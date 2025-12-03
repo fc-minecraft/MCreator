@@ -1,0 +1,1 @@
+Se il tuo avanzamento è il primo di un nuovo percorso, puoi scegliere lo sfondo della scheda dell'avanzamento con questa opzione.

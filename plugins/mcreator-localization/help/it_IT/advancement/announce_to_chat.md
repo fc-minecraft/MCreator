@@ -1,0 +1,1 @@
+Scrivi un messaggio in chat quando il giocatore completa l'avanzamento.
