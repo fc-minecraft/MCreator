@@ -7,9 +7,9 @@ permissions:
 
 on:
   push:
-    branches: ["master", "feature/*", "dev/*"]
+    branches: ['**']
   pull_request:
-    branches: ["master", "feature/*", "dev/*"]
+    branches: ['**']
 
 jobs:
   # 1. SETUP: Быстро определяем версию и чистим старые теги
