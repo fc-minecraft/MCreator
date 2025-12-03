@@ -85,7 +85,8 @@ jobs:
       - name: Install Build Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends mkisofs nsis nsis-pluginapi
+          # Removed --no-install-recommends to ensure NSIS gets all needed 32-bit libs
+          sudo apt-get install -y mkisofs nsis nsis-pluginapi
           
           if [ ! -f LockedList.zip ]; then
             wget -q https://nsis.sourceforge.io/mediawiki/images/d/d3/LockedList.zip
@@ -97,9 +98,9 @@ jobs:
         env:
           SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
         run: |
-          # Removed 'test' task to unblock installer generation (tests are failing in CI environment).
-          # Added -Porg.gradle.java.installations.paths="" to ignore missing local JDK paths from gradle.properties.
-          ARGS="assemble exportLinux exportWindows --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
+          # Added generateExportReport to match original deploy.yml logic
+          # Reverted apt-get optimization to fix NSIS build failure
+          ARGS="assemble generateExportReport exportLinux exportWindows --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
           
           if [[ "$SNAPSHOT" == "true" ]]; then
             ARGS="$ARGS -Psnapshot=true"
@@ -120,6 +121,7 @@ jobs:
           prerelease: ${{ needs.setup.outputs.prerelease }}
           files: |
             build/export/*
+            build/distributions/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -153,8 +155,8 @@ jobs:
         env:
           SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
         run: |
-          # Removed 'test' task and added empty paths property override
-          ARGS="assemble exportMac --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
+          # Added generateExportReport here too for consistency
+          ARGS="assemble generateExportReport exportMac --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
           
           if [[ "$SNAPSHOT" == "true" ]]; then
             ARGS="$ARGS -Psnapshot=true"
@@ -174,5 +176,6 @@ jobs:
           prerelease: ${{ needs.setup.outputs.prerelease }}
           files: |
             build/export/*
+            build/distributions/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
