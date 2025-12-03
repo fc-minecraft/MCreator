@@ -1,10 +1,16 @@
 {
   "name": "Default Dark",
   "colorScheme": {
-    "secondAltBackgroundColor": "0x1e1e1e",
-    "backgroundColor": "0x323232",
-    "altBackgroundColor": "0x505050",
-    "altForegroundColor": "0xc2c2c2",
-    "foregroundColor": "0xf3f3f3"
+    "secondAltBackgroundColor": "0x16202e",
+    "backgroundColor": "0x1E2A3C",
+    "altBackgroundColor": "0x2e3e52",
+    "altForegroundColor": "0x53DDFF",
+    "foregroundColor": "0xFFFFFF",
+    "interfaceAccentColor": "0xCEFF32"
+  },
+  "flatLafOverrides": {
+    "defaultFont": "14",
+    "Button.arc": "10",
+    "Component.arc": "10"
   }
 }

@@ -42,18 +42,12 @@ InstallDir "$PROGRAMFILES${BITS}\Pylo\MCreator"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "..\..\platform\windows\installer\installer_side.bmp"
 !define MUI_UNWELCOMEFINISHPAGE_BITMAP "..\..\platform\windows\installer\installer_side.bmp"
 
-!define MUI_LICENSEPAGE_TEXT_TOP "Read the license agreement below."
-
 !define MUI_FINISHPAGE_RUN_TEXT "Start MCreator after finish"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\mcreator.exe"
-
-!define MUI_FINISHPAGE_LINK "Donate and support MCreator project"
-!define MUI_FINISHPAGE_LINK_LOCATION "http://mcreator.net/donate"
 
 !define MUI_ABORTWARNING
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE ".\win${BITS}\LICENSE.txt"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH

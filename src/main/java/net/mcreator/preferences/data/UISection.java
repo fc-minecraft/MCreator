@@ -45,7 +45,7 @@ public class UISection extends PreferencesSection {
 	public UISection(String preferencesIdentifier) {
 		super(preferencesIdentifier);
 
-		language = addEntry(new LocaleEntry("language", L10N.DEFAULT_LOCALE));
+		language = addEntry(new LocaleEntry("language", Locale.of("ru", "RU")));
 		interfaceAccentColor = addEntry(new ColorEntry("interfaceAccentColor", ColorScheme.MAIN_TINT_DEFAULT));
 		backgroundSource = addEntry(
 				new StringEntry("backgroundSource", "All", "All", "Current theme", "Custom", "None"));
