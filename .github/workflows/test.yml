@@ -5,6 +5,10 @@ permissions:
   checks: write
   statuses: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: ['**']
@@ -12,15 +16,16 @@ on:
     branches: ['**']
 
 jobs:
-  # 1. SETUP: Быстро определяем версию и чистим старые теги
+  # 1. SETUP: Tagging logic
   setup:
     name: Prepare Release
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' # Запускаем только на push, не на PR
+    if: github.event_name == 'push'
     outputs:
       tag_name: ${{ steps.release_info.outputs.tag_name }}
       title: ${{ steps.release_info.outputs.title }}
       prerelease: ${{ steps.release_info.outputs.prerelease }}
+      is_snapshot: ${{ steps.release_info.outputs.is_snapshot }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,33 +37,43 @@ jobs:
             echo "tag_name=release-${{ github.run_number }}" >> $GITHUB_OUTPUT
             echo "title=Production Release #${{ github.run_number }}" >> $GITHUB_OUTPUT
             echo "prerelease=false" >> $GITHUB_OUTPUT
+            echo "is_snapshot=false" >> $GITHUB_OUTPUT
           else
             echo "tag_name=pre-release" >> $GITHUB_OUTPUT
             echo "title=Development Build (Latest)" >> $GITHUB_OUTPUT
             echo "prerelease=true" >> $GITHUB_OUTPUT
+            echo "is_snapshot=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Reset Pre-release Tag
-        # Если это пре-релиз, удаляем старый тег, чтобы пересоздать его на новом коммите
         if: steps.release_info.outputs.prerelease == 'true'
         continue-on-error: true
         run: |
           git push --delete origin pre-release || true
           git tag -d pre-release || true
 
-  # 2. BUILD MATRIX: Собираем на 3 системах параллельно
+  # 2. BUILD MATRIX
   build-and-release:
-    name: Build on ${{ matrix.os }}
-    needs: [setup] # Ждем завершения setup, чтобы не было конфликтов с тегами
+    name: Build ${{ matrix.target }}
+    needs: [setup]
     if: always() && (needs.setup.result == 'success' || github.event_name == 'pull_request')
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false # Если одна ОС упала, остальные продолжают
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            target: Linux
+            gradle_task: exportLinux
+          - os: ubuntu-latest
+            target: Windows
+            gradle_task: exportWindows
+          - os: macos-latest
+            target: macOS
+            gradle_task: exportMac
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
@@ -70,54 +85,55 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          # Кэш отдельно для каждой ОС, запись только на мастере
           cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
-      # Linux Build
-      - name: Build (Linux)
-        if: runner.os == 'Linux'
-        # Добавь 'jpackage' если настроен плагин. Используем assemble для скорости сборки бинарников.
-        run: xvfb-run -a ./gradlew assemble test jpackage --parallel --build-cache --configure-on-demand
+      # Dependencies for Windows build (running on Ubuntu)
+      - name: Install Windows Build Deps
+        if: matrix.target == 'Windows'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mkisofs nsis nsis-pluginapi
+          wget -q https://nsis.sourceforge.io/mediawiki/images/d/d3/LockedList.zip
+          sudo unzip -o -q LockedList.zip -d /usr/share/nsis/
 
-      # Windows Build
-      - name: Build (Windows)
-        if: runner.os == 'Windows'
-        run: ./gradlew assemble test jpackage --parallel --build-cache --configure-on-demand
+      # Dependencies for macOS build
+      - name: Install macOS Build Deps
+        if: matrix.target == 'macOS'
+        run: brew install create-dmg
 
-      # macOS Build
-      - name: Build (macOS)
-        if: runner.os == 'macOS'
-        run: ./gradlew assemble test jpackage --parallel --build-cache --configure-on-demand
+      # BUILD STEP
+      - name: Build and Export
+        env:
+          # Assuming you don't want to fail if secrets are missing during dev builds
+          # Add signing secrets here if strictly required
+          SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
+        run: |
+          ARGS="assemble test ${{ matrix.gradle_task }} --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g"
+          
+          if [[ "$SNAPSHOT" == "true" ]]; then
+            ARGS="$ARGS -Psnapshot=true"
+          fi
+          
+          # Use xvfb only on Linux runner (for both Linux and Windows builds)
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            xvfb-run -a ./gradlew $ARGS
+          else
+            ./gradlew $ARGS
+          fi
 
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v5
-        if: always() # Собираем отчеты даже если тесты упали
-        with:
-          report_paths: '**/build/test-results/test/TEST-*.xml'
-          require_tests: true
-
-      # Загрузка файлов в релиз (только для PUSH)
+      # Upload Artifacts (Only on Push)
       - name: Upload Assets to Release
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
-          # Берем имя тега из предыдущей джобы (setup)
           tag_name: ${{ needs.setup.outputs.tag_name }}
           name: ${{ needs.setup.outputs.title }}
           body: |
             Build commit: ${{ github.sha }}
-            Platform: ${{ matrix.os }}
+            Target: ${{ matrix.target }}
           prerelease: ${{ needs.setup.outputs.prerelease }}
-          # Ищем все возможные типы установщиков
           files: |
-            build/libs/*.jar
-            build/distributions/*.zip
-            build/distributions/*.tar
-            build/**/jpackage/*.exe
-            build/**/jpackage/*.msi
-            build/**/jpackage/*.dmg
-            build/**/jpackage/*.pkg
-            build/**/jpackage/*.deb
-            build/**/jpackage/*.rpm
+            build/export/*
+            build/distributions/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
