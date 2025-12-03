@@ -98,9 +98,9 @@ jobs:
         env:
           SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
         run: |
-          # Added generateExportReport to match original deploy.yml logic
-          # Reverted apt-get optimization to fix NSIS build failure
-          ARGS="assemble generateExportReport exportLinux exportWindows --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
+          # Removed 'test' and 'assemble' to match deploy.yml exactly and avoid interference.
+          # Added -Porg.gradle.java.installations.paths="" to ignore missing local JDK paths.
+          ARGS="generateExportReport exportLinux exportWindows --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
           
           if [[ "$SNAPSHOT" == "true" ]]; then
             ARGS="$ARGS -Psnapshot=true"
@@ -119,9 +119,14 @@ jobs:
             Build commit: ${{ github.sha }}
             Targets: Linux, Windows
           prerelease: ${{ needs.setup.outputs.prerelease }}
+          # "Shotgun" approach: find artifacts wherever they are created
           files: |
             build/export/*
             build/distributions/*
+            build/**/*.exe
+            build/**/*.msi
+            build/**/*.zip
+            build/**/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -155,8 +160,8 @@ jobs:
         env:
           SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
         run: |
-          # Added generateExportReport here too for consistency
-          ARGS="assemble generateExportReport exportMac --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
+          # Removed 'assemble' here too
+          ARGS="generateExportReport exportMac --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
           
           if [[ "$SNAPSHOT" == "true" ]]; then
             ARGS="$ARGS -Psnapshot=true"
@@ -174,8 +179,10 @@ jobs:
             Build commit: ${{ github.sha }}
             Target: macOS
           prerelease: ${{ needs.setup.outputs.prerelease }}
+          # "Shotgun" approach for macOS too
           files: |
             build/export/*
             build/distributions/*
+            build/**/*.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
