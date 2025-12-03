@@ -16,7 +16,7 @@ on:
     branches: ['**']
 
 jobs:
-  # 1. SETUP: Tagging logic
+  # 1. SETUP: Determine version and tags
   setup:
     name: Prepare Release
     runs-on: ubuntu-latest
@@ -52,26 +52,12 @@ jobs:
           git push --delete origin pre-release || true
           git tag -d pre-release || true
 
-  # 2. BUILD MATRIX
-  build-and-release:
-    name: Build ${{ matrix.target }}
+  # 2. LINUX & WINDOWS BUILD (Combined for speed on Ubuntu)
+  build-linux-windows:
+    name: Build Linux & Windows
     needs: [setup]
     if: always() && (needs.setup.result == 'success' || github.event_name == 'pull_request')
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target: Linux
-            gradle_task: exportLinux
-          - os: ubuntu-latest
-            target: Windows
-            gradle_task: exportWindows
-          - os: macos-latest
-            target: macOS
-            gradle_task: exportMac
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -87,42 +73,29 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
-      # Dependencies for Windows build (running on Ubuntu)
-      - name: Install Windows Build Deps
-        if: matrix.target == 'Windows'
+      # Install dependencies for building Windows installers on Linux
+      - name: Install Build Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y mkisofs nsis nsis-pluginapi
           wget -q https://nsis.sourceforge.io/mediawiki/images/d/d3/LockedList.zip
           sudo unzip -o -q LockedList.zip -d /usr/share/nsis/
 
-      # Dependencies for macOS build
-      - name: Install macOS Build Deps
-        if: matrix.target == 'macOS'
-        run: brew install create-dmg
-
-      # BUILD STEP
       - name: Build and Export
         env:
-          # Assuming you don't want to fail if secrets are missing during dev builds
-          # Add signing secrets here if strictly required
           SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
         run: |
-          ARGS="assemble test ${{ matrix.gradle_task }} --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g"
+          # Running exportLinux and exportWindows in parallel on the same runner
+          ARGS="assemble test exportLinux exportWindows --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g"
           
           if [[ "$SNAPSHOT" == "true" ]]; then
             ARGS="$ARGS -Psnapshot=true"
           fi
           
-          # Use xvfb only on Linux runner (for both Linux and Windows builds)
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            xvfb-run -a ./gradlew $ARGS
-          else
-            ./gradlew $ARGS
-          fi
+          # xvfb is required for UI tests/tasks on Linux
+          xvfb-run -a ./gradlew $ARGS
 
-      # Upload Artifacts (Only on Push)
-      - name: Upload Assets to Release
+      - name: Upload Assets
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
@@ -130,10 +103,60 @@ jobs:
           name: ${{ needs.setup.outputs.title }}
           body: |
             Build commit: ${{ github.sha }}
-            Target: ${{ matrix.target }}
+            Targets: Linux, Windows
           prerelease: ${{ needs.setup.outputs.prerelease }}
           files: |
             build/export/*
-            build/distributions/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 3. MACOS BUILD (Must run on macOS runner)
+  build-macos:
+    name: Build macOS
+    needs: [setup]
+    if: always() && (needs.setup.result == 'success' || github.event_name == 'pull_request')
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+
+      - name: Install Build Dependencies
+        run: brew install create-dmg
+
+      - name: Build and Export
+        env:
+          SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
+        run: |
+          ARGS="assemble test exportMac --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g"
+          
+          if [[ "$SNAPSHOT" == "true" ]]; then
+            ARGS="$ARGS -Psnapshot=true"
+          fi
+          
+          ./gradlew $ARGS
+
+      - name: Upload Assets
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.setup.outputs.tag_name }}
+          name: ${{ needs.setup.outputs.title }}
+          body: |
+            Build commit: ${{ github.sha }}
+            Target: macOS
+          prerelease: ${{ needs.setup.outputs.prerelease }}
+          files: |
+            build/export/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
