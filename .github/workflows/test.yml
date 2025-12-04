@@ -16,7 +16,7 @@ on:
     branches: ['**']
 
 jobs:
-  # 1. SETUP: Determine version and tags
+  # 1. SETUP
   setup:
     name: Prepare Release
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
           git push --delete origin pre-release || true
           git tag -d pre-release || true
 
-  # 2. LINUX & WINDOWS BUILD (Combined for speed on Ubuntu)
+  # 2. LINUX & WINDOWS BUILD
   build-linux-windows:
     name: Build Linux & Windows
     needs: [setup]
@@ -73,7 +73,6 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
-      # Cache the static NSIS file to avoid SourceForge download times
       - name: Cache NSIS Resource
         id: cache-nsis
         uses: actions/cache@v4
@@ -81,11 +80,9 @@ jobs:
           path: LockedList.zip
           key: nsis-lockedlist-v1
 
-      # Install dependencies for building Windows installers on Linux
       - name: Install Build Dependencies
         run: |
           sudo apt-get update
-          # Removed --no-install-recommends to ensure NSIS gets all needed 32-bit libs
           sudo apt-get install -y mkisofs nsis nsis-pluginapi
           
           if [ ! -f LockedList.zip ]; then
@@ -98,15 +95,12 @@ jobs:
         env:
           SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
         run: |
-          # Removed 'test' and 'assemble' to match deploy.yml exactly and avoid interference.
-          # Added -Porg.gradle.java.installations.paths="" to ignore missing local JDK paths.
           ARGS="generateExportReport exportLinux exportWindows --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
           
           if [[ "$SNAPSHOT" == "true" ]]; then
             ARGS="$ARGS -Psnapshot=true"
           fi
           
-          # xvfb is required for some UI-dependent tasks during export
           xvfb-run -a ./gradlew $ARGS
 
       - name: Upload Assets
@@ -119,18 +113,14 @@ jobs:
             Build commit: ${{ github.sha }}
             Targets: Linux, Windows
           prerelease: ${{ needs.setup.outputs.prerelease }}
-          # "Shotgun" approach: find artifacts wherever they are created
+          # Исправлено: убраны дубликаты, которые вызывали ошибку
           files: |
             build/export/*
             build/distributions/*
-            build/**/*.exe
-            build/**/*.msi
-            build/**/*.zip
-            build/**/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # 3. MACOS BUILD (Must run on macOS runner)
+  # 3. MACOS BUILD
   build-macos:
     name: Build macOS
     needs: [setup]
@@ -153,14 +143,13 @@ jobs:
 
       - name: Install Build Dependencies
         env:
-          HOMEBREW_NO_AUTO_UPDATE: 1 # Huge speed boost for brew install
+          HOMEBREW_NO_AUTO_UPDATE: 1
         run: brew install create-dmg
 
       - name: Build and Export
         env:
           SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
         run: |
-          # Removed 'assemble' here too
           ARGS="generateExportReport exportMac --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
           
           if [[ "$SNAPSHOT" == "true" ]]; then
@@ -179,10 +168,8 @@ jobs:
             Build commit: ${{ github.sha }}
             Target: macOS
           prerelease: ${{ needs.setup.outputs.prerelease }}
-          # "Shotgun" approach for macOS too
           files: |
             build/export/*
             build/distributions/*
-            build/**/*.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
