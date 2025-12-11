@@ -212,12 +212,12 @@ public class BlockGUI extends ModElementGUI<Block> {
 	private ProcedureSelector onReceivedVibration;
 
 	private final JComboBox<String> rotationMode = new JComboBox<>(
-			new String[] { "<html>No rotation<br><small>Fixed block orientation",
-					"<html>Y axis rotation (S/W/N/E)<br><small>Rotation from player side",
-					"<html>D/U/N/S/W/E rotation<br><small>Rotation from player side",
-					"<html>Y axis rotation (S/W/N/E)<br><small>Rotation from block face",
-					"<html>D/U/N/S/W/E rotation<br><small>Rotation from block face",
-					"<html>Log rotation (X/Y/Z)<br><small>Imitates vanilla log rotation" });
+			new String[] { "<html>Нет вращения<br><small>Блок всегда смотрит в одну сторону",
+                        "<html>Вращение по оси Y (Ю/З/С/В)<br><small>Поворот зависит от стороны игрока",
+                        "<html>Вращение Вниз/Вверх/С/Ю/З/В<br><small>Поворот зависит от стороны игрока",
+                        "<html>Вращение по оси Y (Ю/З/С/В)<br><small>Поворот зависит от стороны блока",
+                        "<html>Вращение Вниз/Вверх/С/Ю/З/В<br><small>Поворот зависит от стороны блока",
+                        "<html>Вращение бревна (X/Y/Z)<br><small>Как у обычных игровых брёвен" });
 	private final JCheckBox enablePitch = L10N.checkbox("elementgui.common.enable");
 
 	private final JComboBox<String> destroyTool = new JComboBox<>(

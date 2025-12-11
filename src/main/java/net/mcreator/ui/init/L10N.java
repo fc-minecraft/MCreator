@@ -85,7 +85,7 @@ public class L10N {
 							HelpLoader.getCoverageForLocale(value));
 				}));
 
-		supportedLocales.put(DEFAULT_LOCALE, new LocaleRegistration(rb_en, 100, 100));
+		supportedLocales.put(Locale.of("en", "US"), new LocaleRegistration(rb_en, 100, 100));
 	}
 
 	public static Set<Locale> getSupportedLocales() {
