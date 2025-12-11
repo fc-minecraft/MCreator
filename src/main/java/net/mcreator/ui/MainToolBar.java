@@ -80,7 +80,7 @@ public abstract class MainToolBar extends JToolBar {
 		return decorateToolbarButton(pluginToolbarRight.add(action));
 	}
 
-	private static JButton decorateToolbarButton(JButton button) {
+	protected static JButton decorateToolbarButton(JButton button) {
 		button.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 		button.addMouseListener(new MouseAdapter() {
 			@Override public void mouseEntered(MouseEvent mouseEvent) {

@@ -22,6 +22,7 @@ package net.mcreator.ui.variants.modmaker;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MainToolBar;
 
+import javax.swing.*;
 import java.awt.*;
 
 class ModMakerToolBar extends MainToolBar {
@@ -64,7 +65,10 @@ class ModMakerToolBar extends MainToolBar {
 
 		addSeparator(new Dimension(10, 4));
 
-		add(mcreator.getActionRegistry().runClient);
+		JButton runClientButton = decorateToolbarButton(new JButton(mcreator.getActionRegistry().runClient));
+		runClientButton.setMargin(new Insets(2, 8, 2, 8));
+		add(runClientButton);
+		
 		add(mcreator.getActionRegistry().debugClient);
 		add(mcreator.getActionRegistry().runServer);
 		add(mcreator.getActionRegistry().cancelGradleTaskAction);
