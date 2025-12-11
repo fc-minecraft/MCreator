@@ -88,8 +88,9 @@ public class WorkspaceGeneratorSetupDialog {
 		}, "GeneratorSetup");
 		t.start();
 
-		if (showWebsite)
-			DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/page/what-next");
+		if (showWebsite) {
+			// DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/page/what-next");
+		}
 
 		dial.setVisible(true);
 	}

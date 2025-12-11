@@ -115,7 +115,23 @@ public class Theme {
 			overrides.put("Objects.BlackText", "@foreground");
 			overrides.put("Objects.Grey", "@buttonArrowColor");
 			overrides.put("Objects.GreenAndroid", "@accentColor");
-		}
+		} else {
+            // Apply custom theme by default (FunCode Theme)
+            overrides.put("@accentColor", "#CEFF32");
+            overrides.put("@background", "#1E2A3C");
+            overrides.put("@foreground", "#FFFFFF");
+            overrides.put("Panel.background", "#1E2A3C");
+            overrides.put("Label.foreground", "#FFFFFF");
+            overrides.put("Button.background", "#53DDFF");
+            overrides.put("Button.foreground", "#000000");
+
+            overrides.put("Objects.BlackText", "@foreground");
+			overrides.put("Objects.Grey", "@buttonArrowColor");
+			overrides.put("Objects.GreenAndroid", "@accentColor");
+        }
+
+        // Increase font size
+        overrides.put("defaultFont", "14");
 
 		if (!disableMCreatorOverrides) {
 			overrides.put("Button.arc", "0");
@@ -245,14 +261,11 @@ public class Theme {
 
 	// Color scheme getters below (to keep code shorter)
 
-	/**
-	 * @return Background of UI panels
-	 */
 	public Color getBackgroundColor() {
 		if (colorScheme != null) {
 			return colorScheme.getBackgroundColor();
 		} else {
-			return UIManager.getColor("Panel.background");
+            return new Color(0x1E2A3C);
 		}
 	}
 
@@ -263,7 +276,7 @@ public class Theme {
 		if (colorScheme != null) {
 			return colorScheme.getAltBackgroundColor();
 		} else {
-			return UIManager.getColor("Panel.background").brighter();
+            return new Color(0x1E2A3C).brighter();
 		}
 	}
 
@@ -274,7 +287,7 @@ public class Theme {
 		if (colorScheme != null) {
 			return colorScheme.getSecondAltBackgroundColor();
 		} else {
-			return UIManager.getColor("Panel.background").darker().darker();
+            return new Color(0x1E2A3C).darker();
 		}
 	}
 
@@ -285,7 +298,7 @@ public class Theme {
 		if (colorScheme != null) {
 			return colorScheme.getForegroundColor();
 		} else {
-			return UIManager.getColor("Panel.foreground");
+            return Color.WHITE;
 		}
 	}
 
@@ -296,7 +309,7 @@ public class Theme {
 		if (colorScheme != null) {
 			return colorScheme.getAltForegroundColor();
 		} else {
-			return UIManager.getColor("Panel.foreground").darker();
+            return Color.LIGHT_GRAY;
 		}
 	}
 
@@ -307,7 +320,7 @@ public class Theme {
 		if (colorScheme != null) {
 			return colorScheme.getInterfaceAccentColor();
 		} else {
-			return UIManager.getColor("Component.accentColor").darker();
+            return new Color(0xCEFF32);
 		}
 	}
 

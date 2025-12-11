@@ -35,3 +35,6 @@ hs_err_pid*
 .AppleDouble
 .LSOverride
 /.idea/runConfigurations.xml
+
+# PLUGINS
+plugins/mcreator-fabric-generator/
