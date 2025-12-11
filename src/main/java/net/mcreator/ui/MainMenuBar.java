@@ -19,7 +19,6 @@
 package net.mcreator.ui;
 
 import net.mcreator.io.OS;
-import net.mcreator.ui.component.SocialButtons;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.ide.CodeEditorView;
 import net.mcreator.ui.init.L10N;
@@ -50,20 +49,7 @@ public abstract class MainMenuBar extends JMenuBar {
 
 		setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.current().getSecondAltBackgroundColor()));
 
-		if (!macOSscreenMenuBar) {
-			JMenu logo = new JMenu("MCreator");
-			logo.setMnemonic('M');
-			logo.add(mcreator.getActionRegistry().mcreatorWebsite);
-			logo.add(mcreator.getActionRegistry().mcreatorCommunity);
-			SocialButtons socialButtons = new SocialButtons();
-			socialButtons.setBorder(BorderFactory.createEmptyBorder(3, 29, 7, 0));
-			logo.add(socialButtons);
-			logo.addSeparator();
-			logo.add(mcreator.getActionRegistry().donate);
-			logo.addSeparator();
-			logo.add(mcreator.getActionRegistry().mcreatorPublish);
-			add(logo);
-		}
+
 
 		JMenu file = L10N.menu("menubar.file");
 		file.setMnemonic('F');
@@ -167,16 +153,7 @@ public abstract class MainMenuBar extends JMenuBar {
 		help.add(mcreator.getActionRegistry().help);
 		help.add(mcreator.getActionRegistry().support);
 		help.add(mcreator.getActionRegistry().knowledgeBase);
-		if (macOSscreenMenuBar) {
-			help.addSeparator();
-			help.add(mcreator.getActionRegistry().mcreatorWebsite);
-			help.add(mcreator.getActionRegistry().mcreatorCommunity);
-			help.add(mcreator.getActionRegistry().mcreatorPublish);
-		}
-		help.addSeparator();
-		help.add(mcreator.getActionRegistry().showShortcuts);
-		help.addSeparator();
-		help.add(mcreator.getActionRegistry().donate);
+
 		help.addSeparator();
 		help.add(mcreator.getActionRegistry().checkForUpdates);
 		help.add(mcreator.getActionRegistry().checkForPluginUpdates);
