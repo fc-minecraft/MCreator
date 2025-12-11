@@ -37,27 +37,9 @@ public class RunServerAction extends GradleAction {
 		super(actionRegistry, L10N.t("action.run_server_and_client"), null);
 		setActionListener(evt -> {
 			if (!ServerUtil.isEULAAccepted(actionRegistry.getMCreator().getWorkspace())) {
-				JOptionPane.showMessageDialog(actionRegistry.getMCreator(),
-						L10N.t("dialog.run_server_and_client.eula_intro"));
-
-				DesktopUtils.browseSafe("https://www.minecraft.net/en-us/eula");
-
-				Object[] options = { L10N.t("dialog.run_server_and_client.agree"),
-						L10N.t("dialog.run_server_and_client.disagree") };
-				int n = JOptionPane.showOptionDialog(null,
-						L10N.t("dialog.run_server_and_client.eula_confirmation.message"),
-						L10N.t("dialog.run_server_and_client.eula_confirmation.title"),
-						JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-				if (n == 0) {
-					ServerUtil.acceptEULA(actionRegistry.getMCreator().getWorkspace());
-					runServer();
-				} else {
-					JOptionPane.showMessageDialog(actionRegistry.getMCreator(),
-							L10N.t("dialog.run_server_and_client.eula_rejected.message"));
-				}
-			} else {
-				runServer();
+				ServerUtil.acceptEULA(actionRegistry.getMCreator().getWorkspace());
 			}
+			runServer();
 		});
 	}
 
