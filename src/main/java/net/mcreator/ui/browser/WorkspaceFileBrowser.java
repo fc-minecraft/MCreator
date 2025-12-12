@@ -200,23 +200,23 @@ public class WorkspaceFileBrowser extends JPanel {
 		FilterTreeNode root = new FilterTreeNode("");
 		FilterTreeNode node = new FilterTreeNode(mcreator.getWorkspaceSettings().getModName());
 
-		sourceCode = new FilterTreeNode("Source (Gradle)");
+		sourceCode = new FilterTreeNode(L10N.t("workspace.browser.source_gradle"));
 		JFileTree.addNodes(sourceCode, mcreator.getGenerator().getSourceRoot(), true);
 		node.add(sourceCode);
 
-		currRes = new FilterTreeNode("Resources (Gradle)");
+		currRes = new FilterTreeNode(L10N.t("workspace.browser.resources_gradle"));
 		JFileTree.addNodes(currRes, mcreator.getGenerator().getResourceRoot(), true);
 		node.add(currRes);
 
 		if (mcreator.getGeneratorStats().getBaseCoverageInfo().get("sounds") != GeneratorStats.CoverageStatus.NONE) {
-			FilterTreeNode sounds = new FilterTreeNode("Sounds");
+			FilterTreeNode sounds = new FilterTreeNode(L10N.t("workspace.browser.sounds"));
 			JFileTree.addNodes(sounds, mcreator.getFolderManager().getSoundsDir(), true);
 			node.add(sounds);
 		}
 
 		if (mcreator.getGeneratorStats().getBaseCoverageInfo().get("structures")
 				!= GeneratorStats.CoverageStatus.NONE) {
-			FilterTreeNode structures = new FilterTreeNode("Structures");
+			FilterTreeNode structures = new FilterTreeNode(L10N.t("workspace.browser.structures"));
 			JFileTree.addNodes(structures, mcreator.getFolderManager().getStructuresDir(), true);
 			node.add(structures);
 		}
@@ -226,13 +226,13 @@ public class WorkspaceFileBrowser extends JPanel {
 				!= GeneratorStats.CoverageStatus.NONE
 				|| mcreator.getGeneratorStats().getBaseCoverageInfo().get("model_obj")
 				!= GeneratorStats.CoverageStatus.NONE) {
-			FilterTreeNode models = new FilterTreeNode("Models");
+			FilterTreeNode models = new FilterTreeNode(L10N.t("workspace.browser.models"));
 			JFileTree.addNodes(models, mcreator.getFolderManager().getModelsDir(), true);
 			node.add(models);
 		}
 
 		if (new File(mcreator.getFolderManager().getClientRunDir(), "debug").isDirectory()) {
-			FilterTreeNode debugFolder = new FilterTreeNode("Debug profiler results");
+			FilterTreeNode debugFolder = new FilterTreeNode(L10N.t("workspace.browser.debug_results"));
 			JFileTree.addNodes(debugFolder, new File(mcreator.getFolderManager().getClientRunDir(), "debug"), true);
 			node.add(debugFolder);
 		}
@@ -250,18 +250,18 @@ public class WorkspaceFileBrowser extends JPanel {
 		File serverRunDir = mcreator.getFolderManager().getServerRunDir();
 		if (clientRunDir.equals(serverRunDir)) {
 			if (clientRunDir.isDirectory()) {
-				FilterTreeNode minecraft = new FilterTreeNode("Minecraft run folder");
+				FilterTreeNode minecraft = new FilterTreeNode(L10N.t("workspace.browser.minecraft_run"));
 				JFileTree.addNodes(minecraft, clientRunDir, true);
 				root.add(minecraft);
 			}
 		} else {
 			if (clientRunDir.isDirectory()) {
-				FilterTreeNode minecraft = new FilterTreeNode("MC client run folder");
+				FilterTreeNode minecraft = new FilterTreeNode(L10N.t("workspace.browser.client_run"));
 				JFileTree.addNodes(minecraft, clientRunDir, true);
 				root.add(minecraft);
 			}
 			if (serverRunDir.isDirectory()) {
-				FilterTreeNode minecraft = new FilterTreeNode("MC server run folder");
+				FilterTreeNode minecraft = new FilterTreeNode(L10N.t("workspace.browser.server_run"));
 				JFileTree.addNodes(minecraft, serverRunDir, true);
 				root.add(minecraft);
 			}
@@ -274,7 +274,7 @@ public class WorkspaceFileBrowser extends JPanel {
 		if (mcreator.getGeneratorConfiguration().getGeneratorFlavor() == GeneratorFlavor.ADDON) {
 			File folder = MinecraftFolderUtils.getBedrockEditionFolder();
 			if (folder != null) {
-				FilterTreeNode minecraft = new FilterTreeNode("Bedrock Edition");
+				FilterTreeNode minecraft = new FilterTreeNode(L10N.t("workspace.browser.bedrock"));
 				JFileTree.addNodes(minecraft, folder, true);
 				root.add(minecraft);
 			}
@@ -349,9 +349,9 @@ public class WorkspaceFileBrowser extends JPanel {
 				else
 					Toolkit.getDefaultToolkit().beep();
 			} else if (selection.getUserObject() instanceof String selectedObject) {
-				if (selectedObject.equals("Source (Gradle)"))
+				if (selectedObject.equals(L10N.t("workspace.browser.source_gradle")))
 					DesktopUtils.openSafe(mcreator.getGenerator().getSourceRoot());
-				else if (selectedObject.equals("Resources (Gradle)"))
+				else if (selectedObject.equals(L10N.t("workspace.browser.resources_gradle")))
 					DesktopUtils.openSafe(mcreator.getGenerator().getResourceRoot());
 				else
 					Toolkit.getDefaultToolkit().beep();
@@ -399,7 +399,7 @@ public class WorkspaceFileBrowser extends JPanel {
 	}
 
 	private void loadExtSources(FilterTreeNode node) {
-		FilterTreeNode extDeps = new FilterTreeNode("External libraries");
+		FilterTreeNode extDeps = new FilterTreeNode(L10N.t("workspace.browser.external_libs"));
 
 		if (mcreator.getGenerator().getProjectJarManager() != null) {
 			List<LibraryInfo> libraryInfos = mcreator.getGenerator().getProjectJarManager().getClassFileSources();
@@ -417,7 +417,7 @@ public class WorkspaceFileBrowser extends JPanel {
 							}
 						}
 					} else {
-						libName = "Gradle: " + libName;
+						libName = L10N.t("workspace.browser.gradle_lib", libName);
 					}
 
 					if (libraryInfo.getSourceLocation() != null) {

@@ -41,6 +41,20 @@ public class L10N {
 
 	public static final Locale DEFAULT_LOCALE = Locale.of("ru", "RU");
 
+	private static final Map<String, String> FALLBACK_MESSAGES = Map.ofEntries(
+			Map.entry("splash.loading_plugins", "Загрузка плагинов"),
+			Map.entry("splash.loading_themes", "Загрузка тем интерфейса"),
+			Map.entry("splash.loading_core", "Загрузка ядра интерфейса"),
+			Map.entry("splash.loading_components", "Загрузка компонентов интерфейса"),
+			Map.entry("splash.loading_plugin_data", "Загрузка данных плагинов"),
+			Map.entry("splash.building_cache", "Построение кэша"),
+			Map.entry("splash.processing_data", "Обработка данных"),
+			Map.entry("splash.loading_generators", "Загрузка генераторов"),
+			Map.entry("splash.loading_generator", "Загрузка генератора: {0}"),
+			Map.entry("splash.initiating_session", "Инициализация сессии"),
+			Map.entry("splash.loading_windows", "Загрузка окон")
+	);
+
 	private static ResourceBundle rb;
 	private static ResourceBundle rb_en;
 
@@ -141,6 +155,14 @@ public class L10N {
 	private static String t_impl(ResourceBundle resourceBundle, String key, Object... parameters) {
 		if (key == null)
 			return null;
+
+		if (resourceBundle == null) {
+			String fallback = FALLBACK_MESSAGES.get(key);
+			if (fallback != null) {
+				return MessageFormat.format(fallback, parameters);
+			}
+			return key;
+		}
 
 		if (resourceBundle.containsKey(key))
 			return MessageFormat.format(resourceBundle.getString(key), parameters);

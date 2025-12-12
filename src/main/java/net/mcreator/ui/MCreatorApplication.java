@@ -89,7 +89,7 @@ public final class MCreatorApplication {
 		final SplashScreen splashScreen = new SplashScreen();
 
 		new Thread(() -> {
-			splashScreen.setProgress(5, "Loading plugins");
+			splashScreen.setProgress(5, L10N.t("splash.loading_plugins"));
 
 			PluginLoader.initInstance();
 
@@ -98,12 +98,12 @@ public final class MCreatorApplication {
 			// As plugins are now loaded, preferences from Java plugins can now be loaded
 			PreferencesManager.initNonCore();
 
-			splashScreen.setProgress(10, "Loading UI Themes");
+			splashScreen.setProgress(10, L10N.t("splash.loading_themes"));
 
 			// We load UI theme now as theme plugins are loaded at this point
 			ThemeManager.loadThemes();
 
-			splashScreen.setProgress(15, "Loading UI core");
+			splashScreen.setProgress(15, L10N.t("splash.loading_core"));
 
 			UIRES.preloadImages();
 
@@ -112,7 +112,7 @@ public final class MCreatorApplication {
 
 			taskbarIntegration = new TaskbarIntegration();
 
-			splashScreen.setProgress(25, "Loading interface components");
+			splashScreen.setProgress(25, L10N.t("splash.loading_components"));
 
 			// preload help entries cache
 			HelpLoader.preloadCache();
@@ -120,19 +120,19 @@ public final class MCreatorApplication {
 			// load translations after plugins are loaded
 			L10N.initTranslations();
 
-			splashScreen.setProgress(35, "Loading plugin data");
+			splashScreen.setProgress(35, L10N.t("splash.loading_plugin_data"));
 
 			// load datalists and icons for them after plugins are loaded
 			BlockItemIcons.init();
 			DataListLoader.preloadCache();
 
-			splashScreen.setProgress(45, "Building plugin cache");
+			splashScreen.setProgress(45, L10N.t("splash.building_cache"));
 
 			// load templates for image makers
 			ImageMakerTexturesCache.init();
 			ArmorMakerTexturesCache.init();
 
-			splashScreen.setProgress(55, "Loading plugin data");
+			splashScreen.setProgress(55, L10N.t("splash.loading_plugin_data"));
 
 			// load apis defined by plugins after plugins are loaded
 			ModAPIManager.initAPIs();
@@ -144,7 +144,7 @@ public final class MCreatorApplication {
 			BlocklyJavaScriptsLoader.init();
 			BlocklyToolboxesLoader.init();
 
-			splashScreen.setProgress(60, "Processing plugin data");
+			splashScreen.setProgress(60, L10N.t("splash.processing_data"));
 
 			// load blockly blocks after plugins are loaded
 			BlocklyLoader.init();
@@ -155,7 +155,7 @@ public final class MCreatorApplication {
 			// register mod element types
 			ModElementTypeLoader.loadModElements();
 
-			splashScreen.setProgress(70, "Loading generators");
+			splashScreen.setProgress(70, L10N.t("splash.loading_generators"));
 
 			MCREvent.event(new PreGeneratorsLoadingEvent(this));
 
@@ -165,7 +165,7 @@ public final class MCreatorApplication {
 			int i = 0;
 			for (String generator : fileNames) {
 				splashScreen.setProgress(70 + i * ((90 - 70) / fileNames.size()),
-						"Loading generators: " + generator.split("/")[0]);
+						L10N.t("splash.loading_generator", generator.split("/")[0]));
 				LOG.info("Loading generator: {}", generator);
 				generator = generator.replace("/generator.yaml", "");
 				try {
@@ -176,7 +176,7 @@ public final class MCreatorApplication {
 				i++;
 			}
 
-			splashScreen.setProgress(93, "Initiating user session");
+			splashScreen.setProgress(93, L10N.t("splash.initiating_session"));
 
 			deviceInfo = new DeviceInfo();
 			isInternet = MCreatorApplication.WEB_API.initAPI();
@@ -189,7 +189,7 @@ public final class MCreatorApplication {
 			// Do not externalize this text
 			discordClient.updatePresence("Just opened", "Version " + Launcher.version.getMajorString());
 
-			splashScreen.setProgress(100, "Loading MCreator windows");
+			splashScreen.setProgress(100, L10N.t("splash.loading_windows"));
 
 			try {
 				if (Desktop.getDesktop().isSupported(Desktop.Action.APP_ABOUT))

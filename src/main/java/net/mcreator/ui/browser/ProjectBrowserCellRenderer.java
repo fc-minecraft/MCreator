@@ -22,6 +22,7 @@ package net.mcreator.ui.browser;
 import net.mcreator.io.tree.FileNode;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.tree.FilterTreeNode;
+import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.laf.FileIcons;
 
@@ -48,30 +49,30 @@ class ProjectBrowserCellRenderer extends DefaultTreeCellRenderer {
 			a.setText(tsi);
 			if (tsi.equals(mcreator.getWorkspaceSettings().getModName()))
 				a.setIcon(UIRES.get("16px.package"));
-			else if (tsi.equals("Source (Gradle)"))
+			else if (tsi.equals(L10N.t("workspace.browser.source_gradle")))
 				a.setIcon(UIRES.get("16px.mod"));
 			else if (tsi.equals("Textures"))
 				a.setIcon(UIRES.get("16px.textures"));
-			else if (tsi.equals("Resources (Gradle)"))
+			else if (tsi.equals(L10N.t("workspace.browser.resources_gradle")))
 				a.setIcon(UIRES.get("16px.resources"));
-			else if (tsi.equals("Models"))
+			else if (tsi.equals(L10N.t("workspace.browser.models")))
 				a.setIcon(UIRES.get("16px.models"));
-			else if (tsi.equals("Minecraft run folder") || tsi.equals("Bedrock Edition") || tsi.equals(
-					"MC client run folder"))
+			else if (tsi.equals(L10N.t("workspace.browser.minecraft_run")) || tsi.equals(L10N.t("workspace.browser.bedrock")) || tsi.equals(
+					L10N.t("workspace.browser.client_run")))
 				a.setIcon(UIRES.get("16px.minecraft"));
-			else if (tsi.equals("MC server run folder"))
+			else if (tsi.equals(L10N.t("workspace.browser.server_run")))
 				a.setIcon(UIRES.get("16px.runserver"));
-			else if (tsi.equals("Sounds"))
+			else if (tsi.equals(L10N.t("workspace.browser.sounds")))
 				a.setIcon(UIRES.get("16px.music"));
-			else if (tsi.equals("External libraries"))
+			else if (tsi.equals(L10N.t("workspace.browser.external_libs")))
 				a.setIcon(UIRES.get("16px.directory"));
-			else if (tsi.equals("Structures"))
+			else if (tsi.equals(L10N.t("workspace.browser.structures")))
 				a.setIcon(UIRES.get("16px.structures"));
 		} else if (node.getUserObject() instanceof FileNode<?> fileNode) {
 			a.setText(fileNode.data);
 			if (fileNode.data.endsWith(".java"))
 				a.setIcon(UIRES.get("16px.classro"));
-			else if (fileNode.data.startsWith("Gradle: "))
+			else if (fileNode.data.startsWith(L10N.t("workspace.browser.gradle_lib", "").trim()))
 				a.setIcon(UIRES.get("16px.ext"));
 			else if (fileNode.data.startsWith("<") && fileNode.data.endsWith(">"))
 				a.setIcon(UIRES.get("16px.directory"));
