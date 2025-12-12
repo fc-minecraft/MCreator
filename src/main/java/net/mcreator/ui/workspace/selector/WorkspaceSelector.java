@@ -175,24 +175,7 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		southcenter.add(new JEmptyBox(7, 5));
 		*/
 
-		JLabel prefs = new JLabel(L10N.t("dialog.workspace_selector.preferences")) {
-			@Override protected void paintComponent(Graphics g) {
-				super.paintComponent(g);
-
-				try {
-					String flagpath =
-							"/flags/" + L10N.getLocale().toString().split("_")[1].toUpperCase(Locale.ENGLISH) + ".png";
-					BufferedImage image = ImageIO.read(
-							Objects.requireNonNull(getClass().getResourceAsStream(flagpath)));
-					g.drawImage(ImageUtils.crop(image, new Rectangle(1, 2, 14, 11)), getWidth() - 15, 4, this);
-				} catch (Exception ignored) { // flag not found, ignore
-				}
-			}
-
-			@Override public Dimension getPreferredSize() {
-				return new Dimension(super.getPreferredSize().width + 21, super.getPreferredSize().height);
-			}
-		};
+		JLabel prefs = new JLabel(L10N.t("dialog.workspace_selector.preferences"));
 		prefs.setIcon(UIRES.get("settings"));
 		prefs.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		ComponentUtils.deriveFont(prefs, 15); // Increased font size

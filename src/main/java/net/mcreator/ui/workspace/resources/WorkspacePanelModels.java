@@ -99,30 +99,6 @@ public class WorkspacePanelModels extends AbstractResourcePanel<Model> {
 			}
 		});
 		addToolBarButton("common.delete_selected", UIRES.get("16px.delete"), e -> deleteCurrentlySelected());
-
-		JPopupMenu helpMenu = new JPopupMenu();
-
-		JMenuItem javaModels = new JMenuItem(L10N.t("workspace.3dmodels.help.java_models"));
-		javaModels.setIcon(UIRES.get("16px.importjavamodel"));
-		javaModels.addActionListener(e -> DesktopUtils.browseSafe(
-				MCreatorApplication.SERVER_DOMAIN + "/wiki/common-blockbench-issues-mcreator"));
-		helpMenu.add(javaModels);
-
-		JMenuItem jsonModels = new JMenuItem(L10N.t("workspace.3dmodels.help.json_models"));
-		jsonModels.setIcon(UIRES.get("16px.importjsonmodel"));
-		jsonModels.addActionListener(e -> DesktopUtils.browseSafe(
-				MCreatorApplication.SERVER_DOMAIN + "/wiki/my-json-model-renders-broken-texture"));
-		helpMenu.add(jsonModels);
-
-		JMenuItem objModels = new JMenuItem(L10N.t("workspace.3dmodels.help.obj_models"));
-		objModels.setIcon(UIRES.get("16px.importobjmodel"));
-		objModels.addActionListener(e -> DesktopUtils.browseSafe(
-				MCreatorApplication.SERVER_DOMAIN + "/wiki/custom-obj-models-blocks-and-items"));
-		helpMenu.add(objModels);
-
-		JButton help = AbstractWorkspacePanel.createToolBarButton("workspace.3dmodels.help", UIRES.get("16px.info"));
-		help.addActionListener(e -> helpMenu.show(help, 5, help.getHeight() + 5));
-		bar.add(help);
 	}
 
 	@Override protected void deleteCurrentlySelected() {

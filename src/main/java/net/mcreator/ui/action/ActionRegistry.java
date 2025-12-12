@@ -305,8 +305,8 @@ public class ActionRegistry {
 		this.knowledgeBase = new VisitURIAction(this, L10N.t("action.knowledge_base"),
 				MCreatorApplication.SERVER_DOMAIN + "/support/knowledgebase");
 		this.setCreativeTabItemOrder = new EditTabOrderAction(this);
-		this.donate = new VisitURIAction(this, L10N.t("action.donate"),
-				MCreatorApplication.SERVER_DOMAIN + "/donate").setIcon(UIRES.get("donate"));
+		this.donate = new BasicAction(this, L10N.t("action.donate"),
+				e -> {});
 		this.openJavaEditionFolder = new MinecraftFolderActions.OpenJavaEditionFolder(this);
 		this.openBedrockEditionFolder = new MinecraftFolderActions.OpenBedrockEditionFolder(this);
 

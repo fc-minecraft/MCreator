@@ -30,7 +30,7 @@ import java.util.jar.Manifest;
 public class MCreatorVersionNumber {
 
 	private static final String buildFormat = "wwuHH";
-	private static final String buildVersion = "99999"; // by default use the largest possible value to prevent regenerating workspace and updating during development
+	private static final String buildVersion = "90001"; // by default use the largest possible value to prevent regenerating workspace and updating during development
 
 	public final String full;
 	public final String major;

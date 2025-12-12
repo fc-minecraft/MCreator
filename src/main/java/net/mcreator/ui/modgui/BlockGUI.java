@@ -131,9 +131,20 @@ public class BlockGUI extends ModElementGUI<Block> {
 	private final JCheckBox canRedstoneConnect = L10N.checkbox("elementgui.common.enable");
 	private final JCheckBox isBonemealable = L10N.checkbox("elementgui.common.enable");
 
-	private final JComboBox<String> tintType = new JComboBox<>(
-			new String[] { "No tint", "Grass", "Foliage", "Birch foliage", "Spruce foliage", "Default foliage", "Water",
-					"Sky", "Fog", "Water fog" });
+	private final JComboBox<String> tintType = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("No tint", "elementgui.block.tint.no_tint"),
+			Map.entry("Grass", "elementgui.block.tint.grass"),
+			Map.entry("Foliage", "elementgui.block.tint.foliage"),
+			Map.entry("Birch foliage", "elementgui.block.tint.birch_foliage"),
+			Map.entry("Spruce foliage", "elementgui.block.tint.spruce_foliage"),
+			Map.entry("Default foliage", "elementgui.block.tint.default_foliage"),
+			Map.entry("Water", "elementgui.block.tint.water"),
+			Map.entry("Sky", "elementgui.block.tint.sky"),
+			Map.entry("Fog", "elementgui.block.tint.fog"),
+			Map.entry("Water fog", "elementgui.block.tint.water_fog")
+			//@formatter:on
+	);
 	private final JCheckBox isItemTinted = L10N.checkbox("elementgui.common.enable");
 
 	private final JCheckBox hasTransparency = L10N.checkbox("elementgui.common.enable");
@@ -171,7 +182,12 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 	private final MCItemHolder strippingResult = new MCItemHolder(mcreator, ElementUtil::loadBlocks);
 
-	private final JComboBox<String> generationShape = new JComboBox<>(new String[] { "UNIFORM", "TRIANGLE" });
+	private final JComboBox<String> generationShape = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("UNIFORM", "elementgui.block.shape.uniform"),
+			Map.entry("TRIANGLE", "elementgui.block.shape.triangle")
+			//@formatter:on
+	);
 	private final JMinMaxSpinner generateHeight = new JMinMaxSpinner(0, 64, -2032, 2016, 1).allowEqualValues();
 	private final JSpinner frequencyPerChunks = new JSpinner(new SpinnerNumberModel(10, 1, 64, 1));
 	private final JSpinner frequencyOnChunk = new JSpinner(new SpinnerNumberModel(16, 1, 64, 1));
@@ -182,10 +198,23 @@ public class BlockGUI extends ModElementGUI<Block> {
 	private final JCheckBox plantsGrowOn = L10N.checkbox("elementgui.common.enable");
 	private final JCheckBox isLadder = L10N.checkbox("elementgui.common.enable");
 
-	private final JComboBox<String> reactionToPushing = new JComboBox<>(
-			new String[] { "NORMAL", "DESTROY", "BLOCK", "PUSH_ONLY", "IGNORE" });
+	private final JComboBox<String> reactionToPushing = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("NORMAL", "elementgui.block.pushing.normal"),
+			Map.entry("DESTROY", "elementgui.block.pushing.destroy"),
+			Map.entry("BLOCK", "elementgui.block.pushing.block"),
+			Map.entry("PUSH_ONLY", "elementgui.block.pushing.push_only"),
+			Map.entry("IGNORE", "elementgui.block.pushing.ignore")
+			//@formatter:on
+	);
 
-	private final JComboBox<String> offsetType = new JComboBox<>(new String[] { "NONE", "XZ", "XYZ" });
+	private final JComboBox<String> offsetType = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("NONE", "elementgui.block.offset.none"),
+			Map.entry("XZ", "elementgui.block.offset.xz"),
+			Map.entry("XYZ", "elementgui.block.offset.xyz")
+			//@formatter:on
+	);
 	private final SearchableComboBox<String> aiPathNodeType = new SearchableComboBox<>();
 
 	private final JCheckBox hasBlockItem = L10N.checkbox("elementgui.common.enable");
@@ -212,12 +241,9 @@ public class BlockGUI extends ModElementGUI<Block> {
 	private ProcedureSelector onReceivedVibration;
 
 	private final JComboBox<String> rotationMode = new JComboBox<>(
-			new String[] { "<html>Нет вращения<br><small>Блок всегда смотрит в одну сторону",
-                        "<html>Вращение по оси Y (Ю/З/С/В)<br><small>Поворот зависит от стороны игрока",
-                        "<html>Вращение Вниз/Вверх/С/Ю/З/В<br><small>Поворот зависит от стороны игрока",
-                        "<html>Вращение по оси Y (Ю/З/С/В)<br><small>Поворот зависит от стороны блока",
-                        "<html>Вращение Вниз/Вверх/С/Ю/З/В<br><small>Поворот зависит от стороны блока",
-                        "<html>Вращение бревна (X/Y/Z)<br><small>Как у обычных игровых брёвен" });
+			new String[] { L10N.t("elementgui.block.rotation.none"), L10N.t("elementgui.block.rotation.y_player"),
+					L10N.t("elementgui.block.rotation.all_player"), L10N.t("elementgui.block.rotation.y_block"),
+					L10N.t("elementgui.block.rotation.all_block"), L10N.t("elementgui.block.rotation.log") });
 	private final JCheckBox enablePitch = L10N.checkbox("elementgui.common.enable");
 
 	private final JComboBox<String> destroyTool = new JComboBox<>(
@@ -245,8 +271,14 @@ public class BlockGUI extends ModElementGUI<Block> {
 					.getModElementDefinition(modElement.getType()).get("block_base_properties"),
 			Collections.emptyMap());
 
-	private final JComboBox<String> transparencyType = new JComboBox<>(
-			new String[] { "SOLID", "CUTOUT", "CUTOUT_MIPPED", "TRANSLUCENT" });
+	private final JComboBox<String> transparencyType = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("SOLID", "elementgui.block.transparency.solid"),
+			Map.entry("CUTOUT", "elementgui.block.transparency.cutout"),
+			Map.entry("CUTOUT_MIPPED", "elementgui.block.transparency.cutout_mipped"),
+			Map.entry("TRANSLUCENT", "elementgui.block.transparency.translucent")
+			//@formatter:on
+	);
 
 	private final JCheckBox hasInventory = L10N.checkbox("elementgui.block.has_inventory");
 
@@ -296,7 +328,17 @@ public class BlockGUI extends ModElementGUI<Block> {
 	}
 
 	@Override protected void initGUI() {
-		destroyTool.setRenderer(new ItemTexturesComboBoxRenderer());
+		destroyTool.setRenderer(new ItemTexturesComboBoxRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList<? extends String> list, String value, int index,
+					boolean isSelected, boolean cellHasFocus) {
+				Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+				if (c instanceof JLabel label) {
+					label.setText(L10N.t("elementgui.block.tool." + value.toLowerCase().replace(" ", "_")));
+				}
+				return c;
+			}
+		});
 		blockBase.setRenderer(new ItemTexturesComboBoxRenderer());
 
 		blocksToReplace = new MCItemListField(mcreator, ElementUtil::loadBlocksAndTags, false, true);
@@ -874,7 +916,17 @@ public class BlockGUI extends ModElementGUI<Block> {
 		selp3.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/vanilla_tool_tier"),
 				L10N.label("elementgui.block.vanilla_tool_tier")));
 		selp3.add(vanillaToolTier);
-		vanillaToolTier.setRenderer(new ItemTexturesComboBoxRenderer());
+		vanillaToolTier.setRenderer(new ItemTexturesComboBoxRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList<? extends String> list, String value, int index,
+					boolean isSelected, boolean cellHasFocus) {
+				Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+				if (c instanceof JLabel label) {
+					label.setText(L10N.t("elementgui.block.tool_tier." + value.toLowerCase()));
+				}
+				return c;
+			}
+		});
 
 		ButtonGroup bg = new ButtonGroup();
 		bg.add(defaultSoundType);
@@ -1773,8 +1825,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 		isLadder.setSelected(block.isLadder);
 		reactionToPushing.setSelectedItem(block.reactionToPushing);
 		slipperiness.setValue(block.slipperiness);
-		jumpFactor.setValue(block.jumpFactor);
 		speedFactor.setValue(block.speedFactor);
+		jumpFactor.setValue(block.jumpFactor);
 		strippingResult.setBlock(block.strippingResult);
 
 		disableOffset.setSelected(block.disableOffset);

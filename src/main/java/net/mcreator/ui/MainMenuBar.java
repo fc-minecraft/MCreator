@@ -149,13 +149,7 @@ public abstract class MainMenuBar extends JMenuBar {
 		add(window);
 
 		JMenu help = L10N.menu("menubar.help");
-		addHelpSearch(help);
-		help.add(mcreator.getActionRegistry().help);
-		help.add(mcreator.getActionRegistry().support);
-		help.add(mcreator.getActionRegistry().knowledgeBase);
 
-		help.addSeparator();
-		help.add(mcreator.getActionRegistry().checkForUpdates);
 		help.add(mcreator.getActionRegistry().checkForPluginUpdates);
 		help.add(mcreator.getActionRegistry().aboutMCreator);
 		help.setMnemonic('H');
@@ -163,37 +157,6 @@ public abstract class MainMenuBar extends JMenuBar {
 	}
 
 	protected abstract void assembleMenuBar(MCreator mcreator);
-
-	private void addHelpSearch(JMenu help) {
-		JTextField searchField = new JTextField(20) {
-			@Override public void paintComponent(Graphics g) {
-				super.paintComponent(g);
-				g.setColor(new Color(0x9C9C9C));
-				g.setFont(getFont().deriveFont(11.0f));
-				if (getText().isEmpty())
-					g.drawString(L10N.t("menubar.help.search.tooltip"), 28, 14);
-			}
-		};
-		ComponentUtils.deriveFont(searchField, 13);
-		searchField.setBorder(BorderFactory.createEmptyBorder(1, 28, 1, 0));
-		searchField.addKeyListener(new KeyAdapter() {
-			@Override public void keyTyped(KeyEvent e) {
-				if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-					DesktopUtils.browseSafe(MCreatorApplication.WEB_API.getSearchURL(searchField.getText()));
-				}
-			}
-		});
-		searchField.addFocusListener(new FocusAdapter() {
-			@Override public void focusLost(FocusEvent focusEvent) {
-				super.focusLost(focusEvent);
-				searchField.setText("");
-			}
-		});
-
-		help.add(searchField);
-
-		refreshMenuBar();
-	}
 
 	public void refreshMenuBar() {
 		code.setVisible(mcreator.getTabs().getCurrentTab() != null && mcreator.getTabs().getCurrentTab()

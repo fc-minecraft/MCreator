@@ -69,16 +69,6 @@ public class StatusBar extends JPanel {
 		left.add(info);
 		left.add(new JEmptyBox(3, 3));
 
-		JLabel donate = new JLabel(UIRES.get("donate"));
-		donate.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
-		donate.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent mouseEvent) {
-				DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/donate");
-			}
-		});
-		donate.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		left.add(donate);
-		left.add(new JEmptyBox(3, 3));
 
 		JLabel preferences = new JLabel(UIRES.get("settings"));
 		preferences.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
