@@ -33,10 +33,10 @@ public class NotificationsSection extends PreferencesSection {
 	NotificationsSection(String preferencesIdentifier) {
 		super(preferencesIdentifier);
 
-		openWhatsNextPage = addEntry(new BooleanEntry("openWhatsNextPage", true));
-		checkAndNotifyForUpdates = addEntry(new BooleanEntry("checkAndNotifyForUpdates", true));
-		checkAndNotifyForPatches = addEntry(new BooleanEntry("checkAndNotifyForPatches", true));
-		showWebsiteNewsNotifications = addEntry(new BooleanEntry("showWebsiteNewsNotifications", true));
+		openWhatsNextPage = addEntry(new BooleanEntry("openWhatsNextPage", false));
+		checkAndNotifyForUpdates = addEntry(new BooleanEntry("checkAndNotifyForUpdates", false));
+		checkAndNotifyForPatches = addEntry(new BooleanEntry("checkAndNotifyForPatches", false));
+		showWebsiteNewsNotifications = addEntry(new BooleanEntry("showWebsiteNewsNotifications", false));
 		checkAndNotifyForPluginUpdates = addEntry(new BooleanEntry("checkAndNotifyForPluginUpdates", false));
 	}
 
