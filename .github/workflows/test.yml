@@ -17,7 +17,6 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  # 1. SETUP
   setup:
     name: Prepare Release
     runs-on: ubuntu-latest
@@ -53,7 +52,6 @@ jobs:
           git push --delete origin pre-release || true
           git tag -d pre-release || true
 
-  # 2. LINUX & WINDOWS BUILD
   build-linux-windows:
     name: Build Linux & Windows
     needs: [setup]
@@ -74,6 +72,14 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
+      - name: Cache MCreator Assets
+        uses: actions/cache@v4
+        with:
+          path: ~/.mcreator
+          key: mcreator-assets-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            mcreator-assets-${{ runner.os }}-
+
       - name: Cache NSIS Resource
         id: cache-nsis
         uses: actions/cache@v4
@@ -85,18 +91,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y mkisofs nsis nsis-pluginapi
-          
           if [ ! -f LockedList.zip ]; then
             wget -q https://nsis.sourceforge.io/mediawiki/images/d/d3/LockedList.zip
           fi
-          
           sudo unzip -o -q LockedList.zip -d /usr/share/nsis/
 
       - name: Build and Export
         env:
           SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
         run: |
-          ARGS="generateExportReport exportLinux exportWindows --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
+          ARGS="generateExportReport exportLinux exportWindows --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Dorg.gradle.java.home=$JAVA_HOME"
           
           if [[ "$SNAPSHOT" == "true" ]]; then
             ARGS="$ARGS -Psnapshot=true"
@@ -114,14 +118,12 @@ jobs:
             Build commit: ${{ github.sha }}
             Targets: Linux, Windows
           prerelease: ${{ needs.setup.outputs.prerelease }}
-          # Исправлено: убраны дубликаты, которые вызывали ошибку
           files: |
             build/export/*
             build/distributions/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # 3. MACOS BUILD
   build-macos:
     name: Build macOS
     needs: [setup]
@@ -142,6 +144,14 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
+      - name: Cache MCreator Assets
+        uses: actions/cache@v4
+        with:
+          path: ~/.mcreator
+          key: mcreator-assets-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            mcreator-assets-${{ runner.os }}-
+
       - name: Install Build Dependencies
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
@@ -151,7 +161,7 @@ jobs:
         env:
           SNAPSHOT: ${{ needs.setup.outputs.is_snapshot }}
         run: |
-          ARGS="generateExportReport exportMac --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
+          ARGS="generateExportReport exportMac --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Dorg.gradle.java.home=$JAVA_HOME"
           
           if [[ "$SNAPSHOT" == "true" ]]; then
             ARGS="$ARGS -Psnapshot=true"
