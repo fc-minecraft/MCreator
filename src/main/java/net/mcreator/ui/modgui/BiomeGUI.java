@@ -32,6 +32,7 @@ import net.mcreator.ui.component.JColor;
 import net.mcreator.ui.component.JEmptyBox;
 import net.mcreator.ui.component.JMinMaxSpinner;
 import net.mcreator.ui.component.util.ComboBoxUtil;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
@@ -53,6 +54,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Map;
 
 public class BiomeGUI extends ModElementGUI<Biome> {
 
@@ -95,11 +97,29 @@ public class BiomeGUI extends ModElementGUI<Biome> {
 	private final JCheckBox spawnNetherFossil = L10N.checkbox("elementgui.common.enable");
 	private final JCheckBox spawnBastionRemnant = L10N.checkbox("elementgui.common.enable");
 	private final JCheckBox spawnEndCity = L10N.checkbox("elementgui.common.enable");
-	private final JComboBox<String> spawnRuinedPortal = new JComboBox<>(
-			new String[] { "NONE", "STANDARD", "DESERT", "JUNGLE", "SWAMP", "MOUNTAIN", "OCEAN", "NETHER" });
-	private final JComboBox<String> villageType = new JComboBox<>(
-			new String[] { "none", "desert", "plains", "savanna", "snowy", "taiga" });
-	private final JComboBox<String> oceanRuinType = new JComboBox<>(new String[] { "NONE", "COLD", "WARM" });
+	private final JComboBox<String> spawnRuinedPortal = new TranslatedComboBox(
+			Map.entry("NONE", "elementgui.biome.ruined_portal_type.none"),
+			Map.entry("STANDARD", "elementgui.biome.ruined_portal_type.standard"),
+			Map.entry("DESERT", "elementgui.biome.ruined_portal_type.desert"),
+			Map.entry("JUNGLE", "elementgui.biome.ruined_portal_type.jungle"),
+			Map.entry("SWAMP", "elementgui.biome.ruined_portal_type.swamp"),
+			Map.entry("MOUNTAIN", "elementgui.biome.ruined_portal_type.mountain"),
+			Map.entry("OCEAN", "elementgui.biome.ruined_portal_type.ocean"),
+			Map.entry("NETHER", "elementgui.biome.ruined_portal_type.nether")
+	);
+	private final JComboBox<String> villageType = new TranslatedComboBox(
+			Map.entry("none", "elementgui.biome.village_type.none"),
+			Map.entry("desert", "elementgui.biome.village_type.desert"),
+			Map.entry("plains", "elementgui.biome.village_type.plains"),
+			Map.entry("savanna", "elementgui.biome.village_type.savanna"),
+			Map.entry("snowy", "elementgui.biome.village_type.snowy"),
+			Map.entry("taiga", "elementgui.biome.village_type.taiga")
+	);
+	private final JComboBox<String> oceanRuinType = new TranslatedComboBox(
+			Map.entry("NONE", "elementgui.biome.ocean_ruin.none"),
+			Map.entry("COLD", "elementgui.biome.ocean_ruin.cold"),
+			Map.entry("WARM", "elementgui.biome.ocean_ruin.warm")
+	);
 
 	private JSpawnEntriesList spawnEntries;
 
@@ -129,9 +149,14 @@ public class BiomeGUI extends ModElementGUI<Biome> {
 	private final DataListComboBox particleToSpawn = new DataListComboBox(mcreator);
 	private final JSpinner particlesProbability = new JSpinner(new SpinnerNumberModel(0.5, 0, 100, 0.1));
 
-	private final JComboBox<String> vanillaTreeType = new JComboBox<>(
-			new String[] { "Default", "Big trees", "Birch trees", "Savanna trees", "Mega pine trees",
-					"Mega spruce trees" });
+	private final JComboBox<String> vanillaTreeType = new TranslatedComboBox(
+			Map.entry("Default", "elementgui.biome.vanilla_tree_type.default"),
+			Map.entry("Big trees", "elementgui.biome.vanilla_tree_type.big_trees"),
+			Map.entry("Birch trees", "elementgui.biome.vanilla_tree_type.birch_trees"),
+			Map.entry("Savanna trees", "elementgui.biome.vanilla_tree_type.savanna_trees"),
+			Map.entry("Mega pine trees", "elementgui.biome.vanilla_tree_type.mega_pine_trees"),
+			Map.entry("Mega spruce trees", "elementgui.biome.vanilla_tree_type.mega_spruce_trees")
+	);
 
 	private final ValidationGroup page1group = new ValidationGroup();
 	private final ValidationGroup page2group = new ValidationGroup();

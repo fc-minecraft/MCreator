@@ -26,6 +26,7 @@ import net.mcreator.minecraft.ElementUtil;
 import net.mcreator.minecraft.MCItem;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
@@ -46,6 +47,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 public class VillagerProfessionGUI extends ModElementGUI<VillagerProfession> {
 
@@ -54,7 +56,11 @@ public class VillagerProfessionGUI extends ModElementGUI<VillagerProfession> {
 	private final MCItemHolder pointOfInterest = new MCItemHolder(mcreator, ElementUtil::loadBlocks);
 	private final SoundSelector actionSound = new SoundSelector(mcreator).requireValue(
 			"elementgui.common.error_sound_empty_null").enableRealTimeValidation();
-	private final JComboBox<String> hat = new JComboBox<>(new String[] { "None", "Partial", "Full" });
+	private final JComboBox<String> hat = new TranslatedComboBox(
+			Map.entry("None", "elementgui.villager_profession.hat.none"),
+			Map.entry("Partial", "elementgui.villager_profession.hat.partial"),
+			Map.entry("Full", "elementgui.villager_profession.hat.full")
+	);
 
 	private TextureComboBox professionTextureFile;
 	private TextureComboBox zombifiedProfessionTextureFile;

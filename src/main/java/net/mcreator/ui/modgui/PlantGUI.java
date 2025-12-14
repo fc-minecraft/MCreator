@@ -29,6 +29,7 @@ import net.mcreator.minecraft.ElementUtil;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
 import net.mcreator.ui.component.*;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
@@ -64,6 +65,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 public class PlantGUI extends ModElementGUI<Plant> {
 
@@ -114,8 +116,13 @@ public class PlantGUI extends ModElementGUI<Plant> {
 
 	private final MCItemHolder customDrop = new MCItemHolder(mcreator, ElementUtil::loadBlocksAndItems);
 
-	private final JComboBox<String> plantType = new JComboBox<>(
-			new String[] { "normal", "double", "growapable", "sapling" });
+	private final JComboBox<String> plantType = new TranslatedComboBox(
+			Map.entry("normal", "elementgui.plant.plant_types.normal"),
+			Map.entry("double", "elementgui.plant.plant_types.double"),
+			Map.entry("growapable", "elementgui.plant.plant_types.growapable"),
+			Map.entry("sapling", "elementgui.plant.plant_types.sapling")
+	);
+
 	private final CardLayout plantTypesLayout = new CardLayout();
 	private final JPanel plantTypesCardPanel = new JPanel(plantTypesLayout);
 	private final JLabel plantTypeIndicator = new JLabel();
@@ -152,13 +159,28 @@ public class PlantGUI extends ModElementGUI<Plant> {
 
 	private final SearchableComboBox<Model> renderType = new SearchableComboBox<>(new Model[] { cross, crop });
 
-	private final JComboBox<String> offsetType = new JComboBox<>(new String[] { "XZ", "XYZ", "NONE" });
+	private final JComboBox<String> offsetType = new TranslatedComboBox(
+			Map.entry("NONE", "elementgui.block.offset.none"),
+			Map.entry("XZ", "elementgui.block.offset.xz"),
+			Map.entry("XYZ", "elementgui.block.offset.xyz")
+	);
 	private final SearchableComboBox<String> aiPathNodeType = new SearchableComboBox<>();
 	private final MCItemHolder strippingResult = new MCItemHolder(mcreator, ElementUtil::loadBlocks);
 
-	private final JComboBox<String> tintType = new JComboBox<>(
-			new String[] { "No tint", "Grass", "Foliage", "Birch foliage", "Spruce foliage", "Default foliage", "Water",
-					"Sky", "Fog", "Water fog" });
+	private final JComboBox<String> tintType = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("No tint", "elementgui.block.tint.no_tint"),
+			Map.entry("Grass", "elementgui.block.tint.grass"),
+			Map.entry("Foliage", "elementgui.block.tint.foliage"),
+			Map.entry("Birch foliage", "elementgui.block.tint.birch_foliage"),
+			Map.entry("Spruce foliage", "elementgui.block.tint.spruce_foliage"),
+			Map.entry("Default foliage", "elementgui.block.tint.default_foliage"),
+			Map.entry("Water", "elementgui.block.tint.water"),
+			Map.entry("Sky", "elementgui.block.tint.sky"),
+			Map.entry("Fog", "elementgui.block.tint.fog"),
+			Map.entry("Water fog", "elementgui.block.tint.water_fog")
+			//@formatter:on
+	);
 	private final JCheckBox isItemTinted = L10N.checkbox("elementgui.common.enable");
 
 	private final JCheckBox isBonemealable = L10N.checkbox("elementgui.common.enable");
@@ -188,7 +210,10 @@ public class PlantGUI extends ModElementGUI<Plant> {
 	private BiomeListField restrictionBiomes;
 	private final JSpinner patchSize = new JSpinner(new SpinnerNumberModel(64, 1, 1024, 1));
 	private final JCheckBox generateAtAnyHeight = L10N.checkbox("elementgui.common.enable");
-	private final JComboBox<String> generationType = new JComboBox<>(new String[] { "Flower", "Grass" });
+	private final JComboBox<String> generationType = new TranslatedComboBox(
+			Map.entry("Flower", "elementgui.plant.generation_type.flower"),
+			Map.entry("Grass", "elementgui.plant.generation_type.grass")
+	);
 
 	private final ValidationGroup page3group = new ValidationGroup();
 
@@ -376,7 +401,7 @@ public class PlantGUI extends ModElementGUI<Plant> {
 				L10N.label("elementgui.plant.plant_type")));
 		plantTypePanel.add(plantType);
 
-		plantType.setRenderer(new PlantTypeListRenderer());
+		plantType.setRenderer(new javax.swing.plaf.basic.BasicComboBoxRenderer() { @Override public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) { String key = "elementgui.plant.plant_types." + value; String translated = L10N.t(key); return super.getListCellRendererComponent(list, translated.equals(key) ? value : translated, index, isSelected, cellHasFocus); } });
 
 		plantTypeIndicator.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 

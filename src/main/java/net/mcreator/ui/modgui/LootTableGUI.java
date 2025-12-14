@@ -24,6 +24,7 @@ import net.mcreator.element.types.LootTable;
 import net.mcreator.minecraft.RegistryNameFixer;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
@@ -40,6 +41,7 @@ import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 public class LootTableGUI extends ModElementGUI<LootTable> {
@@ -47,9 +49,20 @@ public class LootTableGUI extends ModElementGUI<LootTable> {
 	private final JComboBox<String> namespace = new JComboBox<>(new String[] { "mod", "minecraft" });
 	private final VComboBox<String> name = new VComboBox<>();
 
-	private final JComboBox<String> type = new JComboBox<>(
-			new String[] { "Block", "Entity", "Generic", "Chest", "Fishing", "Empty", "Advancement reward", "Gift",
-					"Barter", "Archaeology" });
+	private final JComboBox<String> type = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("Block", "elementgui.loot_table.type.block"),
+			Map.entry("Entity", "elementgui.loot_table.type.entity"),
+			Map.entry("Generic", "elementgui.loot_table.type.generic"),
+			Map.entry("Chest", "elementgui.loot_table.type.chest"),
+			Map.entry("Fishing", "elementgui.loot_table.type.fishing"),
+			Map.entry("Empty", "elementgui.loot_table.type.empty"),
+			Map.entry("Advancement reward", "elementgui.loot_table.type.advancement_reward"),
+			Map.entry("Gift", "elementgui.loot_table.type.gift"),
+			Map.entry("Barter", "elementgui.loot_table.type.barter"),
+			Map.entry("Archaeology", "elementgui.loot_table.type.archaeology")
+			//@formatter:on
+	);
 
 	private JLootTablePoolsList lootTablePools;
 

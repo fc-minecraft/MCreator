@@ -339,7 +339,22 @@ public class BlockGUI extends ModElementGUI<Block> {
 				return c;
 			}
 		});
-		blockBase.setRenderer(new ItemTexturesComboBoxRenderer());
+		blockBase.setRenderer(new ItemTexturesComboBoxRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList<? extends String> list, String value, int index,
+					boolean isSelected, boolean cellHasFocus) {
+				Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+				if (c instanceof JLabel label) {
+					String key = "elementgui.block.base." + value.toLowerCase().replace(" ", "_");
+					String translated = L10N.t(key);
+					if (translated.equals(key))
+						label.setText(value);
+					else
+						label.setText(translated);
+				}
+				return c;
+			}
+		});
 
 		blocksToReplace = new MCItemListField(mcreator, ElementUtil::loadBlocksAndTags, false, true);
 

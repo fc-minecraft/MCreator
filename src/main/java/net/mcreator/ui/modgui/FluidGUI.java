@@ -79,9 +79,20 @@ public class FluidGUI extends ModElementGUI<Fluid> {
 	private final JCheckBox spawnParticles = L10N.checkbox("elementgui.common.enable");
 	private final DataListComboBox dripParticle = new DataListComboBox(mcreator);
 	private final JSpinner flowStrength = new JSpinner(new SpinnerNumberModel(1, -25, 25, 0.1));
-	private final JComboBox<String> tintType = new JComboBox<>(
-			new String[] { "No tint", "Grass", "Foliage", "Birch foliage", "Spruce foliage", "Default foliage", "Water",
-					"Sky", "Fog", "Water fog" });
+	private final JComboBox<String> tintType = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("No tint", "elementgui.block.tint.no_tint"),
+			Map.entry("Grass", "elementgui.block.tint.grass"),
+			Map.entry("Foliage", "elementgui.block.tint.foliage"),
+			Map.entry("Birch foliage", "elementgui.block.tint.birch_foliage"),
+			Map.entry("Spruce foliage", "elementgui.block.tint.spruce_foliage"),
+			Map.entry("Default foliage", "elementgui.block.tint.default_foliage"),
+			Map.entry("Water", "elementgui.block.tint.water"),
+			Map.entry("Sky", "elementgui.block.tint.sky"),
+			Map.entry("Fog", "elementgui.block.tint.fog"),
+			Map.entry("Water fog", "elementgui.block.tint.water_fog")
+			//@formatter:on
+	);
 
 	private final JSpinner luminosity = new JSpinner(new SpinnerNumberModel(0, 0, 100, 1));
 	private final JSpinner density = new JSpinner(new SpinnerNumberModel(1000, -100000, 100000, 1));
@@ -104,7 +115,10 @@ public class FluidGUI extends ModElementGUI<Fluid> {
 	);
 	private StringListProcedureSelector specialInformation;
 
-	private final JComboBox<String> fluidtype = new JComboBox<>(new String[] { "WATER", "LAVA" });
+	private final JComboBox<String> fluidtype = new TranslatedComboBox(
+			Map.entry("WATER", "elementgui.fluid.type.water"),
+			Map.entry("LAVA", "elementgui.fluid.type.lava")
+	);
 
 	private final JSpinner resistance = new JSpinner(new SpinnerNumberModel(100, 0, Integer.MAX_VALUE, 0.5));
 	private final JSpinner luminance = new JSpinner(new SpinnerNumberModel(0, 0, 15, 1));
@@ -176,7 +190,7 @@ public class FluidGUI extends ModElementGUI<Fluid> {
 				new JStringListField(mcreator, null), 0,
 				Dependency.fromString("x:number/y:number/z:number/entity:entity/world:world/itemstack:itemstack"));
 
-		fluidtype.setRenderer(new ItemTexturesComboBoxRenderer());
+		fluidtype.setRenderer(new ItemTexturesComboBoxRenderer() { @Override public Component getListCellRendererComponent(JList<? extends String> list, String value, int index, boolean isSelected, boolean cellHasFocus) { Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus); if (c instanceof JLabel label) { String key = "elementgui.fluid.type." + value.toLowerCase().replace(" ", "_"); String translated = L10N.t(key); if (translated.equals(key)) label.setText(value); else label.setText(translated); } return c; } });
 
 		JPanel visualsPage = new JPanel(new BorderLayout(10, 10));
 		visualsPage.setOpaque(false);

@@ -37,6 +37,7 @@ import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
 import net.mcreator.ui.blockly.BlocklyAggregatedValidationResult;
 import net.mcreator.ui.blockly.BlocklyEditorType;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.blockly.BlocklyPanel;
 import net.mcreator.ui.blockly.CompileNotesPanel;
 import net.mcreator.ui.component.util.ComboBoxUtil;
@@ -76,7 +77,11 @@ public class AchievementGUI extends ModElementGUI<Achievement> implements IBlock
 
 	private MCItemHolder achievementIcon;
 
-	private final JComboBox<String> achievementType = new JComboBox<>(new String[] { "task", "goal", "challenge" });
+	private final JComboBox<String> achievementType = new TranslatedComboBox(
+			Map.entry("task", "elementgui.achievement.type.task"),
+			Map.entry("goal", "elementgui.achievement.type.goal"),
+			Map.entry("challenge", "elementgui.achievement.type.challenge")
+	);
 
 	private TextureComboBox background;
 

@@ -23,6 +23,7 @@ import net.mcreator.element.types.Function;
 import net.mcreator.minecraft.RegistryNameFixer;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.ide.RSyntaxTextAreaStyler;
@@ -45,11 +46,15 @@ import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 public class FunctionGUI extends ModElementGUI<Function> {
 
-	private final JComboBox<String> namespace = new JComboBox<>(new String[] { "mod", "minecraft" });
+	private final JComboBox<String> namespace = new TranslatedComboBox(
+			Map.entry("mod", "elementgui.function.namespace.mod"),
+			Map.entry("minecraft", "elementgui.function.namespace.minecraft")
+	);
 	private final VTextField name = new VTextField();
 
 	private final RSyntaxTextArea te = new RSyntaxTextArea();

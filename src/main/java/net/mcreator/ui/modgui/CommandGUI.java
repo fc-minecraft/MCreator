@@ -30,6 +30,7 @@ import net.mcreator.generator.template.TemplateGeneratorException;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
 import net.mcreator.ui.blockly.*;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
@@ -48,15 +49,29 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.Map;
 
 public class CommandGUI extends ModElementGUI<Command> implements IBlocklyPanelHolder {
 
 	private final VTextField commandName = new VTextField(25).requireValue("elementgui.command.warning.empty_string")
 			.enableRealtimeValidation();
-	private final JComboBox<String> type = new JComboBox<>(
-			new String[] { "STANDARD", "SINGLEPLAYER_ONLY", "MULTIPLAYER_ONLY", "CLIENTSIDE" });
-	private final JComboBox<String> permissionLevel = new JComboBox<>(
-			new String[] { "No requirement", "1", "2", "3", "4" });
+	private final JComboBox<String> type = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("STANDARD", "elementgui.command.type.standard"),
+			Map.entry("SINGLEPLAYER_ONLY", "elementgui.command.type.singleplayer_only"),
+			Map.entry("MULTIPLAYER_ONLY", "elementgui.command.type.multiplayer_only"),
+			Map.entry("CLIENTSIDE", "elementgui.command.type.clientside")
+			//@formatter:on
+	);
+	private final JComboBox<String> permissionLevel = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("No requirement", "elementgui.command.permission_level.no_requirement"),
+			Map.entry("1", "elementgui.command.permission_level.1"),
+			Map.entry("2", "elementgui.command.permission_level.2"),
+			Map.entry("3", "elementgui.command.permission_level.3"),
+			Map.entry("4", "elementgui.command.permission_level.4")
+			//@formatter:on
+	);
 	private final ValidationGroup page1group = new ValidationGroup();
 
 	private BlocklyPanel blocklyPanel;

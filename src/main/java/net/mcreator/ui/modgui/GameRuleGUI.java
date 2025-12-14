@@ -21,42 +21,58 @@ package net.mcreator.ui.modgui;
 import net.mcreator.element.types.GameRule;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.validation.ValidationGroup;
 import net.mcreator.ui.validation.component.VTextField;
+import net.mcreator.ui.validation.validators.RegistryNameValidator;
 import net.mcreator.util.StringUtils;
 import net.mcreator.workspace.elements.ModElement;
-import net.mcreator.workspace.elements.VariableTypeLoader;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Locale;
+import java.util.Map;
 
 public class GameRuleGUI extends ModElementGUI<GameRule> {
 
-	private final VTextField name = new VTextField(30);
+	private final VTextField name = new VTextField();
 	private final VTextField displayName = new VTextField(30).requireValue(
 			"elementgui.gamerule.gamerule_needs_display_name").enableRealtimeValidation();
 	private final VTextField description = new VTextField(30).requireValue(
 			"elementgui.gamerule.gamerule_needs_description").enableRealtimeValidation();
 
-	private final JComboBox<String> gameruleCategory = new JComboBox<>(
-			new String[] { "PLAYER", "UPDATES", "CHAT", "DROPS", "MISC", "MOBS", "SPAWNING" });
-	private final JComboBox<String> gameruleType = new JComboBox<>(new String[] { "Number", "Logic" });
+	private final JComboBox<String> gameruleCategory = new TranslatedComboBox(
+			Map.entry("PLAYER", "elementgui.gamerule.category.player"),
+			Map.entry("UPDATES", "elementgui.gamerule.category.updates"),
+			Map.entry("CHAT", "elementgui.gamerule.category.chat"),
+			Map.entry("DROPS", "elementgui.gamerule.category.drops"),
+			Map.entry("MISC", "elementgui.gamerule.category.misc"),
+			Map.entry("MOBS", "elementgui.gamerule.category.mobs"),
+			Map.entry("SPAWNING", "elementgui.gamerule.category.spawning")
+	);
+	private final JComboBox<String> gameruleType = new TranslatedComboBox(
+			Map.entry("Number", "elementgui.gamerule.type.number"),
+			Map.entry("Logic", "elementgui.gamerule.type.logic")
+	);
 
-	private final JComboBox<String> defaultValueLogic = new JComboBox<>(new String[] { "false", "true" });
+	private final JComboBox<String> defaultValueLogic = new TranslatedComboBox(
+			Map.entry("false", "elementgui.common.false"),
+			Map.entry("true", "elementgui.common.true")
+	);
 	private final JSpinner defaultValueNumber = new JSpinner(
 			new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
 
-	private final ValidationGroup page1group = new ValidationGroup();
+	private final JPanel defaultValue = new JPanel(new CardLayout());
+	private final CardLayout defaultValueLayout = (CardLayout) defaultValue.getLayout();
 
-	private final CardLayout cl = new CardLayout();
-	private final JPanel defaultValue = new JPanel(cl);
+	private final ValidationGroup page1group = new ValidationGroup();
 
 	public GameRuleGUI(MCreator mcreator, ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
@@ -65,19 +81,15 @@ public class GameRuleGUI extends ModElementGUI<GameRule> {
 	}
 
 	@Override protected void initGUI() {
-		JPanel pane3 = new JPanel(new BorderLayout());
-
-		ComponentUtils.deriveFont(name, 16);
-		ComponentUtils.deriveFont(displayName, 16);
-		ComponentUtils.deriveFont(description, 16);
-
 		JPanel subpane2 = new JPanel(new GridLayout(6, 2, 0, 2));
 		subpane2.setOpaque(false);
 
-		name.setEnabled(false);
+		ComponentUtils.deriveFont(displayName, 16);
+		ComponentUtils.deriveFont(description, 16);
+		ComponentUtils.deriveFont(name, 16);
 
-		subpane2.add(
-				HelpUtils.wrapWithHelpButton(this.withEntry("gamerule/name"), L10N.label("elementgui.gamerule.name")));
+		subpane2.add(HelpUtils.wrapWithHelpButton(this.withEntry("gamerule/name"),
+				L10N.label("elementgui.gamerule.gamerule_name")));
 		subpane2.add(name);
 
 		subpane2.add(HelpUtils.wrapWithHelpButton(this.withEntry("gamerule/display_name"),
@@ -105,22 +117,21 @@ public class GameRuleGUI extends ModElementGUI<GameRule> {
 
 		page1group.addValidationElement(displayName);
 		page1group.addValidationElement(description);
+		page1group.addValidationElement(name);
 
-		pane3.add(PanelUtils.totalCenterInPanel(subpane2));
-		pane3.setOpaque(false);
+		addPage(L10N.t("elementgui.common.page_properties"), PanelUtils.totalCenterInPanel(subpane2)).validate(
+				page1group);
 
-		gameruleType.addActionListener(e -> updateDefaultValueUI());
+		gameruleType.addActionListener(e -> {
+			defaultValueLayout.show(defaultValue, (String) gameruleType.getSelectedItem());
+		});
 
-		addPage(L10N.t("elementgui.common.page_properties"), pane3).validate(page1group);
+		name.setValidator(new RegistryNameValidator(name, L10N.t("elementgui.gamerule.gamerule_name")));
+		name.enableRealtimeValidation();
 
-		if (!isEditingMode()) {
-			name.setText(StringUtils.lowercaseFirstLetter(modElement.getName()));
-			updateDefaultValueUI();
+		if (isEditingMode()) {
+			name.setEnabled(false);
 		}
-	}
-
-	private void updateDefaultValueUI() {
-		cl.show(defaultValue, (String) gameruleType.getSelectedItem());
 	}
 
 	@Override public void openInEditingMode(GameRule gamerule) {
@@ -132,7 +143,7 @@ public class GameRuleGUI extends ModElementGUI<GameRule> {
 		defaultValueNumber.setValue(gamerule.defaultValueNumber);
 
 		name.setText(StringUtils.lowercaseFirstLetter(modElement.getName()));
-		updateDefaultValueUI();
+		defaultValueLayout.show(defaultValue, gamerule.type);
 	}
 
 	@Override public GameRule getElementFromGUI() {
@@ -144,13 +155,6 @@ public class GameRuleGUI extends ModElementGUI<GameRule> {
 		gamerule.defaultValueLogic = Boolean.parseBoolean((String) defaultValueLogic.getSelectedItem());
 		gamerule.defaultValueNumber = (int) defaultValueNumber.getValue();
 		return gamerule;
-	}
-
-	@Override protected void afterGeneratableElementStored() {
-		super.afterGeneratableElementStored();
-		modElement.putMetadata("type", "Number".equals(gameruleType.getSelectedItem()) ?
-				VariableTypeLoader.BuiltInTypes.NUMBER.getName() :
-				VariableTypeLoader.BuiltInTypes.LOGIC.getName());
 	}
 
 	@Override public @Nullable URI contextURL() throws URISyntaxException {

@@ -22,16 +22,16 @@ import net.mcreator.blockly.data.Dependency;
 import net.mcreator.element.types.Particle;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
-import net.mcreator.ui.component.JEmptyBox;
-import net.mcreator.ui.component.util.ComponentUtils;
+import net.mcreator.ui.component.JColor;
+import net.mcreator.ui.component.JMinMaxSpinner;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.dialogs.TypedTextureSelectorDialog;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.minecraft.TextureSelectionButton;
-import net.mcreator.ui.procedure.AbstractProcedureSelector;
-import net.mcreator.ui.procedure.NumberProcedureSelector;
 import net.mcreator.ui.procedure.ProcedureSelector;
+import net.mcreator.ui.validation.ValidationGroup;
 import net.mcreator.ui.workspace.resources.TextureType;
 import net.mcreator.workspace.elements.ModElement;
 import net.mcreator.workspace.elements.VariableTypeLoader;
@@ -41,30 +41,31 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 public class ParticleGUI extends ModElementGUI<Particle> {
 
 	private TextureSelectionButton texture;
+	private final JMinMaxSpinner scale = new JMinMaxSpinner(0, 5, 0, 128, 0.1);
+	private final JMinMaxSpinner lifetime = new JMinMaxSpinner(10, 20, 1, 12000, 1);
+	private final JMinMaxSpinner speed = new JMinMaxSpinner(0.8, 1.2, 0, 128, 0.01);
+	private final JSpinner gravity = new JSpinner(new SpinnerNumberModel(0, -100, 100, 0.01));
 
-	private final JSpinner width = new JSpinner(new SpinnerNumberModel(0.2, 0, 4096, 0.1));
-	private final JSpinner height = new JSpinner(new SpinnerNumberModel(0.2, 0, 4096, 0.1));
-	private NumberProcedureSelector scale;
-	private final JSpinner gravity = new JSpinner(new SpinnerNumberModel(0, -100, 100, 0.1));
-	private final JSpinner speedFactor = new JSpinner(new SpinnerNumberModel(1, -100, 100, 0.1));
-	private final JSpinner maxAge = new JSpinner(new SpinnerNumberModel(7, 0, 100000, 1));
-	private final JSpinner maxAgeDiff = new JSpinner(new SpinnerNumberModel(0, 0, 100000, 1));
-	private final JSpinner frameDuration = new JSpinner(new SpinnerNumberModel(1, 1, 100000, 1));
-	private final JSpinner angularVelocity = new JSpinner(new SpinnerNumberModel(0, -100, 100, 0.01));
-	private final JSpinner angularAcceleration = new JSpinner(new SpinnerNumberModel(0, -100, 100, 0.01));
+	private final JColor color = new JColor(mcreator, false, true);
 
-	private final JCheckBox emissiveRendering = L10N.checkbox("elementgui.common.enable");
+	private final JCheckBox hasPhysics = L10N.checkbox("elementgui.common.enable");
 	private final JCheckBox canCollide = L10N.checkbox("elementgui.common.enable");
 	private final JCheckBox alwaysShow = L10N.checkbox("elementgui.common.enable");
 	private final JCheckBox animate = L10N.checkbox("elementgui.common.enable");
 
-	private final JComboBox<String> renderType = new JComboBox<>(new String[] { "OPAQUE", "TRANSLUCENT" });
+	private final JComboBox<String> renderType = new TranslatedComboBox(
+			Map.entry("OPAQUE", "elementgui.particle.render_type.opaque"),
+			Map.entry("TRANSLUCENT", "elementgui.particle.render_type.translucent")
+	);
 
 	private ProcedureSelector additionalExpiryCondition;
+
+	private final ValidationGroup page1group = new ValidationGroup();
 
 	public ParticleGUI(MCreator mcreator, ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
@@ -73,43 +74,41 @@ public class ParticleGUI extends ModElementGUI<Particle> {
 	}
 
 	@Override protected void initGUI() {
-		scale = new NumberProcedureSelector(this.withEntry("particle/scale"), mcreator,
-				L10N.t("elementgui.particle.visual_scale"), AbstractProcedureSelector.Side.CLIENT,
-				new JSpinner(new SpinnerNumberModel(1, 0.1, 4096, 0.1)), 0,
-				Dependency.fromString("x:number/y:number/z:number/world:world/age:number/scale:number"));
-		additionalExpiryCondition = new ProcedureSelector(this.withEntry("particle/additional_expiry_condition"),
-				mcreator, L10N.t("elementgui.particle.expiry_condition"), ProcedureSelector.Side.CLIENT, true,
-				VariableTypeLoader.BuiltInTypes.LOGIC, Dependency.fromString(
-				"x:number/y:number/z:number/world:world/age:number/onGround:logic")).setDefaultName(
-				L10N.t("condition.common.no_additional")).makeInline();
+		texture = new TextureSelectionButton(new TypedTextureSelectorDialog(mcreator, TextureType.PARTICLE)).requireValue(
+				"elementgui.particle.error_texture");
 
-		JPanel pane3 = new JPanel(new BorderLayout());
-		pane3.setOpaque(false);
+		color.setPreferredSize(new Dimension(250, 42));
 
-		canCollide.setSelected(true);
+		JPanel spo2 = new JPanel(new GridLayout(10, 2, 0, 2));
 
-		canCollide.setOpaque(false);
-		alwaysShow.setOpaque(false);
-		animate.setOpaque(false);
+		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/texture"),
+				L10N.label("elementgui.particle.texture")));
+		spo2.add(PanelUtils.join(texture));
 
-		texture = new TextureSelectionButton(
-				new TypedTextureSelectorDialog(mcreator, TextureType.PARTICLE)).requireValue();
-		texture.setOpaque(false);
+		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/color"), L10N.label("elementgui.particle.color")));
+		spo2.add(PanelUtils.join(color));
 
-		JComponent textureComponent = PanelUtils.totalCenterInPanel(ComponentUtils.squareAndBorder(
-				HelpUtils.wrapWithHelpButton(this.withEntry("particle/texture"), texture),
-				L10N.t("elementgui.common.texture")));
+		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/scale"), L10N.label("elementgui.particle.scale")));
+		spo2.add(scale);
 
-		JPanel spo2 = new JPanel(new GridLayout(13, 2, 2, 2));
-		spo2.setOpaque(false);
+		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/lifetime"),
+				L10N.label("elementgui.particle.lifetime")));
+		spo2.add(lifetime);
 
-		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/animated_texture"),
-				L10N.label("elementgui.particle.animated_texture")));
-		spo2.add(animate);
+		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/speed"), L10N.label("elementgui.particle.speed")));
+		spo2.add(speed);
 
-		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/animated_frame_duration"),
-				L10N.label("elementgui.particle.animated_frame_duration")));
-		spo2.add(frameDuration);
+		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/gravity"),
+				L10N.label("elementgui.particle.gravity")));
+		spo2.add(gravity);
+
+		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/has_physics"),
+				L10N.label("elementgui.particle.has_physics")));
+		spo2.add(hasPhysics);
+
+		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/has_collision"),
+				L10N.label("elementgui.particle.has_collision")));
+		spo2.add(canCollide);
 
 		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/render_type"),
 				L10N.label("elementgui.particle.render_type")));
@@ -117,75 +116,55 @@ public class ParticleGUI extends ModElementGUI<Particle> {
 
 		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/emissive_rendering"),
 				L10N.label("elementgui.common.emissive_rendering")));
-		spo2.add(emissiveRendering);
-
-		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/scale"),
-				L10N.label("elementgui.particle.visual_scale")));
-		spo2.add(scale);
-
-		spo2.add(
-				HelpUtils.wrapWithHelpButton(this.withEntry("particle/width"), L10N.label("elementgui.particle.bbox")));
-		spo2.add(PanelUtils.gridElements(1, 2, 2, 2, width, height));
-
-		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/speed_factor"),
-				L10N.label("elementgui.particle.speed_factor")));
-		spo2.add(speedFactor);
-
-		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/angular_velocity"),
-				L10N.label("elementgui.particle.angular_velocity")));
-		spo2.add(angularVelocity);
-
-		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/angular_acceleration"),
-				L10N.label("elementgui.particle.angular_acceleration")));
-		spo2.add(angularAcceleration);
-
-		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/gravity"),
-				L10N.label("elementgui.particle.gravity")));
-		spo2.add(gravity);
-
-		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/max_age"),
-				L10N.label("elementgui.particle.max_age")));
-		spo2.add(PanelUtils.gridElements(1, 2, 2, 2, maxAge, maxAgeDiff));
-
-		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/always_show"),
-				L10N.label("elementgui.particle.always_show")));
 		spo2.add(alwaysShow);
 
-		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("particle/can_collide"),
-				L10N.label("elementgui.particle.does_collide")));
-		spo2.add(canCollide);
+		spo2.setOpaque(false);
 
-		pane3.add("Center", PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(textureComponent,
-				PanelUtils.centerAndSouthElement(spo2,
-						PanelUtils.westAndCenterElement(new JEmptyBox(3, 3), additionalExpiryCondition), 5, 2), 15,
-				5)));
+		additionalExpiryCondition = new ProcedureSelector(this.withEntry("particle/expiry_condition"), mcreator,
+				L10N.t("elementgui.particle.additional_expiry_condition"), VariableTypeLoader.BuiltInTypes.LOGIC,
+				Dependency.fromString("x:number/y:number/z:number/world:world/entity:entity")).makeInline();
 
-		addPage(L10N.t("elementgui.common.page_properties"), pane3).validate(texture);
-	}
+		JPanel page1 = new JPanel(new BorderLayout(10, 10));
+		page1.add("Center", PanelUtils.totalCenterInPanel(
+				PanelUtils.northAndCenterElement(spo2, PanelUtils.gridElements(2, 1, 0, 2,
+						HelpUtils.wrapWithHelpButton(this.withEntry("particle/animate_texture"),
+								L10N.label("elementgui.particle.animate_texture")), animate, additionalExpiryCondition))));
+		page1.setOpaque(false);
 
-	@Override public void reloadDataLists() {
-		super.reloadDataLists();
+		page1group.addValidationElement(texture);
 
-		AbstractProcedureSelector.ReloadContext context = AbstractProcedureSelector.ReloadContext.create(
-				mcreator.getWorkspace());
+		addPage(L10N.t("elementgui.common.page_properties"), page1).validate(page1group);
 
-		additionalExpiryCondition.refreshListKeepSelected(context);
-		scale.refreshListKeepSelected(context);
+		hasPhysics.setOpaque(false);
+		hasPhysics.addActionListener(e -> {
+			canCollide.setEnabled(hasPhysics.isSelected());
+			if (!hasPhysics.isSelected())
+				canCollide.setSelected(false);
+		});
+		canCollide.setOpaque(false);
+		alwaysShow.setOpaque(false);
+		animate.setOpaque(false);
+
+		if (!isEditingMode()) {
+			hasPhysics.setSelected(true);
+		}
 	}
 
 	@Override public void openInEditingMode(Particle particle) {
 		texture.setTexture(particle.texture);
-		width.setValue(particle.width);
-		height.setValue(particle.height);
-		scale.setSelectedProcedure(particle.scale);
+		/*
+		scale.setMinValue(particle.scale.min);
+		scale.setMaxValue(particle.scale.max);
+		lifetime.setMinValue(particle.lifetime.min);
+		lifetime.setMaxValue(particle.lifetime.max);
+		speed.setMinValue(particle.speed.min);
+		speed.setMaxValue(particle.speed.max);
+		*/
 		gravity.setValue(particle.gravity);
-		speedFactor.setValue(particle.speedFactor);
-		frameDuration.setValue(particle.frameDuration);
-		emissiveRendering.setSelected(particle.emissiveRendering);
-		maxAge.setValue(particle.maxAge);
-		maxAgeDiff.setValue(particle.maxAgeDiff);
-		angularVelocity.setValue(particle.angularVelocity);
-		angularAcceleration.setValue(particle.angularAcceleration);
+		/*
+		color.setColor(particle.color);
+		hasPhysics.setSelected(particle.hasPhysics);
+		*/
 		canCollide.setSelected(particle.canCollide);
 		alwaysShow.setSelected(particle.alwaysShow);
 		animate.setSelected(particle.animate);
@@ -196,17 +175,16 @@ public class ParticleGUI extends ModElementGUI<Particle> {
 	@Override public Particle getElementFromGUI() {
 		Particle particle = new Particle(modElement);
 		particle.texture = texture.getTextureHolder();
-		particle.width = (double) width.getValue();
-		particle.height = (double) height.getValue();
-		particle.scale = scale.getSelectedProcedure();
+		/*
+		particle.scale = new Particle.ParticleProperty(scale.getMinValue(), scale.getMaxValue());
+		particle.lifetime = new Particle.ParticleProperty((int) lifetime.getMinValue(), (int) lifetime.getMaxValue());
+		particle.speed = new Particle.ParticleProperty(speed.getMinValue(), speed.getMaxValue());
+		*/
 		particle.gravity = (double) gravity.getValue();
-		particle.speedFactor = (double) speedFactor.getValue();
-		particle.maxAge = (int) maxAge.getValue();
-		particle.frameDuration = (int) frameDuration.getValue();
-		particle.emissiveRendering = emissiveRendering.isSelected();
-		particle.maxAgeDiff = (int) maxAgeDiff.getValue();
-		particle.angularVelocity = (double) angularVelocity.getValue();
-		particle.angularAcceleration = (double) angularAcceleration.getValue();
+		/*
+		particle.color = color.getColor();
+		particle.hasPhysics = hasPhysics.isSelected();
+		*/
 		particle.canCollide = canCollide.isSelected();
 		particle.animate = animate.isSelected();
 		particle.alwaysShow = alwaysShow.isSelected();

@@ -36,10 +36,7 @@ import net.mcreator.minecraft.ElementUtil;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
 import net.mcreator.ui.blockly.*;
-import net.mcreator.ui.component.JColor;
-import net.mcreator.ui.component.JEmptyBox;
-import net.mcreator.ui.component.JMinMaxSpinner;
-import net.mcreator.ui.component.SearchableComboBox;
+import net.mcreator.ui.component.*;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
@@ -74,6 +71,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -212,13 +210,42 @@ public class LivingEntityGUI extends ModElementGUI<LivingEntity> implements IBlo
 					"Pig", "Villager", "Wolf", "Cow", "Bat", "Chicken", "Ocelot", "Squid", "Horse", "Spider",
 					"IronGolem").sorted().toArray(String[]::new));
 
-	private final JComboBox<String> mobBehaviourType = new JComboBox<>(new String[] { "Mob", "Creature", "Raider" });
-	private final JComboBox<String> mobCreatureType = new JComboBox<>(
-			new String[] { "UNDEFINED", "UNDEAD", "ARTHROPOD", "ILLAGER", "WATER" });
-	private final JComboBox<String> bossBarColor = new JComboBox<>(
-			new String[] { "PINK", "BLUE", "RED", "GREEN", "YELLOW", "PURPLE", "WHITE" });
-	private final JComboBox<String> bossBarType = new JComboBox<>(
-			new String[] { "PROGRESS", "NOTCHED_6", "NOTCHED_10", "NOTCHED_12", "NOTCHED_20" });
+	private final JComboBox<String> mobBehaviourType = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("Mob", "elementgui.living_entity.behaviour.mob"),
+			Map.entry("Creature", "elementgui.living_entity.behaviour.creature"),
+			Map.entry("Raider", "elementgui.living_entity.behaviour.raider")
+			//@formatter:on
+	);
+	private final JComboBox<String> mobCreatureType = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("UNDEFINED", "elementgui.living_entity.creature_type.undefined"),
+			Map.entry("UNDEAD", "elementgui.living_entity.creature_type.undead"),
+			Map.entry("ARTHROPOD", "elementgui.living_entity.creature_type.arthropod"),
+			Map.entry("ILLAGER", "elementgui.living_entity.creature_type.illager"),
+			Map.entry("WATER", "elementgui.living_entity.creature_type.water")
+			//@formatter:on
+	);
+	private final JComboBox<String> bossBarColor = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("PINK", "elementgui.living_entity.boss_bar_color.pink"),
+			Map.entry("BLUE", "elementgui.living_entity.boss_bar_color.blue"),
+			Map.entry("RED", "elementgui.living_entity.boss_bar_color.red"),
+			Map.entry("GREEN", "elementgui.living_entity.boss_bar_color.green"),
+			Map.entry("YELLOW", "elementgui.living_entity.boss_bar_color.yellow"),
+			Map.entry("PURPLE", "elementgui.living_entity.boss_bar_color.purple"),
+			Map.entry("WHITE", "elementgui.living_entity.boss_bar_color.white")
+			//@formatter:on
+	);
+	private final JComboBox<String> bossBarType = new TranslatedComboBox(
+			//@formatter:off
+			Map.entry("PROGRESS", "elementgui.living_entity.boss_bar_type.progress"),
+			Map.entry("NOTCHED_6", "elementgui.living_entity.boss_bar_type.notched_6"),
+			Map.entry("NOTCHED_10", "elementgui.living_entity.boss_bar_type.notched_10"),
+			Map.entry("NOTCHED_12", "elementgui.living_entity.boss_bar_type.notched_12"),
+			Map.entry("NOTCHED_20", "elementgui.living_entity.boss_bar_type.notched_20")
+			//@formatter:on
+	);
 
 	private final JCheckBox ridable = L10N.checkbox("elementgui.living_entity.is_rideable");
 

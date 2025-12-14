@@ -27,6 +27,7 @@ import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
 import net.mcreator.ui.component.JMinMaxSpinner;
 import net.mcreator.ui.component.SearchableComboBox;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
@@ -53,19 +54,36 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class StructureGUI extends ModElementGUI<Structure> {
 
 	private MCItemListField ignoreBlocks;
 
-	private final JComboBox<String> surfaceDetectionType = new JComboBox<>(
-			new String[] { "WORLD_SURFACE_WG", "WORLD_SURFACE", "OCEAN_FLOOR_WG", "OCEAN_FLOOR", "MOTION_BLOCKING",
-					"MOTION_BLOCKING_NO_LEAVES" });
+	private final JComboBox<String> surfaceDetectionType = new TranslatedComboBox(
+			Map.entry("WORLD_SURFACE_WG", "elementgui.structuregen.surface_detection_type.world_surface_wg"),
+			Map.entry("WORLD_SURFACE", "elementgui.structuregen.surface_detection_type.world_surface"),
+			Map.entry("OCEAN_FLOOR_WG", "elementgui.structuregen.surface_detection_type.ocean_floor_wg"),
+			Map.entry("OCEAN_FLOOR", "elementgui.structuregen.surface_detection_type.ocean_floor"),
+			Map.entry("MOTION_BLOCKING", "elementgui.structuregen.surface_detection_type.motion_blocking"),
+			Map.entry("MOTION_BLOCKING_NO_LEAVES", "elementgui.structuregen.surface_detection_type.motion_blocking_no_leaves")
+	);
 
-	private final JComboBox<String> terrainAdaptation = new JComboBox<>(
-			new String[] { "none", "beard_thin", "beard_box", "bury", "encapsulate" });
 
-	private final JComboBox<String> projection = new JComboBox<>(new String[] { "rigid", "terrain_matching" });
+
+	private final JComboBox<String> terrainAdaptation = new TranslatedComboBox(
+			Map.entry("none", "elementgui.structuregen.terrain_adaptation.none"),
+			Map.entry("beard_thin", "elementgui.structuregen.terrain_adaptation.beard_thin"),
+			Map.entry("beard_box", "elementgui.structuregen.terrain_adaptation.beard_box"),
+			Map.entry("bury", "elementgui.structuregen.terrain_adaptation.bury"),
+			Map.entry("encapsulate", "elementgui.structuregen.terrain_adaptation.encapsulate")
+	);
+
+
+	private final JComboBox<String> projection = new TranslatedComboBox(
+			Map.entry("rigid", "elementgui.structuregen.projection.rigid"),
+			Map.entry("terrain_matching", "elementgui.structuregen.projection.terrain_matching")
+	);
 
 	private BiomeListField restrictionBiomes;
 
@@ -73,8 +91,13 @@ public class StructureGUI extends ModElementGUI<Structure> {
 			L10N.t("elementgui.structuregen.separation"), L10N.t("elementgui.structuregen.spacing"));
 
 	private final JCheckBox useStartHeight = L10N.checkbox("elementgui.common.enable");
-	private final JComboBox<String> startHeightProviderType = new JComboBox<>(
-			new String[] { "UNIFORM", "BIASED_TO_BOTTOM", "VERY_BIASED_TO_BOTTOM", "TRAPEZOID" });
+	private final JComboBox<String> startHeightProviderType = new TranslatedComboBox(
+			Map.entry("UNIFORM", "elementgui.structuregen.start_height_provider_type.uniform"),
+			Map.entry("BIASED_TO_BOTTOM", "elementgui.structuregen.start_height_provider_type.biased_to_bottom"),
+			Map.entry("VERY_BIASED_TO_BOTTOM", "elementgui.structuregen.start_height_provider_type.very_biased_to_bottom"),
+			Map.entry("TRAPEZOID", "elementgui.structuregen.start_height_provider_type.trapezoid")
+	);
+
 	private final JMinMaxSpinner startHeightRange = new JMinMaxSpinner(0, 128, -1024, 1024, 1);
 
 	private SearchableComboBox<String> structureSelector;

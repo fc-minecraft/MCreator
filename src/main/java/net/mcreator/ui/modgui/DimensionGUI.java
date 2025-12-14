@@ -115,7 +115,11 @@ public class DimensionGUI extends ModElementGUI<Dimension> {
 	private final JCheckBox useCustomEffects = L10N.checkbox("elementgui.common.enable");
 	private final JCheckBox hasClouds = L10N.checkbox("elementgui.common.enable");
 	private final JSpinner cloudHeight = new JSpinner(new SpinnerNumberModel(192, -2032, 2031, 16));
-	private final JComboBox<String> skyType = new JComboBox<>(new String[] { "NONE", "NORMAL", "END" });
+	private final JComboBox<String> skyType = new TranslatedComboBox(
+			Map.entry("NONE", "elementgui.dimension.sky_type.none"),
+			Map.entry("NORMAL", "elementgui.dimension.sky_type.normal"),
+			Map.entry("END", "elementgui.dimension.sky_type.end")
+	);
 	private final JCheckBox sunHeightAffectsFog = L10N.checkbox("elementgui.common.enable");
 
 	private final JCheckBox enablePortal = L10N.checkbox("elementgui.dimension.enable_portal");
@@ -126,8 +130,12 @@ public class DimensionGUI extends ModElementGUI<Dimension> {
 
 	private final DataListComboBox portalParticles = new DataListComboBox(mcreator);
 
-	private final JComboBox<String> worldGenType = new JComboBox<>(
-			new String[] { "Normal world gen", "Nether like gen", "End like gen" });
+	private final JComboBox<String> worldGenType = new TranslatedComboBox(
+			Map.entry("Normal world gen", "elementgui.dimension.world_gen_type.normal"),
+			Map.entry("Nether like gen", "elementgui.dimension.world_gen_type.nether"),
+			Map.entry("End like gen", "elementgui.dimension.world_gen_type.end")
+	);
+
 
 	private BiomeListField biomesInDimension;
 
@@ -179,7 +187,6 @@ public class DimensionGUI extends ModElementGUI<Dimension> {
 				new JStringListField(mcreator, null), 0,
 				Dependency.fromString("x:number/y:number/z:number/entity:entity/world:world/itemstack:itemstack"));
 
-		worldGenType.setRenderer(new ItemTexturesComboBoxRenderer());
 		worldGenType.addActionListener(e -> updateWorldgenSettings());
 		biomesInDimension = new BiomeListField(mcreator);
 

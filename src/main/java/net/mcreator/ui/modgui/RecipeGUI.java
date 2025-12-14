@@ -26,6 +26,7 @@ import net.mcreator.minecraft.ElementUtil;
 import net.mcreator.minecraft.RegistryNameFixer;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
+import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.AdaptiveGridLayout;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
@@ -53,6 +54,7 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 public class RecipeGUI extends ModElementGUI<Recipe> {
@@ -73,20 +75,38 @@ public class RecipeGUI extends ModElementGUI<Recipe> {
 	private final JSpinner xpReward = new JSpinner(new SpinnerNumberModel(1.0, 0, 256, 0.1));
 	private final JSpinner cookingTime = new JSpinner(new SpinnerNumberModel(200, 0, 1000000, 1));
 
-	private final JComboBox<String> namespace = new JComboBox<>(new String[] { "mod", "minecraft" });
+	private final JComboBox<String> namespace = new TranslatedComboBox(
+			Map.entry("mod", "elementgui.recipe.namespace.mod"),
+			Map.entry("minecraft", "elementgui.recipe.namespace.minecraft")
+	);
 
 	private final VComboBox<String> name = new VComboBox<>();
 
 	private final VTextField group = new VTextField();
 
-	private final JComboBox<String> recipeType = new JComboBox<>(
-			new String[] { "Crafting", "Smelting", "Brewing", "Blasting", "Smoking", "Stone cutting",
-					"Campfire cooking", "Smithing" });
+	private final JComboBox<String> recipeType = new TranslatedComboBox(
+			Map.entry("Crafting", "elementgui.recipe.type.crafting"),
+			Map.entry("Smelting", "elementgui.recipe.type.smelting"),
+			Map.entry("Brewing", "elementgui.recipe.type.brewing"),
+			Map.entry("Blasting", "elementgui.recipe.type.blasting"),
+			Map.entry("Smoking", "elementgui.recipe.type.smoking"),
+			Map.entry("Stone cutting", "elementgui.recipe.type.stone_cutting"),
+			Map.entry("Campfire cooking", "elementgui.recipe.type.campfire_cooking"),
+			Map.entry("Smithing", "elementgui.recipe.type.smithing")
+	);
 
-	private final JComboBox<String> cookingBookCategory = new JComboBox<>(new String[] { "MISC", "FOOD", "BLOCKS" });
+	private final JComboBox<String> cookingBookCategory = new TranslatedComboBox(
+			Map.entry("MISC", "elementgui.recipe.book_category.misc"),
+			Map.entry("FOOD", "elementgui.recipe.book_category.food"),
+			Map.entry("BLOCKS", "elementgui.recipe.book_category.blocks")
+	);
 
-	private final JComboBox<String> craftingBookCategory = new JComboBox<>(
-			new String[] { "MISC", "BUILDING", "REDSTONE", "EQUIPMENT" });
+	private final JComboBox<String> craftingBookCategory = new TranslatedComboBox(
+			Map.entry("MISC", "elementgui.recipe.book_category.misc"),
+			Map.entry("BUILDING", "elementgui.recipe.book_category.building"),
+			Map.entry("REDSTONE", "elementgui.recipe.book_category.redstone"),
+			Map.entry("EQUIPMENT", "elementgui.recipe.book_category.equipment")
+	);
 
 	private final CardLayout recipesPanelLayout = new CardLayout();
 	private final JPanel recipesPanel = new JPanel(recipesPanelLayout);
