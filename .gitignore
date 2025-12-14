@@ -38,3 +38,6 @@ hs_err_pid*
 
 # PLUGINS
 plugins/mcreator-fabric-generator/
+
+
+/bin
