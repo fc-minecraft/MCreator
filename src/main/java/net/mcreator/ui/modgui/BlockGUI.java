@@ -600,7 +600,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		renderType.addActionListener(e -> updateTextureOptions());
 
-		JPanel pane2 = new JPanel(new BorderLayout(10, 10));
+		JPanel pane2 = new JPanel(new BorderLayout(40, 10));
 		JPanel pane3 = new JPanel(new BorderLayout(10, 10));
 		JPanel pane4 = new JPanel(new BorderLayout(10, 10));
 		JPanel pane7 = new JPanel(new BorderLayout(10, 10));
@@ -649,7 +649,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		textures = new BlockTexturesSelector(mcreator);
 
-		JPanel sbbp2 = new JPanel(new BorderLayout(1, 5));
+		JPanel sbbp2 = new JPanel(new BorderLayout(40, 10));
 		sbbp2.setOpaque(false);
 
 		JPanel modelSettings = new JPanel(new GridLayout(1, 2, 0, 2));
@@ -811,11 +811,11 @@ public class BlockGUI extends ModElementGUI<Block> {
 		bsPane.setOpaque(false);
 		bsPane.add("Center", statePropertiesList);
 
-		JPanel selp = new JPanel(new GridLayout(9, 2, 0, 2));
-		JPanel selp3 = new JPanel(new GridLayout(8, 2, 0, 2));
-		JPanel soundProperties = new JPanel(new GridLayout(7, 2, 0, 2));
+		JPanel selp = new JPanel(new GridLayout(9, 2, 10, 10));
+		JPanel selp3 = new JPanel(new GridLayout(8, 2, 10, 10));
+		JPanel soundProperties = new JPanel(new GridLayout(7, 2, 10, 10));
 
-		JPanel advancedProperties = new JPanel(new GridLayout(14, 2, 0, 2));
+		JPanel advancedProperties = new JPanel(new GridLayout(14, 2, 10, 10));
 
 		hasGravity.setOpaque(false);
 		tickRandomly.setOpaque(false);
@@ -1076,6 +1076,11 @@ public class BlockGUI extends ModElementGUI<Block> {
 				L10N.t("elementgui.block.properties_advanced_block"), TitledBorder.LEADING,
 				TitledBorder.DEFAULT_POSITION, getFont(), Theme.current().getForegroundColor()));
 
+		ComponentUtils.deriveFontRecursive(selp, 14);
+		ComponentUtils.deriveFontRecursive(blockItemSettings, 14);
+		ComponentUtils.deriveFontRecursive(soundProperties, 14);
+		ComponentUtils.deriveFontRecursive(advancedWithCondition, 14);
+
 		selp.setOpaque(false);
 		soundProperties.setOpaque(false);
 
@@ -1087,7 +1092,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		pane3.add("Center", PanelUtils.totalCenterInPanel(PanelUtils.westAndEastElement(
 				PanelUtils.pullElementUp(PanelUtils.centerAndSouthElement(selp, blockItemSettings)),
-				PanelUtils.pullElementUp(PanelUtils.centerAndSouthElement(selpWrap, soundProperties)))));
+				PanelUtils.pullElementUp(PanelUtils.centerAndSouthElement(selpWrap, soundProperties)), 40, 0)));
 		pane3.setOpaque(false);
 
 		JPanel events = new JPanel(new GridLayout(4, 4, 5, 5));
@@ -1253,7 +1258,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 		pane10.add(PanelUtils.totalCenterInPanel(
 				PanelUtils.northAndCenterElement(L10N.label("elementgui.block.tile_entity_tip"),
 						PanelUtils.westAndEastElement(energyStorage,
-								PanelUtils.northAndCenterElement(fluidTank, new JEmptyBox())), 10, 10)));
+								PanelUtils.northAndCenterElement(fluidTank, new JEmptyBox(), 40, 0), 10, 10))));
 
 		hasInventory.addActionListener(e -> refreshFieldsTileEntity());
 		refreshFieldsTileEntity();
@@ -1304,7 +1309,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 				L10N.t("elementgui.block.settings_inventory"), 0, 0, getFont().deriveFont(12.0f),
 				Theme.current().getForegroundColor()));
 
-		invblock.add("Center", PanelUtils.westAndEastElement(invpropsall, PanelUtils.pullElementUp(vibrationMerger)));
+		invblock.add("Center", PanelUtils.westAndEastElement(invpropsall, PanelUtils.pullElementUp(vibrationMerger),
+				40, 0));
 
 		invblock.add("North", HelpUtils.wrapWithHelpButton(this.withEntry("block/has_inventory"), hasInventory));
 
@@ -1426,7 +1432,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 		});
 
 		pane7.add(PanelUtils.totalCenterInPanel(PanelUtils.westAndEastElement(advancedWithCondition,
-				PanelUtils.pullElementUp(PanelUtils.column(redstoneMerger, bonemealMerger, flammabilityProperties)))));
+				PanelUtils.pullElementUp(PanelUtils.column(redstoneMerger, bonemealMerger, flammabilityProperties)),
+				40, 0)));
 
 		pane7.setOpaque(false);
 		pane9.setOpaque(false);

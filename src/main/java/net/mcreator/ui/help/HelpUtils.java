@@ -50,6 +50,13 @@ public class HelpUtils {
 	}
 
 	public static JComponent wrapWithHelpButton(IHelpContext context, Component ca, @Nullable Color ac, int direction) {
+		if (ca instanceof JLabel label) {
+			String text = label.getText();
+			if (text != null && text.startsWith("<html>") && text.contains("<br><small>")) {
+				label.setText(text.substring(0, text.indexOf("<br><small>")));
+			}
+		}
+
 		JComponent lab = helpButton(context);
 
 		if (ac != null)

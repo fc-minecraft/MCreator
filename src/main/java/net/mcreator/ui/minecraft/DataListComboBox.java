@@ -36,17 +36,27 @@ import java.util.List;
 
 public class DataListComboBox extends SearchableComboBox<DataListEntry> {
 
+	private final MCreator mcreator;
+
 	public DataListComboBox(MCreator mcreator, List<DataListEntry> list) {
-		super(list.toArray(new DataListEntry[0]));
+		super(list.stream().filter(e -> e.isSupportedInWorkspace(mcreator.getWorkspace()))
+				.toArray(DataListEntry[]::new));
+		this.mcreator = mcreator;
 		init(mcreator);
 	}
 
 	public DataListComboBox(MCreator mcreator) {
+		this.mcreator = mcreator;
 		init(mcreator);
 	}
 
 	private void init(MCreator mcreator) {
 		setRenderer(new CustomRenderer(mcreator));
+	}
+
+	@Override public void addItem(DataListEntry item) {
+		if (item.isSupportedInWorkspace(mcreator.getWorkspace()))
+			super.addItem(item);
 	}
 
 	public void setSelectedItem(String string) {
@@ -110,7 +120,6 @@ public class DataListComboBox extends SearchableComboBox<DataListEntry> {
 				Icon imageIcon = getIcon();
 				if (imageIcon instanceof ImageIcon)
 					setIcon(ImageUtils.changeSaturation((ImageIcon) imageIcon, 0.1f));
-				setText(L10N.t("datalist_combobox.not_supported", getText()));
 				setForeground(Theme.current().getAltForegroundColor());
 			}
 
