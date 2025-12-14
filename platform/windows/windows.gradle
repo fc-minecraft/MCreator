@@ -99,7 +99,6 @@ tasks.register('exportWindows') {
 
     dependsOn exportWindowsZip
 
-    // Add installer only if this is not a snapshot build (and not MacOS that does not support makensis)
     if (!project.snapshot && !Os.isFamily(Os.FAMILY_MAC)) {
         dependsOn buildInstallerWin64
     }
@@ -110,19 +109,4 @@ tasks.register('exportWindows') {
 }
 
 void signFile(File fileToSign) {
-    if (System.getenv('WIN_CERT_KEYSTORE') != null) {
-        execCtx.execOps.exec {
-            commandLine 'java', '-jar', file('platform/windows/lib/jsign-7.1.jar'),
-                    '--storetype', 'GOOGLECLOUD',
-                    '--storepass', System.getenv('WIN_CERT_STOREPASS'),
-                    '--keystore', System.getenv('WIN_CERT_KEYSTORE'),
-                    '--alias', System.getenv('WIN_CERT_KEYNAME'),
-                    '--certfile', 'codesign-chain.pem',
-                    '--tsmode', 'RFC3161',
-                    '--tsaurl', 'http://timestamp.globalsign.com/tsa/r6advanced1',
-                    '--name', 'MCreator',
-                    '--url', 'https://mcreator.net/',
-                    fileToSign
-        }
-    }
 }
