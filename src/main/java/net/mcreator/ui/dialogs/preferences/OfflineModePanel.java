@@ -17,11 +17,12 @@ public class OfflineModePanel extends JPanel {
 
     private final PreferencesDialog dialog;
     private final JLabel statusLabel;
-    private final JLabel progressLabel;
+    private final JLabel cacheSizeLabel;
     private final JButton downloadButton;
     private final JButton deleteButton;
     private final JButton openFolderButton;
     private final JProgressBar progressBar;
+    private final JTextArea logArea;
 
     public OfflineModePanel(PreferencesDialog dialog) {
         this.dialog = dialog;
@@ -29,13 +30,20 @@ public class OfflineModePanel extends JPanel {
         this.setOpaque(false);
 
         statusLabel = new JLabel("Статус: Проверка...");
-        progressLabel = new JLabel(" ");
+        cacheSizeLabel = new JLabel("Размер кэша: Вычисление...");
         downloadButton = new JButton("Загрузить офлайн копию");
         deleteButton = new JButton("Очистить офлайн кэш");
         openFolderButton = new JButton("Открыть папку кэша");
         progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
         progressBar.setVisible(false);
+
+        logArea = new JTextArea(5, 40);
+        logArea.setEditable(false);
+        logArea.setLineWrap(true);
+        logArea.setWrapStyleWord(true);
+        JScrollPane logScrollPane = new JScrollPane(logArea);
+        logScrollPane.setBorder(BorderFactory.createTitledBorder("Лог выполнения"));
 
         // Actions
         downloadButton.addActionListener(this::downloadAction);
@@ -53,11 +61,18 @@ public class OfflineModePanel extends JPanel {
         add(statusLabel, gbc);
 
         gbc.gridy++;
-        add(progressLabel, gbc);
+        add(cacheSizeLabel, gbc);
 
         gbc.gridy++;
         add(progressBar, gbc);
 
+        gbc.gridy++;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        add(logScrollPane, gbc);
+
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridy++;
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttons.setOpaque(false);
@@ -97,12 +112,13 @@ public class OfflineModePanel extends JPanel {
                     boolean ready = result.getValue();
 
                     String sizeStr = org.apache.commons.io.FileUtils.byteCountToDisplaySize(size);
+                    cacheSizeLabel.setText("Размер кэша: " + sizeStr);
 
                     if (ready) {
-                        statusLabel.setText("Статус: Готово (Общий размер кэша: " + sizeStr + ")");
+                        statusLabel.setText("Статус: Готово (Файлы загружены)");
                         statusLabel.setForeground(new Color(0, 150, 0));
                     } else {
-                        statusLabel.setText("Статус: Не загружено (Общий размер кэша: " + sizeStr + ")");
+                        statusLabel.setText("Статус: Не загружено");
                         statusLabel.setForeground(Color.RED);
                     }
                 } catch (Exception e) {
@@ -118,20 +134,19 @@ public class OfflineModePanel extends JPanel {
         deleteButton.setEnabled(false);
         progressBar.setVisible(true);
         statusLabel.setText("Статус: Инициализация...");
-        statusLabel.setForeground(Color.BLACK); // Standard color
+        statusLabel.setForeground(Color.BLACK);
+        logArea.setText(""); // Clear log
 
         OfflineCacheManager.downloadOfflineFiles(
             (status) -> SwingUtilities.invokeLater(() -> {
-                progressLabel.setText(status);
-                // Simple indeterminate unless we parse status
-                progressBar.setIndeterminate(true);
+                logArea.append(status + "\n");
+                logArea.setCaretPosition(logArea.getDocument().getLength());
             }),
             () -> { // Success
                 updateStatus();
                 downloadButton.setEnabled(true);
                 deleteButton.setEnabled(true);
                 progressBar.setVisible(false);
-                progressLabel.setText("Загрузка завершена.");
                 JOptionPane.showMessageDialog(dialog, "Файлы для офлайн режима успешно загружены!");
             },
             () -> { // Error
@@ -141,7 +156,7 @@ public class OfflineModePanel extends JPanel {
                 progressBar.setVisible(false);
                 statusLabel.setText("Статус: Ошибка загрузки");
                 statusLabel.setForeground(Color.RED);
-                JOptionPane.showMessageDialog(dialog, "Не удалось загрузить файлы. Проверьте логи.");
+                JOptionPane.showMessageDialog(dialog, "Не удалось загрузить файлы. Проверьте лог.");
             }
         );
     }
@@ -156,6 +171,7 @@ public class OfflineModePanel extends JPanel {
         if (confirm == JOptionPane.YES_OPTION) {
             OfflineCacheManager.deleteOfflineCache();
             updateStatus();
+            logArea.setText("Кэш очищен.\n");
             JOptionPane.showMessageDialog(dialog, "Кэш очищен.");
         }
     }
