@@ -195,12 +195,19 @@ public class OfflineCacheManager {
         File mcreatorGradle = new File(workspaceDir, "mcreator.gradle");
 
         // Inject repositories into mcreator.gradle
-        String repos = "repositories {\n" +
+        String repos = "\nrepositories {\n" +
                        "    maven { url 'https://maven.fabricmc.net/' }\n" +
                        "    mavenCentral()\n" +
                        "    maven { url 'https://libraries.minecraft.net/' }\n" +
                        "}\n";
-        FileIO.writeStringToFile(repos, mcreatorGradle);
+
+        if (mcreatorGradle.exists()) {
+            String content = FileIO.readFileToString(mcreatorGradle);
+            content += repos;
+            FileIO.writeStringToFile(content, mcreatorGradle);
+        } else {
+            FileIO.writeStringToFile(repos, mcreatorGradle);
+        }
 
         // Versions for 1.21.4
         String mcVersion = "1.21.4";
