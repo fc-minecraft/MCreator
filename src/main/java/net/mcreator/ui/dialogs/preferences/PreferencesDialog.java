@@ -158,6 +158,8 @@ public class PreferencesDialog extends MCreatorDialog {
 
 		new ThemesPanel(this);
 
+		new OfflineModePanel(this);
+
 		addEditTemplatesPanel("ui_backgrounds", "backgrounds", "png");
 		addEditTemplatesPanel("texture_templates", "templates/textures/texturemaker", "png");
 		addEditTemplatesPanel("armor_templates", "templates/textures/armormaker", "png");
