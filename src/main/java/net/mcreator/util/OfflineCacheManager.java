@@ -9,19 +9,17 @@ import org.apache.logging.log4j.Logger;
 import org.gradle.tooling.BuildLauncher;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
+import org.gradle.tooling.events.OperationType;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -30,10 +28,8 @@ public class OfflineCacheManager {
 
     private static final Logger LOG = LogManager.getLogger(OfflineCacheManager.class);
 
-    // Marker file to indicate successful offline setup for the specific template
     private static final String MARKER_FILE_NAME = "offline_fabric_1.21.8_ready.marker";
 
-    // Use MCreator's default Gradle User Home location
     public static File getOfflineCacheDir() {
         return new File(System.getProperty("user.home"), ".mcreator/gradle");
     }
@@ -59,28 +55,21 @@ public class OfflineCacheManager {
         }
     }
 
-    /**
-     * Downloads offline files by running a dummy Gradle build using the template.
-     */
-    public static void downloadOfflineFiles(Runnable onComplete, Runnable onError) {
+    public static void downloadOfflineFiles(Consumer<String> statusCallback, Runnable onComplete, Runnable onError) {
         new Thread(() -> {
             File tempDir = null;
             try {
                 LOG.info("Starting offline cache download...");
+                statusCallback.accept("Подготовка рабочего пространства...");
 
-                // 1. Setup a temporary workspace
                 tempDir = Files.createTempDirectory("offline_setup").toFile();
 
-                // Find a suitable plugin (Fabric generator)
                 Optional<Plugin> pluginOpt = PluginLoader.INSTANCE.getPlugins().stream()
                         .filter(p -> p.getID().contains("fabric"))
                         .max(Plugin::compareTo);
 
                 if (pluginOpt.isEmpty()) {
-                     String availablePlugins = PluginLoader.INSTANCE.getPlugins().stream()
-                         .map(Plugin::getID)
-                         .collect(Collectors.joining(", "));
-                     LOG.error("No Fabric generator plugin found. Available: " + availablePlugins);
+                     LOG.error("No Fabric generator plugin found.");
                      throw new RuntimeException("No Fabric generator plugin found.");
                 }
 
@@ -88,10 +77,11 @@ public class OfflineCacheManager {
                 File pluginFile = plugin.getFile();
                 String pluginId = plugin.getID();
                 LOG.info("Using plugin for offline template: " + pluginId);
+                statusCallback.accept("Извлечение шаблона из " + pluginId + "...");
 
                 boolean extracted = false;
 
-                // Extraction Logic (Directory or ZIP)
+                // Extraction Logic
                 if (pluginFile.isDirectory()) {
                      File[] files = pluginFile.listFiles();
                      if (files != null) {
@@ -106,18 +96,6 @@ public class OfflineCacheManager {
                      if (!extracted && new File(pluginFile, "workspacebase").exists()) {
                          FileIO.copyDirectory(new File(pluginFile, "workspacebase"), tempDir);
                          extracted = true;
-                     }
-                     if (!extracted && files != null) {
-                        for (File f : files) {
-                             if (f.isDirectory()) {
-                                 File subWorkspace = new File(f, "workspacebase");
-                                 if (subWorkspace.exists()) {
-                                     FileIO.copyDirectory(subWorkspace, tempDir);
-                                     extracted = true;
-                                     break;
-                                 }
-                             }
-                        }
                      }
                 }
 
@@ -134,7 +112,6 @@ public class OfflineCacheManager {
                         }
 
                         if (workspaceBasePath != null) {
-                            LOG.info("Found workspacebase at: " + workspaceBasePath);
                             entries = zip.entries();
                             while (entries.hasMoreElements()) {
                                 ZipEntry entry = entries.nextElement();
@@ -173,10 +150,11 @@ public class OfflineCacheManager {
                      }
                 }
 
-                // Preprocess build files to fix templates variables
-                preprocessBuildFiles(tempDir, pluginFile);
+                statusCallback.accept("Настройка файлов сборки...");
+                preprocessBuildFiles(tempDir);
 
-                // 2. Run Gradle
+                statusCallback.accept("Запуск Gradle...");
+
                 GradleConnector connector = GradleConnector.newConnector();
                 connector.forProjectDirectory(tempDir);
                 connector.useGradleUserHomeDir(getOfflineCacheDir());
@@ -185,15 +163,20 @@ public class OfflineCacheManager {
                     BuildLauncher launcher = connection.newBuild();
                     launcher.forTasks("dependencies", "eclipse");
                     launcher.addJvmArguments("-Xmx2G");
+
+                    launcher.addProgressListener(event -> {
+                        statusCallback.accept(event.getDescriptor().getName());
+                    }, OperationType.TASK);
+
                     launcher.run();
                 }
 
-                // Create Marker File
                 File marker = new File(getOfflineCacheDir(), MARKER_FILE_NAME);
                 if (!marker.getParentFile().exists()) marker.getParentFile().mkdirs();
                 marker.createNewFile();
 
                 LOG.info("Offline cache download complete.");
+                statusCallback.accept("Готово!");
                 SwingUtilities.invokeLater(onComplete);
 
             } catch (Exception e) {
@@ -207,39 +190,34 @@ public class OfflineCacheManager {
         }).start();
     }
 
-    private static void preprocessBuildFiles(File workspaceDir, File pluginFile) {
+    private static void preprocessBuildFiles(File workspaceDir) {
         File buildGradle = new File(workspaceDir, "build.gradle");
         File mcreatorGradle = new File(workspaceDir, "mcreator.gradle");
 
-        // Ensure mcreator.gradle exists
-        if (!mcreatorGradle.exists()) {
-            try {
-                mcreatorGradle.createNewFile();
-            } catch (IOException e) {
-                LOG.error("Failed to create mcreator.gradle", e);
-            }
-        }
+        // Inject repositories into mcreator.gradle
+        String repos = "repositories {\n" +
+                       "    maven { url 'https://maven.fabricmc.net/' }\n" +
+                       "    mavenCentral()\n" +
+                       "    maven { url 'https://libraries.minecraft.net/' }\n" +
+                       "}\n";
+        FileIO.writeStringToFile(repos, mcreatorGradle);
 
-        // Try to read generator.yaml to get versions
-        String mcVersion = "1.21.4"; // Default fallback
-        String buildFileVersion = "0.133.4"; // Default fallback
-
-        // Attempt to parse generator.yaml from plugin (if possible)
-        // Simplified: we stick to defaults for 1.21.8 which is the target.
+        // Versions for 1.21.4
+        String mcVersion = "1.21.4";
+        String buildFileVersion = "0.115.0"; // Known stable for 1.21.4
 
         if (buildGradle.exists()) {
             String content = FileIO.readFileToString(buildGradle);
 
-            // Replace modid
             content = content.replace("${modid}", "offline");
 
-            // Replace generator calls
+            // Replace generator calls with hardcoded known working versions
             content = content.replace("${generator.getGeneratorMinecraftVersion()}", mcVersion);
             content = content.replace("${generator.getGeneratorBuildFileVersion()}", buildFileVersion);
 
-            // Replace direct property access if any (e.g. generator.get...) without ${}
-            content = content.replace("generator.getGeneratorMinecraftVersion()", "'" + mcVersion + "'");
-            content = content.replace("generator.getGeneratorBuildFileVersion()", "'" + buildFileVersion + "'");
+            // Regex for cases without ${} if any
+            content = content.replaceAll("generator\\.getGeneratorMinecraftVersion\\(\\)", "'" + mcVersion + "'");
+            content = content.replaceAll("generator\\.getGeneratorBuildFileVersion\\(\\)", "'" + buildFileVersion + "'");
 
             FileIO.writeStringToFile(content, buildGradle);
         }
