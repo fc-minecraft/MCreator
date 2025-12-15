@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -67,13 +68,16 @@ public class OfflineCacheManager {
                 tempDir = Files.createTempDirectory("offline_setup").toFile();
 
                 // Find a suitable plugin (Fabric generator)
-                // We look for mcreator-fabric-1.21.* or similar, picking the latest
+                // We look for any plugin containing "fabric" in ID
                 Optional<Plugin> pluginOpt = PluginLoader.INSTANCE.getPlugins().stream()
-                        .filter(p -> p.getID().startsWith("mcreator-fabric-"))
+                        .filter(p -> p.getID().contains("fabric"))
                         .max(Plugin::compareTo); // Get the latest one
 
                 if (pluginOpt.isEmpty()) {
-                     LOG.error("No Fabric generator plugin found.");
+                     String availablePlugins = PluginLoader.INSTANCE.getPlugins().stream()
+                         .map(Plugin::getID)
+                         .collect(Collectors.joining(", "));
+                     LOG.error("No Fabric generator plugin found. Available: " + availablePlugins);
                      throw new RuntimeException("No Fabric generator plugin found.");
                 }
 
@@ -103,6 +107,20 @@ public class OfflineCacheManager {
                              FileIO.copyDirectory(new File(pluginFile, "workspacebase"), tempDir);
                              extracted = true;
                          }
+                     }
+
+                     // Also check for nested structure like "fabric-1.21.8/workspacebase" even if parent is not matching exact name
+                     if (!extracted && files != null) {
+                        for (File f : files) {
+                             if (f.isDirectory()) {
+                                 File subWorkspace = new File(f, "workspacebase");
+                                 if (subWorkspace.exists()) {
+                                     FileIO.copyDirectory(subWorkspace, tempDir);
+                                     extracted = true;
+                                     break;
+                                 }
+                             }
+                        }
                      }
                 }
 
@@ -147,6 +165,17 @@ public class OfflineCacheManager {
                             }
                         }
                     }
+                }
+
+                if (!extracted) {
+                     // Last resort: maybe it's the target user mentioned
+                     if (pluginId.equals("generator-fabric-1.21.8") && pluginFile.isDirectory()) {
+                          File t = new File(pluginFile, "fabric-1.21.8/workspacebase");
+                          if (t.exists()) {
+                              FileIO.copyDirectory(t, tempDir);
+                              extracted = true;
+                          }
+                     }
                 }
 
                 if (!extracted) {
