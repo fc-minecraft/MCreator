@@ -84,10 +84,6 @@ public class OfflineModePanel extends JPanel {
                     long size = result.getKey();
                     boolean ready = result.getValue();
 
-                    if (size > 10 * 1024 * 1024) {
-                        ready = true;
-                    }
-
                     String sizeStr = org.apache.commons.io.FileUtils.byteCountToDisplaySize(size);
 
                     if (ready) {
@@ -95,7 +91,7 @@ public class OfflineModePanel extends JPanel {
                         statusLabel.setForeground(new Color(0, 150, 0));
                     } else {
                         if (size > 0) {
-                             statusLabel.setText("Статус: Частично/Отсутствует (Размер: " + sizeStr + ")");
+                             statusLabel.setText("Статус: Не завершено (Размер: " + sizeStr + ")");
                              statusLabel.setForeground(Color.ORANGE);
                         } else {
                             statusLabel.setText("Статус: Не загружено");

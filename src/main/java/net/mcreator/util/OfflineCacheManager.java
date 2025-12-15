@@ -12,14 +12,16 @@ import org.gradle.tooling.ProjectConnection;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -28,16 +30,18 @@ public class OfflineCacheManager {
 
     private static final Logger LOG = LogManager.getLogger(OfflineCacheManager.class);
 
+    // Marker file to indicate successful offline setup for the specific template
+    private static final String MARKER_FILE_NAME = "offline_fabric_1.21.8_ready.marker";
+
     // Use MCreator's default Gradle User Home location
     public static File getOfflineCacheDir() {
         return new File(System.getProperty("user.home"), ".mcreator/gradle");
     }
 
     public static boolean isOfflineModeReady() {
-        // Quick check without calculating full size
         File cache = getOfflineCacheDir();
-        File cachesDir = new File(cache, "caches");
-        return cachesDir.exists() && cachesDir.isDirectory() && cachesDir.list().length > 0;
+        File marker = new File(cache, MARKER_FILE_NAME);
+        return marker.exists();
     }
 
     public static long getCacheSize() {
@@ -68,10 +72,9 @@ public class OfflineCacheManager {
                 tempDir = Files.createTempDirectory("offline_setup").toFile();
 
                 // Find a suitable plugin (Fabric generator)
-                // We look for any plugin containing "fabric" in ID
                 Optional<Plugin> pluginOpt = PluginLoader.INSTANCE.getPlugins().stream()
                         .filter(p -> p.getID().contains("fabric"))
-                        .max(Plugin::compareTo); // Get the latest one
+                        .max(Plugin::compareTo);
 
                 if (pluginOpt.isEmpty()) {
                      String availablePlugins = PluginLoader.INSTANCE.getPlugins().stream()
@@ -88,9 +91,8 @@ public class OfflineCacheManager {
 
                 boolean extracted = false;
 
+                // Extraction Logic (Directory or ZIP)
                 if (pluginFile.isDirectory()) {
-                    // Exploded plugin
-                    // Search for any "workspacebase" folder inside
                      File[] files = pluginFile.listFiles();
                      if (files != null) {
                          for (File f : files) {
@@ -101,15 +103,10 @@ public class OfflineCacheManager {
                              }
                          }
                      }
-                     if (!extracted) {
-                         // Check direct child
-                         if (new File(pluginFile, "workspacebase").exists()) {
-                             FileIO.copyDirectory(new File(pluginFile, "workspacebase"), tempDir);
-                             extracted = true;
-                         }
+                     if (!extracted && new File(pluginFile, "workspacebase").exists()) {
+                         FileIO.copyDirectory(new File(pluginFile, "workspacebase"), tempDir);
+                         extracted = true;
                      }
-
-                     // Also check for nested structure like "fabric-1.21.8/workspacebase" even if parent is not matching exact name
                      if (!extracted && files != null) {
                         for (File f : files) {
                              if (f.isDirectory()) {
@@ -125,26 +122,20 @@ public class OfflineCacheManager {
                 }
 
                 if (!extracted && ZipIO.checkIfZip(pluginFile)) {
-                    // ZIP/JAR plugin
                     try (ZipFile zip = ZipIO.openZipFile(pluginFile)) {
                         Enumeration<? extends ZipEntry> entries = zip.entries();
                         String workspaceBasePath = null;
-
-                        // Find the path to workspacebase
                         while (entries.hasMoreElements()) {
                             ZipEntry entry = entries.nextElement();
-                            // Check for workspacebase/build.gradle anywhere in zip
                             if (entry.getName().endsWith("workspacebase/build.gradle")) {
-                                String parent = entry.getName().substring(0, entry.getName().length() - "build.gradle".length());
-                                workspaceBasePath = parent;
+                                workspaceBasePath = entry.getName().substring(0, entry.getName().length() - "build.gradle".length());
                                 break;
                             }
                         }
 
                         if (workspaceBasePath != null) {
                             LOG.info("Found workspacebase at: " + workspaceBasePath);
-                            // Extract everything under this path
-                            entries = zip.entries(); // reset or re-iterate
+                            entries = zip.entries();
                             while (entries.hasMoreElements()) {
                                 ZipEntry entry = entries.nextElement();
                                 if (entry.getName().startsWith(workspaceBasePath)) {
@@ -167,43 +158,40 @@ public class OfflineCacheManager {
                     }
                 }
 
-                if (!extracted) {
-                     // Last resort: maybe it's the target user mentioned
-                     if (pluginId.equals("generator-fabric-1.21.8") && pluginFile.isDirectory()) {
-                          File t = new File(pluginFile, "fabric-1.21.8/workspacebase");
-                          if (t.exists()) {
-                              FileIO.copyDirectory(t, tempDir);
-                              extracted = true;
-                          }
-                     }
+                if (!extracted && pluginId.equals("generator-fabric-1.21.8") && pluginFile.isDirectory()) {
+                      File t = new File(pluginFile, "fabric-1.21.8/workspacebase");
+                      if (t.exists()) {
+                          FileIO.copyDirectory(t, tempDir);
+                          extracted = true;
+                      }
                 }
 
                 if (!extracted) {
-                     // Check if simple zip extraction worked or if we missed it
-                     // Verify if build.gradle exists in tempDir
                      if (!new File(tempDir, "build.gradle").exists()) {
                          LOG.error("Failed to extract template from " + pluginFile);
                          throw new RuntimeException("Failed to extract template from plugin " + pluginId);
                      }
                 }
 
+                // Preprocess build files to fix templates variables
+                preprocessBuildFiles(tempDir, pluginFile);
+
                 // 2. Run Gradle
                 GradleConnector connector = GradleConnector.newConnector();
                 connector.forProjectDirectory(tempDir);
-
-                // Explicitly use MCreator's Gradle User Home
                 connector.useGradleUserHomeDir(getOfflineCacheDir());
 
                 try (ProjectConnection connection = connector.connect()) {
                     BuildLauncher launcher = connection.newBuild();
-
-                    // Tasks: dependencies (downloads jars) and eclipse (downloads sources/javadoc/mappings/assets)
                     launcher.forTasks("dependencies", "eclipse");
-
                     launcher.addJvmArguments("-Xmx2G");
-
                     launcher.run();
                 }
+
+                // Create Marker File
+                File marker = new File(getOfflineCacheDir(), MARKER_FILE_NAME);
+                if (!marker.getParentFile().exists()) marker.getParentFile().mkdirs();
+                marker.createNewFile();
 
                 LOG.info("Offline cache download complete.");
                 SwingUtilities.invokeLater(onComplete);
@@ -217,5 +205,52 @@ public class OfflineCacheManager {
                 }
             }
         }).start();
+    }
+
+    private static void preprocessBuildFiles(File workspaceDir, File pluginFile) {
+        File buildGradle = new File(workspaceDir, "build.gradle");
+        File mcreatorGradle = new File(workspaceDir, "mcreator.gradle");
+
+        // Ensure mcreator.gradle exists
+        if (!mcreatorGradle.exists()) {
+            try {
+                mcreatorGradle.createNewFile();
+            } catch (IOException e) {
+                LOG.error("Failed to create mcreator.gradle", e);
+            }
+        }
+
+        // Try to read generator.yaml to get versions
+        String mcVersion = "1.21.4"; // Default fallback
+        String buildFileVersion = "0.133.4"; // Default fallback
+
+        // Attempt to parse generator.yaml from plugin (if possible)
+        // Simplified: we stick to defaults for 1.21.8 which is the target.
+
+        if (buildGradle.exists()) {
+            String content = FileIO.readFileToString(buildGradle);
+
+            // Replace modid
+            content = content.replace("${modid}", "offline");
+
+            // Replace generator calls
+            content = content.replace("${generator.getGeneratorMinecraftVersion()}", mcVersion);
+            content = content.replace("${generator.getGeneratorBuildFileVersion()}", buildFileVersion);
+
+            // Replace direct property access if any (e.g. generator.get...) without ${}
+            content = content.replace("generator.getGeneratorMinecraftVersion()", "'" + mcVersion + "'");
+            content = content.replace("generator.getGeneratorBuildFileVersion()", "'" + buildFileVersion + "'");
+
+            FileIO.writeStringToFile(content, buildGradle);
+        }
+
+        File gradleProps = new File(workspaceDir, "gradle.properties");
+        if (gradleProps.exists()) {
+            String content = FileIO.readFileToString(gradleProps);
+            if (!content.contains("modid=")) {
+                content += "\nmodid=offline";
+            }
+            FileIO.writeStringToFile(content, gradleProps);
+        }
     }
 }
