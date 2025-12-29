@@ -30,6 +30,10 @@ public class OfflineCacheManager {
 
     private static final String MARKER_FILE_NAME = "offline_fabric_1.21.8_ready.marker";
 
+    // Versions for 1.21.4 (Cached target)
+    private static final String CACHED_MC_VERSION = "1.21.4";
+    private static final String CACHED_BUILD_FILE_VERSION = "0.115.0";
+
     public static File getOfflineCacheDir() {
         return new File(System.getProperty("user.home"), ".mcreator/gradle");
     }
@@ -161,7 +165,8 @@ public class OfflineCacheManager {
 
                 try (ProjectConnection connection = connector.connect()) {
                     BuildLauncher launcher = connection.newBuild();
-                    launcher.forTasks("dependencies", "eclipse");
+                    // Added loom:downloadAssets and other tasks to ensure full cache population
+                    launcher.forTasks("dependencies", "eclipse", "loom:downloadAssets", "genEclipseRuns");
                     launcher.addJvmArguments("-Xmx2G");
 
                     launcher.addProgressListener(event -> {
@@ -209,22 +214,18 @@ public class OfflineCacheManager {
             FileIO.writeStringToFile(repos, mcreatorGradle);
         }
 
-        // Versions for 1.21.4
-        String mcVersion = "1.21.4";
-        String buildFileVersion = "0.115.0"; // Known stable for 1.21.4
-
         if (buildGradle.exists()) {
             String content = FileIO.readFileToString(buildGradle);
 
             content = content.replace("${modid}", "offline");
 
             // Replace generator calls with hardcoded known working versions
-            content = content.replace("${generator.getGeneratorMinecraftVersion()}", mcVersion);
-            content = content.replace("${generator.getGeneratorBuildFileVersion()}", buildFileVersion);
+            content = content.replace("${generator.getGeneratorMinecraftVersion()}", CACHED_MC_VERSION);
+            content = content.replace("${generator.getGeneratorBuildFileVersion()}", CACHED_BUILD_FILE_VERSION);
 
             // Regex for cases without ${} if any
-            content = content.replaceAll("generator\\.getGeneratorMinecraftVersion\\(\\)", "'" + mcVersion + "'");
-            content = content.replaceAll("generator\\.getGeneratorBuildFileVersion\\(\\)", "'" + buildFileVersion + "'");
+            content = content.replaceAll("generator\\.getGeneratorMinecraftVersion\\(\\)", "'" + CACHED_MC_VERSION + "'");
+            content = content.replaceAll("generator\\.getGeneratorBuildFileVersion\\(\\)", "'" + CACHED_BUILD_FILE_VERSION + "'");
 
             FileIO.writeStringToFile(content, buildGradle);
         }
@@ -236,6 +237,63 @@ public class OfflineCacheManager {
                 content += "\nmodid=offline";
             }
             FileIO.writeStringToFile(content, gradleProps);
+        }
+    }
+
+    /**
+     * Applies offline mode fixes to an existing workspace.
+     * Use this when creating a new project in offline mode to ensure it matches the cached versions.
+     */
+    public static void applyOfflineFixes(File workspaceDir) {
+        LOG.info("Applying offline mode fixes to workspace: " + workspaceDir);
+
+        File mcreatorGradle = new File(workspaceDir, "mcreator.gradle");
+        if (mcreatorGradle.exists()) {
+             String content = FileIO.readFileToString(mcreatorGradle);
+             if (!content.contains("maven { url 'https://maven.fabricmc.net/' }")) {
+                 String repos = "\nrepositories {\n" +
+                                "    maven { url 'https://maven.fabricmc.net/' }\n" +
+                                "    mavenCentral()\n" +
+                                "    maven { url 'https://libraries.minecraft.net/' }\n" +
+                                "}\n";
+                 content += repos;
+                 FileIO.writeStringToFile(content, mcreatorGradle);
+             }
+        }
+
+        File buildGradle = new File(workspaceDir, "build.gradle");
+        if (buildGradle.exists()) {
+            String content = FileIO.readFileToString(buildGradle);
+
+            // Force replace versions that might have been set by generator to unsupported versions
+            // This regex looks for 'minecraft { ... version = "..." ... }' or just 'version = "..."' inside the block ideally,
+            // but in build.gradle usually it is 'version = "..."' inside dependencies or minecraft block.
+            // Fabric Loom usually: minecraft "com.mojang:minecraft:${project.minecraft_version}"
+            // Or in gradle.properties: minecraft_version=...
+
+            // NOTE: MCreator Fabric generator often puts version in gradle.properties or directly in build.gradle.
+
+            // Let's handle gradle.properties first
+            File gradleProps = new File(workspaceDir, "gradle.properties");
+            if (gradleProps.exists()) {
+                String props = FileIO.readFileToString(gradleProps);
+                props = props.replaceAll("minecraft_version=.*", "minecraft_version=" + CACHED_MC_VERSION);
+                props = props.replaceAll("yarn_mappings=.*", "yarn_mappings=" + CACHED_MC_VERSION + "+build.1"); // Best guess for mappings
+                props = props.replaceAll("loader_version=.*", "loader_version=" + "0.15.11"); // Common stable loader
+                props = props.replaceAll("fabric_version=.*", "fabric_version=" + CACHED_BUILD_FILE_VERSION); // API version
+                FileIO.writeStringToFile(props, gradleProps);
+            }
+
+            // If the version is directly in build.gradle (common in some templates)
+            // Look for: minecraft "com.mojang:minecraft:1.21.8" or similar
+            content = content.replaceAll("com\\.mojang:minecraft:[0-9\\.]+", "com.mojang:minecraft:" + CACHED_MC_VERSION);
+            content = content.replaceAll("net\\.fabricmc:fabric-loader:[0-9\\.]+", "net.fabricmc:fabric-loader:0.15.11");
+
+            // Also replace mappings if they are hardcoded
+            // mappings "net.fabricmc:yarn:..."
+            content = content.replaceAll("net\\.fabricmc:yarn:[0-9\\.+]+:v2", "net.fabricmc:yarn:" + CACHED_MC_VERSION + "+build.1:v2");
+
+            FileIO.writeStringToFile(content, buildGradle);
         }
     }
 }

@@ -42,6 +42,8 @@ import net.mcreator.java.ProjectJarManager;
 import net.mcreator.workspace.Workspace;
 import net.mcreator.workspace.elements.ModElement;
 import net.mcreator.workspace.resources.ExternalTexture;
+import net.mcreator.preferences.PreferencesManager;
+import net.mcreator.util.OfflineCacheManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gradle.tooling.GradleConnector;
@@ -197,6 +199,10 @@ public class Generator implements IGenerator, Closeable {
 
 		// generate tags files
 		TagsUtils.generateTagsFiles(this, workspace, generatorConfiguration.getTagsSpecification());
+
+		if (PreferencesManager.PREFERENCES.gradle.offline.get() && OfflineCacheManager.isOfflineModeReady()) {
+			OfflineCacheManager.applyOfflineFixes(workspace.getWorkspaceFolder());
+		}
 
 		return success.get();
 	}
