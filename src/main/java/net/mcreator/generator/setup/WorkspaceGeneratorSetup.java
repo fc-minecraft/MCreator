@@ -27,7 +27,9 @@ import net.mcreator.generator.setup.folders.AbstractFolderStructure;
 import net.mcreator.generator.template.InlineTemplatesHandler;
 import net.mcreator.io.FileIO;
 import net.mcreator.plugin.PluginLoader;
+import net.mcreator.preferences.PreferencesManager;
 import net.mcreator.ui.workspace.resources.TextureType;
+import net.mcreator.util.OfflineCacheManager;
 import net.mcreator.util.TestUtil;
 import net.mcreator.workspace.Workspace;
 import org.apache.commons.io.FileUtils;
@@ -134,6 +136,10 @@ public class WorkspaceGeneratorSetup {
 	}
 
 	public static void setupWorkspaceBase(Workspace workspace) {
+		if (PreferencesManager.PREFERENCES.gradle.offline.get() && OfflineCacheManager.isOfflineModeReady()) {
+			OfflineCacheManager.applyOfflineFixes(workspace.getWorkspaceFolder());
+		}
+
 		Set<String> fileNames = PluginLoader.INSTANCE.getResourcesInPackage(
 				workspace.getGenerator().getGeneratorName() + ".workspacebase");
 		for (String file : fileNames) {
