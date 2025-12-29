@@ -187,20 +187,42 @@ public class Generator implements IGenerator, Closeable {
 		// generate files as old files were deleted
 		generateFiles(generatorFiles, formatAndOrganiseImports);
 
-		// HOTFIX: Inject java.util.Collection if ConcurrentLinkedQueue is used but import is missing
-		// This handles cases where templates are missing imports (e.g. offline mode restrictions or broken templates)
+		// HOTFIX: Inject missing imports for offline mode / unstable templates
+		// This handles cases where templates are missing imports (ConcurrentLinkedQueue, Arrays, List, etc.)
 		for (GeneratorFile gf : generatorFiles) {
-			if (gf.writer() == GeneratorFile.Writer.JAVA && gf.getFile().getName().endsWith("Mod.java")) {
+			if (gf.writer() == GeneratorFile.Writer.JAVA) {
 				File f = gf.getFile();
 				if (f.exists()) {
 					String content = FileIO.readFileToString(f);
+					boolean changed = false;
+
+					// Fix ConcurrentLinkedQueue -> Collection import
 					if (content.contains("ConcurrentLinkedQueue") && !content.contains("import java.util.Collection;")) {
-						content = content.replace("import java.util.concurrent.ConcurrentLinkedQueue;",
-								"import java.util.Collection;\nimport java.util.concurrent.ConcurrentLinkedQueue;");
-						if (!content.contains("import java.util.Collection;")) { // Fallback if replacement didn't match exactly
-							// Insert after package declaration to avoid syntax error
-							content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\n\nimport java.util.Collection;");
-						}
+						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.util.Collection;");
+						changed = true;
+					}
+
+					// Fix Arrays.stream -> java.util.Arrays import
+					if (content.contains("Arrays.stream") && !content.contains("import java.util.Arrays;")) {
+						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.util.Arrays;");
+						changed = true;
+					}
+
+					// Fix List/ArrayList -> java.util.List/ArrayList import
+					if ((content.contains("List<") || content.contains("ArrayList")) && !content.contains("import java.util.List;")) {
+						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.util.List;");
+						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.util.ArrayList;");
+						changed = true;
+					}
+
+					// Fix MethodHandles/MethodType -> java.lang.invoke.*
+					if ((content.contains("MethodHandles") || content.contains("MethodType")) && !content.contains("import java.lang.invoke.MethodHandles;")) {
+						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.lang.invoke.MethodHandles;");
+						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.lang.invoke.MethodType;");
+						changed = true;
+					}
+
+					if (changed) {
 						FileIO.writeStringToFile(content, f);
 					}
 				}

@@ -37,7 +37,7 @@ public class OfflineCacheManager {
 
     // Fallback Versions (used if detection fails)
     private static final String FALLBACK_MC_VERSION = "1.21.8";
-    private static final String FALLBACK_BUILD_FILE_VERSION = "0.133.4"; // Updated fallback
+    private static final String FALLBACK_BUILD_FILE_VERSION = "0.133.4";
 
     public static File getOfflineCacheDir() {
         return new File(System.getProperty("user.home"), ".mcreator/gradle");
@@ -100,7 +100,6 @@ public class OfflineCacheManager {
                     Properties p = new Properties();
                     p.setProperty("minecraft_version", mcVersion);
                     p.setProperty("build_file_version", buildFileVersion);
-                    // Also try to capture loader version if possible, but for now defaults
                     p.store(Files.newBufferedWriter(versionsFile.toPath()), "Offline Mode Versions");
                 } catch (Exception ex) {
                     LOG.warn("Failed to save versions file", ex);
@@ -212,6 +211,23 @@ public class OfflineCacheManager {
                             Thread.sleep(2000);
                         }
                     }
+                }
+
+                // Cache IDE files (Eclipse .project, .classpath, .settings) to speed up new project creation
+                try {
+                    File cachedProjectFiles = new File(getOfflineCacheDir(), "cached_project_files");
+                    if (!cachedProjectFiles.exists()) cachedProjectFiles.mkdirs();
+
+                    File dotProject = new File(tempDir, ".project");
+                    File dotClasspath = new File(tempDir, ".classpath");
+                    File dotSettings = new File(tempDir, ".settings");
+
+                    if (dotProject.exists()) FileIO.copyFile(dotProject, new File(cachedProjectFiles, ".project"));
+                    if (dotClasspath.exists()) FileIO.copyFile(dotClasspath, new File(cachedProjectFiles, ".classpath"));
+                    if (dotSettings.exists()) FileIO.copyDirectory(dotSettings, new File(cachedProjectFiles, ".settings"));
+                    LOG.info("Cached Eclipse project files for offline acceleration.");
+                } catch (Exception e) {
+                    LOG.warn("Failed to cache Eclipse project files", e);
                 }
 
                 File marker = new File(getOfflineCacheDir(), MARKER_FILE_NAME);
@@ -406,6 +422,23 @@ public class OfflineCacheManager {
             content = content.replaceAll("net\\.fabricmc:yarn:[0-9\\.+]+:v2", "net.fabricmc:yarn:" + mcVersion + "+build.1:v2");
 
             FileIO.writeStringToFile(content, buildGradle);
+        }
+
+        // Restore cached Eclipse files if available to skip initial sync
+        File cachedProjectFiles = new File(getOfflineCacheDir(), "cached_project_files");
+        if (cachedProjectFiles.exists()) {
+            LOG.info("Restoring cached Eclipse files to accelerate workspace setup...");
+            try {
+                File dotProject = new File(cachedProjectFiles, ".project");
+                File dotClasspath = new File(cachedProjectFiles, ".classpath");
+                File dotSettings = new File(cachedProjectFiles, ".settings");
+
+                if (dotProject.exists()) FileIO.copyFile(dotProject, new File(workspaceDir, ".project"));
+                if (dotClasspath.exists()) FileIO.copyFile(dotClasspath, new File(workspaceDir, ".classpath"));
+                if (dotSettings.exists()) FileIO.copyDirectory(dotSettings, new File(workspaceDir, ".settings"));
+            } catch (Exception e) {
+                LOG.warn("Failed to restore cached Eclipse files", e);
+            }
         }
     }
 }
