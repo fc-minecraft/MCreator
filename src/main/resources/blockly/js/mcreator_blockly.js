@@ -37,7 +37,19 @@ workspace.addChangeListener(function (event) {
 
 window.addEventListener('resize', function () {
     Blockly.svgResize(workspace);
+    setTimeout(function() {
+        Blockly.svgResize(workspace);
+    }, 200);
 });
+
+let lastPixelRatio = window.devicePixelRatio;
+setInterval(function() {
+    if (window.devicePixelRatio !== lastPixelRatio) {
+        lastPixelRatio = window.devicePixelRatio;
+        Blockly.svgResize(workspace);
+    }
+}, 1000);
+
 Blockly.svgResize(workspace);
 
 // disable help entry

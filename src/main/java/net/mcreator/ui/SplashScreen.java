@@ -46,8 +46,8 @@ public class SplashScreen extends JWindow {
 
 		imagePanel.setLayout(null);
 
-		JLabel pylo = new JLabel(UIRES.SVG.getBuiltIn("pylo", 86, 50));
-		pylo.setBounds(shadowPadding + 550 - 15 - 10, shadowPadding + 320 - 15 - 10, 86, 50);
+		JLabel pylo = new JLabel(UIRES.SVG.getBuiltIn("pylo", 90, 24));
+		pylo.setBounds(shadowPadding + 540 - 15 - 10, shadowPadding + 348 - 15 - 10, 90, 24);
 		imagePanel.add(pylo);
 
 		JLabel label = new JLabel(

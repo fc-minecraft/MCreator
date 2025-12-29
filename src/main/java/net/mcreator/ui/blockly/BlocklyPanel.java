@@ -85,7 +85,6 @@ public class BlocklyPanel extends JFXPanel implements Closeable {
 
 		ThreadUtil.runOnFxThread(() -> {
 			WebView browser = new WebView();
-			browser.setFontSmoothingType(javafx.scene.text.FontSmoothingType.GRAY);
 			browser.setContextMenuEnabled(false);
 			Scene scene = new Scene(browser);
 			java.awt.Color bg = Theme.current().getSecondAltBackgroundColor();
