@@ -1,5 +1,19 @@
+@font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/NotoSans-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 700;
+    src: url('../fonts/NotoSans-Bold.ttf') format('truetype');
+}
+
 * {
-    font-family: "Segoe UI", sans-serif;
+    font-family: "Noto Sans", "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
@@ -37,14 +51,14 @@ body {
 }
 
 .blocklyTreeLabel {
-    font-family: "Segoe UI", sans-serif;
+    font-family: "Noto Sans", "Segoe UI", sans-serif;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .blocklyText {
-    font-family: "Segoe UI", sans-serif;
-    font-weight: 600;
+    font-family: "Noto Sans", "Segoe UI", sans-serif;
+    font-weight: 700;
 }
 
 .blocklyMainBackground {
@@ -72,7 +86,7 @@ body {
 }
 
 .whlab > .blocklyFlyoutLabelText {
-    font-family: "Segoe UI", sans-serif;
+    font-family: "Noto Sans", "Segoe UI", sans-serif;
     font-size: 14px;
 }
 
