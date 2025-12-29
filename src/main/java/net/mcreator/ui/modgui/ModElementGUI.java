@@ -338,7 +338,19 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 					JButton help = L10N.button("common.help");
 					help.setMargin(new Insets(1, 40, 1, 40));
 					toolBarLeft.add(help);
-					help.addActionListener(e -> DesktopUtils.browse(helpURI));
+					help.addActionListener(e -> {
+						if (helpURI.toString().contains("mcreator.net/wiki")) {
+							String path = helpURI.getPath();
+							if (path != null && path.contains("/wiki/")) {
+								String slug = path.substring(path.indexOf("/wiki/") + "/wiki/".length());
+								net.mcreator.ui.help.HelpBrowser.openPage(slug);
+							} else {
+								net.mcreator.ui.help.HelpBrowser.open();
+							}
+						} else {
+							DesktopUtils.browse(helpURI);
+						}
+					});
 				}
 			} catch (URISyntaxException e) {
 				LOG.warn("Failed to create help context", e);
@@ -409,7 +421,19 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 					JButton help = L10N.button("common.help");
 					help.setMargin(new Insets(1, 40, 1, 40));
 					toolBarLeft.add(help);
-					help.addActionListener(e -> DesktopUtils.browse(helpURI));
+					help.addActionListener(e -> {
+						if (helpURI.toString().contains("mcreator.net/wiki")) {
+							String path = helpURI.getPath();
+							if (path != null && path.contains("/wiki/")) {
+								String slug = path.substring(path.indexOf("/wiki/") + "/wiki/".length());
+								net.mcreator.ui.help.HelpBrowser.openPage(slug);
+							} else {
+								net.mcreator.ui.help.HelpBrowser.open();
+							}
+						} else {
+							DesktopUtils.browse(helpURI);
+						}
+					});
 				}
 			} catch (URISyntaxException e) {
 				LOG.warn("Failed to create help context", e);

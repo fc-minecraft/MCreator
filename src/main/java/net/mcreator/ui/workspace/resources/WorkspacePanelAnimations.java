@@ -69,7 +69,7 @@ public class WorkspacePanelAnimations extends AbstractResourcePanel<Animation> {
 		addToolBarButton("common.delete_selected", UIRES.get("16px.delete"), e -> deleteCurrentlySelected());
 
 		addToolBarButton("action.workspace.resources.animations.help", UIRES.get("16px.info"),
-				e -> DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/wiki/entity-model-animations"));
+				e -> net.mcreator.ui.help.HelpBrowser.openPage("entity-model-animations"));
 	}
 
 	@Override protected void deleteCurrentlySelected() {

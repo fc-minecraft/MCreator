@@ -245,7 +245,7 @@ class WorkspacePanelVariables extends AbstractWorkspacePanel {
 		}));
 
 		bar.add(createToolBarButton("workspace.variables.help", UIRES.get("16px.info"),
-				e -> DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/wiki/variables")));
+				e -> net.mcreator.ui.help.HelpBrowser.openPage("variables")));
 
 		add("North", bar);
 

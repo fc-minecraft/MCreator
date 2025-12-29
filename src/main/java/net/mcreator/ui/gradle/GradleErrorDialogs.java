@@ -142,7 +142,7 @@ public class GradleErrorDialogs {
 				L10N.t("gradle.errors.build_failed.title"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
 				null, options, options[0]);
 		if (reply == 0) {
-			DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/wiki/gradle-setup-errors");
+			net.mcreator.ui.help.HelpBrowser.openPage("gradle-setup-errors");
 		}
 	}
 

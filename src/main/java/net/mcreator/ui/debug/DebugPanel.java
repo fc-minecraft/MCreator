@@ -123,7 +123,7 @@ public class DebugPanel extends JPanel {
 		nomarkers.setForeground(Theme.current().getAltForegroundColor());
 		JButton showHelp = new JButton(L10N.t("common.help"));
 		showHelp.addActionListener(
-				e -> DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/wiki/how-use-debugger"));
+				e -> net.mcreator.ui.help.HelpBrowser.openPage("how-use-debugger"));
 		showHelp.setIcon(UIRES.get("16px.info"));
 		JComponent nomarkerwrap = PanelUtils.totalCenterInPanel(
 				PanelUtils.northAndCenterElement(nomarkers, PanelUtils.centerInPanel(showHelp), 10, 10));

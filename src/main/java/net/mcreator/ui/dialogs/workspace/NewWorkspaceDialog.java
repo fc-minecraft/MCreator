@@ -132,8 +132,7 @@ public class NewWorkspaceDialog extends MCreatorDialog {
 			dispose();
 		});
 
-		help.addActionListener(actionEvent -> DesktopUtils.browseSafe(
-				MCreatorApplication.SERVER_DOMAIN + "/wiki/create-new-workspace-window"));
+		help.addActionListener(actionEvent -> net.mcreator.ui.help.HelpBrowser.openPage("create-new-workspace-window"));
 
 		workspacePanels.add("neoforge", neoforgeWorkspacePanel.getContainer());
 		workspacePanels.add("fabric", fabricWorkspacePanel.getContainer());

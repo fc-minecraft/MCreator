@@ -65,13 +65,15 @@ public class HelpBrowser extends JFrame {
         contentPane = new JEditorPane();
         contentPane.setContentType("text/html");
         contentPane.setEditable(false);
+        contentPane.setBackground(Color.WHITE); // Explicitly set background
         contentPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
         ComponentUtils.deriveFont(contentPane, 14); // Readable font size
 
         // Custom CSS for better look
         try {
             javax.swing.text.html.HTMLEditorKit kit = new javax.swing.text.html.HTMLEditorKit();
-            kit.getStyleSheet().addRule("body { font-family: Segoe UI, Open Sans, sans-serif; font-size: 14px; margin: 10px; color: #333; }");
+            // Force white background and black text in CSS
+            kit.getStyleSheet().addRule("body { font-family: Segoe UI, Open Sans, sans-serif; font-size: 14px; margin: 10px; color: #333; background-color: white; }");
             kit.getStyleSheet().addRule("h1 { font-size: 24px; color: #000; margin-bottom: 10px; }");
             kit.getStyleSheet().addRule("h2 { font-size: 20px; color: #444; margin-top: 15px; margin-bottom: 5px; }");
             kit.getStyleSheet().addRule("h3 { font-size: 16px; font-weight: bold; margin-top: 10px; }");
@@ -95,6 +97,7 @@ public class HelpBrowser extends JFrame {
 
         JScrollPane contentScroll = new JScrollPane(contentPane);
         contentScroll.setBorder(BorderFactory.createEmptyBorder());
+        contentScroll.getViewport().setBackground(Color.WHITE); // Ensure viewport is white
 
         // Navigation Tree
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(L10N.t("help_browser.home"));
@@ -102,6 +105,7 @@ public class HelpBrowser extends JFrame {
         navigationTree = new JTree(root);
         navigationTree.addTreeSelectionListener(this::onNodeSelected);
         navigationTree.setRowHeight(24);
+        navigationTree.setBackground(new Color(245, 245, 245)); // Light gray for tree
         ComponentUtils.deriveFont(navigationTree, 13);
 
         JScrollPane treeScroll = new JScrollPane(navigationTree);

@@ -4,29 +4,84 @@
     "file": "index.md",
     "children": [
       {
-        "title": "help_browser.toc.getting_started",
-        "file": "getting_started.md",
-        "children": [
-            { "title": "help_browser.toc.installation", "file": "installation.md" },
-            { "title": "help_browser.toc.workspace", "file": "workspace.md" }
-        ]
+        "title": "Блоки",
+        "file": "block.md"
       },
       {
-        "title": "help_browser.toc.interface",
-        "file": "interface.md"
+        "title": "Предметы",
+        "file": "item.md"
       },
       {
-        "title": "help_browser.toc.mod_elements",
-        "file": "mod_elements.md",
-        "children": [
-            { "title": "help_browser.toc.blocks", "file": "block.md" },
-            { "title": "help_browser.toc.items", "file": "item.md" },
-            { "title": "help_browser.toc.procedures", "file": "procedures.md" }
-        ]
+        "title": "Инструменты",
+        "file": "tool.md"
       },
       {
-        "title": "help_browser.toc.troubleshooting",
-        "file": "troubleshooting.md"
+        "title": "Броня",
+        "file": "armor.md"
+      },
+      {
+        "title": "Переменные",
+        "file": "variables.md"
+      },
+      {
+        "title": "Биомы",
+        "file": "biome.md"
+      },
+      {
+        "title": "Измерения",
+        "file": "dimension.md"
+      },
+      {
+        "title": "Рецепты",
+        "file": "recipe.md"
+      },
+      {
+        "title": "Структуры",
+        "file": "structure.md"
+      },
+      {
+        "title": "Жидкости",
+        "file": "fluid.md"
+      },
+      {
+        "title": "Растения",
+        "file": "plant.md"
+      },
+      {
+        "title": "Частицы",
+        "file": "particle.md"
+      },
+      {
+        "title": "Клавиши",
+        "file": "keybinding.md"
+      },
+      {
+        "title": "Наложения",
+        "file": "overlay.md"
+      },
+      {
+        "title": "Достижения",
+        "file": "achievement.md"
+      },
+      {
+        "title": "Музыкальные пластинки",
+        "file": "musicdisc.md"
+      },
+      {
+        "title": "Картины",
+        "file": "painting.md"
+      },
+      {
+        "title": "Связки (Tags)",
+        "file": "tag.md"
+      },
+      {
+        "title": "Функции",
+        "file": "function.md"
+      },
+      {
+        "title": "Таблицы лута",
+        "file": "loot_table.md"
       }
     ]
   }
