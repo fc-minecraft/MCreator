@@ -206,7 +206,7 @@ public class ActionRegistry {
 		this.aboutMCreator = new AboutAction(this);
 		this.checkForUpdates = new CheckForUpdatesAction(this);
 		this.checkForPluginUpdates = new CheckForPluginUpdatesAction(this);
-		this.help = new VisitURIAction(this, L10N.t("action.wiki"), MCreatorApplication.SERVER_DOMAIN + "/wiki");
+		this.help = new OpenHelpBrowserAction(this);
 		this.support = new VisitURIAction(this, L10N.t("action.support"),
 				MCreatorApplication.SERVER_DOMAIN + "/support");
 		this.openFile = new BasicAction(this, L10N.t("workspace_file_browser.open"),

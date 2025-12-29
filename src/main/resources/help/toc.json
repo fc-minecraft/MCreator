@@ -1,0 +1,33 @@
+[
+  {
+    "title": "help_browser.home",
+    "file": "index.md",
+    "children": [
+      {
+        "title": "Getting Started",
+        "file": "getting_started.md",
+        "children": [
+            { "title": "Installation", "file": "installation.md" },
+            { "title": "Workspace", "file": "workspace.md" }
+        ]
+      },
+      {
+        "title": "Interface",
+        "file": "interface.md"
+      },
+      {
+        "title": "Mod Elements",
+        "file": "mod_elements.md",
+        "children": [
+            { "title": "Blocks", "file": "block.md" },
+            { "title": "Items", "file": "item.md" },
+            { "title": "Procedures", "file": "procedures.md" }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "file": "troubleshooting.md"
+      }
+    ]
+  }
+]
