@@ -16,7 +16,7 @@ const workspace = Blockly.inject(blockly, {
     zoom: {
         controls: false,
         wheel: true,
-        startScale: 0.95,
+        startScale: 1.0,
         maxScale: MCR_BLOCKLY_PREF['maxScale'],
         minScale: MCR_BLOCKLY_PREF['minScale'],
         scaleSpeed: MCR_BLOCKLY_PREF['scaleSpeed']

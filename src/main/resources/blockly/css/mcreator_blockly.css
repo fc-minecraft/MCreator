@@ -1,6 +1,13 @@
 * {
-    font-family: sans-serif;
+    font-family: "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+svg {
+    shape-rendering: geometricPrecision;
+    text-rendering: geometricPrecision;
+    image-rendering: optimizeQuality;
 }
 
 ::-webkit-scrollbar {
@@ -31,12 +38,12 @@ body {
 }
 
 .blocklyTreeLabel {
-    font-family: sans-serif;
+    font-family: "Segoe UI", sans-serif;
     font-size: 13px;
 }
 
 .blocklyText {
-    font-family: sans-serif;
+    font-family: "Segoe UI", sans-serif;
 }
 
 .blocklyMainBackground {
@@ -64,7 +71,7 @@ body {
 }
 
 .whlab > .blocklyFlyoutLabelText {
-    font-family: sans-serif;
+    font-family: "Segoe UI", sans-serif;
     font-size: 14px;
 }
 
