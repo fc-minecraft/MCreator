@@ -19,6 +19,7 @@ public class OfflineModePanel extends JPanel {
     private final JLabel cacheSizeLabel;
     private final JButton downloadButton;
     private final JButton deleteButton;
+    private final JButton verifyButton;
     private final JButton openFolderButton;
     private final JCheckBox offlineModeCheckbox;
     private final JProgressBar progressBar;
@@ -41,6 +42,7 @@ public class OfflineModePanel extends JPanel {
         downloadButton.setPreferredSize(new Dimension(250, 40));
 
         deleteButton = new JButton("Очистить офлайн кэш");
+        verifyButton = new JButton("Проверить целостность");
         openFolderButton = new JButton("Открыть папку кэша");
 
         offlineModeCheckbox = new JCheckBox("Всегда запускать Gradle в офлайн режиме");
@@ -63,6 +65,11 @@ public class OfflineModePanel extends JPanel {
         // Actions
         downloadButton.addActionListener(this::downloadAction);
         deleteButton.addActionListener(this::deleteAction);
+        verifyButton.addActionListener(e -> {
+            String result = OfflineCacheManager.verifyCacheIntegrity();
+            JOptionPane.showMessageDialog(dialog, result, "Проверка целостности",
+                result.startsWith("Ошибка") ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE);
+        });
         openFolderButton.addActionListener(e -> DesktopUtils.openSafe(OfflineCacheManager.getOfflineCacheDir()));
 
         // Layout
@@ -102,6 +109,7 @@ public class OfflineModePanel extends JPanel {
         JPanel subButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
         subButtons.setOpaque(false);
         subButtons.add(deleteButton);
+        subButtons.add(verifyButton);
         subButtons.add(openFolderButton);
         add(subButtons, gbc);
 

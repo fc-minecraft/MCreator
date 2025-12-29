@@ -49,6 +49,20 @@ public class OfflineCacheManager {
         return marker.exists();
     }
 
+    public static String verifyCacheIntegrity() {
+        if (!isOfflineModeReady()) return "Кэш не готов (маркер отсутствует)";
+
+        File cache = getOfflineCacheDir();
+        File versions = new File(cache, VERSIONS_FILE_NAME);
+        if (!versions.exists()) return "Ошибка: файл версий отсутствует";
+
+        File cachedProjectFiles = new File(cache, "cached_project_files");
+        if (!cachedProjectFiles.exists()) return "Ошибка: кэшированные файлы проекта отсутствуют";
+        if (!new File(cachedProjectFiles, ".classpath").exists()) return "Ошибка: .classpath не найден";
+
+        return "Кэш цел (Проверено)";
+    }
+
     public static long getCacheSize() {
         File cache = getOfflineCacheDir();
         if (cache.exists() && cache.isDirectory()) {

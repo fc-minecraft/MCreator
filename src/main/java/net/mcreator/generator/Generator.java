@@ -196,29 +196,29 @@ public class Generator implements IGenerator, Closeable {
 					String content = FileIO.readFileToString(f);
 					boolean changed = false;
 
-					// Fix ConcurrentLinkedQueue -> Collection import
-					if (content.contains("ConcurrentLinkedQueue") && !content.contains("import java.util.Collection;")) {
-						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.util.Collection;");
+					// Fix ConcurrentLinkedQueue usage
+					if (content.contains("ConcurrentLinkedQueue") && !content.contains("import java.util.concurrent.ConcurrentLinkedQueue;")) {
+						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.util.concurrent.ConcurrentLinkedQueue;\nimport java.util.Collection;");
 						changed = true;
 					}
 
-					// Fix Arrays.stream -> java.util.Arrays import
-					if (content.contains("Arrays.stream") && !content.contains("import java.util.Arrays;")) {
-						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.util.Arrays;");
+					// Fix Arrays.stream ambiguity by using Fully Qualified Name
+					if (content.contains("Arrays.stream")) {
+						content = content.replace("Arrays.stream", "java.util.Arrays.stream");
 						changed = true;
 					}
 
-					// Fix List/ArrayList -> java.util.List/ArrayList import
-					if ((content.contains("List<") || content.contains("ArrayList")) && !content.contains("import java.util.List;")) {
-						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.util.List;");
-						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.util.ArrayList;");
+					// Fix List/ArrayList ambiguity by using Fully Qualified Name
+					if (content.contains("List<") || content.contains("ArrayList")) {
+						content = content.replaceAll("\\bList<", "java.util.List<");
+						content = content.replaceAll("\\bArrayList<", "java.util.ArrayList<");
+						content = content.replaceAll("new ArrayList", "new java.util.ArrayList");
 						changed = true;
 					}
 
-					// Fix MethodHandles/MethodType -> java.lang.invoke.*
+					// Fix MethodHandles/MethodType imports
 					if ((content.contains("MethodHandles") || content.contains("MethodType")) && !content.contains("import java.lang.invoke.MethodHandles;")) {
-						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.lang.invoke.MethodHandles;");
-						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.lang.invoke.MethodType;");
+						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.lang.invoke.MethodHandles;\nimport java.lang.invoke.MethodType;");
 						changed = true;
 					}
 
