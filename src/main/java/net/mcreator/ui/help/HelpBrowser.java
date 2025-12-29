@@ -30,13 +30,25 @@ public class HelpBrowser extends JFrame {
     private JTree navigationTree;
 
     private static HelpBrowser INSTANCE;
+    private static java.util.Map<String, String> SLUG_CACHE;
 
     public static void open() {
+        openPage(null);
+    }
+
+    public static void openPage(String page) {
+        if (INSTANCE != null && !INSTANCE.isVisible()) {
+            INSTANCE.dispose();
+            INSTANCE = null;
+        }
         if (INSTANCE == null) {
             INSTANCE = new HelpBrowser();
         }
         INSTANCE.setVisible(true);
         INSTANCE.toFront();
+        if (page != null) {
+            INSTANCE.loadPage(page);
+        }
     }
 
     private HelpBrowser() {
@@ -72,7 +84,10 @@ public class HelpBrowser extends JFrame {
 
         contentPane.addHyperlinkListener(e -> {
             if (e.getEventType() == javax.swing.event.HyperlinkEvent.EventType.ACTIVATED) {
-                if (e.getURL() != null) {
+                String desc = e.getDescription();
+                if (desc != null && !desc.contains("://") && !desc.startsWith("mailto:")) {
+                    loadPage(desc);
+                } else if (e.getURL() != null) {
                     DesktopUtils.browseSafe(e.getURL().toString());
                 }
             }
@@ -124,12 +139,9 @@ public class HelpBrowser extends JFrame {
 
     private void addTocEntry(DefaultMutableTreeNode parent, TocEntry entry) {
         String title = entry.title;
-        // Try to translate title if it's a key
-        if (title.startsWith("help_browser.") || !title.contains(" ")) {
-             String translated = L10N.t(title);
-             if (translated != null && !translated.equals(title)) {
-                 title = translated;
-             }
+        String translated = L10N.t(title);
+        if (translated != null) {
+            title = translated;
         }
 
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(new HelpNode(title, entry.file));
@@ -155,7 +167,8 @@ public class HelpBrowser extends JFrame {
         }
     }
 
-    private void loadPage(String filename) {
+    private void loadPage(String slug) {
+        String filename = getFilenameForSlug(slug);
         try {
             // Try localized first
             String path = "/help/" + net.mcreator.ui.init.L10N.getLocaleString() + "/wiki/" + filename;
@@ -202,5 +215,28 @@ public class HelpBrowser extends JFrame {
         String title;
         String file;
         List<TocEntry> children;
+    }
+
+    private String getFilenameForSlug(String slug) {
+        if (SLUG_CACHE == null) {
+            try {
+                InputStream is = getClass().getResourceAsStream("/help/slug_map.json");
+                if (is != null) {
+                    Gson gson = new Gson();
+                    SLUG_CACHE = gson.fromJson(new InputStreamReader(is, StandardCharsets.UTF_8), new TypeToken<java.util.Map<String, String>>(){}.getType());
+                } else {
+                    SLUG_CACHE = new java.util.HashMap<>();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                SLUG_CACHE = new java.util.HashMap<>();
+            }
+        }
+
+        if (SLUG_CACHE.containsKey(slug)) {
+            return SLUG_CACHE.get(slug);
+        }
+        // Fallback: assume slug is filename if it ends in .md, else append .md
+        return slug.endsWith(".md") ? slug : slug + ".md";
     }
 }

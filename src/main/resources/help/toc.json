@@ -1,31 +1,31 @@
 [
   {
-    "title": "help_browser.home",
+    "title": "help_browser.toc.home",
     "file": "index.md",
     "children": [
       {
-        "title": "Getting Started",
+        "title": "help_browser.toc.getting_started",
         "file": "getting_started.md",
         "children": [
-            { "title": "Installation", "file": "installation.md" },
-            { "title": "Workspace", "file": "workspace.md" }
+            { "title": "help_browser.toc.installation", "file": "installation.md" },
+            { "title": "help_browser.toc.workspace", "file": "workspace.md" }
         ]
       },
       {
-        "title": "Interface",
+        "title": "help_browser.toc.interface",
         "file": "interface.md"
       },
       {
-        "title": "Mod Elements",
+        "title": "help_browser.toc.mod_elements",
         "file": "mod_elements.md",
         "children": [
-            { "title": "Blocks", "file": "block.md" },
-            { "title": "Items", "file": "item.md" },
-            { "title": "Procedures", "file": "procedures.md" }
+            { "title": "help_browser.toc.blocks", "file": "block.md" },
+            { "title": "help_browser.toc.items", "file": "item.md" },
+            { "title": "help_browser.toc.procedures", "file": "procedures.md" }
         ]
       },
       {
-        "title": "Troubleshooting",
+        "title": "help_browser.toc.troubleshooting",
         "file": "troubleshooting.md"
       }
     ]

@@ -95,7 +95,17 @@ public class HelpUtils {
 
 						editorPane.addHyperlinkListener(he -> {
 							if (he.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-								DesktopUtils.browseSafe(he.getURL().toString());
+								if (he.getURL() != null && he.getURL().toString().contains("mcreator.net/wiki")) {
+									String path = he.getURL().getPath();
+									if (path != null && path.startsWith("/wiki/")) {
+										String slug = path.substring("/wiki/".length());
+										HelpBrowser.openPage(slug);
+									} else {
+										HelpBrowser.open();
+									}
+								} else if (he.getURL() != null) {
+									DesktopUtils.browseSafe(he.getURL().toString());
+								}
 							}
 						});
 
