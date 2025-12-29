@@ -211,6 +211,11 @@ public class ProjectJarManager extends JarManager {
 
 		if (classesArchive.getName().endsWith(".jmod")) {
 			info = new JModLibraryInfo(classesArchive);
+		} else if (classesArchive.getName().equals("modules")) {
+			// JImage files (lib/modules) are not supported by RSyntaxTextArea's JarLibraryInfo which expects ZIP/JAR.
+			// We cannot read classes from it for code completion yet.
+			LOG.warn("Skipping code completion for JImage file {}: format not supported", classesArchive);
+			return;
 		} else {
 			info = new JarLibraryInfo(classesArchive);
 		}
@@ -226,7 +231,9 @@ public class ProjectJarManager extends JarManager {
 		try {
 			addClassFileSource(info);
 		} catch (IOException e) {
-			throw new GradleCacheImportFailedException(e);
+			// If we fail to load the main JVM library (e.g. invalid JAR), we should warn but not crash the entire generator setup
+			// crashing here prevents opening the workspace entirely.
+			LOG.warn("Failed to load JVM library info from {}: {}", classesArchive, e.getMessage());
 		}
 	}
 

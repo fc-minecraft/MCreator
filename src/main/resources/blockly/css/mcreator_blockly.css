@@ -6,7 +6,6 @@
 
 svg {
     shape-rendering: geometricPrecision;
-    text-rendering: geometricPrecision;
     image-rendering: optimizeQuality;
 }
 
@@ -41,10 +40,12 @@ body {
 .blocklyTreeLabel {
     font-family: "Segoe UI", sans-serif;
     font-size: 13px;
+    font-weight: 500;
 }
 
 .blocklyText {
     font-family: "Segoe UI", sans-serif;
+    font-weight: 500;
 }
 
 .blocklyMainBackground {
