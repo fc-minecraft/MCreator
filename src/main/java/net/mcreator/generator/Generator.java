@@ -187,6 +187,26 @@ public class Generator implements IGenerator, Closeable {
 		// generate files as old files were deleted
 		generateFiles(generatorFiles, formatAndOrganiseImports);
 
+		// HOTFIX: Inject java.util.Collection if ConcurrentLinkedQueue is used but import is missing
+		// This handles cases where templates are missing imports (e.g. offline mode restrictions or broken templates)
+		for (GeneratorFile gf : generatorFiles) {
+			if (gf.writer() == GeneratorFile.Writer.JAVA && gf.getFile().getName().endsWith("Mod.java")) {
+				File f = gf.getFile();
+				if (f.exists()) {
+					String content = FileIO.readFileToString(f);
+					if (content.contains("ConcurrentLinkedQueue") && !content.contains("import java.util.Collection;")) {
+						content = content.replace("import java.util.concurrent.ConcurrentLinkedQueue;",
+								"import java.util.Collection;\nimport java.util.concurrent.ConcurrentLinkedQueue;");
+						if (!content.contains("import java.util.Collection;")) { // Fallback if replacement didn't match exactly
+							// Insert after package declaration to avoid syntax error
+							content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\n\nimport java.util.Collection;");
+						}
+						FileIO.writeStringToFile(content, f);
+					}
+				}
+			}
+		}
+
 		// store paths of generated files
 		workspace.putMetadata("files", generatorFiles.stream().map(GeneratorFile::getFile)
 				.map(e -> getFolderManager().getPathInWorkspace(e).replace(File.separator, "/")).toList());

@@ -30,8 +30,8 @@ public class OfflineCacheManager {
 
     private static final String MARKER_FILE_NAME = "offline_fabric_1.21.8_ready.marker";
 
-    // Versions for 1.21.4 (Cached target)
-    private static final String CACHED_MC_VERSION = "1.21.4";
+    // Versions for 1.21.8 (Cached target)
+    private static final String CACHED_MC_VERSION = "1.21.8";
     private static final String CACHED_BUILD_FILE_VERSION = "0.115.0";
 
     public static File getOfflineCacheDir() {
@@ -165,15 +165,28 @@ public class OfflineCacheManager {
 
                 try (ProjectConnection connection = connector.connect()) {
                     BuildLauncher launcher = connection.newBuild();
-                    // Added loom:downloadAssets and other tasks to ensure full cache population
-                    launcher.forTasks("dependencies", "eclipse", "loom:downloadAssets", "genEclipseRuns");
+                    // Added downloadAssets (without loom: prefix to be safe) and eclipse which transitively relies on assets
+                    launcher.forTasks("dependencies", "eclipse", "downloadAssets", "genEclipseRuns");
                     launcher.addJvmArguments("-Xmx2G");
 
                     launcher.addProgressListener(event -> {
                         statusCallback.accept(event.getDescriptor().getName());
                     }, OperationType.TASK);
 
-                    launcher.run();
+                    // Retry logic for the build launcher
+                    int attempts = 0;
+                    while (attempts < 3) {
+                        try {
+                            launcher.run();
+                            break; // Success
+                        } catch (Exception e) {
+                            attempts++;
+                            if (attempts >= 3) throw e;
+                            LOG.warn("Gradle offline cache download attempt " + attempts + " failed, retrying...", e);
+                            statusCallback.accept("Ошибка загрузки (Попытка " + attempts + "/3)...");
+                            Thread.sleep(2000);
+                        }
+                    }
                 }
 
                 File marker = new File(getOfflineCacheDir(), MARKER_FILE_NAME);

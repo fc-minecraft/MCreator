@@ -9,7 +9,6 @@ import net.mcreator.util.DesktopUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.text.DecimalFormat;
 import java.util.AbstractMap;
 import java.util.Map;
 

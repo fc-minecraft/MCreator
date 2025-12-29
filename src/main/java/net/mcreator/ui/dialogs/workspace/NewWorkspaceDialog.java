@@ -93,7 +93,7 @@ public class NewWorkspaceDialog extends MCreatorDialog {
 		JButton ok = L10N.button("dialog.new_workspace.button_new");
 		buttons.add(ok);
 
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = L10N.button("common.cancel");
 		buttons.add(cancel);
 
 		buttons.add(new JEmptyBox(2, 2));
