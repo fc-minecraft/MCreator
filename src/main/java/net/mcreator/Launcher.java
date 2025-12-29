@@ -75,8 +75,6 @@ public class Launcher {
 				Boolean.toString(PreferencesManager.PREFERENCES.ui.usemacOSMenuBar.get()));
 
 		// some flags to prevent rendering issues with certain GPU drivers
-		System.setProperty("sun.java2d.opengl", "false");
-		System.setProperty("sun.java2d.d3d", "false");
 		System.setProperty("sun.java2d.pmoffscreen", "false");
 		System.setProperty("prism.lcdtext", "false");
 
