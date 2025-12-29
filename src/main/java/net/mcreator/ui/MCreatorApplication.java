@@ -114,9 +114,6 @@ public final class MCreatorApplication {
 
 			splashScreen.setProgress(25, L10N.t("splash.loading_components"));
 
-			// preload help entries cache
-			HelpLoader.preloadCache();
-
 			// load translations after plugins are loaded
 			L10N.initTranslations();
 
@@ -127,10 +124,6 @@ public final class MCreatorApplication {
 			DataListLoader.preloadCache();
 
 			splashScreen.setProgress(45, L10N.t("splash.building_cache"));
-
-			// load templates for image makers
-			ImageMakerTexturesCache.init();
-			ArmorMakerTexturesCache.init();
 
 			splashScreen.setProgress(55, L10N.t("splash.loading_plugin_data"));
 
@@ -148,9 +141,6 @@ public final class MCreatorApplication {
 
 			// load blockly blocks after plugins are loaded
 			BlocklyLoader.init();
-
-			// load entity animations for the Java Model animation editor
-			EntityAnimationsLoader.init();
 
 			// register mod element types
 			ModElementTypeLoader.loadModElements();
@@ -230,6 +220,21 @@ public final class MCreatorApplication {
 				if (!directLaunch)
 					showWorkspaceSelector();
 			});
+
+			// Lazy load less critical components to speed up startup
+			new Thread(() -> {
+				LOG.info("Starting deferred initialization of heavy resources...");
+				// preload help entries cache
+				HelpLoader.preloadCache();
+
+				// load templates for image makers
+				ImageMakerTexturesCache.init();
+				ArmorMakerTexturesCache.init();
+
+				// load entity animations for the Java Model animation editor
+				EntityAnimationsLoader.init();
+				LOG.info("Deferred initialization complete.");
+			}, "Application-Deferred-Loader").start();
 
 			LOG.debug("Application loader finished");
 		}, "Application-Loader").start();

@@ -30,8 +30,10 @@ import org.apache.logging.log4j.Logger;
 import org.gradle.tooling.*;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GradleUtils {
@@ -82,12 +84,24 @@ public class GradleUtils {
 		// use custom set of environment variables to prevent system overrides
 		launcher.setEnvironmentVariables(getEnvironment(java_home));
 
-		if (java_home != null)
-			launcher.withArguments(Arrays.asList("-Porg.gradle.java.installations.auto-detect=false",
-					"-Porg.gradle.java.installations.paths=" + java_home.replace('\\', '/')));
+		List<String> arguments = new ArrayList<>();
+
+		if (java_home != null) {
+			arguments.add("-Porg.gradle.java.installations.auto-detect=false");
+			arguments.add("-Porg.gradle.java.installations.paths=" + java_home.replace('\\', '/'));
+		}
+
+		// Optimize Gradle for performance
+		arguments.add("--parallel");
+
+		launcher.withArguments(arguments);
 
 		// some mod API toolchains (NeoGradle, Mod Dev Gradle) need to think they are running in IDE, so we make them think we are Eclipse
 		launcher.addJvmArguments("-Declipse.application=net.mcreator");
+
+		launcher.addJvmArguments("-Dorg.gradle.parallel=true");
+		launcher.addJvmArguments("-Dorg.gradle.caching=true");
+		launcher.addJvmArguments("-Dorg.gradle.vfs.watch=true");
 
 		return launcher;
 	}
