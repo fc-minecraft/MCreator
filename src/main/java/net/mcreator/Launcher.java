@@ -78,6 +78,7 @@ public class Launcher {
 		System.setProperty("sun.java2d.opengl", "false");
 		System.setProperty("sun.java2d.d3d", "false");
 		System.setProperty("sun.java2d.pmoffscreen", "false");
+		System.setProperty("prism.lcdtext", "false");
 
 		// Init JFX Toolkit
 		ThreadUtil.runOnSwingThreadAndWait(JFXPanel::new);
