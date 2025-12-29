@@ -12,13 +12,17 @@ import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.events.OperationType;
 
 import javax.swing.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -29,10 +33,11 @@ public class OfflineCacheManager {
     private static final Logger LOG = LogManager.getLogger(OfflineCacheManager.class);
 
     private static final String MARKER_FILE_NAME = "offline_fabric_1.21.8_ready.marker";
+    private static final String VERSIONS_FILE_NAME = "offline_versions.properties";
 
-    // Versions for 1.21.8 (Cached target)
-    private static final String CACHED_MC_VERSION = "1.21.8";
-    private static final String CACHED_BUILD_FILE_VERSION = "0.115.0";
+    // Fallback Versions (used if detection fails)
+    private static final String FALLBACK_MC_VERSION = "1.21.8";
+    private static final String FALLBACK_BUILD_FILE_VERSION = "0.133.4"; // Updated fallback
 
     public static File getOfflineCacheDir() {
         return new File(System.getProperty("user.home"), ".mcreator/gradle");
@@ -81,6 +86,26 @@ public class OfflineCacheManager {
                 File pluginFile = plugin.getFile();
                 String pluginId = plugin.getID();
                 LOG.info("Using plugin for offline template: " + pluginId);
+
+                // Detect versions from plugin
+                Properties versions = detectVersions(pluginFile);
+                String mcVersion = versions.getProperty("minecraft_version", FALLBACK_MC_VERSION);
+                String buildFileVersion = versions.getProperty("build_file_version", FALLBACK_BUILD_FILE_VERSION);
+                LOG.info("Detected versions - MC: " + mcVersion + ", Build: " + buildFileVersion);
+
+                // Save versions to cache dir
+                File versionsFile = new File(getOfflineCacheDir(), VERSIONS_FILE_NAME);
+                if (!versionsFile.getParentFile().exists()) versionsFile.getParentFile().mkdirs();
+                try {
+                    Properties p = new Properties();
+                    p.setProperty("minecraft_version", mcVersion);
+                    p.setProperty("build_file_version", buildFileVersion);
+                    // Also try to capture loader version if possible, but for now defaults
+                    p.store(Files.newBufferedWriter(versionsFile.toPath()), "Offline Mode Versions");
+                } catch (Exception ex) {
+                    LOG.warn("Failed to save versions file", ex);
+                }
+
                 statusCallback.accept("Извлечение шаблона из " + pluginId + "...");
 
                 boolean extracted = false;
@@ -155,7 +180,7 @@ public class OfflineCacheManager {
                 }
 
                 statusCallback.accept("Настройка файлов сборки...");
-                preprocessBuildFiles(tempDir);
+                preprocessBuildFiles(tempDir, mcVersion, buildFileVersion);
 
                 statusCallback.accept("Запуск Gradle...");
 
@@ -208,7 +233,73 @@ public class OfflineCacheManager {
         }).start();
     }
 
-    private static void preprocessBuildFiles(File workspaceDir) {
+    private static Properties detectVersions(File pluginFile) {
+        Properties props = new Properties();
+        try {
+            if (pluginFile.isDirectory()) {
+                // Try to find generator.yaml recursively (depth 2)
+                File yaml = findFile(pluginFile, "generator.yaml", 2);
+                if (yaml != null) parseYamlVersions(new FileInputStream(yaml), props);
+            } else if (ZipIO.checkIfZip(pluginFile)) {
+                try (ZipFile zip = ZipIO.openZipFile(pluginFile)) {
+                    Enumeration<? extends ZipEntry> entries = zip.entries();
+                    while (entries.hasMoreElements()) {
+                        ZipEntry e = entries.nextElement();
+                        if (e.getName().endsWith("generator.yaml")) {
+                            parseYamlVersions(zip.getInputStream(e), props);
+                            break; // Assume first generator.yaml is correct
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Failed to detect versions from plugin", e);
+        }
+        return props;
+    }
+
+    private static File findFile(File dir, String name, int depth) {
+        if (depth < 0) return null;
+        File[] files = dir.listFiles();
+        if (files == null) return null;
+        for (File f : files) {
+            if (f.getName().equals(name)) return f;
+            if (f.isDirectory()) {
+                File res = findFile(f, name, depth - 1);
+                if (res != null) return res;
+            }
+        }
+        return null;
+    }
+
+    private static void parseYamlVersions(InputStream is, Properties props) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("minecraft_version:")) {
+                    props.setProperty("minecraft_version", parseValue(line));
+                } else if (line.startsWith("build_file_version:")) {
+                    props.setProperty("build_file_version", parseValue(line));
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Error parsing yaml", e);
+        }
+    }
+
+    private static String parseValue(String line) {
+        String[] parts = line.split(":", 2);
+        if (parts.length > 1) {
+            String v = parts[1].trim();
+            if (v.startsWith("\"") && v.endsWith("\"")) return v.substring(1, v.length() - 1);
+            if (v.startsWith("'") && v.endsWith("'")) return v.substring(1, v.length() - 1);
+            return v;
+        }
+        return "";
+    }
+
+    private static void preprocessBuildFiles(File workspaceDir, String mcVersion, String buildFileVersion) {
         File buildGradle = new File(workspaceDir, "build.gradle");
         File mcreatorGradle = new File(workspaceDir, "mcreator.gradle");
 
@@ -232,13 +323,13 @@ public class OfflineCacheManager {
 
             content = content.replace("${modid}", "offline");
 
-            // Replace generator calls with hardcoded known working versions
-            content = content.replace("${generator.getGeneratorMinecraftVersion()}", CACHED_MC_VERSION);
-            content = content.replace("${generator.getGeneratorBuildFileVersion()}", CACHED_BUILD_FILE_VERSION);
+            // Replace generator calls with detected versions
+            content = content.replace("${generator.getGeneratorMinecraftVersion()}", mcVersion);
+            content = content.replace("${generator.getGeneratorBuildFileVersion()}", buildFileVersion);
 
             // Regex for cases without ${} if any
-            content = content.replaceAll("generator\\.getGeneratorMinecraftVersion\\(\\)", "'" + CACHED_MC_VERSION + "'");
-            content = content.replaceAll("generator\\.getGeneratorBuildFileVersion\\(\\)", "'" + CACHED_BUILD_FILE_VERSION + "'");
+            content = content.replaceAll("generator\\.getGeneratorMinecraftVersion\\(\\)", "'" + mcVersion + "'");
+            content = content.replaceAll("generator\\.getGeneratorBuildFileVersion\\(\\)", "'" + buildFileVersion + "'");
 
             FileIO.writeStringToFile(content, buildGradle);
         }
@@ -260,6 +351,21 @@ public class OfflineCacheManager {
     public static void applyOfflineFixes(File workspaceDir) {
         LOG.info("Applying offline mode fixes to workspace: " + workspaceDir);
 
+        // Load versions from cache
+        String mcVersion = FALLBACK_MC_VERSION;
+        String buildFileVersion = FALLBACK_BUILD_FILE_VERSION;
+        try {
+             File versionsFile = new File(getOfflineCacheDir(), VERSIONS_FILE_NAME);
+             if (versionsFile.exists()) {
+                 Properties p = new Properties();
+                 p.load(Files.newBufferedReader(versionsFile.toPath()));
+                 mcVersion = p.getProperty("minecraft_version", FALLBACK_MC_VERSION);
+                 buildFileVersion = p.getProperty("build_file_version", FALLBACK_BUILD_FILE_VERSION);
+             }
+        } catch (Exception e) {
+            LOG.warn("Failed to load offline versions properties", e);
+        }
+
         File mcreatorGradle = new File(workspaceDir, "mcreator.gradle");
         if (mcreatorGradle.exists()) {
              String content = FileIO.readFileToString(mcreatorGradle);
@@ -278,33 +384,26 @@ public class OfflineCacheManager {
         if (buildGradle.exists()) {
             String content = FileIO.readFileToString(buildGradle);
 
-            // Force replace versions that might have been set by generator to unsupported versions
-            // This regex looks for 'minecraft { ... version = "..." ... }' or just 'version = "..."' inside the block ideally,
-            // but in build.gradle usually it is 'version = "..."' inside dependencies or minecraft block.
-            // Fabric Loom usually: minecraft "com.mojang:minecraft:${project.minecraft_version}"
-            // Or in gradle.properties: minecraft_version=...
-
             // NOTE: MCreator Fabric generator often puts version in gradle.properties or directly in build.gradle.
 
             // Let's handle gradle.properties first
             File gradleProps = new File(workspaceDir, "gradle.properties");
             if (gradleProps.exists()) {
                 String props = FileIO.readFileToString(gradleProps);
-                props = props.replaceAll("minecraft_version=.*", "minecraft_version=" + CACHED_MC_VERSION);
-                props = props.replaceAll("yarn_mappings=.*", "yarn_mappings=" + CACHED_MC_VERSION + "+build.1"); // Best guess for mappings
-                props = props.replaceAll("loader_version=.*", "loader_version=" + "0.15.11"); // Common stable loader
-                props = props.replaceAll("fabric_version=.*", "fabric_version=" + CACHED_BUILD_FILE_VERSION); // API version
+                props = props.replaceAll("minecraft_version=.*", "minecraft_version=" + mcVersion);
+                // Assume yarn matches mc version + build.1 usually
+                props = props.replaceAll("yarn_mappings=.*", "yarn_mappings=" + mcVersion + "+build.1");
+                props = props.replaceAll("loader_version=.*", "loader_version=" + "0.15.11"); // Still hardcoded stable loader for now
+                props = props.replaceAll("fabric_version=.*", "fabric_version=" + buildFileVersion); // API version
                 FileIO.writeStringToFile(props, gradleProps);
             }
 
-            // If the version is directly in build.gradle (common in some templates)
-            // Look for: minecraft "com.mojang:minecraft:1.21.8" or similar
-            content = content.replaceAll("com\\.mojang:minecraft:[0-9\\.]+", "com.mojang:minecraft:" + CACHED_MC_VERSION);
+            // If the version is directly in build.gradle
+            content = content.replaceAll("com\\.mojang:minecraft:[0-9\\.]+", "com.mojang:minecraft:" + mcVersion);
             content = content.replaceAll("net\\.fabricmc:fabric-loader:[0-9\\.]+", "net.fabricmc:fabric-loader:0.15.11");
 
-            // Also replace mappings if they are hardcoded
             // mappings "net.fabricmc:yarn:..."
-            content = content.replaceAll("net\\.fabricmc:yarn:[0-9\\.+]+:v2", "net.fabricmc:yarn:" + CACHED_MC_VERSION + "+build.1:v2");
+            content = content.replaceAll("net\\.fabricmc:yarn:[0-9\\.+]+:v2", "net.fabricmc:yarn:" + mcVersion + "+build.1:v2");
 
             FileIO.writeStringToFile(content, buildGradle);
         }
