@@ -25,9 +25,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.lang.ref.SoftReference;
 import java.net.URL;
 import java.util.Map;
 import java.util.Objects;
@@ -38,8 +38,10 @@ public class UIRES {
 
 	private static final Logger LOG = LogManager.getLogger("UIRES");
 
-	private static final Map<String, ImageIcon> THEME_CACHE = new ConcurrentHashMap<>();
-	private static final Map<String, ImageIcon> FALLBACK_CACHE = new ConcurrentHashMap<>();
+	// Use SoftReference to allow GC to reclaim memory if needed
+	private static final Map<String, SoftReference<ImageIcon>> THEME_CACHE = new ConcurrentHashMap<>();
+	private static final Map<String, SoftReference<ImageIcon>> FALLBACK_CACHE = new ConcurrentHashMap<>();
+	private static final Map<String, SoftReference<ImageIcon>> BUILTIN_CACHE = new ConcurrentHashMap<>();
 
 	// Cache to store missing images to avoid repeated failed lookups
 	private static final Map<String, Boolean> MISSING_CACHE = new ConcurrentHashMap<>();
@@ -55,10 +57,6 @@ public class UIRES {
 
 	private static ImageIcon loadFromTheme(String theme, String identifier, String type) {
 		String themePath = "themes." + theme + ".images." + identifier + "." + type;
-		// Try to find the resource directly
-		// We reconstruct the path logic from the original bulk loader
-		// Original: themes.{theme}.images + relative path
-		// Here identifier is the relative path (e.g. "buttons.add")
 
 		String resourcePath = "themes/" + theme + "/images/" + identifier.replace('.', '/') + "." + type;
 
@@ -124,24 +122,35 @@ public class UIRES {
 		String keySvg = identifier + ".svg";
 		String keyPng = identifier + ".png";
 
-		if (THEME_CACHE.containsKey(keySvg)) return THEME_CACHE.get(keySvg);
-		if (THEME_CACHE.containsKey(keyPng)) return THEME_CACHE.get(keyPng);
+		ImageIcon icon;
+		if ((icon = getFromSoftCache(THEME_CACHE, keySvg)) != null) return icon;
+		if ((icon = getFromSoftCache(THEME_CACHE, keyPng)) != null) return icon;
 
 		if (!currentTheme.equals("default_dark")) {
-			if (FALLBACK_CACHE.containsKey(keySvg)) return FALLBACK_CACHE.get(keySvg);
-			if (FALLBACK_CACHE.containsKey(keyPng)) return FALLBACK_CACHE.get(keyPng);
+			if ((icon = getFromSoftCache(FALLBACK_CACHE, keySvg)) != null) return icon;
+			if ((icon = getFromSoftCache(FALLBACK_CACHE, keyPng)) != null) return icon;
 		}
 		return null;
 	}
 
-	private static ImageIcon loadAndCache(String theme, String identifier, String type, Map<String, ImageIcon> cache) {
+	private static ImageIcon getFromSoftCache(Map<String, SoftReference<ImageIcon>> cache, String key) {
+		SoftReference<ImageIcon> ref = cache.get(key);
+		if (ref != null) {
+			return ref.get();
+		}
+		return null;
+	}
+
+	private static ImageIcon loadAndCache(String theme, String identifier, String type, Map<String, SoftReference<ImageIcon>> cache) {
 		String key = identifier + "." + type;
+
 		// Double check cache
-		if (cache.containsKey(key)) return cache.get(key);
+		ImageIcon cached = getFromSoftCache(cache, key);
+		if (cached != null) return cached;
 
 		ImageIcon icon = loadFromTheme(theme, identifier, type);
 		if (icon != null) {
-			cache.put(key, icon);
+			cache.put(key, new SoftReference<>(icon));
 			return icon;
 		}
 		return null;
@@ -155,24 +164,40 @@ public class UIRES {
 	 * @return the image icon
 	 */
 	public static ImageIcon getBuiltIn(String identifier) {
-		return THEME_CACHE.computeIfAbsent("@" + identifier, key -> new ImageIcon(Objects.requireNonNull(
-				ClassLoader.getSystemClassLoader().getResource("net/mcreator/ui/res/" + identifier + ".png"))));
+		String key = "@" + identifier;
+		ImageIcon icon = getFromSoftCache(BUILTIN_CACHE, key);
+		if (icon != null) return icon;
+
+		icon = new ImageIcon(Objects.requireNonNull(
+				ClassLoader.getSystemClassLoader().getResource("net/mcreator/ui/res/" + identifier + ".png")));
+		BUILTIN_CACHE.put(key, new SoftReference<>(icon));
+		return icon;
 	}
 
 	public static class SVG {
 
-		private static final Map<String, ImageIcon> CACHE = new ConcurrentHashMap<>();
+		private static final Map<String, SoftReference<ImageIcon>> CACHE = new ConcurrentHashMap<>();
 
 		public static ImageIcon getBuiltIn(String identifier, int width, int height) {
 			return getBuiltIn(identifier, width, height, null);
 		}
 
 		public static ImageIcon getBuiltIn(String identifier, int width, int height, @Nullable Color paint) {
-			return CACHE.computeIfAbsent(computeKey("@" + identifier, width, height, paint), id -> {
-				URL url = ClassLoader.getSystemClassLoader()
-						.getResource("net/mcreator/ui/res/" + identifier.replace('.', '/') + ".svg");
-				return new FlatSVGIcon(url).derive(width, height);
-			});
+			String key = computeKey("@" + identifier, width, height, paint);
+			SoftReference<ImageIcon> ref = CACHE.get(key);
+			if (ref != null) {
+				ImageIcon icon = ref.get();
+				if (icon != null) return icon;
+			}
+
+			URL url = ClassLoader.getSystemClassLoader()
+					.getResource("net/mcreator/ui/res/" + identifier.replace('.', '/') + ".svg");
+			ImageIcon icon = new FlatSVGIcon(url).derive(width, height);
+
+			if (icon != null)
+				CACHE.put(key, new SoftReference<>(icon));
+
+			return icon;
 		}
 
 		private static String computeKey(String identifier, int width, int height, @Nullable Color color) {
