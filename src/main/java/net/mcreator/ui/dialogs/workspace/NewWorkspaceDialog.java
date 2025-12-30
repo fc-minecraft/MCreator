@@ -163,18 +163,18 @@ public class NewWorkspaceDialog extends MCreatorDialog {
 
 		ButtonGroup buttonGroup = new ButtonGroup();
 
-		styleButton(neoforge);
-		buttonGroup.add(neoforge);
-		neoforge.addActionListener(e -> {
-			current = neoforgeWorkspacePanel;
-			cardLayout.show(workspacePanels, "neoforge");
-		});
-
 		styleButton(fabric);
 		buttonGroup.add(fabric);
 		fabric.addActionListener(e -> {
 			current = fabricWorkspacePanel;
 			cardLayout.show(workspacePanels, "fabric");
+		});
+
+		styleButton(neoforge);
+		buttonGroup.add(neoforge);
+		neoforge.addActionListener(e -> {
+			current = neoforgeWorkspacePanel;
+			cardLayout.show(workspacePanels, "neoforge");
 		});
 
 		styleButton(forge);
@@ -303,14 +303,18 @@ public class NewWorkspaceDialog extends MCreatorDialog {
 		pack();
 		setLocationRelativeTo(w);
 
-		GeneratorConfiguration suggestedGenerator = GeneratorConfiguration.getRecommendedGeneratorForBaseLanguage(
-				Generator.GENERATOR_CACHE.values().stream()
-						.filter(e -> GeneratorFlavor.OFFICIAL_FLAVORS.contains(e.getGeneratorFlavor()))
-						.collect(Collectors.toSet()), GeneratorFlavor.BaseLanguage.JAVA);
-		if (suggestedGenerator != null) {
-			selectType(suggestedGenerator.getGeneratorFlavor());
+		if (fabric.isEnabled()) {
+			selectType(GeneratorFlavor.FABRIC);
 		} else {
-			selectType(GeneratorFlavor.FORGE);
+			GeneratorConfiguration suggestedGenerator = GeneratorConfiguration.getRecommendedGeneratorForBaseLanguage(
+					Generator.GENERATOR_CACHE.values().stream()
+							.filter(e -> GeneratorFlavor.OFFICIAL_FLAVORS.contains(e.getGeneratorFlavor()))
+							.collect(Collectors.toSet()), GeneratorFlavor.BaseLanguage.JAVA);
+			if (suggestedGenerator != null) {
+				selectType(suggestedGenerator.getGeneratorFlavor());
+			} else {
+				selectType(GeneratorFlavor.FORGE);
+			}
 		}
 		this.current.focusMainField();
 

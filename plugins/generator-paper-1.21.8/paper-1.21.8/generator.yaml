@@ -1,0 +1,35 @@
+name: Minecraft Paper for @minecraft-@buildfileversion
+status: stable
+buildfileversion: 60
+subversion: 2
+
+import:
+  - datapack-1.21.8:
+    exclude:
+      - features
+      - jsontriggers
+
+gradle:
+  export_file: "build/libs/plugin.jar"
+  run_server: runPaperServer
+  sync_task: buildPaper
+
+source_root: "@WORKSPACEROOT/src/main/java"
+res_root: "@WORKSPACEROOT/src/main/resources"
+
+import_formatter:
+  duplicates_whitelist:
+    - java.util
+    - net.minecraft
+    - org.bukkit
+    - org.spigotmc
+    - io.papermc
+
+base_templates:
+- template: modbase/mod.java.ftl
+  name: "@SRCROOT/@BASEPACKAGEPATH/@JavaModName.java"
+  canLock: true
+- template: modbase/plugin.yml.ftl
+  writer: file
+  name: "@RESROOT/plugin.yml"
+  canLock: true

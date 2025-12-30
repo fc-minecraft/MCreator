@@ -1,0 +1,1 @@
+/*@ItemStack*/(arguments.getArgument("${field$param}", ItemStack.class))

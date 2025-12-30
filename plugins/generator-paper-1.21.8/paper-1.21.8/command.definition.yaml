@@ -1,0 +1,9 @@
+templates:
+  - template: command.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/commands/@NAME.java"
+
+global_templates:
+  - template: elementinits/commands.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/init/@JavaModNameCommands.java"
+
+field_exclusions: [type, permissionLevel]
