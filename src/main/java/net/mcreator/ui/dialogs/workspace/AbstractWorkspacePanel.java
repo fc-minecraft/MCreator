@@ -71,6 +71,23 @@ public abstract class AbstractWorkspacePanel {
 
 		workspaceDialogPanel = new WorkspaceDialogs.WorkspaceDialogPanel(parent, null);
 
+		// Update workspace path when Mod Name changes (as Mod ID is often auto-filled from name)
+		workspaceDialogPanel.modName.getDocument().addDocumentListener(new DocumentListener() {
+			@Override public void insertUpdate(DocumentEvent e) { update(); }
+			@Override public void removeUpdate(DocumentEvent e) { update(); }
+			@Override public void changedUpdate(DocumentEvent e) { update(); }
+			private void update() {
+				if (!workspaceFolderAltered) {
+					// Use Mod Name to suggest folder if Mod ID hasn't triggered yet or is empty
+					String cleanName = workspaceDialogPanel.modName.getText().replaceAll("[^a-zA-Z0-9]", "");
+					if (!cleanName.isEmpty()) {
+						workspaceFolder.setText(WorkspaceFolderManager.getSuggestedWorkspaceFoldersRoot().getAbsolutePath() + File.separator + cleanName);
+						workspaceFolder.getValidationStatus();
+					}
+				}
+			}
+		});
+
 		workspaceDialogPanel.modID.getDocument().addDocumentListener(new DocumentListener() {
 			@Override public void insertUpdate(DocumentEvent documentEvent) {
 				action();

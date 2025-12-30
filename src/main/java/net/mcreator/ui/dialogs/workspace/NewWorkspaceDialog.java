@@ -227,8 +227,8 @@ public class NewWorkspaceDialog extends MCreatorDialog {
 		});
 
 		workspaceType.add(separator("dialog.new_workspace.je_mod"));
-		workspaceType.add(neoforge);
 		workspaceType.add(fabric);
+		workspaceType.add(neoforge);
 		workspaceType.add(forge);
 		workspaceType.add(quilt);
 		workspaceType.add(separator("dialog.new_workspace.je_dp"));
