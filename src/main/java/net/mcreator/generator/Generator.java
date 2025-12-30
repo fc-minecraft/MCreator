@@ -42,6 +42,8 @@ import net.mcreator.java.ProjectJarManager;
 import net.mcreator.workspace.Workspace;
 import net.mcreator.workspace.elements.ModElement;
 import net.mcreator.workspace.resources.ExternalTexture;
+import net.mcreator.preferences.PreferencesManager;
+import net.mcreator.util.OfflineCacheManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gradle.tooling.GradleConnector;
@@ -185,6 +187,48 @@ public class Generator implements IGenerator, Closeable {
 		// generate files as old files were deleted
 		generateFiles(generatorFiles, formatAndOrganiseImports);
 
+		// HOTFIX: Inject missing imports for offline mode / unstable templates
+		// This handles cases where templates are missing imports (ConcurrentLinkedQueue, Arrays, List, etc.)
+		for (GeneratorFile gf : generatorFiles) {
+			if (gf.writer() == GeneratorFile.Writer.JAVA) {
+				File f = gf.getFile();
+				if (f.exists()) {
+					String content = FileIO.readFileToString(f);
+					boolean changed = false;
+
+					// Fix ConcurrentLinkedQueue usage
+					if (content.contains("ConcurrentLinkedQueue") && !content.contains("import java.util.concurrent.ConcurrentLinkedQueue;")) {
+						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.util.concurrent.ConcurrentLinkedQueue;\nimport java.util.Collection;");
+						changed = true;
+					}
+
+					// Fix Arrays.stream ambiguity by using Fully Qualified Name
+					if (content.contains("Arrays.stream")) {
+						content = content.replace("Arrays.stream", "java.util.Arrays.stream");
+						changed = true;
+					}
+
+					// Fix List/ArrayList ambiguity by using Fully Qualified Name
+					if (content.contains("List<") || content.contains("ArrayList")) {
+						content = content.replaceAll("\\bList<", "java.util.List<");
+						content = content.replaceAll("\\bArrayList<", "java.util.ArrayList<");
+						content = content.replaceAll("new ArrayList", "new java.util.ArrayList");
+						changed = true;
+					}
+
+					// Fix MethodHandles/MethodType imports
+					if ((content.contains("MethodHandles") || content.contains("MethodType")) && !content.contains("import java.lang.invoke.MethodHandles;")) {
+						content = content.replaceAll("(package\\s+[\\w\\.]+;)", "$1\nimport java.lang.invoke.MethodHandles;\nimport java.lang.invoke.MethodType;");
+						changed = true;
+					}
+
+					if (changed) {
+						FileIO.writeStringToFile(content, f);
+					}
+				}
+			}
+		}
+
 		// store paths of generated files
 		workspace.putMetadata("files", generatorFiles.stream().map(GeneratorFile::getFile)
 				.map(e -> getFolderManager().getPathInWorkspace(e).replace(File.separator, "/")).toList());
@@ -197,6 +241,10 @@ public class Generator implements IGenerator, Closeable {
 
 		// generate tags files
 		TagsUtils.generateTagsFiles(this, workspace, generatorConfiguration.getTagsSpecification());
+
+		if (PreferencesManager.PREFERENCES.gradle.offline.get() && OfflineCacheManager.isOfflineModeReady()) {
+			OfflineCacheManager.applyOfflineFixes(workspace.getWorkspaceFolder());
+		}
 
 		return success.get();
 	}
