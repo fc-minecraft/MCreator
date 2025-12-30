@@ -4,10 +4,21 @@ Blockly.HSV_SATURATION = MCR_BLOCKLY_PREF['saturation'];
 Blockly.HSV_VALUE = MCR_BLOCKLY_PREF['value'];
 
 const blockly = document.getElementById('blockly');
+
+const mcreatorTheme = Blockly.Theme.defineTheme('mcreator', {
+    'base': Blockly.Themes.Classic,
+    'fontStyle': {
+        'family': '"Noto Sans", "Segoe UI", sans-serif',
+        'weight': '600',
+        'size': 10
+    }
+});
+
 const workspace = Blockly.inject(blockly, {
     media: 'res/',
     oneBasedIndex: false,
     sounds: false,
+    theme: mcreatorTheme,
     comments: MCR_BLOCKLY_PREF['comments'],
     collapse: MCR_BLOCKLY_PREF['collapse'],
     disable: false,
