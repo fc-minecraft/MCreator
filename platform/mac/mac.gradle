@@ -4,11 +4,22 @@ import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
+tasks.register('extractJcefMacX64', Copy) {
+    dependsOn configurations.macX64
+    from {
+        configurations.macX64.filter { it.name.contains('jcef-natives') }.collect { zipTree(it) }
+    }
+    include "**/*.dylib", "**/*.pak", "**/*.bin", "**/*.dat", "**/*.json", "**/*.so"
+    exclude "META-INF/**"
+    into 'build/export/mac_x64/MCreator.app/Contents/MacOS/jcef-bundle'
+}
+
 tasks.register('exportMacX64', Copy.class) {
     dependsOn downloadJDKMacX64
     dependsOn downloadMKISOFS
     dependsOn jar
     dependsOn exportPlugins
+    dependsOn extractJcefMacX64
 
     def exportPathX64 = 'build/export/mac_x64/MCreator.app'
 
@@ -55,11 +66,22 @@ tasks.register('exportMacX64', Copy.class) {
     }
 }
 
+tasks.register('extractJcefMacAarch64', Copy) {
+    dependsOn configurations.macAarch64
+    from {
+        configurations.macAarch64.filter { it.name.contains('jcef-natives') }.collect { zipTree(it) }
+    }
+    include "**/*.dylib", "**/*.pak", "**/*.bin", "**/*.dat", "**/*.json", "**/*.so"
+    exclude "META-INF/**"
+    into 'build/export/mac_aarch64/MCreator.app/Contents/MacOS/jcef-bundle'
+}
+
 tasks.register('exportMacAarch64', Copy.class) {
     dependsOn downloadJDKMacAarch64
     dependsOn downloadMKISOFS
     dependsOn jar
     dependsOn exportPlugins
+    dependsOn extractJcefMacAarch64
 
     def exportPathAarch64 = 'build/export/mac_aarch64/MCreator.app'
 

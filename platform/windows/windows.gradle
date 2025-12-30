@@ -32,11 +32,22 @@ launch4j {
     icon = "${projectDir}/src/main/resources/net/mcreator/ui/res/" + (project.snapshot ? "icon_eap.ico" : "icon.ico")
 }
 
+tasks.register('extractJcefWin64', Copy) {
+    dependsOn configurations.win64
+    from {
+        configurations.win64.filter { it.name.contains('jcef-natives') }.collect { zipTree(it) }
+    }
+    include "**/*.dll", "**/*.pak", "**/*.bin", "**/*.dat", "**/*.json", "**/*.exe"
+    exclude "META-INF/**"
+    into 'build/export/win64/jcef-bundle'
+}
+
 tasks.register('exportWin64', Copy.class) {
     dependsOn downloadJDKWin64
     dependsOn createAllExecutables
     dependsOn jar
     dependsOn exportPlugins
+    dependsOn extractJcefWin64
 
     into 'build/export/win64'
     into('') {
