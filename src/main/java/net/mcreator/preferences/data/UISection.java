@@ -54,7 +54,7 @@ public class UISection extends PreferencesSection {
 		expandSectionsByDefault = addEntry(new BooleanEntry("expandSectionsByDefault", false));
 		autoReloadTabs = addEntry(new BooleanEntry("autoReloadTabs", true));
 		remindOfUnsavedChanges = addEntry(new BooleanEntry("remindOfUnsavedChanges", false));
-		discordRichPresenceEnable = addEntry(new BooleanEntry("discordRichPresenceEnable", true));
+		discordRichPresenceEnable = addEntry(new BooleanEntry("discordRichPresenceEnable", false));
 	}
 
 	@Override public String getSectionKey() {

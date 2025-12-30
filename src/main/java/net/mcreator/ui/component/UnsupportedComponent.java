@@ -76,25 +76,11 @@ public class UnsupportedComponent extends JPanel {
 		Arrays.stream(origin.getKeyListeners()).forEach(origin::removeKeyListener);
 
 		add(origin);
+		setVisible(false);
 	}
 
 	@Override public void paint(Graphics g) {
 		super.paint(g);
-
-		g.setColor(ColorUtils.applyAlpha(Theme.current().getAltBackgroundColor(), 100));
-		g.fillRect(0, 0, getWidth(), getHeight());
-
-		int x = (this.getWidth() - warning.getWidth(null)) / 2;
-		int y = (this.getHeight() - warning.getHeight(null)) / 2;
-
-		if (getWidth() > 100) {
-			g.setFont(g.getFont().deriveFont(12f));
-			g.drawImage(warning, x - g.getFontMetrics().stringWidth("Не поддерживается") / 2, y, null);
-			g.setColor(Theme.current().getForegroundColor());
-			g.drawString("Не поддерживается", x - g.getFontMetrics().stringWidth("Не поддерживается") / 2 + 18 + 4, y + 13);
-		} else {
-			g.drawImage(warning, x, y, null);
-		}
 	}
 
 }

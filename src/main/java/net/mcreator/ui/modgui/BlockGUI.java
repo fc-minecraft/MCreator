@@ -600,7 +600,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		renderType.addActionListener(e -> updateTextureOptions());
 
-		JPanel pane2 = new JPanel(new BorderLayout(10, 10));
+		JPanel pane2 = new JPanel(new BorderLayout(40, 10));
 		JPanel pane3 = new JPanel(new BorderLayout(10, 10));
 		JPanel pane4 = new JPanel(new BorderLayout(10, 10));
 		JPanel pane7 = new JPanel(new BorderLayout(10, 10));
@@ -649,10 +649,10 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		textures = new BlockTexturesSelector(mcreator);
 
-		JPanel sbbp2 = new JPanel(new BorderLayout(1, 5));
+		JPanel sbbp2 = new JPanel(new BorderLayout(40, 10));
 		sbbp2.setOpaque(false);
 
-		JPanel modelSettings = new JPanel(new GridLayout(1, 2, 0, 2));
+		JPanel modelSettings = new JPanel(new GridLayout(1, 2, 10, 10));
 		modelSettings.setOpaque(false);
 		modelSettings.add(
 				HelpUtils.wrapWithHelpButton(this.withEntry("block/model"), L10N.label("elementgui.block.model")));
@@ -660,7 +660,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		renderType.setPreferredSize(new Dimension(300, 42));
 
-		JPanel optionalTextures = new JPanel(new GridLayout(2, 2, 0, 2));
+		JPanel optionalTextures = new JPanel(new GridLayout(2, 2, 10, 10));
 		optionalTextures.setOpaque(false);
 		optionalTextures.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/item_texture"),
 				L10N.label("elementgui.block.item_texture")));
@@ -697,7 +697,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 		ComponentUtils.deriveFont(blockSetType, 16);
 		ComponentUtils.deriveFont(tintType, 16);
 
-		JPanel visualRenderingSettings = new JPanel(new GridLayout(7, 2, 0, 2));
+		JPanel visualRenderingSettings = new JPanel(new GridLayout(7, 2, 10, 10));
 		visualRenderingSettings.setOpaque(false);
 
 		visualRenderingSettings.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/has_transparency"),
@@ -731,7 +731,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 		ComponentUtils.deriveFont(rotationMode, 16);
 		ComponentUtils.deriveFont(offsetType, 16);
 
-		JPanel rent = new JPanel(new GridLayout(3, 2, 0, 2));
+		JPanel rent = new JPanel(new GridLayout(3, 2, 10, 10));
 		rent.setOpaque(false);
 
 		rent.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/rotation_mode"),
@@ -786,7 +786,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 		pane2.setOpaque(false);
 		pane2.add("Center", PanelUtils.totalCenterInPanel(sbbp2));
 
-		JPanel northPanel = new JPanel(new GridLayout(2, 2, 10, 2));
+		JPanel northPanel = new JPanel(new GridLayout(2, 2, 10, 10));
 		northPanel.setOpaque(false);
 
 		northPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/disable_offset"),
@@ -811,11 +811,11 @@ public class BlockGUI extends ModElementGUI<Block> {
 		bsPane.setOpaque(false);
 		bsPane.add("Center", statePropertiesList);
 
-		JPanel selp = new JPanel(new GridLayout(9, 2, 0, 2));
-		JPanel selp3 = new JPanel(new GridLayout(8, 2, 0, 2));
-		JPanel soundProperties = new JPanel(new GridLayout(7, 2, 0, 2));
+		JPanel selp = new JPanel(new GridLayout(9, 2, 10, 10));
+		JPanel selp3 = new JPanel(new GridLayout(8, 2, 10, 10));
+		JPanel soundProperties = new JPanel(new GridLayout(7, 2, 10, 10));
 
-		JPanel advancedProperties = new JPanel(new GridLayout(14, 2, 0, 2));
+		JPanel advancedProperties = new JPanel(new GridLayout(14, 2, 10, 10));
 
 		hasGravity.setOpaque(false);
 		tickRandomly.setOpaque(false);
@@ -877,7 +877,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 				L10N.label("elementgui.block.is_replaceable")));
 		selp.add(isReplaceable);
 
-		JPanel blockItemSettings = new JPanel(new GridLayout(5, 2, 0, 2));
+		JPanel blockItemSettings = new JPanel(new GridLayout(5, 2, 10, 10));
 		blockItemSettings.setOpaque(false);
 
 		blockItemSettings.add(HelpUtils.wrapWithHelpButton(this.withEntry("common/has_block_item"),
@@ -1076,6 +1076,11 @@ public class BlockGUI extends ModElementGUI<Block> {
 				L10N.t("elementgui.block.properties_advanced_block"), TitledBorder.LEADING,
 				TitledBorder.DEFAULT_POSITION, getFont(), Theme.current().getForegroundColor()));
 
+		ComponentUtils.deriveFontRecursive(selp, 14);
+		ComponentUtils.deriveFontRecursive(blockItemSettings, 14);
+		ComponentUtils.deriveFontRecursive(soundProperties, 14);
+		ComponentUtils.deriveFontRecursive(advancedWithCondition, 14);
+
 		selp.setOpaque(false);
 		soundProperties.setOpaque(false);
 
@@ -1087,7 +1092,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		pane3.add("Center", PanelUtils.totalCenterInPanel(PanelUtils.westAndEastElement(
 				PanelUtils.pullElementUp(PanelUtils.centerAndSouthElement(selp, blockItemSettings)),
-				PanelUtils.pullElementUp(PanelUtils.centerAndSouthElement(selpWrap, soundProperties)))));
+				PanelUtils.pullElementUp(PanelUtils.centerAndSouthElement(selpWrap, soundProperties)), 40, 0)));
 		pane3.setOpaque(false);
 
 		JPanel events = new JPanel(new GridLayout(4, 4, 5, 5));
@@ -1127,7 +1132,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 		inventoryDropWhenDestroyed.setSelected(true);
 		inventoryComparatorPower.setSelected(true);
 
-		JPanel props = new JPanel(new GridLayout(8, 2, 0, 2));
+		JPanel props = new JPanel(new GridLayout(8, 2, 10, 10));
 		props.setOpaque(false);
 
 		props.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/bind_gui"),
@@ -1199,8 +1204,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 		JPanel pane10 = new JPanel(new BorderLayout(10, 10));
 		pane10.setOpaque(false);
 
-		JPanel energyStorage = new JPanel(new GridLayout(5, 2, 10, 2));
-		JPanel fluidTank = new JPanel(new GridLayout(3, 2, 10, 2));
+		JPanel energyStorage = new JPanel(new GridLayout(5, 2, 10, 10));
+		JPanel fluidTank = new JPanel(new GridLayout(3, 2, 10, 10));
 
 		energyStorage.setOpaque(false);
 		fluidTank.setOpaque(false);
@@ -1253,17 +1258,17 @@ public class BlockGUI extends ModElementGUI<Block> {
 		pane10.add(PanelUtils.totalCenterInPanel(
 				PanelUtils.northAndCenterElement(L10N.label("elementgui.block.tile_entity_tip"),
 						PanelUtils.westAndEastElement(energyStorage,
-								PanelUtils.northAndCenterElement(fluidTank, new JEmptyBox())), 10, 10)));
+								PanelUtils.northAndCenterElement(fluidTank, new JEmptyBox(), 40, 0), 10, 10))));
 
 		hasInventory.addActionListener(e -> refreshFieldsTileEntity());
 		refreshFieldsTileEntity();
 
-		JPanel invpropsbottom = new JPanel(new GridLayout(2, 1, 0, 2));
+		JPanel invpropsbottom = new JPanel(new GridLayout(2, 1, 10, 10));
 		invpropsbottom.setOpaque(false);
 		invpropsbottom.add(inventoryAutomationTakeCondition);
 		invpropsbottom.add(inventoryAutomationPlaceCondition);
 
-		JPanel vibrationPanel = new JPanel(new GridLayout(2, 2, 0, 2));
+		JPanel vibrationPanel = new JPanel(new GridLayout(2, 2, 10, 10));
 		vibrationPanel.setOpaque(false);
 
 		sensitiveToVibration.setOpaque(false);
@@ -1280,8 +1285,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		vibrationalEvents.setPreferredSize(new Dimension(280, 0));
 
-		JPanel vibrationEvents = new JPanel(new BorderLayout(0, 2));
-		JPanel vibrationEventsBottom = new JPanel(new GridLayout(2, 1, 0, 2));
+		JPanel vibrationEvents = new JPanel(new BorderLayout(0, 10));
+		JPanel vibrationEventsBottom = new JPanel(new GridLayout(2, 1, 10, 10));
 
 		vibrationEventsBottom.setOpaque(false);
 		vibrationEventsBottom.add(canReceiveVibrationCondition);
@@ -1304,13 +1309,14 @@ public class BlockGUI extends ModElementGUI<Block> {
 				L10N.t("elementgui.block.settings_inventory"), 0, 0, getFont().deriveFont(12.0f),
 				Theme.current().getForegroundColor()));
 
-		invblock.add("Center", PanelUtils.westAndEastElement(invpropsall, PanelUtils.pullElementUp(vibrationMerger)));
+		invblock.add("Center", PanelUtils.westAndEastElement(invpropsall, PanelUtils.pullElementUp(vibrationMerger),
+				40, 0));
 
 		invblock.add("North", HelpUtils.wrapWithHelpButton(this.withEntry("block/has_inventory"), hasInventory));
 
 		pane8.add("Center", PanelUtils.totalCenterInPanel(invblock));
 
-		JPanel genPanel = new JPanel(new GridLayout(7, 2, 20, 2));
+		JPanel genPanel = new JPanel(new GridLayout(7, 2, 20, 10));
 
 		genPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("common/generate_feature"),
 				L10N.label("elementgui.block.generate_feature")));
@@ -1345,7 +1351,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		genPanel.setOpaque(false);
 
-		JPanel redstoneParameters = new JPanel(new GridLayout(2, 2, 0, 2));
+		JPanel redstoneParameters = new JPanel(new GridLayout(2, 2, 10, 10));
 		redstoneParameters.setOpaque(false);
 
 		redstoneParameters.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/redstone_connect"),
@@ -1366,14 +1372,14 @@ public class BlockGUI extends ModElementGUI<Block> {
 		canProvidePower.addActionListener(e -> refreshRedstoneEmitted());
 		refreshRedstoneEmitted();
 
-		JPanel bonemealPanel = new JPanel(new GridLayout(1, 2, 0, 2));
+		JPanel bonemealPanel = new JPanel(new GridLayout(1, 2, 10, 10));
 		bonemealPanel.setOpaque(false);
 
 		bonemealPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/is_bonemealable"),
 				L10N.label("elementgui.common.is_bonemealable")));
 		bonemealPanel.add(isBonemealable);
 
-		JPanel bonemealEvents = new JPanel(new GridLayout(3, 1, 0, 2));
+		JPanel bonemealEvents = new JPanel(new GridLayout(3, 1, 10, 10));
 		bonemealEvents.setOpaque(false);
 
 		bonemealEvents.add(isBonemealTargetCondition);
@@ -1389,7 +1395,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 		isBonemealable.addActionListener(e -> refreshBonemealProperties());
 		refreshBonemealProperties();
 
-		JPanel flammabilityProperties = new JPanel(new GridLayout(3, 2, 0, 2));
+		JPanel flammabilityProperties = new JPanel(new GridLayout(3, 2, 10, 10));
 		flammabilityProperties.setOpaque(false);
 
 		flammabilityProperties.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/ignited_by_lava"),
@@ -1426,7 +1432,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 		});
 
 		pane7.add(PanelUtils.totalCenterInPanel(PanelUtils.westAndEastElement(advancedWithCondition,
-				PanelUtils.pullElementUp(PanelUtils.column(redstoneMerger, bonemealMerger, flammabilityProperties)))));
+				PanelUtils.pullElementUp(PanelUtils.column(redstoneMerger, bonemealMerger, flammabilityProperties)),
+				40, 0)));
 
 		pane7.setOpaque(false);
 		pane9.setOpaque(false);
