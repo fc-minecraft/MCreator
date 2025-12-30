@@ -1,0 +1,1 @@
+.then(Commands.argument("${field$name}", ArgumentTypes.${field$type}())${statement$args})

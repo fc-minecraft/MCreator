@@ -1,0 +1,15 @@
+{
+  "id": "generator-paper-1.21.8",
+  "supportedversions": [
+    202500490001
+  ],
+  "info": {
+    "name": "Minecraft Paper 1.21.8 Generator",
+    "version": "1.1",
+    "description": "A Paper Generator",
+    "author": "Goldorion",
+    "credits": "",
+    "updateJSONURL": "",
+    "pluginPageID": 120235
+  }
+}
