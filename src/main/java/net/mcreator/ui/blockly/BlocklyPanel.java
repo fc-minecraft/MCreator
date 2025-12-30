@@ -90,7 +90,7 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		bridge = new BlocklyJavascriptBridge(mcreator, () -> ThreadUtil.runOnSwingThread(
 				() -> changeListeners.forEach(listener -> listener.stateChanged(new ChangeEvent(BlocklyPanel.this)))));
 
-		loadingLabel = new JLabel("Initializing JCEF...", SwingConstants.CENTER);
+		loadingLabel = new JLabel("Загрузка редактора...", SwingConstants.CENTER);
 		loadingLabel.setFont(loadingLabel.getFont().deriveFont(16f));
 		add(loadingLabel, BorderLayout.CENTER);
 
@@ -105,7 +105,6 @@ public class BlocklyPanel extends JPanel implements Closeable {
 					return;
 				}
 
-				// Add Console Logging
 				client.addDisplayHandler(new CefDisplayHandlerAdapter() {
 					@Override
 					public boolean onConsoleMessage(CefBrowser browser, org.cef.CefSettings.LogSeverity level, String message, String source, int line) {
@@ -116,11 +115,10 @@ public class BlocklyPanel extends JPanel implements Closeable {
 							case LOGSEVERITY_INFO: LOG.info(logMsg); break;
 							default: LOG.debug(logMsg); break;
 						}
-						return false; // Allow default handling? or true to suppress
+						return false;
 					}
 				});
 
-				// Message Router
 				CefMessageRouter msgRouter = CefMessageRouter.create();
 				msgRouter.addHandler(new CefMessageRouterHandlerAdapter() {
 					@Override
@@ -172,7 +170,6 @@ public class BlocklyPanel extends JPanel implements Closeable {
 								return true;
 							}
 						} else if (request.startsWith("openEntrySelector:")) {
-							// Format: openEntrySelector:ID:type:typeFilter:customEntryProviders
 							String[] parts = request.split(":", 5);
 							if (parts.length >= 3) {
 								String id = parts[1];
@@ -185,7 +182,6 @@ public class BlocklyPanel extends JPanel implements Closeable {
 
 								bridge.openEntrySelector(type, typeFilter, customEntryProviders, (result) -> {
 									String[] res = (String[]) result;
-									// result is {value, readableName}
 									String val = res[0].replace("'", "\\'");
 									String name = res[1].replace("'", "\\'");
 									browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + val + "', '" + name + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
@@ -205,6 +201,10 @@ public class BlocklyPanel extends JPanel implements Closeable {
 								callback.success("");
 								return true;
 							}
+						} else if (request.equals("blocklyLoaded")) {
+							SwingUtilities.invokeLater(() -> executePluginScripts());
+							callback.success("");
+							return true;
 						}
 						return false;
 					}
@@ -260,6 +260,9 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	private void injectSetupScripts() {
 		StringBuilder initScript = new StringBuilder();
 
+		// Define loader function
+		initScript.append("function loadScript(src) { return new Promise((resolve, reject) => { var s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.head.appendChild(s); }); }\n");
+
 		initScript.append("window.javabridge = {};\n");
 		initScript.append("window.javabridge.callbacks = {};\n");
 		initScript.append("window.javabridge.triggerEvent = function() { window.cefQuery({request: 'triggerEvent', persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
@@ -270,7 +273,6 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		String startBlock = bridge.startBlockForEditor(type.registryName());
 		initScript.append("window.javabridge.startBlockForEditor = function(editor) { return '" + (startBlock!=null?startBlock:"") + "'; };\n");
 
-		// Helper for callbacks
 		initScript.append("""
 			window.javabridge.registerCallback = function(callback) {
 				var id = 'cb_' + Math.floor(Math.random() * 1000000);
@@ -287,18 +289,14 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		// Preload Lists
 		initScript.append("window.MCR_LISTS = {};\n");
 		Gson gson = new Gson();
-
 		Set<String> datalists = new HashSet<>(DataListLoader.getCache().keySet());
-
 		String[] explicitTypes = {"procedure", "entity", "spawnableEntity", "gui", "achievement", "effect", "potion",
                                   "gamerulesboolean", "gamerulesnumber", "fluid", "sound", "particle", "direction",
                                   "schematic", "enhancement", "biome", "dimension_custom", "villagerprofessions"};
         datalists.addAll(Arrays.asList(explicitTypes));
-
         for (VariableType vt : VariableTypeLoader.INSTANCE.getAllVariableTypes()) {
              datalists.add("procedure_retval_" + vt.getName());
         }
-
 		for (String t : datalists) {
 			try {
 				String[] list = BlocklyJavascriptBridge.getListOfForWorkspace(mcreator.getWorkspace(), t);
@@ -311,9 +309,7 @@ public class BlocklyPanel extends JPanel implements Closeable {
 			}
 		}
 
-		browser.executeJavaScript(initScript.toString(), browser.getURL(), 0);
-
-		// Load CSS
+		// CSS injection (unchanged logic)
 		String css = FileIO.readResourceToString("/blockly/css/mcreator_blockly.css");
 		if (PluginLoader.INSTANCE.getResourceAsStream(
 				"themes/" + Theme.current().getID() + "/styles/blockly.css") != null) {
@@ -323,20 +319,13 @@ public class BlocklyPanel extends JPanel implements Closeable {
 			css += FileIO.readResourceToString(PluginLoader.INSTANCE,
 					"/themes/default_dark/styles/blockly.css");
 		}
-
 		if (PreferencesManager.PREFERENCES.blockly.legacyFont.get()) {
 			css = css.replace("font-family: sans-serif;", "");
 		}
+		initScript.append("var style = document.createElement('style'); style.innerHTML = `" + css.replace("`", "\\`") + "`; document.head.appendChild(style);\n");
 
-		// Inject CSS
-		String cssScript = "var style = document.createElement('style'); style.innerHTML = `" + css.replace("`", "\\`") + "`; document.head.appendChild(style);";
-		browser.executeJavaScript(cssScript, browser.getURL(), 0);
+		initScript.append("window.editorType = '" + type.registryName() + "';\n");
 
-		// Initialize Window Members
-		String jsMembers = "window.editorType = '" + type.registryName() + "';";
-		browser.executeJavaScript(jsMembers, browser.getURL(), 0);
-
-		// Preferences
 		String prefScript = "var MCR_BLOCKLY_PREF = { "
 						+ "'comments' : " + PreferencesManager.PREFERENCES.blockly.enableComments.get() + ","
 						+ "'renderer' : '" + PreferencesManager.PREFERENCES.blockly.blockRenderer.get().toLowerCase(Locale.ENGLISH) + "',"
@@ -347,26 +336,29 @@ public class BlocklyPanel extends JPanel implements Closeable {
 						+ "'scaleSpeed' : " + PreferencesManager.PREFERENCES.blockly.scaleSpeed.get() / 100.0 + ","
 						+ "'saturation' :" + PreferencesManager.PREFERENCES.blockly.colorSaturation.get() / 100.0 + ","
 						+ "'value' :" + PreferencesManager.PREFERENCES.blockly.colorValue.get() / 100.0
-						+ " };";
-		browser.executeJavaScript(prefScript, browser.getURL(), 0);
+						+ " };\n";
+		initScript.append(prefScript);
 
-		// Load Scripts
-		loadScript("/jsdist/blockly_compressed.js");
-		loadScript("/jsdist/msg/" + L10N.getBlocklyLangName() + ".js");
-		loadScript("/jsdist/blocks_compressed.js");
-		loadScript("/blockly/js/mcreator_blockly.js");
+		// Execute initial setup first
+		browser.executeJavaScript(initScript.toString(), browser.getURL(), 0);
 
-		for (String script : BlocklyJavaScriptsLoader.INSTANCE.getScripts())
-			browser.executeJavaScript(script, browser.getURL(), 0);
+		// Now load scripts in chain
+		StringBuilder loaderScript = new StringBuilder();
+		loaderScript.append("loadScript('client://mcreator/jsdist/blockly_compressed.js')");
+		loaderScript.append(".then(() => loadScript('client://mcreator/jsdist/msg/" + L10N.getBlocklyLangName() + ".js'))");
+		loaderScript.append(".then(() => loadScript('client://mcreator/jsdist/blocks_compressed.js'))");
+		loaderScript.append(".then(() => loadScript('client://mcreator/blockly/js/mcreator_blockly.js'))");
+		loaderScript.append(".then(() => { window.cefQuery({request: 'blocklyLoaded', persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); })");
+		loaderScript.append(".catch(e => console.error('Blockly Load Error: ', e));");
 
-		browser.executeJavaScript(VariableTypeLoader.INSTANCE.getVariableBlocklyJS(), browser.getURL(), 0);
+		browser.executeJavaScript(loaderScript.toString(), browser.getURL(), 0);
 	}
 
-	private void loadScript(String path) {
-		String content = FileIO.readResourceToString(path);
-		if (content != null) {
-			browser.executeJavaScript(content, browser.getURL(), 0);
+	private void executePluginScripts() {
+		for (String script : BlocklyJavaScriptsLoader.INSTANCE.getScripts()) {
+			browser.executeJavaScript(script, browser.getURL(), 0);
 		}
+		browser.executeJavaScript(VariableTypeLoader.INSTANCE.getVariableBlocklyJS(), browser.getURL(), 0);
 	}
 
 	public void addTaskToRunAfterLoaded(Runnable runnable) {

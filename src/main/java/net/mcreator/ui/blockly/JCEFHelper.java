@@ -26,7 +26,6 @@ public class JCEFHelper {
         synchronized (lock) {
             if (initialized) return;
             if (initializing) {
-                // Wait for other thread to finish
                 try {
                     lock.wait();
                 } catch (InterruptedException e) {
@@ -43,8 +42,9 @@ public class JCEFHelper {
             builder.setProgressHandler(new IProgressHandler() {
                 @Override
                 public void handleProgress(EnumProgress state, float percent) {
-                    String msg = "JCEF Init: " + state + " " + ((int)percent) + "%";
-                    LOG.info(msg);
+                    String msg = "Загрузка компонентов... " + ((int)percent) + "%";
+                    if (percent < 0) msg = "Загрузка компонентов...";
+                    LOG.info("JCEF Init: " + state + " " + percent + "%"); // Keep English in logs for debugging
                     if (statusUpdater != null) {
                          statusUpdater.accept(msg);
                     }
@@ -53,6 +53,28 @@ public class JCEFHelper {
 
             // Configure command line arguments for CEF
             builder.getCefSettings().windowless_rendering_enabled = false;
+
+            // Optimizations
+            builder.addJcefArgs("--disable-extensions");
+            builder.addJcefArgs("--disable-pdf-extension");
+            builder.addJcefArgs("--disable-plugins-discovery");
+            builder.addJcefArgs("--disable-background-networking");
+            builder.addJcefArgs("--disable-sync");
+
+            // Performance / FPS Limit logic
+            int cores = Runtime.getRuntime().availableProcessors();
+            if (cores < 4) {
+                // Weak PC optimization
+                // Try to limit frame rate (Note: exact switch support varies by Chromium version, but --max-frame-rate is common)
+                // Also disable some animations/smooth scrolling if possible via args?
+                builder.addJcefArgs("--disable-smooth-scrolling");
+                // builder.addJcefArgs("--scheduler-configuration-default");
+                // For windowed mode, vsync usually dictates 60. To force 30 is hard without OSR.
+                // But we can try:
+                // builder.addJcefArgs("--max-frame-rate=30"); // Might work if composition supports it
+            } else {
+                // builder.addJcefArgs("--max-frame-rate=60");
+            }
 
             builder.setAppHandler(new MavenCefAppHandlerAdapter() {
                 @Override
@@ -103,5 +125,16 @@ public class JCEFHelper {
             return app.createClient();
         }
         return null;
+    }
+
+    public static void dispose() {
+        synchronized (lock) {
+            if (cefApp != null) {
+                LOG.info("Disposing JCEF CefApp...");
+                cefApp.dispose();
+                cefApp = null;
+                initialized = false;
+            }
+        }
     }
 }
