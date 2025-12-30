@@ -50,6 +50,15 @@ public class ComponentUtils {
 		return component;
 	}
 
+	public static void deriveFontRecursive(JComponent component, float param) {
+		deriveFont(component, param);
+		for (Component child : component.getComponents()) {
+			if (child instanceof JComponent jComponent) {
+				deriveFontRecursive(jComponent, param);
+			}
+		}
+	}
+
 	public static Component wrapWithInfoButton(Component ca, String url) {
 		JPanel pan = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		pan.setOpaque(false);
