@@ -18,6 +18,7 @@
 
 package net.mcreator.ui.blockly;
 
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.JFXPanel;
