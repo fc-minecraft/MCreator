@@ -71,7 +71,7 @@ public class MCItemSelectorDialog extends SearchableSelectorDialog<MCItem> {
 		});
 
 		JPanel buttons = new JPanel();
-		JButton cancelButton = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancelButton = new JButton(L10N.t("common.cancel"));
 
 		JButton useSelectedButton = L10N.button("dialog.item_selector.use_selected");
 		useSelectedButton.addActionListener(e -> {

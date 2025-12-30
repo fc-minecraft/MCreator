@@ -935,7 +935,7 @@ import java.util.regex.Pattern;
 		if (selectedElements.stream()
 				.anyMatch(i -> i instanceof ModElement me && !(me.getType() == ModElementType.CODE))) {
 			Object[] options = { L10N.t("workspace.elements.lock_modelement_lock_unlock"),
-					UIManager.getString("OptionPane.cancelButtonText") };
+					L10N.t("common.cancel") };
 			int n = JOptionPane.showOptionDialog(mcreator, L10N.t("workspace.elements.lock_modelement_message"),
 					L10N.t("workspace.elements.lock_modelement_confirm"), JOptionPane.YES_NO_CANCEL_OPTION,
 					JOptionPane.WARNING_MESSAGE, null, options, options[1]);
@@ -1027,7 +1027,7 @@ import java.util.regex.Pattern;
 								return new ModElementNameValidator(mcreator.getWorkspace(), (VTextField) component,
 										L10N.t("common.mod_element_name")).validate();
 							}
-						}, L10N.t("workspace.elements.duplicate"), UIManager.getString("OptionPane.cancelButtonText"),
+						}, L10N.t("workspace.elements.duplicate"), L10N.t("common.cancel"),
 						mu.getName(), breadcrumb.getInScrollPane(), null);
 				if (modName != null && !modName.isEmpty()) {
 					modName = JavaConventions.convertToValidClassName(modName);

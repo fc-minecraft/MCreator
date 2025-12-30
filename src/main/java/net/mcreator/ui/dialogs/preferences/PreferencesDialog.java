@@ -87,7 +87,7 @@ public class PreferencesDialog extends MCreatorDialog {
 		ComponentUtils.deriveFont(sections, 13);
 
 		JButton ok = L10N.button("dialog.preferences.save");
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 
 		JButton reset = L10N.button("dialog.preferences.restore_defaults");
 		reset.addActionListener(actionEvent -> {

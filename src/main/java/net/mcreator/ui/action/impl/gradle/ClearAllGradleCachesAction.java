@@ -38,7 +38,7 @@ public class ClearAllGradleCachesAction extends GradleAction {
 		super(actionRegistry, L10N.t("action.gradle.clear_caches"), evt -> {
 			Object[] options = { L10N.t("action.gradle.clear_caches.option.gradle_caches"),
 					L10N.t("action.gradle.clear_caches.option.gradle_folder"),
-					UIManager.getString("OptionPane.cancelButtonText") };
+					L10N.t("common.cancel") };
 			int reply = JOptionPane.showOptionDialog(actionRegistry.getMCreator(),
 					L10N.t("action.gradle.clear_caches.option.message"),
 					L10N.t("action.gradle.clear_caches.option.title"), JOptionPane.YES_NO_OPTION,

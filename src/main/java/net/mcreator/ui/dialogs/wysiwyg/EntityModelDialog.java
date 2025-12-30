@@ -71,11 +71,11 @@ public class EntityModelDialog extends AbstractWYSIWYGDialog<EntityModel> {
 		JCheckBox followMouseMovement = new JCheckBox();
 		followMouseMovement.setOpaque(false);
 
-		JButton ok = new JButton(UIManager.getString("OptionPane.okButtonText"));
+		JButton ok = new JButton(L10N.t("common.ok"));
 
 		getRootPane().setDefaultButton(ok);
 
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 
 		JPanel opts = new JPanel(new GridLayout(0, 2, 2, 2));
 

@@ -59,7 +59,7 @@ public abstract class AbstractPackMakerTool extends MCreatorDialog {
 				this.dispose();
 			}
 		});
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		cancel.addActionListener(e -> this.dispose());
 		this.add("South", PanelUtils.join(ok, cancel));
 

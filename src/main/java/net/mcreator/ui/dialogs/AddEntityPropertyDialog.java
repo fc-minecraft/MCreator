@@ -55,8 +55,8 @@ public class AddEntityPropertyDialog {
 
 		JComboBox<String> type = new JComboBox<>(new String[] { "Integer", "Logic", "String" });
 
-		JButton ok = new JButton(UIManager.getString("OptionPane.okButtonText"));
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton ok = new JButton(L10N.t("common.ok"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		dialog.getRootPane().setDefaultButton(ok);
 
 		ok.addActionListener(e -> {

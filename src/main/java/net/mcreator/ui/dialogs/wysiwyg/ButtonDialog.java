@@ -73,8 +73,8 @@ public class ButtonDialog extends AbstractWYSIWYGDialog<Button> {
 
 		add("Center", new JScrollPane(PanelUtils.centerInPanel(options)));
 
-		JButton ok = new JButton(UIManager.getString("OptionPane.okButtonText"));
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton ok = new JButton(L10N.t("common.ok"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		add("South", PanelUtils.join(ok, cancel));
 
 		getRootPane().setDefaultButton(ok);

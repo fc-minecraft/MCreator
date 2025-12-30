@@ -78,11 +78,11 @@ public class TooltipDialog extends AbstractWYSIWYGDialog<Tooltip> {
 
 		setTitle(L10N.t("dialog.gui.add_tooltip"));
 
-		JButton ok = new JButton(UIManager.getString("OptionPane.okButtonText"));
+		JButton ok = new JButton(L10N.t("common.ok"));
 
 		getRootPane().setDefaultButton(ok);
 
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		add("South", PanelUtils.join(ok, cancel));
 
 		if (tooltip != null) {

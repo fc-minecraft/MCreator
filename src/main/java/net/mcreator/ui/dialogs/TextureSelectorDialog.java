@@ -35,7 +35,7 @@ import java.util.Locale;
 
 public class TextureSelectorDialog extends MCreatorDialog {
 
-	public final JButton naprej = new JButton(UIManager.getString("OptionPane.okButtonText"));
+	public final JButton naprej = new JButton(L10N.t("common.ok"));
 
 	private final FilterModel model = new FilterModel();
 
@@ -53,7 +53,7 @@ public class TextureSelectorDialog extends MCreatorDialog {
 		block.forEach(model::addElement);
 
 		JPanel buttons = new JPanel();
-		JButton naprej2 = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton naprej2 = new JButton(L10N.t("common.cancel"));
 		buttons.add(naprej2);
 		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 		list.addListSelectionListener(event -> naprej.doClick());

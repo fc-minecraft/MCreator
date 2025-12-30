@@ -123,7 +123,7 @@ public class SearchUsagesDialog {
 
 		JButton edit = L10N.button("dialog.search_usages.open_selected");
 		JButton close = deletionRequested ?
-				new JButton(UIManager.getString("OptionPane.cancelButtonText")) :
+				new JButton(L10N.t("common.cancel")) :
 				L10N.button("common.close");
 
 		edit.addActionListener(e -> {

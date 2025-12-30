@@ -125,7 +125,7 @@ public class TextureMappingDialog {
 			pane.setSelectedIndex(1);
 
 		JButton ok = L10N.button("dialog.textures_mapping.save");
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 
 		d.add("South", PanelUtils.join(FlowLayout.CENTER, ok, cancel));
 

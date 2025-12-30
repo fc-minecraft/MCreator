@@ -58,7 +58,7 @@ public class HSVNoiseDialog extends MCreatorDialog {
 		seedControls.add(new JLabel(""));
 		seedControls.add(randomize);
 
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		JButton ok = L10N.button("action.common.apply");
 		getRootPane().setDefaultButton(ok);
 

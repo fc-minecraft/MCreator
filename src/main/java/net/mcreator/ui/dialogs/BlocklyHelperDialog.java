@@ -40,7 +40,7 @@ public abstract class BlocklyHelperDialog extends MCreatorDialog {
 		this.setIconImage(UIRES.get("18px.add").getImage());
 
 		JButton ok = new JButton(okMessage);
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		cancel.addActionListener(e -> dispose());
 		ok.addActionListener(e -> {
 			if (getValidationResult().validateIsErrorFree()) {

@@ -74,8 +74,8 @@ public class AddBlockPropertyDialog {
 				stringBounds));
 		type.addActionListener(e -> cards.show(bounds, (String) type.getSelectedItem()));
 
-		JButton ok = new JButton(UIManager.getString("OptionPane.okButtonText"));
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton ok = new JButton(L10N.t("common.ok"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		dialog.getRootPane().setDefaultButton(ok);
 
 		AtomicReference<PropertyDataWithValue<?>> result = new AtomicReference<>(null);

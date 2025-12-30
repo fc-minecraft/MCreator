@@ -67,7 +67,7 @@ public class AddCommonTagsDialog {
 		dialog.add("Center", tabPanel);
 
 		JButton ok = L10N.button("dialog.tools.inject_tags.confirm");
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		cancel.addActionListener(e -> dialog.dispose());
 		dialog.add("South", PanelUtils.join(ok, cancel));
 

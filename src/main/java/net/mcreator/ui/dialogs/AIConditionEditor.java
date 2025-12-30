@@ -68,7 +68,7 @@ public class AIConditionEditor {
 		JPanel conditions = new JPanel();
 		conditions.add(PanelUtils.centerAndEastElement(startCondition, continueCondition, 20, 5));
 
-		JButton ok = new JButton(UIManager.getString("OptionPane.okButtonText"));
+		JButton ok = new JButton(L10N.t("common.ok"));
 		ok.addActionListener(e -> {
 			retVal.set(0, startCondition.getSelectedProcedure() != null ?
 					startCondition.getSelectedProcedure().getName() :
@@ -78,7 +78,7 @@ public class AIConditionEditor {
 					"null");
 			window.dispose();
 		});
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		cancel.addActionListener(e -> window.dispose());
 		parent.getRootPane().setDefaultButton(ok);
 		JPanel options = new JPanel();

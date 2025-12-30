@@ -439,7 +439,7 @@ public class AnimationMakerView extends ViewBase {
 
 		if (JOptionPane.showOptionDialog(mcreator, od, L10N.t("dialog.animation_maker.add_frames_from_template"),
 				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-				new String[] { L10N.t("common.add"), UIManager.getString("OptionPane.cancelButtonText") },
+				new String[] { L10N.t("common.add"), L10N.t("common.cancel") },
 				L10N.t("common.add")) == 0) {
 			try {
 				BufferedImage imge = TiledImageUtils.convert(

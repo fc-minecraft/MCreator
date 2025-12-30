@@ -95,11 +95,11 @@ public class LabelDialog extends AbstractWYSIWYGDialog<Label> {
 			options.add(PanelUtils.join(FlowLayout.LEFT, L10N.label("dialog.gui.anchor"), anchor));
 		}
 
-		JButton ok = new JButton(UIManager.getString("OptionPane.okButtonText"));
+		JButton ok = new JButton(L10N.t("common.ok"));
 
 		getRootPane().setDefaultButton(ok);
 
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		add("South", PanelUtils.join(ok, cancel));
 
 		if (label != null) {

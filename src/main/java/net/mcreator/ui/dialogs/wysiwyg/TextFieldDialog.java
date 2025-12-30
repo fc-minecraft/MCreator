@@ -65,8 +65,8 @@ public class TextFieldDialog extends AbstractWYSIWYGDialog<TextField> {
 		grid.add(L10N.label("dialog.gui.textfield_initial_text"));
 		grid.add(deft);
 
-		JButton ok = new JButton(UIManager.getString("OptionPane.okButtonText"));
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton ok = new JButton(L10N.t("common.ok"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 
 		add("Center", PanelUtils.join(grid));
 		add("South", PanelUtils.join(ok, cancel));

@@ -91,7 +91,7 @@ public class WorkspaceDialogs {
 
 		AtomicBoolean canceled = new AtomicBoolean(false);
 
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		buttons.add(cancel);
 		cancel.addActionListener(e -> {
 			canceled.set(true);

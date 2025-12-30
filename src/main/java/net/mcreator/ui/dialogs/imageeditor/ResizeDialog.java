@@ -48,7 +48,7 @@ public class ResizeDialog extends MCreatorDialog {
 		JCheckBox affectCanvas = new JCheckBox();
 
 		JButton ok = L10N.button("action.common.resize");
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		getRootPane().setDefaultButton(ok);
 
 		GridBagConstraints layoutConstraints = new GridBagConstraints();

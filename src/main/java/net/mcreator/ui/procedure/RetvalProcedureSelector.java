@@ -157,7 +157,7 @@ public abstract class RetvalProcedureSelector<E, T extends RetvalProcedure<E>> e
 										L10N.t("common.mod_element_name")).validate();
 							}
 						}, L10N.t("action.procedure.create_procedure"),
-						UIManager.getString("OptionPane.cancelButtonText"), procedureNameString,
+						L10N.t("common.cancel"), procedureNameString,
 						breadcrumb.getInScrollPane(), null);
 
 				if (procedureNameString != null) {

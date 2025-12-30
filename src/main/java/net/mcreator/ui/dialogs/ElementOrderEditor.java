@@ -188,7 +188,7 @@ public class ElementOrderEditor {
 
 		int resultval = JOptionPane.showOptionDialog(mcreator, mainPanel, L10N.t("dialog.element_order.editor_title"),
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-				new String[] { "Save layout", UIManager.getString("OptionPane.cancelButtonText") }, "");
+				new String[] { "Save layout", L10N.t("common.cancel") }, "");
 		if (resultval == 0) {
 			for (Map.Entry<String, DefaultListModel<ModElement>> entry : tabEditors.entrySet()) {
 				ModElement[] newOrder = Collections.list(entry.getValue().elements()).toArray(new ModElement[0]);

@@ -113,7 +113,7 @@ public class OutputSlotDialog extends AbstractWYSIWYGDialog<OutputSlot> {
 
 		setTitle(L10N.t("dialog.gui.slot_output_editor_title"));
 		JButton ok = L10N.button("dialog.gui.save_slot");
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		add("South", PanelUtils.join(ok, cancel));
 
 		getRootPane().setDefaultButton(ok);

@@ -71,7 +71,7 @@ public class StateEditorDialog {
 		scrollEntries.getVerticalScrollBar().setUnitIncrement(15);
 
 		JButton ok = L10N.button("dialog.common.save_changes");
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		dialog.getRootPane().setDefaultButton(ok);
 
 		ok.addActionListener(e -> {

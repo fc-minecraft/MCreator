@@ -102,7 +102,7 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 
 		JPanel buttons = new JPanel();
 
-		JButton cancelButton = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancelButton = new JButton(L10N.t("common.cancel"));
 		cancelButton.addActionListener(event -> dispose());
 
 		buttons.add(select);

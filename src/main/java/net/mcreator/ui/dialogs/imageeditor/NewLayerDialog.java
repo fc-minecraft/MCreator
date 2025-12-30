@@ -82,7 +82,7 @@ public class NewLayerDialog extends MCreatorDialog {
 		JSpinner offsetX = new JSpinner(new SpinnerNumberModel(0, -10000, 10000, 1));
 		JSpinner offsetY = new JSpinner(new SpinnerNumberModel(0, -10000, 10000, 1));
 
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		JButton ok = L10N.button("action.common.create");
 		getRootPane().setDefaultButton(ok);
 

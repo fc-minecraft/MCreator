@@ -119,11 +119,11 @@ public class SpriteDialog extends AbstractWYSIWYGDialog<Sprite> {
 		add("Center", PanelUtils.totalCenterInPanel(
 				PanelUtils.centerAndEastElement(options, PanelUtils.pullElementUp(displayCondition), 10, 10)));
 
-		JButton ok = new JButton(UIManager.getString("OptionPane.okButtonText"));
+		JButton ok = new JButton(L10N.t("common.ok"));
 
 		getRootPane().setDefaultButton(ok);
 
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = new JButton(L10N.t("common.cancel"));
 		add("South", PanelUtils.join(ok, cancel));
 
 		if (sprite != null) {
