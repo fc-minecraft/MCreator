@@ -91,3 +91,44 @@ body {
 .blocklyDropDownContent {
     position: relative;
 }
+
+/* Enhanced Toolbox UI */
+.blocklyTreeRow {
+    height: 35px !important;
+    line-height: 35px !important;
+    padding-left: 12px !important;
+    border-left: 4px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.blocklyTreeRow:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.blocklyTreeSelected .blocklyTreeRow {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-left-color: #4CAF50;
+    font-weight: bold;
+}
+
+.blocklyTreeLabel {
+    font-size: 14px !important;
+}
+
+/* Arrow indicator for categories */
+.blocklyTreeRow::after {
+    content: '▶'; /* Unicode arrow */
+    position: absolute;
+    right: 15px;
+    top: 0;
+    line-height: 35px;
+    font-size: 10px;
+    color: #888;
+    transition: transform 0.2s;
+}
+
+.blocklyTreeSelected .blocklyTreeRow::after {
+    color: #4CAF50;
+    transform: rotate(90deg);
+}

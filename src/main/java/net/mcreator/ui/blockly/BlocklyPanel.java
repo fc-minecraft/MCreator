@@ -45,6 +45,7 @@ import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.browser.CefMessageRouter;
 import org.cef.callback.CefQueryCallback;
+import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefLoadHandlerAdapter;
 import org.cef.handler.CefMessageRouterHandlerAdapter;
 
@@ -104,7 +105,20 @@ public class BlocklyPanel extends JPanel implements Closeable {
 					return;
 				}
 
-				// JCEFHelper registers scheme handler factory internally now
+				// Add Console Logging
+				client.addDisplayHandler(new CefDisplayHandlerAdapter() {
+					@Override
+					public boolean onConsoleMessage(CefBrowser browser, org.cef.CefSettings.LogSeverity level, String message, String source, int line) {
+						String logMsg = "[JS] " + message + " (" + source + ":" + line + ")";
+						switch (level) {
+							case LOGSEVERITY_ERROR: LOG.error(logMsg); break;
+							case LOGSEVERITY_WARNING: LOG.warn(logMsg); break;
+							case LOGSEVERITY_INFO: LOG.info(logMsg); break;
+							default: LOG.debug(logMsg); break;
+						}
+						return false; // Allow default handling? or true to suppress
+					}
+				});
 
 				// Message Router
 				CefMessageRouter msgRouter = CefMessageRouter.create();
