@@ -64,16 +64,7 @@ public class JCEFHelper {
             // Performance / FPS Limit logic
             int cores = Runtime.getRuntime().availableProcessors();
             if (cores < 4) {
-                // Weak PC optimization
-                // Try to limit frame rate (Note: exact switch support varies by Chromium version, but --max-frame-rate is common)
-                // Also disable some animations/smooth scrolling if possible via args?
                 builder.addJcefArgs("--disable-smooth-scrolling");
-                // builder.addJcefArgs("--scheduler-configuration-default");
-                // For windowed mode, vsync usually dictates 60. To force 30 is hard without OSR.
-                // But we can try:
-                // builder.addJcefArgs("--max-frame-rate=30"); // Might work if composition supports it
-            } else {
-                // builder.addJcefArgs("--max-frame-rate=60");
             }
 
             builder.setAppHandler(new MavenCefAppHandlerAdapter() {
@@ -82,6 +73,13 @@ public class JCEFHelper {
                    if (state == CefApp.CefAppState.TERMINATED) {
                        // Handle termination if needed
                    }
+                }
+
+                @Override
+                public void onRegisterCustomSchemes(org.cef.callback.CefSchemeRegistrar registrar) {
+                    // Register client scheme as standard to behave like HTTP (support XHR etc)
+                    // Arguments: schemeName, isStandard, isLocal, isDisplayIsolated, isSecure, isCorsEnabled, isCspBypassing, isFetchEnabled
+                    registrar.addCustomScheme("client", true, false, false, false, false, false, false);
                 }
             });
 
