@@ -436,9 +436,13 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		saveRecentWorkspaces();
 	}
 
-	private void removeRecentWorkspace(RecentWorkspaceEntry recentWorkspace) {
+	public void removeRecentWorkspace(RecentWorkspaceEntry recentWorkspace) {
 		recentWorkspaces.getList().remove(recentWorkspace);
 		saveRecentWorkspaces();
+	}
+
+	public void refreshRecentList() {
+		reloadRecents();
 	}
 
 	private static final Gson gson = new GsonBuilder().setPrettyPrinting().setStrictness(Strictness.LENIENT).create();

@@ -48,6 +48,7 @@ import net.mcreator.ui.notifications.StartupNotifications;
 import net.mcreator.ui.workspace.selector.RecentWorkspaceEntry;
 import net.mcreator.ui.workspace.selector.WorkspaceSelector;
 import net.mcreator.util.MCreatorVersionNumber;
+import net.mcreator.util.ProjectPurge;
 import net.mcreator.workspace.CorruptedWorkspaceFileException;
 import net.mcreator.workspace.MissingGeneratorFeaturesException;
 import net.mcreator.workspace.UnsupportedGeneratorException;
@@ -229,6 +230,9 @@ public final class MCreatorApplication {
 
 				if (!directLaunch)
 					showWorkspaceSelector();
+
+				// run project purge after UI is ready
+				ProjectPurge.runPurge(MCreatorApplication.this);
 			});
 
 			LOG.debug("Application loader finished");
@@ -353,6 +357,14 @@ public final class MCreatorApplication {
 				L10N.t("dialog.workspace.is_not_valid_title"), JOptionPane.ERROR_MESSAGE));
 	}
 
+	public void removeRecentWorkspace(RecentWorkspaceEntry entry) {
+		workspaceSelector.removeRecentWorkspace(entry);
+	}
+
+	public void updateRecentList() {
+		workspaceSelector.refreshRecentList();
+	}
+
 	public void closeApplication() {
 		LOG.debug("Closing any potentially open MCreator windows");
 
@@ -406,7 +418,7 @@ public final class MCreatorApplication {
 		StartupNotifications.handleStartupNotifications(workspaceSelector);
 	}
 
-	List<RecentWorkspaceEntry> getRecentWorkspaces() {
+	public List<RecentWorkspaceEntry> getRecentWorkspaces() {
 		return workspaceSelector.getRecentWorkspaces().getList();
 	}
 
