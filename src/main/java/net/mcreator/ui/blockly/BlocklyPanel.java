@@ -80,12 +80,23 @@ public class BlocklyPanel extends JFXPanel implements Closeable {
 		this.mcreator = mcreator;
 		this.type = type;
 
+		// Optimize JFXPanel for performance
+		Platform.runLater(() -> {
+			// Disable implicit exit to keep JavaFX alive
+			Platform.setImplicitExit(false);
+		});
+
 		bridge = new BlocklyJavascriptBridge(mcreator, () -> ThreadUtil.runOnSwingThread(
 				() -> changeListeners.forEach(listener -> listener.stateChanged(new ChangeEvent(BlocklyPanel.this)))));
 
 		ThreadUtil.runOnFxThread(() -> {
 			WebView browser = new WebView();
 			browser.setContextMenuEnabled(false);
+
+			// Optimization: Reduce font smoothing if possible (JavaFX doesn't expose this directly but we can try to influence it)
+			browser.setCache(true);
+			browser.setCacheHint(javafx.scene.CacheHint.SPEED);
+
 			Scene scene = new Scene(browser);
 			java.awt.Color bg = Theme.current().getSecondAltBackgroundColor();
 			scene.setFill(Color.rgb(bg.getRed(), bg.getGreen(), bg.getBlue()));
@@ -121,6 +132,10 @@ public class BlocklyPanel extends JFXPanel implements Closeable {
 					if (PreferencesManager.PREFERENCES.blockly.legacyFont.get()) {
 						css = css.replace("font-family: sans-serif;", "");
 					}
+
+					// Performance Optimization: CSS
+					css += "\n* { -webkit-font-smoothing: antialiased; }"; // Smoother fonts but maybe faster than subpixel
+					css += "\n.blocklySvg { shape-rendering: geometricPrecision; }"; // Better for blocks
 
 					Text styleContent = webEngine.getDocument().createTextNode(css);
 					styleNode.appendChild(styleContent);

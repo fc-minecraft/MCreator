@@ -21,6 +21,8 @@ package net.mcreator.ui.init;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.mcreator.plugin.PluginLoader;
 import net.mcreator.preferences.PreferencesManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -34,40 +36,41 @@ import java.util.regex.Pattern;
 
 public class UIRES {
 
+	private static final Logger LOG = LogManager.getLogger("UIRES");
+
 	private static final Map<String, ImageIcon> THEME_CACHE = new ConcurrentHashMap<>();
 	private static final Map<String, ImageIcon> FALLBACK_CACHE = new ConcurrentHashMap<>();
+
+	// Cache to store missing images to avoid repeated failed lookups
+	private static final Map<String, Boolean> MISSING_CACHE = new ConcurrentHashMap<>();
 
 	private static final Pattern rasterPattern = Pattern.compile(".*\\.png$");
 	private static final Pattern vectorPattern = Pattern.compile(".*\\.svg$");
 
 	public static void preloadImages() {
-		// first, preload textures of the current theme
-		preloadRastersForTheme(THEME_CACHE, PreferencesManager.PREFERENCES.hidden.uiTheme.get());
-		preloadVectorsForTheme(THEME_CACHE, PreferencesManager.PREFERENCES.hidden.uiTheme.get());
+		// Lazy loading implemented, no preloading needed.
+		// This method is kept for compatibility but does nothing to save startup time.
+		LOG.info("Lazy image loading enabled. Skipping preload.");
+	}
 
-		// we also load default textures in non-default theme does not specify all textures
-		if (!PreferencesManager.PREFERENCES.hidden.uiTheme.get().equals("default_dark")) {
-			preloadRastersForTheme(FALLBACK_CACHE, "default_dark");
-			preloadVectorsForTheme(FALLBACK_CACHE, "default_dark");
-		} else {
-			FALLBACK_CACHE.putAll(THEME_CACHE);
+	private static ImageIcon loadFromTheme(String theme, String identifier, String type) {
+		String themePath = "themes." + theme + ".images." + identifier + "." + type;
+		// Try to find the resource directly
+		// We reconstruct the path logic from the original bulk loader
+		// Original: themes.{theme}.images + relative path
+		// Here identifier is the relative path (e.g. "buttons.add")
+
+		String resourcePath = "themes/" + theme + "/images/" + identifier.replace('.', '/') + "." + type;
+
+		URL url = PluginLoader.INSTANCE.getResource(resourcePath);
+		if (url != null) {
+			if ("svg".equals(type)) {
+				return new FlatSVGIcon(url);
+			} else {
+				return new ImageIcon(url);
+			}
 		}
-	}
-
-	private static void preloadRastersForTheme(Map<String, ImageIcon> cache, String theme) {
-		ImageIO.setUseCache(false); // we use custom cache
-		String themePath = "themes." + theme + ".images";
-		PluginLoader.INSTANCE.getResources(themePath, rasterPattern).parallelStream().forEach(
-				element -> cache.putIfAbsent(element.replace('/', '.').substring(themePath.length() + 1),
-						new ImageIcon(Objects.requireNonNull(PluginLoader.INSTANCE.getResource(element)))));
-		ImageIO.setUseCache(true);
-	}
-
-	private static void preloadVectorsForTheme(Map<String, ImageIcon> cache, String theme) {
-		String themePath = "themes." + theme + ".images";
-		PluginLoader.INSTANCE.getResources(themePath, vectorPattern).parallelStream().forEach(
-				element -> cache.putIfAbsent(element.replace('/', '.').substring(themePath.length() + 1),
-						new FlatSVGIcon(Objects.requireNonNull(PluginLoader.INSTANCE.getResource(element)))));
+		return null;
 	}
 
 	/**
@@ -86,23 +89,62 @@ public class UIRES {
 	 * @return the image icon
 	 */
 	public static ImageIcon get(String identifier) {
-		ImageIcon currentThemeSvg = THEME_CACHE.get(identifier + ".svg");
-		if (currentThemeSvg != null)
-			return currentThemeSvg;
+		if (MISSING_CACHE.containsKey(identifier)) {
+			throw new NullPointerException("Image not found (cached missing): " + identifier);
+		}
 
-		ImageIcon currentThemePng = THEME_CACHE.get(identifier + ".png");
-		if (currentThemePng != null)
-			return currentThemePng;
+		String currentTheme = PreferencesManager.PREFERENCES.hidden.uiTheme.get();
+		String defaultTheme = "default_dark";
 
-		ImageIcon fallbackThemeSvg = FALLBACK_CACHE.get(identifier + ".svg");
-		if (fallbackThemeSvg != null)
-			return fallbackThemeSvg;
+		// Check caches first
+		ImageIcon cached = checkCache(identifier, currentTheme);
+		if (cached != null) return cached;
 
-		ImageIcon fallbackThemePng = FALLBACK_CACHE.get(identifier + ".png");
-		if (fallbackThemePng != null)
-			return fallbackThemePng;
+		// Load from current theme
+		ImageIcon currentSvg = loadAndCache(currentTheme, identifier, "svg", THEME_CACHE);
+		if (currentSvg != null) return currentSvg;
 
+		ImageIcon currentPng = loadAndCache(currentTheme, identifier, "png", THEME_CACHE);
+		if (currentPng != null) return currentPng;
+
+		// Load from fallback theme
+		if (!currentTheme.equals(defaultTheme)) {
+			ImageIcon fallbackSvg = loadAndCache(defaultTheme, identifier, "svg", FALLBACK_CACHE);
+			if (fallbackSvg != null) return fallbackSvg;
+
+			ImageIcon fallbackPng = loadAndCache(defaultTheme, identifier, "png", FALLBACK_CACHE);
+			if (fallbackPng != null) return fallbackPng;
+		}
+
+		MISSING_CACHE.put(identifier, true);
 		throw new NullPointerException("Image not found: " + identifier);
+	}
+
+	private static ImageIcon checkCache(String identifier, String currentTheme) {
+		String keySvg = identifier + ".svg";
+		String keyPng = identifier + ".png";
+
+		if (THEME_CACHE.containsKey(keySvg)) return THEME_CACHE.get(keySvg);
+		if (THEME_CACHE.containsKey(keyPng)) return THEME_CACHE.get(keyPng);
+
+		if (!currentTheme.equals("default_dark")) {
+			if (FALLBACK_CACHE.containsKey(keySvg)) return FALLBACK_CACHE.get(keySvg);
+			if (FALLBACK_CACHE.containsKey(keyPng)) return FALLBACK_CACHE.get(keyPng);
+		}
+		return null;
+	}
+
+	private static ImageIcon loadAndCache(String theme, String identifier, String type, Map<String, ImageIcon> cache) {
+		String key = identifier + "." + type;
+		// Double check cache
+		if (cache.containsKey(key)) return cache.get(key);
+
+		ImageIcon icon = loadFromTheme(theme, identifier, type);
+		if (icon != null) {
+			cache.put(key, icon);
+			return icon;
+		}
+		return null;
 	}
 
 	/**

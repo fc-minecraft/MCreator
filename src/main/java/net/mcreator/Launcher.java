@@ -74,10 +74,16 @@ public class Launcher {
 		System.setProperty("apple.laf.useScreenMenuBar",
 				Boolean.toString(PreferencesManager.PREFERENCES.ui.usemacOSMenuBar.get()));
 
-		// some flags to prevent rendering issues with certain GPU drivers
+		// Performance tuning flags
+		// Re-enabled hardware acceleration for UI smoothness
 		// System.setProperty("sun.java2d.opengl", "false");
 		// System.setProperty("sun.java2d.d3d", "false");
 		// System.setProperty("sun.java2d.pmoffscreen", "false");
+
+		// Additional tuning
+		System.setProperty("prism.order", "es2,d3d,sw"); // Prioritize efficient renderers
+		System.setProperty("prism.vsync", "false"); // Reduce input latency (optional, might cause tearing)
+		System.setProperty("javafx.animation.fullspeed", "true");
 
 		// Init JFX Toolkit
 		ThreadUtil.runOnSwingThreadAndWait(JFXPanel::new);

@@ -196,6 +196,9 @@ tasks.register('runMCreator', JavaExec.class) {
 
     jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
 
+    // Performance optimization for dev environment
+    jvmArgs '-XX:+UseG1GC', '-XX:MaxGCPauseMillis=200', '-XX:+UseStringDeduplication'
+
     classpath += sourceSets.main.runtimeClasspath
 
     mainClass.set("net.mcreator.Launcher")

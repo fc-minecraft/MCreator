@@ -24,10 +24,10 @@
         </RollingFile>
     </Appenders>
     <Loggers>
-        <Logger name="net.mcreator" level="ALL"/>
-        <Root level="ALL">
-            <AppenderRef ref="CONSOLE" level="ALL"/>
-            <AppenderRef ref="ROLLINGFILE" level="ALL"/>
+        <Logger name="net.mcreator" level="INFO"/>
+        <Root level="INFO">
+            <AppenderRef ref="CONSOLE" level="INFO"/>
+            <AppenderRef ref="ROLLINGFILE" level="INFO"/>
         </Root>
     </Loggers>
 </Configuration>

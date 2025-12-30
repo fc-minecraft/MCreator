@@ -38,6 +38,7 @@ import org.reflections.util.ConfigurationBuilder;
 import javax.annotation.Nullable;
 import java.beans.Introspector;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -158,9 +159,11 @@ public class PluginLoader extends URLClassLoader {
 			}
 		}
 
+		// Parallel scanning
+		LOG.info("Scanning plugin resources...");
 		this.reflections = new Reflections(
 				new ConfigurationBuilder().setClassLoaders(new ClassLoader[] { this }).setUrls(getURLs())
-						.setScanners(Scanners.Resources).setExpandSuperTypes(false));
+						.setScanners(Scanners.Resources).setExpandSuperTypes(false).setParallel(true));
 
 		checkForPluginUpdates();
 
