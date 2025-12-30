@@ -1,5 +1,6 @@
 package net.mcreator.util;
 
+import net.mcreator.ui.MCreator;
 import net.mcreator.ui.MCreatorApplication;
 import net.mcreator.ui.workspace.selector.RecentWorkspaceEntry;
 import net.mcreator.preferences.PreferencesManager;
@@ -22,16 +23,22 @@ public class ProjectPurge {
     private static final Logger LOG = LogManager.getLogger("ProjectPurge");
 
     public static void runPurge(MCreatorApplication app) {
-        if (!PreferencesManager.PREFERENCES.projectPurge.enableProjectPurge.getValue()) {
+        if (!PreferencesManager.PREFERENCES.projectPurge.enableProjectPurge.get()) {
             return;
         }
 
+        // Capture state on the current thread (expected to be EDT based on call site in MCreatorApplication)
+        List<RecentWorkspaceEntry> recentWorkspacesSnapshot = new ArrayList<>(app.getRecentWorkspaces());
+
+        // We can't rely on getOpenMCreators() right now because the purge runs delayed and the user might open projects in the meantime.
+        // Instead, we will fetch the list of open projects inside the delayed thread, but we need to do it on EDT.
+
         new Thread(() -> {
             try {
-                // Sleep a bit to not slow down immediate startup
+                // Sleep to not slow down immediate startup and allow user to settle in
                 Thread.sleep(10000);
 
-                String intervalStr = PreferencesManager.PREFERENCES.projectPurge.projectPurgeInterval.getValue();
+                String intervalStr = PreferencesManager.PREFERENCES.projectPurge.projectPurgeInterval.get();
                 int months = 6;
                 if (intervalStr.startsWith("3")) months = 3;
                 else if (intervalStr.startsWith("12")) months = 12;
@@ -40,11 +47,32 @@ public class ProjectPurge {
 
                 LOG.info("Running project purge. Cutoff time: " + new java.util.Date(cutoffTime));
 
-                List<RecentWorkspaceEntry> recentWorkspaces = app.getRecentWorkspaces();
+                // Fetch currently open workspaces safely on EDT
+                List<File> openWorkspacePaths = new ArrayList<>();
+                try {
+                    SwingUtilities.invokeAndWait(() -> {
+                        for (MCreator mcreator : app.getOpenMCreators()) {
+                            if (mcreator.getWorkspace() != null && mcreator.getWorkspace().getFileManager() != null && mcreator.getWorkspace().getFileManager().getWorkspaceFile() != null) {
+                                openWorkspacePaths.add(mcreator.getWorkspace().getFileManager().getWorkspaceFile().getAbsoluteFile());
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    LOG.error("Failed to fetch open workspaces", e);
+                    return; // Abort purge if we can't determine what's open
+                }
+
                 List<RecentWorkspaceEntry> toRemove = new ArrayList<>();
 
-                for (RecentWorkspaceEntry entry : recentWorkspaces) {
-                    File workspaceFile = entry.getPath();
+                for (RecentWorkspaceEntry entry : recentWorkspacesSnapshot) {
+                    File workspaceFile = entry.getPath().getAbsoluteFile();
+
+                    // Critical Safety: Do not purge if currently open
+                    if (openWorkspacePaths.contains(workspaceFile)) {
+                        LOG.info("Skipping purge for project " + entry.getName() + ": Project is currently open.");
+                        continue;
+                    }
+
                     if (workspaceFile.exists() && workspaceFile.isFile()) {
                          long lastModified = workspaceFile.lastModified();
 
