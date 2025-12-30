@@ -47,18 +47,16 @@ class AcceleratorDialog {
 		map.setGridColor(Theme.current().getAltBackgroundColor());
 		map.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		if (OS.getOS() == OS.MAC) {
-			map.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-				@Override
-				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-						boolean hasFocus, int row, int column) {
-					Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-					if (column == 1)
-						c.setFont(new Font(".SF NS Text", Font.PLAIN, 12));
-					return c;
-				}
-			});
-		}
+		map.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+			@Override
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
+				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+				if (column == 1)
+					c.setFont(new Font("Noto Sans", Font.PLAIN, 12));
+				return c;
+			}
+		});
 
 		DefaultTableModel model = (DefaultTableModel) map.getModel();
 		SortedSet<BasicAction> keys = new TreeSet<>(acceleratorMap.getActionKeyStrokeMap().keySet());

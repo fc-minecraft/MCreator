@@ -77,21 +77,19 @@ public class Theme {
 		if (colorScheme != null)
 			colorScheme.init();
 
+		loadUIFonts();
+
 		try {
-			InputStream consoleFontStream = PluginLoader.INSTANCE.getResourceAsStream(
-					"themes/" + id + "/fonts/console_font.ttf");
+			InputStream consoleFontStream = Theme.class.getResourceAsStream("/fonts/NotoSansMono-Regular.ttf");
 			if (consoleFontStream != null) {
 				consoleFont = Font.createFont(Font.TRUETYPE_FONT, consoleFontStream);
+				consoleFont = consoleFont.deriveFont(12.0f);
+				GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(consoleFont);
 			} else {
-				// Default main front (from the default_dark theme)
-				consoleFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(
-						PluginLoader.INSTANCE.getResourceAsStream("themes/default_dark/fonts/console_font.ttf")));
-				LOG.info("Console font from default_dark will be used.");
+				LOG.warn("Failed to load console font: NotoSansMono-Regular.ttf");
 			}
-			consoleFont = consoleFont.deriveFont(12.0f);
-			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(consoleFont);
-		} catch (NullPointerException | FontFormatException | IOException e2) {
-			LOG.info("Failed to init MCreator Theme! Error {}", e2.getMessage());
+		} catch (FontFormatException | IOException e) {
+			LOG.error("Failed to init MCreator Theme Console Font! Error {}", e.getMessage());
 		}
 
 		return this;
@@ -131,7 +129,7 @@ public class Theme {
         }
 
         // Increase font size
-        overrides.put("defaultFont", "14");
+		overrides.put("defaultFont", "Noto Sans, 14");
 
 		if (!disableMCreatorOverrides) {
 			overrides.put("Button.arc", "0");
@@ -196,6 +194,24 @@ public class Theme {
 	/**
 	 * @return <p>Its displayed name</p>
 	 */
+	private void loadUIFonts() {
+		try {
+			String[] fonts = {"NotoSans-Regular.ttf", "NotoSans-Bold.ttf", "NotoSans-Italic.ttf",
+					"NotoSans-BoldItalic.ttf", "NotoSansMono-Regular.ttf", "NotoSansMono-Bold.ttf"};
+			for (String fontName : fonts) {
+				InputStream fontStream = Theme.class.getResourceAsStream("/fonts/" + fontName);
+				if (fontStream != null) {
+					Font font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+					GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
+				} else {
+					LOG.warn("Failed to load font: {}", fontName);
+				}
+			}
+		} catch (Exception e) {
+			LOG.error("Failed to load UI fonts", e);
+		}
+	}
+
 	public String getName() {
 		return name;
 	}

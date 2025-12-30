@@ -608,7 +608,7 @@ public class MinecraftImageGenerator {
 							MCItem.getBlockIconBasedOnName(workspace, achievementIcon.getUnmappedValue()).getImage())), 8), 2,
 					10, null);
 
-			graphics2D.setFont(new Font(null, Font.PLAIN, 9));
+			graphics2D.setFont(new Font("Noto Sans", Font.PLAIN, 9));
 
 			GradientPaint gp = new GradientPaint(22, 14, new Color(255, 255, 255, 180), 26, 14,
 					new Color(255, 255, 255, 0));
@@ -629,7 +629,7 @@ public class MinecraftImageGenerator {
 		public static BufferedImage generateCommandPreviewPicture(String command, String procedurexml) {
 			BufferedImage icon = new BufferedImage(28, 28, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D graphics2D = icon.createGraphics();
-			graphics2D.setFont(new Font(null, Font.PLAIN, 9));
+			graphics2D.setFont(new Font("Noto Sans", Font.PLAIN, 9));
 
 			graphics2D.setColor(new Color(255, 255, 255, 180));
 			graphics2D.drawLine(3, 16, 6, 10);
@@ -680,7 +680,7 @@ public class MinecraftImageGenerator {
 			else
 				text = StringUtils.abbreviateString(keybind, 3, false);
 
-			graphics2D.setFont(new Font(null, Font.PLAIN, 9));
+			graphics2D.setFont(new Font("Noto Sans", Font.PLAIN, 9));
 
 			graphics2D.drawLine(0, 1, 0, 26);
 			graphics2D.drawLine(27, 1, 27, 26);
@@ -705,7 +705,7 @@ public class MinecraftImageGenerator {
 			BufferedImage icon = new BufferedImage(28, 28, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D graphics2D = icon.createGraphics();
 			graphics2D.setColor(new Color(190, 190, 190, 65));
-			graphics2D.setFont(new Font(null, Font.PLAIN, 9));
+			graphics2D.setFont(new Font("Noto Sans", Font.PLAIN, 9));
 
 			graphics2D.drawLine(0, 1, 0, 27);
 			graphics2D.drawLine(27, 1, 27, 27);
