@@ -27,6 +27,7 @@ import net.mcreator.preferences.PreferencesManager;
 import net.mcreator.ui.MCreatorApplication;
 import net.mcreator.ui.blockly.WebConsoleListener;
 import net.mcreator.ui.component.util.ThreadUtil;
+import net.mcreator.ui.init.FontLoader;
 import net.mcreator.util.MCreatorVersionNumber;
 import net.mcreator.util.TerribleModuleHacks;
 import net.mcreator.util.UTF8Forcer;
@@ -69,6 +70,9 @@ public class Launcher {
 
 		// after we have libraries loaded, we load preferences
 		PreferencesManager.init();
+
+		// Load custom fonts early
+		FontLoader.loadFonts();
 
 		// set system properties from preferences
 		System.setProperty("apple.laf.useScreenMenuBar",

@@ -48,12 +48,14 @@ class AcceleratorDialog {
 		map.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		map.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+			private final Font font = new Font("Noto Sans", Font.PLAIN, 12);
+
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
 					boolean hasFocus, int row, int column) {
 				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 				if (column == 1)
-					c.setFont(new Font("Noto Sans", Font.PLAIN, 12));
+					c.setFont(font);
 				return c;
 			}
 		});

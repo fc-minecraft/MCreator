@@ -77,14 +77,15 @@ public class Theme {
 		if (colorScheme != null)
 			colorScheme.init();
 
-		loadUIFonts();
-
 		try {
+			// Console font is already registered by FontLoader, but we need the object for getConsoleFont()
+			// We can recreate it or try to fetch it, but creating from stream is robust for keeping the reference.
+			// Ideally we should get it from GE, but for now let's keep the logic simple but using the already loaded resource if possible.
+			// Or just load it again to keep the field populated.
 			InputStream consoleFontStream = Theme.class.getResourceAsStream("/fonts/NotoSansMono-Regular.ttf");
 			if (consoleFontStream != null) {
 				consoleFont = Font.createFont(Font.TRUETYPE_FONT, consoleFontStream);
 				consoleFont = consoleFont.deriveFont(12.0f);
-				GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(consoleFont);
 			} else {
 				LOG.warn("Failed to load console font: NotoSansMono-Regular.ttf");
 			}
@@ -194,24 +195,6 @@ public class Theme {
 	/**
 	 * @return <p>Its displayed name</p>
 	 */
-	private void loadUIFonts() {
-		try {
-			String[] fonts = {"NotoSans-Regular.ttf", "NotoSans-Bold.ttf", "NotoSans-Italic.ttf",
-					"NotoSans-BoldItalic.ttf", "NotoSansMono-Regular.ttf", "NotoSansMono-Bold.ttf"};
-			for (String fontName : fonts) {
-				InputStream fontStream = Theme.class.getResourceAsStream("/fonts/" + fontName);
-				if (fontStream != null) {
-					Font font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
-					GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
-				} else {
-					LOG.warn("Failed to load font: {}", fontName);
-				}
-			}
-		} catch (Exception e) {
-			LOG.error("Failed to load UI fonts", e);
-		}
-	}
-
 	public String getName() {
 		return name;
 	}
