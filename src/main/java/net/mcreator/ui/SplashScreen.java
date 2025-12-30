@@ -38,7 +38,7 @@ public class SplashScreen extends JWindow {
 	private final static int EXTEND_BORDER = 3;
 
 	public SplashScreen() {
-		Font splashFont = new Font("Sans-Serif", Font.PLAIN, 13);
+		Font splashFont = new Font("Noto Sans", Font.BOLD, 13);
 
 		SplashScreenPanel imagePanel = new SplashScreenPanel(getSplashImage(false), CORNER_RADIUS, SHADOW_RADIUS,
 				EXTEND_BORDER, (Launcher.version != null && Launcher.version.isSnapshot()), new Color(50, 50, 50));
@@ -46,29 +46,43 @@ public class SplashScreen extends JWindow {
 
 		imagePanel.setLayout(null);
 
-		JLabel pylo = new JLabel(UIRES.SVG.getBuiltIn("pylo", 86, 50));
-		pylo.setBounds(shadowPadding + 550 - 15 - 10, shadowPadding + 320 - 15 - 10, 86, 50);
+		// Pylo logo properties
+		final double pyloScale = 1.5; // Scale factor for the logo
+		final int pyloBaseWidth = 121; // Original width: (int) Math.round(145 * 2.5) / 3
+		final int pyloBaseHeight = 20; // Original height: (int) Math.round(24.5 * 2.5) / 3
+		final int pyloWidth = (int) (pyloBaseWidth * pyloScale);
+		final int pyloHeight = (int) (pyloBaseHeight * pyloScale);
+		final int pyloRightAnchor = 650; // Base X position from right
+		final int pyloBottomAnchor = 345; // Base Y position from bottom
+		final int pyloXOffset = 20; // Offset from right anchor. Smaller values move it right.
+		final int pyloX = shadowPadding + pyloRightAnchor - pyloXOffset - pyloWidth;
+		final int pyloY = shadowPadding + pyloBottomAnchor - pyloHeight;
+
+		JLabel pylo = new JLabel(UIRES.SVG.getBuiltIn("pylo", pyloWidth, pyloHeight));
+		pylo.setBounds(pyloX, pyloY, pyloWidth, pyloHeight);
 		imagePanel.add(pylo);
 
 		JLabel label = new JLabel(
-                 "<html><p>MCreator – это набор инструментов для создания модификаций в Minecraft.</p>"
-                         + "<p style='margin-top:-2'>NOT AN OFFICIAL MINECRAFT [PRODUCT/SERVICE/EVENT/etc.].</p>"
-                         + "<p style='margin-top:-2'>NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>");
+				"<html><p>MCreator – это набор инструментов для создания модификаций в Minecraft.</p>"
+						+ "<p style='margin-top:-2'>NOT AN OFFICIAL MINECRAFT [PRODUCT/SERVICE/EVENT/etc.].</p>"
+						+ "<p style='margin-top:-2'>NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>");
 		label.setFont(splashFont.deriveFont(10f));
 		label.setForeground(Color.white);
 		label.setBounds(shadowPadding + 30 + 10 - 4, shadowPadding + 330 - 10 - 10, 500, 45);
 		imagePanel.add(label);
 
-		JLabel logo = new JLabel(UIRES.SVG.getBuiltIn("logo", 350, 63));
-		logo.setBounds(shadowPadding + 24 + 8 - 4, shadowPadding + 70, 350, 63);
+		// MCreator logo properties
+		final int panelWidth = 608;
+		final int logoWidth = 350;
+		final int logoHeight = 63;
+		final int logoX = shadowPadding + (panelWidth - logoWidth) / 2;
+		final int logoY = shadowPadding ;
+
+		JLabel logo = new JLabel(UIRES.SVG.getBuiltIn("logo", logoWidth, logoHeight));
+		logo.setBounds(logoX, logoY, logoWidth, logoHeight);
 		imagePanel.add(logo);
 
-		JLabel version = new JLabel(
-				"VERSION " + (Launcher.version != null ? Launcher.version.getMajorString() : "1234.5"));
-		version.setFont(splashFont.deriveFont(18f));
-		version.setForeground(Color.white);
-		version.setBounds(shadowPadding + 30 + 10 - 4, shadowPadding + 129, 500, 45);
-		imagePanel.add(version);
+
 
 		if (Launcher.version != null && Launcher.version.isSnapshot()) {
 			JLabel snapshot = new JLabel("Snapshot - not for production use!");
