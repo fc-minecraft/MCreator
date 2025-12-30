@@ -79,6 +79,8 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	private String lastKnownXML = "";
 	private List<VariableElement> localVariables = new ArrayList<>();
 
+	private final JLabel loadingLabel;
+
 	public BlocklyPanel(MCreator mcreator, @Nonnull BlocklyEditorType type) {
 		super(new BorderLayout());
 		this.mcreator = mcreator;
@@ -87,126 +89,136 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		bridge = new BlocklyJavascriptBridge(mcreator, () -> ThreadUtil.runOnSwingThread(
 				() -> changeListeners.forEach(listener -> listener.stateChanged(new ChangeEvent(BlocklyPanel.this)))));
 
-		// Initialize JCEF if needed
-		if (JCEFHelper.getCefApp() == null) {
-			JCEFHelper.initialize();
-		}
+		loadingLabel = new JLabel("Initializing JCEF...", SwingConstants.CENTER);
+		loadingLabel.setFont(loadingLabel.getFont().deriveFont(16f));
+		add(loadingLabel, BorderLayout.CENTER);
 
-		client = JCEFHelper.createClient();
-		if (client == null) {
-			LOG.error("Failed to create JCEF client");
-			return;
-		}
+		Thread initThread = new Thread(() -> {
+			JCEFHelper.initialize(status -> SwingUtilities.invokeLater(() -> loadingLabel.setText(status)));
 
-		// Register custom scheme
-		JCEFHelper.getCefApp().registerSchemeHandlerFactory("client", "mcreator", new MCRSchemeHandlerFactory());
-
-		// Message Router
-		CefMessageRouter msgRouter = CefMessageRouter.create();
-		msgRouter.addHandler(new CefMessageRouterHandlerAdapter() {
-			@Override
-			public boolean onQuery(CefBrowser browser, CefFrame frame, long query_id, String request, boolean persistent,
-					CefQueryCallback callback) {
-				if (request.startsWith("t:")) {
-					String key = request.substring(2);
-					callback.success(bridge.t(key));
-					return true;
-				} else if (request.equals("triggerEvent")) {
-					bridge.triggerEvent();
-					callback.success("");
-					return true;
-				} else if (request.startsWith("startBlockForEditor:")) {
-					String editor = request.substring("startBlockForEditor:".length());
-					String result = bridge.startBlockForEditor(editor);
-					callback.success(result != null ? result : "");
-					return true;
-				} else if (request.startsWith("updateXML:")) {
-					lastKnownXML = request.substring("updateXML:".length());
-					callback.success("");
-					return true;
-				} else if (request.startsWith("updateLocalVariables:")) {
-					updateLocalVariables(request.substring("updateLocalVariables:".length()));
-					callback.success("");
-					return true;
-				} else if (request.startsWith("openColorSelector:")) {
-					String[] parts = request.split(":", 3);
-					if (parts.length == 3) {
-						String id = parts[1];
-						String color = parts[2];
-						bridge.openColorSelector(color, (result) -> {
-							String res = (String) result;
-							browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + (res!=null?res:"") + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
-						});
-						callback.success("");
-						return true;
-					}
-				} else if (request.startsWith("openMCItemSelector:")) {
-					String[] parts = request.split(":", 3);
-					if (parts.length == 3) {
-						String id = parts[1];
-						String type = parts[2];
-						bridge.openMCItemSelector(type, (result) -> {
-							String res = (String) result;
-							browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + (res!=null?res:"") + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
-						});
-						callback.success("");
-						return true;
-					}
-				} else if (request.startsWith("openEntrySelector:")) {
-					// Format: openEntrySelector:ID:type:typeFilter:customEntryProviders
-					String[] parts = request.split(":", 5);
-					if (parts.length >= 3) {
-						String id = parts[1];
-						String type = parts[2];
-						String typeFilter = parts.length > 3 ? parts[3] : null;
-						String customEntryProviders = parts.length > 4 ? parts[4] : null;
-
-						if ("null".equals(typeFilter)) typeFilter = null;
-						if ("null".equals(customEntryProviders)) customEntryProviders = null;
-
-						bridge.openEntrySelector(type, typeFilter, customEntryProviders, (result) -> {
-							String[] res = (String[]) result;
-							// result is {value, readableName}
-							String val = res[0].replace("'", "\\'");
-							String name = res[1].replace("'", "\\'");
-							browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + val + "', '" + name + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
-						});
-						callback.success("");
-						return true;
-					}
-				} else if (request.startsWith("openAIConditionEditor:")) {
-					String[] parts = request.split(":", 3);
-					if (parts.length == 3) {
-						String id = parts[1];
-						String data = parts[2];
-						bridge.openAIConditionEditor(data, (result) -> {
-							String res = (String) result;
-							browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + (res!=null?res:"") + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
-						});
-						callback.success("");
-						return true;
-					}
+			SwingUtilities.invokeLater(() -> {
+				client = JCEFHelper.createClient();
+				if (client == null) {
+					LOG.error("Failed to create JCEF client");
+					loadingLabel.setText("Failed to initialize JCEF.");
+					return;
 				}
-				return false;
-			}
-		}, true);
-		client.addMessageRouter(msgRouter);
 
-		browser = client.createBrowser("client://mcreator/blockly/blockly.html", false, false);
-		browserWorkspaceMap.put(browser, mcreator.getWorkspace());
-		add(browser.getUIComponent(), BorderLayout.CENTER);
+				// JCEFHelper registers scheme handler factory internally now
 
-		client.addLoadHandler(new CefLoadHandlerAdapter() {
-			@Override
-			public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
-				if (frame.isMain()) {
-					injectSetupScripts();
-					loaded = true;
-					runAfterLoaded.forEach(ThreadUtil::runOnSwingThread);
-					runAfterLoaded.clear();
-				}
-			}
+				// Message Router
+				CefMessageRouter msgRouter = CefMessageRouter.create();
+				msgRouter.addHandler(new CefMessageRouterHandlerAdapter() {
+					@Override
+					public boolean onQuery(CefBrowser browser, CefFrame frame, long query_id, String request, boolean persistent,
+							CefQueryCallback callback) {
+						if (request.startsWith("t:")) {
+							String key = request.substring(2);
+							callback.success(bridge.t(key));
+							return true;
+						} else if (request.equals("triggerEvent")) {
+							bridge.triggerEvent();
+							callback.success("");
+							return true;
+						} else if (request.startsWith("startBlockForEditor:")) {
+							String editor = request.substring("startBlockForEditor:".length());
+							String result = bridge.startBlockForEditor(editor);
+							callback.success(result != null ? result : "");
+							return true;
+						} else if (request.startsWith("updateXML:")) {
+							lastKnownXML = request.substring("updateXML:".length());
+							callback.success("");
+							return true;
+						} else if (request.startsWith("updateLocalVariables:")) {
+							updateLocalVariables(request.substring("updateLocalVariables:".length()));
+							callback.success("");
+							return true;
+						} else if (request.startsWith("openColorSelector:")) {
+							String[] parts = request.split(":", 3);
+							if (parts.length == 3) {
+								String id = parts[1];
+								String color = parts[2];
+								bridge.openColorSelector(color, (result) -> {
+									String res = (String) result;
+									browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + (res!=null?res:"") + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
+								});
+								callback.success("");
+								return true;
+							}
+						} else if (request.startsWith("openMCItemSelector:")) {
+							String[] parts = request.split(":", 3);
+							if (parts.length == 3) {
+								String id = parts[1];
+								String type = parts[2];
+								bridge.openMCItemSelector(type, (result) -> {
+									String res = (String) result;
+									browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + (res!=null?res:"") + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
+								});
+								callback.success("");
+								return true;
+							}
+						} else if (request.startsWith("openEntrySelector:")) {
+							// Format: openEntrySelector:ID:type:typeFilter:customEntryProviders
+							String[] parts = request.split(":", 5);
+							if (parts.length >= 3) {
+								String id = parts[1];
+								String type = parts[2];
+								String typeFilter = parts.length > 3 ? parts[3] : null;
+								String customEntryProviders = parts.length > 4 ? parts[4] : null;
+
+								if ("null".equals(typeFilter)) typeFilter = null;
+								if ("null".equals(customEntryProviders)) customEntryProviders = null;
+
+								bridge.openEntrySelector(type, typeFilter, customEntryProviders, (result) -> {
+									String[] res = (String[]) result;
+									// result is {value, readableName}
+									String val = res[0].replace("'", "\\'");
+									String name = res[1].replace("'", "\\'");
+									browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + val + "', '" + name + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
+								});
+								callback.success("");
+								return true;
+							}
+						} else if (request.startsWith("openAIConditionEditor:")) {
+							String[] parts = request.split(":", 3);
+							if (parts.length == 3) {
+								String id = parts[1];
+								String data = parts[2];
+								bridge.openAIConditionEditor(data, (result) -> {
+									String res = (String) result;
+									browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + (res!=null?res:"") + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
+								});
+								callback.success("");
+								return true;
+							}
+						}
+						return false;
+					}
+				}, true);
+				client.addMessageRouter(msgRouter);
+
+				browser = client.createBrowser("client://mcreator/blockly/blockly.html", false, false);
+				browserWorkspaceMap.put(browser, mcreator.getWorkspace());
+
+				client.addLoadHandler(new CefLoadHandlerAdapter() {
+					@Override
+					public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
+						if (frame.isMain()) {
+							injectSetupScripts();
+							loaded = true;
+							runAfterLoaded.forEach(ThreadUtil::runOnSwingThread);
+							runAfterLoaded.clear();
+						}
+					}
+				});
+
+				removeAll();
+				add(browser.getUIComponent(), BorderLayout.CENTER);
+				revalidate();
+				repaint();
+			});
 		});
+		initThread.start();
 	}
 
 	private void updateLocalVariables(String query) {
