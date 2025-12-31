@@ -394,6 +394,10 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	}
 
 	public void setXML(String xml) {
+		if (!loaded) {
+			addTaskToRunAfterLoaded(() -> setXML(xml));
+			return;
+		}
 		String cleanXML = xml.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r");
 		String script = """
 				workspace.clear();
@@ -407,6 +411,10 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	}
 
 	public void addBlocksFromXML(String xml) {
+		if (!loaded) {
+			addTaskToRunAfterLoaded(() -> addBlocksFromXML(xml));
+			return;
+		}
 		if (browser == null) return;
 		String cleanXML = xml.replace("xmlns=\"http://www.w3.org/1999/xhtml\"", "")
 				.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r");
@@ -427,14 +435,26 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	}
 
 	public void addGlobalVariable(String name, String type) {
+		if (!loaded) {
+			addTaskToRunAfterLoaded(() -> addGlobalVariable(name, type));
+			return;
+		}
 		if (browser != null) browser.executeJavaScript("global_variables.push({name: '" + name + "', type: '" + type + "'})", browser.getURL(), 0);
 	}
 
 	public void addLocalVariable(String name, String type) {
+		if (!loaded) {
+			addTaskToRunAfterLoaded(() -> addLocalVariable(name, type));
+			return;
+		}
 		if (browser != null) browser.executeJavaScript("workspace.createVariable('" + name + "', '" + type + "', '" + name + "')", browser.getURL(), 0);
 	}
 
 	public void removeLocalVariable(String name) {
+		if (!loaded) {
+			addTaskToRunAfterLoaded(() -> removeLocalVariable(name));
+			return;
+		}
 		if (browser != null) browser.executeJavaScript("workspace.deleteVariableById('" + name + "')", browser.getURL(), 0);
 	}
 
