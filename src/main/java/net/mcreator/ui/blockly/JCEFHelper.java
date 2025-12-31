@@ -74,19 +74,13 @@ public class JCEFHelper {
                        // Handle termination if needed
                    }
                 }
-
-                @Override
-                public void onRegisterCustomSchemes(org.cef.callback.CefSchemeRegistrar registrar) {
-                    // Register client scheme as standard to behave like HTTP (support XHR etc)
-                    // Arguments: schemeName, isStandard, isLocal, isDisplayIsolated, isSecure, isCorsEnabled, isCspBypassing, isFetchEnabled
-                    registrar.addCustomScheme("client", true, false, false, false, false, false, false);
-                }
             });
 
             cefApp = builder.build();
 
-            // Register custom scheme immediately after build
-            cefApp.registerSchemeHandlerFactory("client", "mcreator", new MCRSchemeHandlerFactory());
+            // Register standard http scheme for mcreator.local
+            // No custom scheme registration needed for http
+            cefApp.registerSchemeHandlerFactory("http", "mcreator.local", new MCRSchemeHandlerFactory());
 
             synchronized (lock) {
                 initialized = true;

@@ -36,7 +36,7 @@ public class MCRResourceHandler implements CefResourceHandler {
     @Override
     public boolean processRequest(CefRequest request, CefCallback callback) {
         String url = request.getURL();
-        String path = url.replace("client://mcreator/", "");
+        String path = url.replace("http://mcreator.local/", "");
 
         if (path.startsWith("icon/")) {
             String itemName = path.substring(5);

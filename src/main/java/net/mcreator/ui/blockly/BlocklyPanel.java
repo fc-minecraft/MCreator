@@ -211,7 +211,7 @@ public class BlocklyPanel extends JPanel implements Closeable {
 				}, true);
 				client.addMessageRouter(msgRouter);
 
-				browser = client.createBrowser("client://mcreator/blockly/blockly.html", false, false);
+				browser = client.createBrowser("http://mcreator.local/blockly/blockly.html", false, false);
 				browserWorkspaceMap.put(browser, mcreator.getWorkspace());
 
 				client.addLoadHandler(new CefLoadHandlerAdapter() {
@@ -267,8 +267,7 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		initScript.append("window.javabridge.callbacks = {};\n");
 		initScript.append("window.javabridge.triggerEvent = function() { window.cefQuery({request: 'triggerEvent', persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
 
-		initScript.append("window.javabridge.t = function(key) { return key; };\n");
-		initScript.append("window.javabridge.getMCItemURI = function(name) { return 'client://mcreator/icon/' + name + '.png'; };\n");
+		initScript.append("window.javabridge.getMCItemURI = function(name) { return 'http://mcreator.local/icon/' + name + '.png'; };\n");
 
 		String startBlock = bridge.startBlockForEditor(type.registryName());
 		initScript.append("window.javabridge.startBlockForEditor = function(editor) { return '" + (startBlock!=null?startBlock:"") + "'; };\n");
@@ -286,9 +285,27 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		initScript.append("window.javabridge.openAIConditionEditor = function(data, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openAIConditionEditor:' + id + ':' + data, persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
 		initScript.append("window.javabridge.openEntrySelector = function(type, typeFilter, customEntryProviders, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openEntrySelector:' + id + ':' + type + ':' + (typeFilter?typeFilter:'null') + ':' + (customEntryProviders?customEntryProviders:'null'), persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
 
+		// Preload Texts
+		initScript.append("window.MCR_TEXTS = {};\n");
+		Gson gson = new Gson();
+		Map<String, String> texts = new HashMap<>();
+
+		// Collect all blockly keys
+		ResourceBundle rb = L10N.getSupportedLocales().contains(L10N.getLocale())
+                ? ResourceBundle.getBundle("lang/texts", L10N.getLocale(), PluginLoader.INSTANCE, new net.mcreator.util.locale.UTF8Control())
+                : ResourceBundle.getBundle("lang/texts", Locale.ROOT, PluginLoader.INSTANCE, new net.mcreator.util.locale.UTF8Control());
+
+        for (String key : Collections.list(rb.getKeys())) {
+            if (key.startsWith("blockly.")) {
+                texts.put(key, rb.getString(key));
+            }
+        }
+
+		initScript.append("window.MCR_TEXTS = " + gson.toJson(texts) + ";\n");
+		initScript.append("window.javabridge.t = function(key) { return window.MCR_TEXTS[key] || key; };\n");
+
 		// Preload Lists
 		initScript.append("window.MCR_LISTS = {};\n");
-		Gson gson = new Gson();
 		Set<String> datalists = new HashSet<>(DataListLoader.getCache().keySet());
 		String[] explicitTypes = {"procedure", "entity", "spawnableEntity", "gui", "achievement", "effect", "potion",
                                   "gamerulesboolean", "gamerulesnumber", "fluid", "sound", "particle", "direction",
@@ -344,10 +361,10 @@ public class BlocklyPanel extends JPanel implements Closeable {
 
 		// Now load scripts in chain
 		StringBuilder loaderScript = new StringBuilder();
-		loaderScript.append("loadScript('client://mcreator/jsdist/blockly_compressed.js')");
-		loaderScript.append(".then(() => loadScript('client://mcreator/jsdist/msg/" + L10N.getBlocklyLangName() + ".js'))");
-		loaderScript.append(".then(() => loadScript('client://mcreator/jsdist/blocks_compressed.js'))");
-		loaderScript.append(".then(() => loadScript('client://mcreator/blockly/js/mcreator_blockly.js'))");
+		loaderScript.append("loadScript('http://mcreator.local/jsdist/blockly_compressed.js')");
+		loaderScript.append(".then(() => loadScript('http://mcreator.local/jsdist/msg/" + L10N.getBlocklyLangName() + ".js'))");
+		loaderScript.append(".then(() => loadScript('http://mcreator.local/jsdist/blocks_compressed.js'))");
+		loaderScript.append(".then(() => loadScript('http://mcreator.local/blockly/js/mcreator_blockly.js'))");
 		loaderScript.append(".then(() => { window.cefQuery({request: 'blocklyLoaded', persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); })");
 		loaderScript.append(".catch(e => console.error('Blockly Load Error: ', e));");
 
