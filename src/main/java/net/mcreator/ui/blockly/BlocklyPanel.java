@@ -1,21 +1,3 @@
-/*
- * MCreator (https://mcreator.net/)
- * Copyright (C) 2020 Pylo and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package net.mcreator.ui.blockly;
 
 import com.google.gson.Gson;
@@ -45,9 +27,9 @@ import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.browser.CefMessageRouter;
 import org.cef.callback.CefQueryCallback;
-import org.cef.handler.CefDisplayHandlerAdapter;
-import org.cef.handler.CefLoadHandlerAdapter;
-import org.cef.handler.CefMessageRouterHandlerAdapter;
+import org.cef.handler.*;
+import org.cef.misc.BoolRef; // !!! ВАЖНО: Добавлен импорт
+import org.cef.network.CefRequest;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -64,6 +46,9 @@ public class BlocklyPanel extends JPanel implements Closeable {
 
 	private static final Logger LOG = LogManager.getLogger("Blockly");
 	public static final Map<CefBrowser, Workspace> browserWorkspaceMap = new ConcurrentHashMap<>();
+
+	// Стратегия http://mcreator.ui
+	private static final String BLOCKLY_URL = "http://mcreator.ui/blockly/blockly.html";
 
 	private CefClient client;
 	private CefBrowser browser;
@@ -105,10 +90,30 @@ public class BlocklyPanel extends JPanel implements Closeable {
 					return;
 				}
 
+				// !!! ИСПРАВЛЕНИЕ: Используем правильную сигнатуру с BoolRef
+				client.addRequestHandler(new CefRequestHandlerAdapter() {
+					@Override
+					public CefResourceRequestHandler getResourceRequestHandler(CefBrowser browser, CefFrame frame, CefRequest request, boolean isNavigation, boolean isDownload, String requestInitiator, BoolRef disableDefaultHandling) {
+						return new CefResourceRequestHandlerAdapter() {
+							@Override
+							public CefResourceHandler getResourceHandler(CefBrowser browser, CefFrame frame, CefRequest request) {
+								if (request.getURL().startsWith("http://mcreator.ui/")) {
+									MCRResourceHandler handler = new MCRResourceHandler();
+									handler.setWorkspace(mcreator.getWorkspace());
+									return handler;
+								}
+								return null;
+							}
+						};
+					}
+				});
+
 				client.addDisplayHandler(new CefDisplayHandlerAdapter() {
 					@Override
 					public boolean onConsoleMessage(CefBrowser browser, org.cef.CefSettings.LogSeverity level, String message, String source, int line) {
 						String logMsg = "[JS] " + message + " (" + source + ":" + line + ")";
+						if (message.contains("Refused to get unsafe header")) return false;
+						
 						switch (level) {
 							case LOGSEVERITY_ERROR: LOG.error(logMsg); break;
 							case LOGSEVERITY_WARNING: LOG.warn(logMsg); break;
@@ -202,7 +207,12 @@ public class BlocklyPanel extends JPanel implements Closeable {
 								return true;
 							}
 						} else if (request.equals("blocklyLoaded")) {
-							SwingUtilities.invokeLater(() -> executePluginScripts());
+							SwingUtilities.invokeLater(() -> {
+								executePluginScripts();
+								loaded = true;
+								runAfterLoaded.forEach(ThreadUtil::runOnSwingThread);
+								runAfterLoaded.clear();
+							});
 							callback.success("");
 							return true;
 						}
@@ -211,17 +221,31 @@ public class BlocklyPanel extends JPanel implements Closeable {
 				}, true);
 				client.addMessageRouter(msgRouter);
 
-				browser = client.createBrowser("http://mcreator.local/blockly/blockly.html", false, false);
+				browser = client.createBrowser("about:blank", false, false);
 				browserWorkspaceMap.put(browser, mcreator.getWorkspace());
 
 				client.addLoadHandler(new CefLoadHandlerAdapter() {
 					@Override
 					public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
 						if (frame.isMain()) {
-							injectSetupScripts();
-							loaded = true;
-							runAfterLoaded.forEach(ThreadUtil::runOnSwingThread);
-							runAfterLoaded.clear();
+							String url = browser.getURL();
+							if (url.equalsIgnoreCase("about:blank")) {
+								browser.loadURL(BLOCKLY_URL);
+							} 
+							else if (url.startsWith("http://mcreator.ui/")) {
+								if (httpStatusCode == 200) {
+									injectSetupScripts();
+								} else {
+									LOG.error("Page load failed with status: " + httpStatusCode);
+								}
+							}
+						}
+					}
+					
+					@Override
+					public void onLoadError(CefBrowser browser, CefFrame frame, ErrorCode errorCode, String errorText, String failedUrl) {
+						if (frame.isMain()) {
+							LOG.error("Blockly Load Error: " + errorCode + " - " + errorText + " for " + failedUrl);
 						}
 					}
 				});
@@ -260,14 +284,13 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	private void injectSetupScripts() {
 		StringBuilder initScript = new StringBuilder();
 
-		// Define loader function
 		initScript.append("function loadScript(src) { return new Promise((resolve, reject) => { var s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.head.appendChild(s); }); }\n");
 
 		initScript.append("window.javabridge = {};\n");
 		initScript.append("window.javabridge.callbacks = {};\n");
 		initScript.append("window.javabridge.triggerEvent = function() { window.cefQuery({request: 'triggerEvent', persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
 
-		initScript.append("window.javabridge.getMCItemURI = function(name) { return 'http://mcreator.local/icon/' + name + '.png'; };\n");
+		initScript.append("window.javabridge.getMCItemURI = function(name) { return 'http://mcreator.ui/icon/' + name + '.png'; };\n");
 
 		String startBlock = bridge.startBlockForEditor(type.registryName());
 		initScript.append("window.javabridge.startBlockForEditor = function(editor) { return '" + (startBlock!=null?startBlock:"") + "'; };\n");
@@ -285,12 +308,10 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		initScript.append("window.javabridge.openAIConditionEditor = function(data, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openAIConditionEditor:' + id + ':' + data, persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
 		initScript.append("window.javabridge.openEntrySelector = function(type, typeFilter, customEntryProviders, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openEntrySelector:' + id + ':' + type + ':' + (typeFilter?typeFilter:'null') + ':' + (customEntryProviders?customEntryProviders:'null'), persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
 
-		// Preload Texts
 		initScript.append("window.MCR_TEXTS = {};\n");
 		Gson gson = new Gson();
 		Map<String, String> texts = new HashMap<>();
 
-		// Collect all blockly keys
 		ResourceBundle rb = L10N.getSupportedLocales().contains(L10N.getLocale())
                 ? ResourceBundle.getBundle("lang/texts", L10N.getLocale(), PluginLoader.INSTANCE, new net.mcreator.util.locale.UTF8Control())
                 : ResourceBundle.getBundle("lang/texts", Locale.ROOT, PluginLoader.INSTANCE, new net.mcreator.util.locale.UTF8Control());
@@ -304,7 +325,6 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		initScript.append("window.MCR_TEXTS = " + gson.toJson(texts) + ";\n");
 		initScript.append("window.javabridge.t = function(key) { return window.MCR_TEXTS[key] || key; };\n");
 
-		// Preload Lists
 		initScript.append("window.MCR_LISTS = {};\n");
 		Set<String> datalists = new HashSet<>(DataListLoader.getCache().keySet());
 		String[] explicitTypes = {"procedure", "entity", "spawnableEntity", "gui", "achievement", "effect", "potion",
@@ -326,7 +346,6 @@ public class BlocklyPanel extends JPanel implements Closeable {
 			}
 		}
 
-		// CSS injection (unchanged logic)
 		String css = FileIO.readResourceToString("/blockly/css/mcreator_blockly.css");
 		if (PluginLoader.INSTANCE.getResourceAsStream(
 				"themes/" + Theme.current().getID() + "/styles/blockly.css") != null) {
@@ -356,15 +375,13 @@ public class BlocklyPanel extends JPanel implements Closeable {
 						+ " };\n";
 		initScript.append(prefScript);
 
-		// Execute initial setup first
 		browser.executeJavaScript(initScript.toString(), browser.getURL(), 0);
 
-		// Now load scripts in chain
 		StringBuilder loaderScript = new StringBuilder();
-		loaderScript.append("loadScript('http://mcreator.local/jsdist/blockly_compressed.js')");
-		loaderScript.append(".then(() => loadScript('http://mcreator.local/jsdist/msg/" + L10N.getBlocklyLangName() + ".js'))");
-		loaderScript.append(".then(() => loadScript('http://mcreator.local/jsdist/blocks_compressed.js'))");
-		loaderScript.append(".then(() => loadScript('http://mcreator.local/blockly/js/mcreator_blockly.js'))");
+		loaderScript.append("loadScript('http://mcreator.ui/jsdist/blockly_compressed.js')");
+		loaderScript.append(".then(() => loadScript('http://mcreator.ui/jsdist/msg/" + L10N.getBlocklyLangName() + ".js'))");
+		loaderScript.append(".then(() => loadScript('http://mcreator.ui/jsdist/blocks_compressed.js'))");
+		loaderScript.append(".then(() => loadScript('http://mcreator.ui/blockly/js/mcreator_blockly.js'))");
 		loaderScript.append(".then(() => { window.cefQuery({request: 'blocklyLoaded', persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); })");
 		loaderScript.append(".catch(e => console.error('Blockly Load Error: ', e));");
 
