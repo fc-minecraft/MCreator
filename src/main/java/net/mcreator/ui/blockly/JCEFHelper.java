@@ -1,0 +1,138 @@
+package net.mcreator.ui.blockly;
+
+import me.friwi.jcefmaven.CefAppBuilder;
+import me.friwi.jcefmaven.MavenCefAppHandlerAdapter;
+import me.friwi.jcefmaven.IProgressHandler;
+import me.friwi.jcefmaven.EnumProgress;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.cef.CefApp;
+import org.cef.CefClient;
+
+import java.io.File;
+import java.util.function.Consumer;
+
+public class JCEFHelper {
+
+    private static final Logger LOG = LogManager.getLogger("JCEF");
+    private static CefApp cefApp;
+    private static boolean initialized = false;
+    private static boolean initializing = false;
+    private static final Object lock = new Object();
+
+    public static void initialize(Consumer<String> statusUpdater) {
+        synchronized (lock) {
+            // Если уже инициализировано (от Gradle), просто используем существующий App
+            if (CefApp.getState() == CefApp.CefAppState.INITIALIZED) {
+                cefApp = CefApp.getInstance();
+                initialized = true;
+                return;
+            }
+            
+            if (initialized) return;
+            if (initializing) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return;
+            }
+            initializing = true;
+        }
+
+        try {
+            CefAppBuilder builder = new CefAppBuilder();
+            builder.setInstallDir(new File("jcef-bundle"));
+            builder.setProgressHandler(new IProgressHandler() {
+                @Override
+                public void handleProgress(EnumProgress state, float percent) {
+                    String msg = "Загрузка компонентов... " + ((int)percent) + "%";
+                    if (percent < 0) msg = "Загрузка компонентов...";
+                    LOG.info("JCEF Init: " + state + " " + percent + "%");
+                    if (statusUpdater != null) statusUpdater.accept(msg);
+                }
+            });
+
+            builder.getCefSettings().windowless_rendering_enabled = false;
+            builder.getCefSettings().log_severity = org.cef.CefSettings.LogSeverity.LOGSEVERITY_WARNING;
+
+            builder.addJcefArgs("--disable-extensions");
+            builder.addJcefArgs("--disable-pdf-extension");
+            builder.addJcefArgs("--disable-plugins-discovery");
+            builder.addJcefArgs("--disable-background-networking");
+            builder.addJcefArgs("--disable-sync");
+            builder.addJcefArgs("--disable-site-isolation-trials");
+            builder.addJcefArgs("--proxy-server=direct://");
+            builder.addJcefArgs("--proxy-bypass-list=*");
+            
+            builder.addJcefArgs("--disable-web-security"); 
+            builder.addJcefArgs("--allow-file-access-from-files");
+
+            int cores = Runtime.getRuntime().availableProcessors();
+            if (cores < 4) {
+                builder.addJcefArgs("--disable-smooth-scrolling");
+            }
+
+            builder.setAppHandler(new MavenCefAppHandlerAdapter() {
+                @Override
+                public void stateHasChanged(org.cef.CefApp.CefAppState state) {
+                   if (state == CefApp.CefAppState.TERMINATED) {
+                       // Handle termination
+                   }
+                }
+            });
+
+            cefApp = builder.build();
+
+            // МЫ НЕ РЕГИСТРИРУЕМ ЗДЕСЬ СХЕМЫ. 
+            // Это делает BlocklyPanel через client.addRequestHandler.
+
+            synchronized (lock) {
+                initialized = true;
+                initializing = false;
+                lock.notifyAll();
+            }
+
+        } catch (Exception e) {
+            LOG.error("Failed to initialize JCEF", e);
+            synchronized (lock) {
+                initializing = false;
+                lock.notifyAll();
+            }
+        }
+    }
+
+    public static CefClient createClient() {
+        CefApp app = getCefApp();
+        if (app != null) {
+            return app.createClient();
+        }
+        return null;
+    }
+
+    public static CefApp getCefApp() {
+        synchronized (lock) {
+            while (initializing) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return null;
+                }
+            }
+        }
+        return cefApp;
+    }
+
+    public static void dispose() {
+        synchronized (lock) {
+            if (cefApp != null) {
+                LOG.info("Disposing JCEF CefApp...");
+                cefApp.dispose();
+                cefApp = null;
+                initialized = false;
+            }
+        }
+    }
+}

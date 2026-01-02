@@ -392,6 +392,12 @@ public final class MCreatorApplication {
 		}
 
 		try {
+			net.mcreator.ui.blockly.JCEFHelper.dispose();
+		} catch (Exception e) {
+			LOG.warn("Failed to dispose JCEF", e);
+		}
+
+		try {
 			Thread.sleep(1000); // additional sleep for more robustness
 		} catch (Exception ignored) {
 		}

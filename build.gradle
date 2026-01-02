@@ -135,6 +135,14 @@ dependencies {
     implementation "net.java.dev.jna:jna:5.18.1" // needed by discord-rpc.jar
 
     implementation "com.github.weisj:jsvg:2.0.0"
+    implementation "me.friwi:jcefmaven:132.3.1"
+
+    def jcef_natives_version = 'jcef-1770317+cef-132.3.1+g144febe+chromium-132.0.6834.83'
+    win64 "me.friwi:jcef-natives-windows-amd64:${jcef_natives_version}"
+    linux64 "me.friwi:jcef-natives-linux-amd64:${jcef_natives_version}"
+    macX64 "me.friwi:jcef-natives-macosx-amd64:${jcef_natives_version}"
+    macAarch64 "me.friwi:jcef-natives-macosx-arm64:${jcef_natives_version}"
+
     implementation "com.formdev:flatlaf:3.6.2:no-natives"
     implementation("com.formdev:flatlaf-extras:3.6.2") {
         dep -> exclude group: 'com.formdev', module: 'flatlaf'

@@ -31,6 +31,25 @@ workspace.addChangeListener(function (event) {
     if (event.isUiEvent)
         return; // Don't update on UI-only events.
 
+    // Send updates to Java asynchronously
+    if (typeof window.cefQuery !== "undefined") {
+        // Send XML
+        window.cefQuery({
+            request: 'updateXML:' + workspaceToXML(),
+            persistent: false,
+            onSuccess: function(response) {},
+            onFailure: function(error_code, error_message) {}
+        });
+
+        // Send Variables
+        window.cefQuery({
+            request: 'updateLocalVariables:' + getSerializedLocalVariables(),
+            persistent: false,
+            onSuccess: function(response) {},
+            onFailure: function(error_code, error_message) {}
+        });
+    }
+
     if (typeof javabridge !== "undefined")
         javabridge.triggerEvent();
 });

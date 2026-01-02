@@ -1,7 +1,18 @@
+tasks.register('extractJcefLinux64', Copy) {
+    dependsOn configurations.linux64
+    from {
+        configurations.linux64.filter { it.name.contains('jcef-natives') }.collect { zipTree(it) }
+    }
+    include "**/*.so", "**/*.pak", "**/*.bin", "**/*.dat", "**/*.json"
+    exclude "META-INF/**"
+    into 'build/export/linux64/jcef-bundle'
+}
+
 tasks.register('exportLinux64', Copy.class) {
     dependsOn downloadJDKLinux64
     dependsOn jar
     dependsOn exportPlugins
+    dependsOn extractJcefLinux64
 
     def icon = project.snapshot ? "icon_eap.png" : "icon.png"
 

@@ -5,7 +5,12 @@ class FieldDataListDropdown extends Blockly.FieldDropdown {
 
     constructor(datalist = '', opt_validator, opt_config) {
         super(function () {
-            return arrayToBlocklyDropDownArray(javabridge.getListOf(datalist));
+            if (typeof javabridge.getListOf === 'function') {
+                return arrayToBlocklyDropDownArray(javabridge.getListOf(datalist));
+            } else if (window.MCR_LISTS && window.MCR_LISTS[datalist]) {
+                return arrayToBlocklyDropDownArray(window.MCR_LISTS[datalist]);
+            }
+            return [["", ""]];
         }, opt_validator, opt_config);
         this.type = datalist;
         this.maxDisplayLength = 75;
