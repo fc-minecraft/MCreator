@@ -16,6 +16,7 @@ import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.laf.themes.Theme;
 import net.mcreator.util.TestUtil;
 import net.mcreator.workspace.Workspace;
+import net.mcreator.workspace.elements.ModElement;
 import net.mcreator.workspace.elements.VariableElement;
 import net.mcreator.workspace.elements.VariableType;
 import net.mcreator.workspace.elements.VariableTypeLoader;
@@ -28,7 +29,7 @@ import org.cef.browser.CefFrame;
 import org.cef.browser.CefMessageRouter;
 import org.cef.callback.CefQueryCallback;
 import org.cef.handler.*;
-import org.cef.misc.BoolRef; // !!! ВАЖНО: Добавлен импорт
+import org.cef.misc.BoolRef;
 import org.cef.network.CefRequest;
 
 import javax.annotation.Nonnull;
@@ -47,7 +48,6 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	private static final Logger LOG = LogManager.getLogger("Blockly");
 	public static final Map<CefBrowser, Workspace> browserWorkspaceMap = new ConcurrentHashMap<>();
 
-	// Стратегия http://mcreator.ui
 	private static final String BLOCKLY_URL = "http://mcreator.ui/blockly/blockly.html";
 
 	private CefClient client;
@@ -90,7 +90,6 @@ public class BlocklyPanel extends JPanel implements Closeable {
 					return;
 				}
 
-				// !!! ИСПРАВЛЕНИЕ: Используем правильную сигнатуру с BoolRef
 				client.addRequestHandler(new CefRequestHandlerAdapter() {
 					@Override
 					public CefResourceRequestHandler getResourceRequestHandler(CefBrowser browser, CefFrame frame, CefRequest request, boolean isNavigation, boolean isDownload, String requestInitiator, BoolRef disableDefaultHandling) {
@@ -308,8 +307,23 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		initScript.append("window.javabridge.openAIConditionEditor = function(data, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openAIConditionEditor:' + id + ':' + data, persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
 		initScript.append("window.javabridge.openEntrySelector = function(type, typeFilter, customEntryProviders, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openEntrySelector:' + id + ':' + type + ':' + (typeFilter?typeFilter:'null') + ':' + (customEntryProviders?customEntryProviders:'null'), persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
 
-		initScript.append("window.MCR_TEXTS = {};\n");
 		Gson gson = new Gson();
+		Map<String, String> elementNames = new HashMap<>();
+		try {
+			for (ModElement element : mcreator.getWorkspace().getModElements()) {
+				elementNames.put(element.getRegistryName(), element.getName());
+			}
+		} catch (Exception e) {
+			LOG.warn("Failed to load element names", e);
+		}
+		initScript.append("window.MCR_ELEMENT_NAMES = " + gson.toJson(elementNames) + ";\n");
+
+        initScript.append("window.javabridge.getReadableNameOf = function(id) { return window.MCR_ELEMENT_NAMES[id] || id; };\n");
+        initScript.append("window.javabridge.getDependencies = function() { return []; };\n");
+        initScript.append("window.javabridge.isPlayerVariable = function(name) { return false; };\n");
+
+		initScript.append("window.MCR_TEXTS = {};\n");
+		
 		Map<String, String> texts = new HashMap<>();
 
 		ResourceBundle rb = L10N.getSupportedLocales().contains(L10N.getLocale())
