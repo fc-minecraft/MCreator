@@ -193,6 +193,7 @@ public class OfflineCacheManager {
                 }
 
                 statusCallback.accept("Настройка файлов сборки...");
+                captureVersionsFromTemplate(tempDir);
                 preprocessBuildFiles(tempDir, mcVersion, buildFileVersion);
 
                 statusCallback.accept("Запуск Gradle...");
@@ -329,6 +330,43 @@ public class OfflineCacheManager {
         return "";
     }
 
+    private static void captureVersionsFromTemplate(File tempDir) {
+        try {
+            File gradleProps = new File(tempDir, "gradle.properties");
+            if (!gradleProps.exists()) return;
+
+            Properties templateProps = new Properties();
+            try (InputStream is = new FileInputStream(gradleProps)) {
+                templateProps.load(is);
+            }
+
+            File versionsFile = new File(getOfflineCacheDir(), VERSIONS_FILE_NAME);
+            Properties cacheProps = new Properties();
+            if (versionsFile.exists()) {
+                try (InputStream is = new FileInputStream(versionsFile)) {
+                    cacheProps.load(is);
+                }
+            }
+
+            // Copy relevant keys
+            String[] keys = {"loader_version", "yarn_mappings", "fabric_version", "minecraft_version"};
+            for (String key : keys) {
+                if (templateProps.containsKey(key)) {
+                    cacheProps.setProperty(key, templateProps.getProperty(key));
+                }
+            }
+
+            try (java.io.OutputStream os = Files.newOutputStream(versionsFile.toPath())) {
+                cacheProps.store(os, "Offline Mode Versions");
+            }
+
+            LOG.info("Captured template versions: " + cacheProps);
+
+        } catch (Exception e) {
+            LOG.warn("Failed to capture versions from template", e);
+        }
+    }
+
     private static void preprocessBuildFiles(File workspaceDir, String mcVersion, String buildFileVersion) {
         File buildGradle = new File(workspaceDir, "build.gradle");
         File mcreatorGradle = new File(workspaceDir, "mcreator.gradle");
@@ -382,12 +420,12 @@ public class OfflineCacheManager {
         LOG.info("Applying offline mode fixes to workspace: " + workspaceDir);
 
         // Load versions from cache
+        Properties p = new Properties();
         String mcVersion = FALLBACK_MC_VERSION;
         String buildFileVersion = FALLBACK_BUILD_FILE_VERSION;
         try {
              File versionsFile = new File(getOfflineCacheDir(), VERSIONS_FILE_NAME);
              if (versionsFile.exists()) {
-                 Properties p = new Properties();
                  p.load(Files.newBufferedReader(versionsFile.toPath()));
                  mcVersion = p.getProperty("minecraft_version", FALLBACK_MC_VERSION);
                  buildFileVersion = p.getProperty("build_file_version", FALLBACK_BUILD_FILE_VERSION);
@@ -421,19 +459,28 @@ public class OfflineCacheManager {
             if (gradleProps.exists()) {
                 String props = FileIO.readFileToString(gradleProps);
                 props = props.replaceAll("minecraft_version=.*", "minecraft_version=" + mcVersion);
-                // Assume yarn matches mc version + build.1 usually
-                props = props.replaceAll("yarn_mappings=.*", "yarn_mappings=" + mcVersion + "+build.1");
-                props = props.replaceAll("loader_version=.*", "loader_version=" + "0.15.11"); // Still hardcoded stable loader for now
-                props = props.replaceAll("fabric_version=.*", "fabric_version=" + buildFileVersion); // API version
+
+                String yarn = p.getProperty("yarn_mappings", mcVersion + "+build.1");
+                props = props.replaceAll("yarn_mappings=.*", "yarn_mappings=" + yarn);
+
+                String loader = p.getProperty("loader_version", "0.15.11");
+                props = props.replaceAll("loader_version=.*", "loader_version=" + loader);
+
+                String fabric = p.getProperty("fabric_version", buildFileVersion);
+                props = props.replaceAll("fabric_version=.*", "fabric_version=" + fabric);
+
                 FileIO.writeStringToFile(props, gradleProps);
             }
 
             // If the version is directly in build.gradle
             content = content.replaceAll("com\\.mojang:minecraft:[0-9\\.]+", "com.mojang:minecraft:" + mcVersion);
-            content = content.replaceAll("net\\.fabricmc:fabric-loader:[0-9\\.]+", "net.fabricmc:fabric-loader:0.15.11");
+
+            String loader = p.getProperty("loader_version", "0.15.11");
+            content = content.replaceAll("net\\.fabricmc:fabric-loader:[0-9\\.]+", "net.fabricmc:fabric-loader:" + loader);
 
             // mappings "net.fabricmc:yarn:..."
-            content = content.replaceAll("net\\.fabricmc:yarn:[0-9\\.+]+:v2", "net.fabricmc:yarn:" + mcVersion + "+build.1:v2");
+            String yarn = p.getProperty("yarn_mappings", mcVersion + "+build.1");
+            content = content.replaceAll("net\\.fabricmc:yarn:[0-9\\.+]+:v2", "net.fabricmc:yarn:" + yarn + ":v2");
 
             FileIO.writeStringToFile(content, buildGradle);
         }

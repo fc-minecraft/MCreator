@@ -136,10 +136,6 @@ public class WorkspaceGeneratorSetup {
 	}
 
 	public static void setupWorkspaceBase(Workspace workspace) {
-		if (PreferencesManager.PREFERENCES.gradle.offline.get() && OfflineCacheManager.isOfflineModeReady()) {
-			OfflineCacheManager.applyOfflineFixes(workspace.getWorkspaceFolder());
-		}
-
 		Set<String> fileNames = PluginLoader.INSTANCE.getResourcesInPackage(
 				workspace.getGenerator().getGeneratorName() + ".workspacebase");
 		for (String file : fileNames) {
@@ -163,6 +159,10 @@ public class WorkspaceGeneratorSetup {
 				LOG.error("Failed to copy workspace base file", e);
 				TestUtil.failIfTestingEnvironment();
 			}
+		}
+
+		if (PreferencesManager.PREFERENCES.gradle.offline.get() && OfflineCacheManager.isOfflineModeReady()) {
+			OfflineCacheManager.applyOfflineFixes(workspace.getWorkspaceFolder());
 		}
 	}
 
