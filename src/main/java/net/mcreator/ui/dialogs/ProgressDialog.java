@@ -82,7 +82,22 @@ public class ProgressDialog extends MCreatorDialog {
 			titleLabel.setText(title);
 			titleLabel.setBorder(BorderFactory.createEmptyBorder(7, 10, 2, 10));
 			titleLabel.setForeground(Theme.current().getAltForegroundColor());
-			add("North", titleLabel);
+
+			JPanel titlePanel = new JPanel(new BorderLayout());
+			titlePanel.setOpaque(false);
+			titlePanel.add("Center", titleLabel);
+
+			JLabel closeButton = new JLabel(UIRES.get("close_small"));
+			closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+			closeButton.setBorder(BorderFactory.createEmptyBorder(7, 5, 2, 10));
+			closeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+				@Override public void mouseClicked(java.awt.event.MouseEvent e) {
+					dispatchEvent(new WindowEvent(ProgressDialog.this, WindowEvent.WINDOW_CLOSING));
+				}
+			});
+			titlePanel.add("East", closeButton);
+
+			add("North", titlePanel);
 		} else if (OS.getOS() == OS.MAC
 				&& SystemInfo.isMacFullWindowContentSupported) { // on macOS, we use full window content instead
 			getRootPane().putClientProperty("apple.awt.fullWindowContent", true);
@@ -212,6 +227,10 @@ public class ProgressDialog extends MCreatorDialog {
 
 		private final Map<ProgressUnit, Icon> LOADER_CACHE = new HashMap<>();
 		private final JProgressBar sharedBar = new JProgressBar(0, 100);
+
+		public Render() {
+			sharedBar.setStringPainted(true);
+		}
 
 		@Override
 		public Component getListCellRendererComponent(JList<? extends ProgressUnit> list, ProgressUnit ma, int index,
