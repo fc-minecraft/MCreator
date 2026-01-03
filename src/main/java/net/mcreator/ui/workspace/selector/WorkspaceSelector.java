@@ -204,9 +204,20 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 				ProgressDialog.ProgressUnit unit = new ProgressDialog.ProgressUnit(
 						L10N.t("dialog.workspace_selector.offline_mode.preparing"));
 				dialog.addProgressUnit(unit);
+
+				// Enable cancellation
+				dialog.setClosable(true);
+				dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+				dialog.addWindowListener(new WindowAdapter() {
+					@Override public void windowClosing(WindowEvent e) {
+						OfflineCacheManager.cancelDownload();
+						dialog.hideDialog();
+					}
+				});
+
 				dialog.setVisible(true);
 
-				OfflineCacheManager.downloadOfflineFiles(unit::setName, () -> {
+				OfflineCacheManager.downloadOfflineFiles(unit::setName, unit::setPercent, () -> {
 					unit.markStateOk();
 					dialog.hideDialog();
 					if (!ALWAYS_SHOW_OFFLINE_BUTTON) {

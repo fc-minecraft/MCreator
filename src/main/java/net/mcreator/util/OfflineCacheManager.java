@@ -23,6 +23,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -31,6 +32,8 @@ import java.util.zip.ZipFile;
 public class OfflineCacheManager {
 
     private static final Logger LOG = LogManager.getLogger(OfflineCacheManager.class);
+
+    private static final AtomicBoolean CANCELLED = new AtomicBoolean(false);
 
     private static final String MARKER_FILE_NAME = "offline_fabric_1.21.8_ready.marker";
     private static final String VERSIONS_FILE_NAME = "offline_versions.properties";
@@ -78,14 +81,36 @@ public class OfflineCacheManager {
         }
     }
 
+    public static void cancelDownload() {
+        CANCELLED.set(true);
+    }
+
     public static void downloadOfflineFiles(Consumer<String> statusCallback, Runnable onComplete, Runnable onError) {
+        downloadOfflineFiles(statusCallback, i -> {}, onComplete, onError);
+    }
+
+    public static void downloadOfflineFiles(Consumer<String> statusCallback, Consumer<Integer> progressCallback,
+            Runnable onComplete, Runnable onError) {
+        CANCELLED.set(false);
         new Thread(() -> {
             File tempDir = null;
             try {
+                int[] currentProgress = { 0 };
+                Consumer<Integer> updateProgress = p -> {
+                    if (p > currentProgress[0]) {
+                        currentProgress[0] = p;
+                        progressCallback.accept(p);
+                    }
+                };
+
                 LOG.info("Starting offline cache download...");
+                updateProgress.accept(1);
                 statusCallback.accept("Подготовка рабочего пространства...");
 
                 tempDir = Files.createTempDirectory("offline_setup").toFile();
+
+                if (CANCELLED.get())
+                    throw new RuntimeException("Cancelled by user");
 
                 Optional<Plugin> pluginOpt = PluginLoader.INSTANCE.getPlugins().stream()
                         .filter(p -> p.getID().contains("fabric"))
@@ -119,6 +144,7 @@ public class OfflineCacheManager {
                     LOG.warn("Failed to save versions file", ex);
                 }
 
+                updateProgress.accept(10);
                 statusCallback.accept("Извлечение шаблона из " + pluginId + "...");
 
                 boolean extracted = false;
@@ -156,6 +182,7 @@ public class OfflineCacheManager {
                         if (workspaceBasePath != null) {
                             entries = zip.entries();
                             while (entries.hasMoreElements()) {
+                                if (CANCELLED.get()) throw new RuntimeException("Cancelled by user");
                                 ZipEntry entry = entries.nextElement();
                                 if (entry.getName().startsWith(workspaceBasePath)) {
                                     String relativePath = entry.getName().substring(workspaceBasePath.length());
@@ -192,10 +219,15 @@ public class OfflineCacheManager {
                      }
                 }
 
+                updateProgress.accept(20);
                 statusCallback.accept("Настройка файлов сборки...");
                 preprocessBuildFiles(tempDir, mcVersion, buildFileVersion);
 
+                updateProgress.accept(25);
                 statusCallback.accept("Запуск Gradle...");
+
+                if (CANCELLED.get())
+                    throw new RuntimeException("Cancelled by user");
 
                 GradleConnector connector = GradleConnector.newConnector();
                 connector.forProjectDirectory(tempDir);
@@ -209,15 +241,19 @@ public class OfflineCacheManager {
 
                     launcher.addProgressListener(event -> {
                         statusCallback.accept(event.getDescriptor().getName());
+                        if (currentProgress[0] < 95)
+                            updateProgress.accept(currentProgress[0] + 1);
                     }, OperationType.TASK);
 
                     // Retry logic for the build launcher
                     int attempts = 0;
                     while (attempts < 3) {
+                        if (CANCELLED.get()) throw new RuntimeException("Cancelled by user");
                         try {
                             launcher.run();
                             break; // Success
                         } catch (Exception e) {
+                            if (CANCELLED.get()) throw new RuntimeException("Cancelled by user");
                             attempts++;
                             if (attempts >= 3) throw e;
                             LOG.warn("Gradle offline cache download attempt " + attempts + " failed, retrying...", e);
@@ -226,6 +262,8 @@ public class OfflineCacheManager {
                         }
                     }
                 }
+
+                if (CANCELLED.get()) throw new RuntimeException("Cancelled by user");
 
                 // Cache IDE files (Eclipse .project, .classpath, .settings) to speed up new project creation
                 try {
@@ -249,11 +287,16 @@ public class OfflineCacheManager {
                 marker.createNewFile();
 
                 LOG.info("Offline cache download complete.");
+                updateProgress.accept(100);
                 statusCallback.accept("Готово!");
                 SwingUtilities.invokeLater(onComplete);
 
             } catch (Exception e) {
-                LOG.error("Failed to download offline files", e);
+                if (e.getMessage() != null && e.getMessage().contains("Cancelled")) {
+                     LOG.info("Offline cache download cancelled.");
+                } else {
+                     LOG.error("Failed to download offline files", e);
+                }
                 SwingUtilities.invokeLater(onError);
             } finally {
                 if (tempDir != null) {
