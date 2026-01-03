@@ -239,6 +239,7 @@ public class Generator implements IGenerator, Closeable {
 			if (OfflineCacheManager.restoreCachedProjectFiles(workspace.getWorkspaceFolder())) {
 				skippedSetup = true;
 				LOG.info("Skipped Gradle setup tasks because offline project files were restored.");
+				WorkspaceGeneratorSetup.completeSetup(this);
 			}
 		}
 

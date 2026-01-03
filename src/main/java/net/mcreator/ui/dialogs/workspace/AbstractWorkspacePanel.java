@@ -102,12 +102,9 @@ public abstract class AbstractWorkspacePanel {
 			}
 
 			private void action() {
-				if (!workspaceFolderAltered) {
-					workspaceFolder.setText(
-							WorkspaceFolderManager.getSuggestedWorkspaceFoldersRoot().getAbsolutePath() + File.separator
-									+ workspaceDialogPanel.modID.getText());
-					workspaceFolder.getValidationStatus();
-				}
+				// We don't want modID to drive the workspace folder name automatically,
+				// as modID rules (no digits) might differ from folder name preferences.
+				// The modName listener handles folder auto-fill.
 			}
 		});
 

@@ -239,7 +239,7 @@ public class WorkspaceDialogs {
 					super.keyReleased(e);
 					if (!modIDManuallyEntered) {
 						modID.setText(modName.getText().toLowerCase(Locale.ENGLISH).replace(" ", "_")
-								.replaceAll("[^a-z0-9_]+", ""));
+								.replaceAll("[^a-z_]+", ""));
 						modID.getValidationStatus();
 					}
 					if (!packageNameManuallyEntered) {
