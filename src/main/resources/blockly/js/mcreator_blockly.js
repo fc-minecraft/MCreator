@@ -24,6 +24,41 @@ const workspace = Blockly.inject(blockly, {
     toolbox: '<xml id="toolbox"><category name="" colour=""></category></xml>'
 });
 
+// Inject background div
+(function() {
+    var bgDiv = document.createElement('div');
+    bgDiv.className = 'blockly-bg';
+    bgDiv.id = 'blockly-bg';
+    blockly.prepend(bgDiv);
+
+    function updateBackground() {
+        var metrics = workspace.getMetrics();
+        if (metrics) {
+            // Adjust for scale
+            var scale = workspace.scale;
+            // workspace.scrollX/Y are in pixels relative to the workspace origin
+            // We want the background to move with the workspace.
+            // If we pan right, scrollX becomes negative (or positive depending on implementation).
+            // Usually dragging workspace right moves the view left?
+            // In Blockly, scrollX is the offset of the workspace origin from the top-left.
+            // So if we drag workspace to the right, scrollX increases.
+            // background-position should increase to move the pattern right.
+            bgDiv.style.backgroundPosition = workspace.scrollX + 'px ' + workspace.scrollY + 'px';
+            bgDiv.style.backgroundSize = (50 * scale) + 'px';
+        }
+    }
+
+    // Initial update
+    updateBackground();
+
+    // Listen for scroll/zoom
+    workspace.addChangeListener(function(e) {
+        if (e.type === Blockly.Events.VIEWPORT_CHANGE) {
+            updateBackground();
+        }
+    });
+})();
+
 workspace.addChangeListener(function (event) {
     if (workspace.isDragging())
         return; // Don't update while changes are happening.

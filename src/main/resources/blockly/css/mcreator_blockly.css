@@ -1,20 +1,50 @@
+@font-face {
+    font-family: 'Minecraft';
+    src: url('/fonts/Minecraft.woff2') format('woff2'),
+         url('/fonts/Minecraft.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Minecraft';
+    src: url('/fonts/Minecraft.woff2') format('woff2'); /* Fallback or bold if available, but reusing normal for now as we only have one weight from github */
+    font-weight: 700;
+    font-style: normal;
+}
+
 * {
-    font-family: "Segoe UI", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    font-family: 'Minecraft', sans-serif !important;
+    -webkit-font-smoothing: none;
+    text-rendering: optimizeSpeed;
 }
 
 svg {
     shape-rendering: geometricPrecision;
-    image-rendering: optimizeQuality;
+    image-rendering: pixelated;
 }
 
 ::-webkit-scrollbar {
     width: 7px;
+    height: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .blocklyScrollbarBackground {
-    opacity: 255;
+    opacity: 0;
     fill: transparent;
 }
 
@@ -34,101 +64,142 @@ body {
     left: 0;
     bottom: 0;
     right: 0;
+    background-color: transparent !important;
+    z-index: 0;
 }
 
-.blocklyTreeLabel {
-    font-family: "Segoe UI", sans-serif;
-    font-size: 13px;
-    font-weight: 500;
+.blockly-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Absolute path to ensure resolution from JCEF root */
+    background-image: url('/blockly/res/workspace.png');
+    background-repeat: repeat;
+    opacity: 1; /* Opacity handled by the image or parent, user said 0.3 but in their example they used 1? */
+    /* Wait, previous request was opacity 0.3. In the new example provided by user: "opacity: 1".
+       But user example used a gradient background.
+       I will stick to 0.3 for the IMAGE as per original request, or maybe 1 if the image itself is faint?
+       The user said "background-image: url('res/workspace.png'); ... but background is not there".
+       I'll use 0.3 as per first request unless they changed it.
+       In the provided example HTML, they had `opacity: 1` on the `::before`.
+       I will set 0.3 to match the original requirement for the *pattern*.
+    */
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: -1;
 }
 
-.blocklyText {
-    font-family: "Segoe UI", sans-serif;
-    font-weight: 500;
+.blocklySvg {
+    background-color: transparent !important;
 }
 
 .blocklyMainBackground {
-    stroke-width: 0;
+    /* fill: rgba(255, 255, 255, 0.4) !important; User example */
+    fill-opacity: 0 !important; /* To show our custom background */
 }
 
 .blocklyFlyoutBackground {
-    fill-opacity: 0;
+    fill: rgba(255, 255, 255, 0.95);
+    fill-opacity: 0.95;
 }
 
-.blocklyScrollbarVertical .blocklyScrollbarHandle {
-    rx: 3;
-    ry: 3;
-    width: 6px;
+/* Toolbox Styling */
+.blocklyToolboxDiv {
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    border-right: 2px solid rgba(0,0,0,0.1);
+    padding-top: 12px;
 }
 
-.blocklyScrollbarHorizontal .blocklyScrollbarHandle {
-    rx: 3;
-    ry: 3;
-    height: 6px;
+.blocklyTreeRow {
+    height: 38px !important;
+    line-height: 38px !important;
+    padding-left: 16px !important;
+    border-left: 4px solid transparent;
+    margin: 4px 8px;
+    border-radius: 0;
+    transition: all 0.1s step-end;
+    position: relative;
 }
 
-.blocklySelected > .blocklyPath {
-    stroke-width: 2px;
+.blocklyTreeRow:hover {
+    background-color: rgba(0,0,0,0.05) !important;
 }
 
-.whlab > .blocklyFlyoutLabelText {
-    font-family: "Segoe UI", sans-serif;
-    font-size: 14px;
+.blocklyTreeSelected .blocklyTreeRow {
+    background-color: rgba(0, 120, 212, 0.15) !important;
+    border-left-color: #0078D4;
 }
 
-.small-text {
-    font-size: 12px !important;
+.blocklyTreeLabel {
+    font-size: 16px;
+    font-weight: 400;
+    color: #201f1e;
+    letter-spacing: 0.5px;
+}
+
+.blocklyTreeSelected .blocklyTreeLabel {
+    color: #0078D4;
+    text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+}
+
+.blocklyText {
+    font-size: 14px !important;
+    font-weight: 400;
+}
+
+/* Arrow / Icons
+   Standard Blockly uses span.blocklyTreeIcon
+   Classes: .blocklyTreeIconNone, .blocklyTreeIconClosed, .blocklyTreeIconOpen
+*/
+
+.blocklyTreeIcon {
+    visibility: hidden; /* Hide the default icon rendering */
+    width: 0; /* Collapse space */
+}
+
+/* Custom Arrow using ::after on the row, targeted by icon class presence?
+   We cannot target the parent row based on the child icon class without :has.
+   Since I cannot guarantee :has support, I will style the ICON itself to be the arrow.
+*/
+
+.blocklyTreeIconClosed, .blocklyTreeIconOpen {
+    visibility: visible !important;
+    width: 24px !important;
+    height: 38px !important;
+    position: absolute;
+    right: 15px;
+    top: 0;
+    left: auto !important;
+    background-image: none !important; /* Remove default sprites */
+    text-align: center;
+    line-height: 38px;
+    cursor: pointer;
+}
+
+.blocklyTreeIconClosed::after {
+    content: '▶';
+    font-size: 10px;
+    color: #888;
+    display: block;
+}
+
+.blocklyTreeIconOpen::after {
+    content: '▼'; /* Rotated arrow */
+    font-size: 10px;
+    color: #4CAF50;
+    display: block;
+}
+
+/* Ensure None icon is hidden */
+.blocklyTreeIconNone {
+    display: none !important;
 }
 
 .blocklyWidgetDiv .goog-menu {
     border-radius: 0;
-}
-
-.condition-label {
-    font-size: 13px !important;
-}
-
-.blocklyDropDownContent {
-    position: relative;
-}
-
-/* Enhanced Toolbox UI */
-.blocklyTreeRow {
-    height: 35px !important;
-    line-height: 35px !important;
-    padding-left: 12px !important;
-    border-left: 4px solid transparent;
-    cursor: pointer;
-    transition: background-color 0.1s;
-}
-
-.blocklyTreeRow:hover {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-.blocklyTreeSelected .blocklyTreeRow {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    border-left-color: #4CAF50;
-    font-weight: bold;
-}
-
-.blocklyTreeLabel {
-    font-size: 14px !important;
-}
-
-/* Arrow indicator for categories */
-.blocklyTreeRow::after {
-    content: '▶'; /* Unicode arrow */
-    position: absolute;
-    right: 15px;
-    top: 0;
-    line-height: 35px;
-    font-size: 10px;
-    color: #888;
-    transition: transform 0.2s;
-}
-
-.blocklyTreeSelected .blocklyTreeRow::after {
-    color: #4CAF50;
-    transform: rotate(90deg);
+    border: 2px solid #ccc;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
 }
