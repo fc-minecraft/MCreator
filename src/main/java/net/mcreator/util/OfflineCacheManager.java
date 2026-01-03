@@ -23,11 +23,13 @@ import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.Optional;
 import net.mcreator.io.UserFolderManager;
+import net.mcreator.gradle.GradleUtils;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.Arrays;
 
 public class OfflineCacheManager {
 
@@ -218,6 +220,19 @@ public class OfflineCacheManager {
                     // Also adding genSources to ensure remapping of sources happens during cache creation
                     launcher.forTasks("dependencies", "eclipse", "downloadAssets", "genEclipseRuns", "genSources");
                     launcher.addJvmArguments("-Xmx2G");
+
+                    // Match GradleUtils configuration to ensure cache compatibility
+                    launcher.addJvmArguments("-Duser.language=en");
+                    launcher.addJvmArguments("-Declipse.application=net.mcreator");
+
+                    String java_home = GradleUtils.getJavaHome();
+                    if (java_home != null) {
+                        launcher.setJavaHome(new File(java_home));
+                        launcher.withArguments(Arrays.asList("-Porg.gradle.java.installations.auto-detect=false",
+                            "-Porg.gradle.java.installations.paths=" + java_home.replace('\\', '/')));
+                    }
+
+                    launcher.setEnvironmentVariables(GradleUtils.getEnvironment(java_home));
 
                     launcher.addProgressListener(event -> {
                         statusCallback.accept(event.getDescriptor().getName());

@@ -239,11 +239,11 @@ public class WorkspaceDialogs {
 					super.keyReleased(e);
 					if (!modIDManuallyEntered) {
 						modID.setText(modName.getText().toLowerCase(Locale.ENGLISH).replace(" ", "_")
-								.replaceAll("[^a-z_]+", ""));
+								.replaceAll("[^a-z0-9_]+", ""));
 						modID.getValidationStatus();
 					}
 					if (!packageNameManuallyEntered) {
-						packageName.setText("net.mcreator." + modID.getText().replaceAll("[^a-z]+", ""));
+						packageName.setText("net.mcreator." + modID.getText().replaceAll("[^a-z0-9]+", ""));
 						packageName.getValidationStatus();
 					}
 				}
