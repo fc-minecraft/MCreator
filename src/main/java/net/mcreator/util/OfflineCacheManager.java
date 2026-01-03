@@ -63,6 +63,12 @@ public class OfflineCacheManager {
         if (!cachedProjectFiles.exists()) return "Ошибка: кэшированные файлы проекта отсутствуют";
         if (!new File(cachedProjectFiles, ".classpath").exists()) return "Ошибка: .classpath не найден";
 
+        File modules = new File(cache, "caches/modules-2");
+        if (!modules.exists() || !modules.isDirectory()) return "Ошибка: зависимости Gradle (modules-2) отсутствуют";
+
+        File fabricLoom = new File(cache, "caches/fabric-loom");
+        if (!fabricLoom.exists()) return "Ошибка: кэш Fabric Loom отсутствует (remapping не выполнен)";
+
         return "Кэш цел (Проверено)";
     }
 
@@ -266,6 +272,15 @@ public class OfflineCacheManager {
                     if (dotProject.exists()) FileIO.copyFile(dotProject, new File(cachedProjectFiles, ".project"));
                     if (dotClasspath.exists()) FileIO.copyFile(dotClasspath, new File(cachedProjectFiles, ".classpath"));
                     if (dotSettings.exists()) FileIO.copyDirectory(dotSettings, new File(cachedProjectFiles, ".settings"));
+
+                    // Cache launch files
+                    File[] launchFiles = tempDir.listFiles((dir, name) -> name.endsWith(".launch"));
+                    if (launchFiles != null) {
+                        for (File f : launchFiles) {
+                            FileIO.copyFile(f, new File(cachedProjectFiles, f.getName()));
+                        }
+                    }
+
                     LOG.info("Cached Eclipse project files for offline acceleration.");
                 } catch (Exception e) {
                     LOG.warn("Failed to cache Eclipse project files", e);
@@ -510,8 +525,9 @@ public class OfflineCacheManager {
 
             FileIO.writeStringToFile(content, buildGradle);
         }
+    }
 
-        // Restore cached Eclipse files if available to skip initial sync
+    public static boolean restoreCachedProjectFiles(File workspaceDir) {
         File cachedProjectFiles = new File(getOfflineCacheDir(), "cached_project_files");
         if (cachedProjectFiles.exists()) {
             LOG.info("Restoring cached Eclipse files to accelerate workspace setup...");
@@ -523,9 +539,20 @@ public class OfflineCacheManager {
                 if (dotProject.exists()) FileIO.copyFile(dotProject, new File(workspaceDir, ".project"));
                 if (dotClasspath.exists()) FileIO.copyFile(dotClasspath, new File(workspaceDir, ".classpath"));
                 if (dotSettings.exists()) FileIO.copyDirectory(dotSettings, new File(workspaceDir, ".settings"));
+
+                // Restore launch configurations if present
+                File[] launchFiles = cachedProjectFiles.listFiles((dir, name) -> name.endsWith(".launch"));
+                if (launchFiles != null) {
+                    for (File f : launchFiles) {
+                         FileIO.copyFile(f, new File(workspaceDir, f.getName()));
+                    }
+                }
+
+                return dotClasspath.exists();
             } catch (Exception e) {
                 LOG.warn("Failed to restore cached Eclipse files", e);
             }
         }
+        return false;
     }
 }

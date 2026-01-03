@@ -234,7 +234,17 @@ public class Generator implements IGenerator, Closeable {
 				.map(e -> getFolderManager().getPathInWorkspace(e).replace(File.separator, "/")).toList());
 
 		// run other source tasks
-		GeneratorFileTasks.runFileTasks(this, generatorConfiguration.getSourceSetupTasks());
+		boolean skippedSetup = false;
+		if (PreferencesManager.PREFERENCES.gradle.offline.get() && OfflineCacheManager.isOfflineModeReady()) {
+			if (OfflineCacheManager.restoreCachedProjectFiles(workspace.getWorkspaceFolder())) {
+				skippedSetup = true;
+				LOG.info("Skipped Gradle setup tasks because offline project files were restored.");
+			}
+		}
+
+		if (!skippedSetup) {
+			GeneratorFileTasks.runFileTasks(this, generatorConfiguration.getSourceSetupTasks());
+		}
 
 		// generate lang files
 		LocalizationUtils.generateLanguageFiles(this, workspace, generatorConfiguration.getLanguageFileSpecification());
