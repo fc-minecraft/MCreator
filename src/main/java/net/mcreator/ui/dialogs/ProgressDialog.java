@@ -135,7 +135,7 @@ public class ProgressDialog extends MCreatorDialog {
 
 	public static class ProgressUnit {
 
-		private final String name;
+		private String name;
 
 		private Status status;
 		private int percent;
@@ -145,6 +145,13 @@ public class ProgressDialog extends MCreatorDialog {
 		public ProgressUnit(String name) {
 			this.name = name;
 			status = Status.LOADING;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+			if (progressDialog != null) {
+				ThreadUtil.runOnSwingThread(() -> progressDialog.progressUnits.repaint());
+			}
 		}
 
 		public void markStateOk() {

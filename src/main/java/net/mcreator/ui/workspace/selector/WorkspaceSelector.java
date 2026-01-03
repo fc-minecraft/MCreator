@@ -41,6 +41,7 @@ import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.dialogs.file.FileDialogs;
 import net.mcreator.ui.dialogs.preferences.PreferencesDialog;
+import net.mcreator.ui.dialogs.ProgressDialog;
 import net.mcreator.ui.dialogs.workspace.NewWorkspaceDialog;
 import net.mcreator.ui.init.AppIcon;
 import net.mcreator.ui.init.L10N;
@@ -50,6 +51,7 @@ import net.mcreator.ui.notifications.INotificationConsumer;
 import net.mcreator.ui.notifications.NotificationsRenderer;
 import net.mcreator.util.DesktopUtils;
 import net.mcreator.util.ListUtils;
+import net.mcreator.util.OfflineCacheManager;
 import net.mcreator.util.StringUtils;
 import net.mcreator.util.image.EmptyIcon;
 import net.mcreator.util.image.ImageUtils;
@@ -79,6 +81,8 @@ import java.util.concurrent.CompletableFuture;
 public final class WorkspaceSelector extends JFrame implements DropTargetListener, INotificationConsumer {
 
 	private static final Logger LOG = LogManager.getLogger("Workspace Selector");
+
+	private static final boolean ALWAYS_SHOW_OFFLINE_BUTTON = false;
 
 	private final CardLayout recentPanes = new CardLayout();
 	private final JPanel recentPanel = new JPanel(recentPanes);
@@ -174,6 +178,97 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 
 		southcenter.add(new JEmptyBox(7, 5));
 		*/
+
+		JLabel offlineButton = new JLabel(L10N.t("dialog.workspace_selector.create_offline_copy"));
+		offlineButton.setIcon(UIRES.get("16px.gradle"));
+		offlineButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		ComponentUtils.deriveFont(offlineButton, 15);
+		offlineButton.setForeground(Theme.current().getForegroundColor());
+		offlineButton.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+		offlineButton.setHorizontalTextPosition(JLabel.LEFT);
+
+		if (!ALWAYS_SHOW_OFFLINE_BUTTON && OfflineCacheManager.isOfflineModeReady()) {
+			offlineButton.setVisible(false);
+		}
+
+		// Timer declared early to be accessible in the listener
+		Timer[] glowTimerContainer = new Timer[1];
+
+		offlineButton.addMouseListener(new MouseAdapter() {
+			@Override public void mouseClicked(MouseEvent e) {
+				if (!offlineButton.isVisible())
+					return;
+
+				ProgressDialog dialog = new ProgressDialog(WorkspaceSelector.this,
+						L10N.t("dialog.workspace_selector.offline_mode.title"));
+				ProgressDialog.ProgressUnit unit = new ProgressDialog.ProgressUnit(
+						L10N.t("dialog.workspace_selector.offline_mode.preparing"));
+				dialog.addProgressUnit(unit);
+				dialog.setVisible(true);
+
+				OfflineCacheManager.downloadOfflineFiles(unit::setName, () -> {
+					unit.markStateOk();
+					dialog.hideDialog();
+					if (!ALWAYS_SHOW_OFFLINE_BUTTON) {
+						offlineButton.setVisible(false);
+						if (glowTimerContainer[0] != null)
+							glowTimerContainer[0].stop();
+					}
+					JOptionPane.showMessageDialog(WorkspaceSelector.this,
+							L10N.t("dialog.workspace_selector.offline_mode.success"),
+							L10N.t("dialog.workspace_selector.offline_mode.success_title"),
+							JOptionPane.INFORMATION_MESSAGE);
+				}, () -> {
+					unit.markStateError();
+					dialog.hideDialog();
+					JOptionPane.showMessageDialog(WorkspaceSelector.this,
+							L10N.t("dialog.workspace_selector.offline_mode.error"),
+							L10N.t("dialog.workspace_selector.offline_mode.error_title"), JOptionPane.ERROR_MESSAGE);
+				});
+			}
+		});
+
+		Timer glowTimer = new Timer(50, new ActionListener() {
+			float alpha = 0f;
+			boolean rising = true;
+
+			@Override public void actionPerformed(ActionEvent e) {
+				if (!offlineButton.isVisible()) {
+					((Timer) e.getSource()).stop();
+					return;
+				}
+
+				if (rising) {
+					alpha += 0.05f;
+					if (alpha >= 1.0f) {
+						alpha = 1.0f;
+						rising = false;
+					}
+				} else {
+					alpha -= 0.05f;
+					if (alpha <= 0.0f) {
+						alpha = 0.0f;
+						rising = true;
+					}
+				}
+
+				Color base = Theme.current().getForegroundColor();
+				Color glow = UIManager.getColor("Component.accentColor");
+				if (glow == null)
+					glow = Color.CYAN;
+
+				int r = (int) (base.getRed() * (1 - alpha) + glow.getRed() * alpha);
+				int g = (int) (base.getGreen() * (1 - alpha) + glow.getGreen() * alpha);
+				int b = (int) (base.getBlue() * (1 - alpha) + glow.getBlue() * alpha);
+
+				offlineButton.setForeground(new Color(r, g, b));
+				offlineButton.repaint();
+			}
+		});
+		glowTimer.start();
+		glowTimerContainer[0] = glowTimer;
+
+		southcenter.add(offlineButton);
 
 		JLabel prefs = new JLabel(L10N.t("dialog.workspace_selector.preferences"));
 		prefs.setIcon(UIRES.get("settings"));
