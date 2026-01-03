@@ -40,7 +40,7 @@ public class OfflineCacheManager {
     private static final String FALLBACK_BUILD_FILE_VERSION = "0.133.4";
 
     public static File getOfflineCacheDir() {
-        return new File(System.getProperty("user.home"), ".mcreator/gradle");
+        return net.mcreator.io.UserFolderManager.getGradleHome();
     }
 
     public static boolean isOfflineModeReady() {
@@ -205,7 +205,8 @@ public class OfflineCacheManager {
                 try (ProjectConnection connection = connector.connect()) {
                     BuildLauncher launcher = connection.newBuild();
                     // Added downloadAssets (without loom: prefix to be safe) and eclipse which transitively relies on assets
-                    launcher.forTasks("dependencies", "eclipse", "downloadAssets", "genEclipseRuns");
+                    // Also adding genSources to ensure remapping of sources happens during cache creation
+                    launcher.forTasks("dependencies", "eclipse", "downloadAssets", "genEclipseRuns", "genSources");
                     launcher.addJvmArguments("-Xmx2G");
 
                     launcher.addProgressListener(event -> {
