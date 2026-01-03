@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.Optional;
+import net.mcreator.io.UserFolderManager;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public class OfflineCacheManager {
     private static final String FALLBACK_BUILD_FILE_VERSION = "0.133.4";
 
     public static File getOfflineCacheDir() {
-        return net.mcreator.io.UserFolderManager.getGradleHome();
+        return UserFolderManager.getGradleHome();
     }
 
     public static boolean isOfflineModeReady() {
@@ -194,6 +195,15 @@ public class OfflineCacheManager {
 
                 statusCallback.accept("Настройка файлов сборки...");
                 captureVersionsFromTemplate(tempDir);
+
+                // Generate dummy access widener to ensure cache compatibility with projects using it
+                File metaInf = new File(tempDir, "src/main/resources/META-INF");
+                if (!metaInf.exists()) metaInf.mkdirs();
+                File awFile = new File(metaInf, "offline.accesswidener");
+                if (!awFile.exists()) {
+                     FileIO.writeStringToFile("accessWidener\tv1\tnamed\n", awFile);
+                }
+
                 preprocessBuildFiles(tempDir, mcVersion, buildFileVersion);
 
                 statusCallback.accept("Запуск Gradle...");
