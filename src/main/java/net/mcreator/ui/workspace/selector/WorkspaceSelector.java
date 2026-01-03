@@ -206,18 +206,20 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 				dialog.addProgressUnit(unit);
 
 				// Enable cancellation
+				Runnable[] cancelCallback = new Runnable[1];
 				dialog.setClosable(true);
 				dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 				dialog.addWindowListener(new WindowAdapter() {
 					@Override public void windowClosing(WindowEvent e) {
-						OfflineCacheManager.cancelDownload();
+						if (cancelCallback[0] != null)
+							cancelCallback[0].run();
 						dialog.hideDialog();
 					}
 				});
 
 				dialog.setVisible(true);
 
-				OfflineCacheManager.downloadOfflineFiles(unit::setName, unit::setPercent, () -> {
+				cancelCallback[0] = OfflineCacheManager.downloadOfflineFiles(unit::setName, unit::setPercent, () -> {
 					unit.markStateOk();
 					dialog.hideDialog();
 					if (!ALWAYS_SHOW_OFFLINE_BUTTON) {

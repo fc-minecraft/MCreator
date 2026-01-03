@@ -33,8 +33,6 @@ public class OfflineCacheManager {
 
     private static final Logger LOG = LogManager.getLogger(OfflineCacheManager.class);
 
-    private static final AtomicBoolean CANCELLED = new AtomicBoolean(false);
-
     private static final String MARKER_FILE_NAME = "offline_fabric_1.21.8_ready.marker";
     private static final String VERSIONS_FILE_NAME = "offline_versions.properties";
 
@@ -81,17 +79,21 @@ public class OfflineCacheManager {
         }
     }
 
-    public static void cancelDownload() {
-        CANCELLED.set(true);
+    /**
+     * Starts downloading offline files.
+     * @return A Runnable that cancels the operation when executed.
+     */
+    public static Runnable downloadOfflineFiles(Consumer<String> statusCallback, Runnable onComplete, Runnable onError) {
+        return downloadOfflineFiles(statusCallback, i -> {}, onComplete, onError);
     }
 
-    public static void downloadOfflineFiles(Consumer<String> statusCallback, Runnable onComplete, Runnable onError) {
-        downloadOfflineFiles(statusCallback, i -> {}, onComplete, onError);
-    }
-
-    public static void downloadOfflineFiles(Consumer<String> statusCallback, Consumer<Integer> progressCallback,
+    /**
+     * Starts downloading offline files.
+     * @return A Runnable that cancels the operation when executed.
+     */
+    public static Runnable downloadOfflineFiles(Consumer<String> statusCallback, Consumer<Integer> progressCallback,
             Runnable onComplete, Runnable onError) {
-        CANCELLED.set(false);
+        AtomicBoolean cancelled = new AtomicBoolean(false);
         new Thread(() -> {
             File tempDir = null;
             try {
@@ -109,7 +111,7 @@ public class OfflineCacheManager {
 
                 tempDir = Files.createTempDirectory("offline_setup").toFile();
 
-                if (CANCELLED.get())
+                if (cancelled.get())
                     throw new RuntimeException("Cancelled by user");
 
                 Optional<Plugin> pluginOpt = PluginLoader.INSTANCE.getPlugins().stream()
@@ -180,10 +182,17 @@ public class OfflineCacheManager {
                         }
 
                         if (workspaceBasePath != null) {
+                            int totalEntries = zip.size();
+                            int processedEntries = 0;
                             entries = zip.entries();
                             while (entries.hasMoreElements()) {
-                                if (CANCELLED.get()) throw new RuntimeException("Cancelled by user");
+                                if (cancelled.get()) throw new RuntimeException("Cancelled by user");
                                 ZipEntry entry = entries.nextElement();
+
+                                processedEntries++;
+                                int percentage = 10 + (int) ((double) processedEntries / totalEntries * 10); // 10% to 20%
+                                updateProgress.accept(percentage);
+
                                 if (entry.getName().startsWith(workspaceBasePath)) {
                                     String relativePath = entry.getName().substring(workspaceBasePath.length());
                                     if (relativePath.isEmpty()) continue;
@@ -226,7 +235,7 @@ public class OfflineCacheManager {
                 updateProgress.accept(25);
                 statusCallback.accept("Запуск Gradle...");
 
-                if (CANCELLED.get())
+                if (cancelled.get())
                     throw new RuntimeException("Cancelled by user");
 
                 GradleConnector connector = GradleConnector.newConnector();
@@ -248,12 +257,12 @@ public class OfflineCacheManager {
                     // Retry logic for the build launcher
                     int attempts = 0;
                     while (attempts < 3) {
-                        if (CANCELLED.get()) throw new RuntimeException("Cancelled by user");
+                        if (cancelled.get()) throw new RuntimeException("Cancelled by user");
                         try {
                             launcher.run();
                             break; // Success
                         } catch (Exception e) {
-                            if (CANCELLED.get()) throw new RuntimeException("Cancelled by user");
+                            if (cancelled.get()) throw new RuntimeException("Cancelled by user");
                             attempts++;
                             if (attempts >= 3) throw e;
                             LOG.warn("Gradle offline cache download attempt " + attempts + " failed, retrying...", e);
@@ -263,7 +272,7 @@ public class OfflineCacheManager {
                     }
                 }
 
-                if (CANCELLED.get()) throw new RuntimeException("Cancelled by user");
+                if (cancelled.get()) throw new RuntimeException("Cancelled by user");
 
                 // Cache IDE files (Eclipse .project, .classpath, .settings) to speed up new project creation
                 try {
@@ -304,6 +313,8 @@ public class OfflineCacheManager {
                 }
             }
         }).start();
+
+        return () -> cancelled.set(true);
     }
 
     private static Properties detectVersions(File pluginFile) {

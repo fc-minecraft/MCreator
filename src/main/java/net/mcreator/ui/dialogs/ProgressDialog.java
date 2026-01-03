@@ -211,6 +211,7 @@ public class ProgressDialog extends MCreatorDialog {
 		private final ImageIcon warning = UIRES.get("18px.warning");
 
 		private final Map<ProgressUnit, Icon> LOADER_CACHE = new HashMap<>();
+		private final JProgressBar sharedBar = new JProgressBar(0, 100);
 
 		@Override
 		public Component getListCellRendererComponent(JList<? extends ProgressUnit> list, ProgressUnit ma, int index,
@@ -232,10 +233,9 @@ public class ProgressDialog extends MCreatorDialog {
 				status2.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
 				stap.add("East", PanelUtils.centerInPanel(status2));
 
-				JProgressBar bar = new JProgressBar(0, 100);
-				bar.setValue(ma.percent);
-				if (bar.getValue() > 0)
-					stap.add("West", PanelUtils.totalCenterInPanel(bar));
+				sharedBar.setValue(ma.percent);
+				if (sharedBar.getValue() > 0)
+					stap.add("West", PanelUtils.totalCenterInPanel(sharedBar));
 			}
 			case COMPLETE -> stap.add("East", PanelUtils.centerInPanel(new JLabel(complete)));
 			case ERROR -> stap.add("East", PanelUtils.centerInPanel(new JLabel(remove)));
