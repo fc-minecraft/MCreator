@@ -39,8 +39,14 @@ import org.gradle.tooling.ModelBuilder;
 import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.model.ExternalDependency;
 import org.gradle.tooling.model.eclipse.EclipseProject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.annotation.Nullable;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -60,23 +66,69 @@ public class ProjectJarManager extends JarManager {
 		List<GeneratorGradleCache.ClasspathEntry> classPathEntries = new ArrayList<>();
 		File assumedJavaHome = null;
 
-		ProjectConnection projectConnection = GradleUtils.getGradleProjectConnection(generator.getWorkspace());
-		if (projectConnection != null) {
+		// Optimization: Try to load from .classpath directly to avoid triggering Gradle execution
+		File dotClasspath = new File(generator.getWorkspace().getWorkspaceFolder(), ".classpath");
+		if (dotClasspath.exists()) {
 			try {
-				ModelBuilder<EclipseProject> modelBuilder = GradleUtils.getGradleModelBuilder(
-						generator.getGeneratorConfiguration(), projectConnection, EclipseProject.class);
+				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+				Document doc = dBuilder.parse(dotClasspath);
+				doc.getDocumentElement().normalize();
 
-				EclipseProject project = modelBuilder.get();
+				NodeList nList = doc.getElementsByTagName("classpathentry");
+				boolean loadedLibs = false;
 
-				processProjectClassPath(generator, project, classPathEntries);
+				for (int temp = 0; temp < nList.getLength(); temp++) {
+					Node nNode = nList.item(temp);
+					if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+						Element eElement = (Element) nNode;
+						if ("lib".equals(eElement.getAttribute("kind"))) {
+							String path = eElement.getAttribute("path");
+							String sourcepath = eElement.getAttribute("sourcepath");
 
-				// Only look up JDK toolchain JAVA_HOME for Java-based projects
-				if (generator.getGeneratorConfiguration().getGeneratorFlavor().getBaseLanguage()
-						== GeneratorFlavor.BaseLanguage.JAVA) {
-					assumedJavaHome = GradleToolchainUtil.getToolchainJavaHome(generator.getGeneratorConfiguration(),
-							projectConnection, project);
+							if (path != null && !path.isEmpty()) {
+								GeneratorGradleCache.ClasspathEntry classpathEntry = new GeneratorGradleCache.ClasspathEntry(
+										generator.getWorkspace(), path,
+										sourcepath != null && !sourcepath.isEmpty() ? sourcepath : null);
+								classPathEntries.add(classpathEntry);
+								loadedLibs = true;
+							}
+						}
+					}
 				}
-			} catch (BuildException ignored) {
+
+				if (loadedLibs) {
+					// Assume default Java Home if we skipped Gradle (usually correct for MCreator env)
+					String jh = GradleUtils.getJavaHome();
+					if (jh != null) assumedJavaHome = new File(jh);
+					LOG.info("Loaded project classpath from .classpath file, skipping Gradle execution.");
+				}
+
+			} catch (Exception e) {
+				LOG.warn("Failed to parse .classpath file, falling back to Gradle", e);
+				classPathEntries.clear(); // Reset to try Gradle
+			}
+		}
+
+		if (classPathEntries.isEmpty()) {
+			ProjectConnection projectConnection = GradleUtils.getGradleProjectConnection(generator.getWorkspace());
+			if (projectConnection != null) {
+				try {
+					ModelBuilder<EclipseProject> modelBuilder = GradleUtils.getGradleModelBuilder(
+							generator.getGeneratorConfiguration(), projectConnection, EclipseProject.class);
+
+					EclipseProject project = modelBuilder.get();
+
+					processProjectClassPath(generator, project, classPathEntries);
+
+					// Only look up JDK toolchain JAVA_HOME for Java-based projects
+					if (generator.getGeneratorConfiguration().getGeneratorFlavor().getBaseLanguage()
+							== GeneratorFlavor.BaseLanguage.JAVA) {
+						assumedJavaHome = GradleToolchainUtil.getToolchainJavaHome(generator.getGeneratorConfiguration(),
+								projectConnection, project);
+					}
+				} catch (BuildException ignored) {
+				}
 			}
 		}
 
