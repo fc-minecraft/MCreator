@@ -87,7 +87,7 @@ public class PreferencesDialog extends MCreatorDialog {
 		ComponentUtils.deriveFont(sections, 13);
 
 		JButton ok = L10N.button("dialog.preferences.save");
-		JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
+		JButton cancel = L10N.button("action.common.cancel");
 
 		JButton reset = L10N.button("dialog.preferences.restore_defaults");
 		reset.addActionListener(actionEvent -> {
@@ -160,12 +160,26 @@ public class PreferencesDialog extends MCreatorDialog {
 
 		new OfflineModePanel(this);
 
-		addEditTemplatesPanel("ui_backgrounds", "backgrounds", "png");
-		addEditTemplatesPanel("texture_templates", "templates/textures/texturemaker", "png");
-		addEditTemplatesPanel("armor_templates", "templates/textures/armormaker", "png");
+		// Consolidate templates into one section
+		createPreferenceSection("templates");
+		JPanel templatesPanel = sectionPanels.get("templates");
+
+		// Helper to add sub-sections to the templates panel
+		java.util.function.BiConsumer<String, String[]> addTemplateSection = (key, args) -> {
+			String name = L10N.t("dialog.preferences.page_" + key);
+			JButton btn = new JButton(name);
+			btn.addActionListener(e -> new EditTemplatesPanel(this, name, args[0], args[1]));
+			templatesPanel.add(PanelUtils.westAndCenterElement(new JLabel(name), PanelUtils.pullElementUp(btn)),
+					getConstraints());
+		};
+
+		addTemplateSection.accept("ui_backgrounds", new String[] { "backgrounds", "png" });
+		addTemplateSection.accept("texture_templates", new String[] { "templates/textures/texturemaker", "png" });
+		addTemplateSection.accept("armor_templates", new String[] { "templates/textures/armormaker", "png" });
 
 		BlocklyLoader.INSTANCE.getAllBlockLoaders().keySet().stream().filter(type -> type.extension() != null)
-				.forEach(this::addEditTemplatesPanel);
+				.forEach(type -> addTemplateSection.accept(type.registryName() + "_templates",
+						new String[] { "templates/" + type.extension(), type.extension() }));
 
 		MCREvent.event(new PreferencesDialogEvent.SectionsLoaded(this));
 

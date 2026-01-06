@@ -73,7 +73,8 @@ class EditTemplatesPanel {
 		remove.addActionListener(a -> deleteCurrentlySelected(templatesFolder, tmodel, templates));
 
 		templates.addKeyListener(new KeyAdapter() {
-			@Override public void keyReleased(KeyEvent e) {
+			@Override
+			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
 					deleteCurrentlySelected(templatesFolder, tmodel, templates);
 				}
