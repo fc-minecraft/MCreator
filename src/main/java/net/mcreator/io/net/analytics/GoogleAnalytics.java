@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
 
 public class GoogleAnalytics {
 
-	public static boolean ANALYTICS_ENABLED = true;
+	public static boolean ANALYTICS_ENABLED = false;
 
 	private static final Logger LOG = LogManager.getLogger("GA4");
 

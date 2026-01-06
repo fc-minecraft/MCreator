@@ -179,7 +179,13 @@ public final class MCreatorApplication {
 			splashScreen.setProgress(93, L10N.t("splash.initiating_session"));
 
 			deviceInfo = new DeviceInfo();
-			isInternet = MCreatorApplication.WEB_API.initAPI();
+			// Check offline mode preference/status before attempting connection
+			if (net.mcreator.util.OfflineCacheManager.isOfflineModeReady()) {
+				isInternet = false;
+				LOG.info("Running in offline mode, skipping network initialization.");
+			} else {
+				isInternet = MCreatorApplication.WEB_API.initAPI();
+			}
 
 			analytics = new GoogleAnalytics(deviceInfo);
 			analytics.trackPage(AnalyticsConstants.PAGE_LAUNCH);

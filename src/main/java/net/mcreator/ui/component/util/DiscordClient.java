@@ -22,7 +22,6 @@ import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
 import com.sun.jna.Native;
-import net.mcreator.preferences.PreferencesManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,7 +52,8 @@ public class DiscordClient implements Closeable {
 			handlers.errored = (errorCode, message) -> LOG.warn("Discord error: {} - {}", errorCode, message);
 			discordRpc.Discord_Initialize("712264497787568171", handlers, true, null);
 			timer.schedule(new TimerTask() {
-				@Override public void run() {
+				@Override
+				public void run() {
 					discordRpc.Discord_RunCallbacks();
 				}
 			}, 0, 5000);
@@ -85,7 +85,8 @@ public class DiscordClient implements Closeable {
 		}, "DiscordPresenceUpdater").start();
 	}
 
-	@Override public void close() {
+	@Override
+	public void close() {
 		if (isDisabled())
 			return;
 
@@ -98,7 +99,7 @@ public class DiscordClient implements Closeable {
 	}
 
 	private boolean isDisabled() {
-		return !PreferencesManager.PREFERENCES.ui.discordRichPresenceEnable.get();
+		return true; // !PreferencesManager.PREFERENCES.ui.discordRichPresenceEnable.get();
 	}
 
 }
