@@ -55,7 +55,7 @@ public class HiddenSection extends PreferencesSection {
 				}
 			}
 		});
-		uiTheme = addEntry(new StringEntry("uiTheme", "default_dark"));
+		uiTheme = addEntry(new StringEntry("uiTheme", "midnight"));
 		enableJavaPlugins = addEntry(new BooleanEntry("enableJavaPlugins", false));
 		lastWebsiteNewsRead = addEntry(new StringEntry("lastWebsiteNewsRead", ""));
 	}
@@ -69,3 +69,4 @@ public class HiddenSection extends PreferencesSection {
 	}
 
 }
+
