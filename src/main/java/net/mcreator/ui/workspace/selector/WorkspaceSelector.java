@@ -138,33 +138,11 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		// Removed logo link
 		logoPanel.add("North", logo);
 
-		// Removed SocialButtons
-		// SocialButtons socialButtons = new SocialButtons();
-		// logoPanel.add("Center", PanelUtils.centerInPanel(socialButtons));
-
 		logoPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
 
 		JPanel southcenter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
 		// Removed Donate button
-		/*
-		 * JLabel donate = L10N.label("dialog.workspace_selector.donate");
-		 * donate.setIcon(UIRES.get("donate"));
-		 * donate.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		 * ComponentUtils.deriveFont(donate, 13);
-		 * donate.setForeground(Theme.current().getForegroundColor());
-		 * donate.setBorder(BorderFactory.createEmptyBorder());
-		 * donate.setHorizontalTextPosition(JLabel.LEFT);
-		 * donate.addMouseListener(new MouseAdapter() {
-		 * 
-		 * @Override public void mouseClicked(MouseEvent mouseEvent) {
-		 * DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/donate");
-		 * }
-		 * });
-		 * southcenter.add(donate);
-		 * 
-		 * southcenter.add(new JEmptyBox(7, 5));
-		 */
 
 		JLabel prefs = new JLabel(L10N.t("dialog.workspace_selector.preferences"));
 		prefs.setIcon(UIRES.get("settings"));
