@@ -1,7 +1,6 @@
 package net.mcreator.ui.dialogs.preferences;
 
 import net.mcreator.preferences.PreferencesManager;
-import net.mcreator.ui.dialogs.preferences.PreferencesDialog;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.util.OfflineCacheManager;
 import net.mcreator.util.DesktopUtils;
@@ -49,7 +48,8 @@ public class OfflineModePanel extends JPanel {
         offlineModeCheckbox.setOpaque(false);
         offlineModeCheckbox.setForeground(Color.WHITE);
         offlineModeCheckbox.setSelected(PreferencesManager.PREFERENCES.gradle.offline.get());
-        offlineModeCheckbox.addActionListener(e -> PreferencesManager.PREFERENCES.gradle.offline.set(offlineModeCheckbox.isSelected()));
+        offlineModeCheckbox.addActionListener(
+                e -> PreferencesManager.PREFERENCES.gradle.offline.set(offlineModeCheckbox.isSelected()));
 
         progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
@@ -68,13 +68,14 @@ public class OfflineModePanel extends JPanel {
         verifyButton.addActionListener(e -> {
             String result = OfflineCacheManager.verifyCacheIntegrity();
             JOptionPane.showMessageDialog(dialog, result, "Проверка целостности",
-                result.startsWith("Ошибка") ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE);
+                    result.startsWith("Ошибка") ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE);
         });
         openFolderButton.addActionListener(e -> DesktopUtils.openSafe(OfflineCacheManager.getOfflineCacheDir()));
 
         // Layout
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 10, 5, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -119,9 +120,46 @@ public class OfflineModePanel extends JPanel {
         scrollPane.getVerticalScrollBar().setUnitIncrement(10);
 
         dialog.model.addElement(name);
-        dialog.preferences.add(PanelUtils.northAndCenterElement(new JLabel("Настройки офлайн режима"), scrollPane, 0, 0), name);
+        dialog.preferences
+                .add(PanelUtils.northAndCenterElement(new JLabel("Настройки офлайн режима"), scrollPane, 0, 0), name);
+
+        dialog.registerOfflineModePanel(this);
 
         updateStatus();
+    }
+
+    public void highlightDownload() {
+        downloadButton.requestFocusInWindow();
+
+        // Timer to flash the button border
+        Timer flashTimer = new Timer(500, new java.awt.event.ActionListener() {
+            boolean bright = true;
+            int count = 0;
+
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                if (count > 10 || !downloadButton.isDisplayable()) { // Stop after 5 seconds or if closed
+                    ((Timer) e.getSource()).stop();
+                    downloadButton.setBorder(UIManager.getBorder("Button.border")); // Reset border
+                    return;
+                }
+                if (bright) {
+                    // Red border
+                    downloadButton.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(Color.RED, 2),
+                            BorderFactory.createEmptyBorder(3, 8, 3, 8) // Internal padding to keep text spaced
+                    ));
+                } else {
+                    // Transparent/White border (or lighter red)
+                    downloadButton.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(new Color(255, 200, 200), 2),
+                            BorderFactory.createEmptyBorder(3, 8, 3, 8)));
+                }
+                bright = !bright;
+                count++;
+            }
+        });
+        flashTimer.start();
     }
 
     private void updateStatus() {
@@ -166,9 +204,10 @@ public class OfflineModePanel extends JPanel {
     }
 
     private String formatSize(long v) {
-        if (v < 1024) return v + " B";
+        if (v < 1024)
+            return v + " B";
         int z = (63 - Long.numberOfLeadingZeros(v)) / 10;
-        return String.format("%.2f %sB", (double)v / (1L << (z*10)), " KMGTPE".charAt(z));
+        return String.format("%.2f %sB", (double) v / (1L << (z * 10)), " KMGTPE".charAt(z));
     }
 
     private void downloadAction(ActionEvent e) {
@@ -181,38 +220,37 @@ public class OfflineModePanel extends JPanel {
         logArea.setText(""); // Clear log
 
         OfflineCacheManager.downloadOfflineFiles(
-            (status) -> SwingUtilities.invokeLater(() -> {
-                logArea.append(status + "\n");
-                logArea.setCaretPosition(logArea.getDocument().getLength());
-                statusLabel.setText("Статус: " + status);
-            }),
-            () -> { // Success
-                updateStatus();
-                downloadButton.setEnabled(true);
-                deleteButton.setEnabled(true);
-                offlineModeCheckbox.setEnabled(true);
-                progressBar.setVisible(false);
-                JOptionPane.showMessageDialog(dialog, "Файлы для офлайн режима успешно загружены!");
-            },
-            () -> { // Error
-                updateStatus();
-                downloadButton.setEnabled(true);
-                deleteButton.setEnabled(true);
-                offlineModeCheckbox.setEnabled(true);
-                progressBar.setVisible(false);
-                statusLabel.setText("Статус: Ошибка загрузки");
-                statusLabel.setForeground(Color.RED);
-                JOptionPane.showMessageDialog(dialog, "Не удалось загрузить файлы. Проверьте лог.");
-            }
-        );
+                (status) -> SwingUtilities.invokeLater(() -> {
+                    logArea.append(status + "\n");
+                    logArea.setCaretPosition(logArea.getDocument().getLength());
+                    statusLabel.setText("Статус: " + status);
+                }),
+                () -> { // Success
+                    updateStatus();
+                    downloadButton.setEnabled(true);
+                    deleteButton.setEnabled(true);
+                    offlineModeCheckbox.setEnabled(true);
+                    progressBar.setVisible(false);
+                    JOptionPane.showMessageDialog(dialog, "Файлы для офлайн режима успешно загружены!");
+                },
+                () -> { // Error
+                    updateStatus();
+                    downloadButton.setEnabled(true);
+                    deleteButton.setEnabled(true);
+                    offlineModeCheckbox.setEnabled(true);
+                    progressBar.setVisible(false);
+                    statusLabel.setText("Статус: Ошибка загрузки");
+                    statusLabel.setForeground(Color.RED);
+                    JOptionPane.showMessageDialog(dialog, "Не удалось загрузить файлы. Проверьте лог.");
+                });
     }
 
     private void deleteAction(ActionEvent e) {
         int confirm = JOptionPane.showConfirmDialog(dialog,
-            "Вы уверены, что хотите очистить кэш Gradle?\n" +
-            "ВНИМАНИЕ: Это удалит зависимости для ВСЕХ проектов и генераторов.\n" +
-            "Вам придется загружать их заново для других проектов.",
-            "Подтверждение очистки", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                "Вы уверены, что хотите очистить кэш Gradle?\n" +
+                        "ВНИМАНИЕ: Это удалит зависимости для ВСЕХ проектов и генераторов.\n" +
+                        "Вам придется загружать их заново для других проектов.",
+                "Подтверждение очистки", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
             OfflineCacheManager.deleteOfflineCache();

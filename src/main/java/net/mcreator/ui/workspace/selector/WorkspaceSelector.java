@@ -27,16 +27,10 @@ import net.mcreator.Launcher;
 import net.mcreator.io.FileIO;
 import net.mcreator.io.OS;
 import net.mcreator.io.UserFolderManager;
-import net.mcreator.io.net.WebIO;
 import net.mcreator.plugin.MCREvent;
 import net.mcreator.plugin.events.WorkspaceSelectorLoadedEvent;
-import net.mcreator.preferences.PreferencesManager;
 import net.mcreator.ui.MCreatorApplication;
-import net.mcreator.ui.SplashScreen;
 import net.mcreator.ui.action.impl.AboutAction;
-import net.mcreator.ui.component.ImagePanel;
-import net.mcreator.ui.component.JEmptyBox;
-import net.mcreator.ui.component.SocialButtons;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.dialogs.file.FileDialogs;
@@ -50,7 +44,6 @@ import net.mcreator.ui.notifications.INotificationConsumer;
 import net.mcreator.ui.notifications.NotificationsRenderer;
 import net.mcreator.util.DesktopUtils;
 import net.mcreator.util.ListUtils;
-import net.mcreator.util.StringUtils;
 import net.mcreator.util.image.EmptyIcon;
 import net.mcreator.util.image.ImageUtils;
 import net.mcreator.workspace.ShareableZIPManager;
@@ -59,7 +52,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
@@ -68,13 +60,9 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 public final class WorkspaceSelector extends JFrame implements DropTargetListener, INotificationConsumer {
 
@@ -85,7 +73,8 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 	private final WorkspaceOpenListener workspaceOpenListener;
 	private RecentWorkspaces recentWorkspaces = new RecentWorkspaces();
 
-	@Nullable private final MCreatorApplication application;
+	@Nullable
+	private final MCreatorApplication application;
 
 	private final JButton newWorkspace;
 
@@ -107,7 +96,8 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 
 		if (application != null)
 			addWindowListener(new WindowAdapter() {
-				@Override public void windowClosing(WindowEvent arg0) {
+				@Override
+				public void windowClosing(WindowEvent arg0) {
 					application.closeApplication();
 				}
 			});
@@ -158,22 +148,23 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 
 		// Removed Donate button
 		/*
-		JLabel donate = L10N.label("dialog.workspace_selector.donate");
-		donate.setIcon(UIRES.get("donate"));
-		donate.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		ComponentUtils.deriveFont(donate, 13);
-		donate.setForeground(Theme.current().getForegroundColor());
-		donate.setBorder(BorderFactory.createEmptyBorder());
-		donate.setHorizontalTextPosition(JLabel.LEFT);
-		donate.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent mouseEvent) {
-				DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/donate");
-			}
-		});
-		southcenter.add(donate);
-
-		southcenter.add(new JEmptyBox(7, 5));
-		*/
+		 * JLabel donate = L10N.label("dialog.workspace_selector.donate");
+		 * donate.setIcon(UIRES.get("donate"));
+		 * donate.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		 * ComponentUtils.deriveFont(donate, 13);
+		 * donate.setForeground(Theme.current().getForegroundColor());
+		 * donate.setBorder(BorderFactory.createEmptyBorder());
+		 * donate.setHorizontalTextPosition(JLabel.LEFT);
+		 * donate.addMouseListener(new MouseAdapter() {
+		 * 
+		 * @Override public void mouseClicked(MouseEvent mouseEvent) {
+		 * DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/donate");
+		 * }
+		 * });
+		 * southcenter.add(donate);
+		 * 
+		 * southcenter.add(new JEmptyBox(7, 5));
+		 */
 
 		JLabel prefs = new JLabel(L10N.t("dialog.workspace_selector.preferences"));
 		prefs.setIcon(UIRES.get("settings"));
@@ -183,7 +174,8 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		prefs.setBorder(BorderFactory.createEmptyBorder());
 		prefs.setHorizontalTextPosition(JLabel.LEFT);
 		prefs.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent mouseEvent) {
+			@Override
+			public void mouseClicked(MouseEvent mouseEvent) {
 				new PreferencesDialog(WorkspaceSelector.this, null);
 			}
 		});
@@ -194,7 +186,8 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		JLabel version = L10N.label("dialog.workspace_selector.version",
 				Launcher.version.isSnapshot() ? Launcher.version.getMajorString() : Launcher.version.getFullString());
 		version.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent mouseEvent) {
+			@Override
+			public void mouseClicked(MouseEvent mouseEvent) {
 				AboutAction.showDialog(WorkspaceSelector.this);
 			}
 		});
@@ -205,9 +198,86 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		version.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		southcenterleft.add(version);
 
-		JComponent southSubComponent = PanelUtils.westAndEastElement(southcenterleft, southcenter);
-
+		JPanel southSubComponent = new JPanel(new GridBagLayout());
+		southSubComponent.setOpaque(false);
 		southSubComponent.setBorder(BorderFactory.createEmptyBorder(0, 25, 20, 25));
+
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridy = 0;
+		gbc.weighty = 0;
+		gbc.fill = GridBagConstraints.VERTICAL;
+
+		// Left: Version
+		gbc.gridx = 0;
+		gbc.weightx = 1.0;
+		gbc.anchor = GridBagConstraints.WEST;
+		southSubComponent.add(southcenterleft, gbc);
+
+		// Center: Button (if visible)
+		boolean showCompleteSetup = !net.mcreator.util.OfflineCacheManager.isOfflineModeReady();
+		boolean debugShowSetup = false; // TOGGLE
+
+		if (showCompleteSetup || debugShowSetup) {
+			// Clean design: Standard Label, Bold, Red, Pulsing Color
+			JLabel completeSetup = new JLabel("ЗАВЕРШИТЬ НАСТРОЙКУ");
+			completeSetup.setCursor(new Cursor(Cursor.HAND_CURSOR));
+			// Use Bold font to stand out, but keep same size to avoid displacement
+			completeSetup.setFont(completeSetup.getFont().deriveFont(Font.BOLD));
+			completeSetup.setOpaque(false);
+
+			// Initial Color
+			completeSetup.setForeground(new Color(255, 60, 60)); // Base Red
+			completeSetup.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+
+			if (showCompleteSetup) {
+				Timer glowTimer = new Timer(50, new ActionListener() { // Faster 50ms for smoother animation
+					float phase = 0f;
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						if (!isDisplayable()) {
+							((Timer) e.getSource()).stop();
+							return;
+						}
+						phase += 0.15f;
+						// Pulse between Red and White-Red
+						// R = 255
+						// G, B = oscillates 0 to 180 (Whiteish)
+						int gb = (int) (90 + 90 * Math.sin(phase));
+						// Clamp just in case
+						gb = Math.max(0, Math.min(255, gb));
+
+						completeSetup.setForeground(new Color(255, gb, gb));
+					}
+				});
+				glowTimer.start();
+			}
+
+			completeSetup.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					new PreferencesDialog(WorkspaceSelector.this, "Офлайн режим", true);
+				}
+			});
+
+			gbc.gridx = 1;
+			gbc.weightx = 0;
+			gbc.anchor = GridBagConstraints.CENTER;
+			gbc.insets = new Insets(0, 0, 0, 0); // Reset insets
+
+			// Wrap in standard FlowLayout (vgap=5) to match southcenterleft (Version)
+			JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
+			wrapper.setOpaque(false);
+			wrapper.add(completeSetup);
+
+			southSubComponent.add(wrapper, gbc);
+		}
+
+		// Right: Settings
+		gbc.gridx = 2;
+		gbc.weightx = 1.0;
+		gbc.anchor = GridBagConstraints.EAST;
+		southSubComponent.add(southcenter, gbc);
 
 		JComponent centerComponent = PanelUtils.centerAndSouthElement(
 				PanelUtils.northAndCenterElement(logoPanel, PanelUtils.totalCenterInPanel(actions)), southSubComponent);
@@ -231,7 +301,8 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		recentsList.setBackground(Theme.current().getSecondAltBackgroundColor());
 		recentsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		recentsList.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent mouseEvent) {
+			@Override
+			public void mouseClicked(MouseEvent mouseEvent) {
 				if (mouseEvent.getButton() == MouseEvent.BUTTON2) {
 					int idx = recentsList.locationToIndex(mouseEvent.getPoint());
 					removeRecentWorkspace(defaultListModel.elementAt(idx));
@@ -242,7 +313,8 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 			}
 		});
 		recentsList.addKeyListener(new KeyAdapter() {
-			@Override public void keyPressed(KeyEvent e) {
+			@Override
+			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
 					Object[] options = { L10N.t("dialog.workspace_selector.delete_workspace.recent_list"),
 							L10N.t("dialog.workspace_selector.delete_workspace.workspace"), L10N.t("common.cancel") };
@@ -258,7 +330,8 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 					} else if (n == 1) {
 						int m = JOptionPane.showConfirmDialog(WorkspaceSelector.this,
 								L10N.t("dialog.workspace_selector.delete_workspace.confirmation",
-										recentsList.getSelectedValue().getName()), L10N.t("common.confirmation"),
+										recentsList.getSelectedValue().getName()),
+								L10N.t("common.confirmation"),
 								JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 						if (m == JOptionPane.YES_OPTION) {
 							FileIO.moveToTrash(recentsList.getSelectedValue().getPath().getParentFile());
@@ -287,7 +360,8 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		MCREvent.event(new WorkspaceSelectorLoadedEvent(this));
 
 		addWindowListener(new WindowAdapter() {
-			@Override public void windowActivated(WindowEvent e) {
+			@Override
+			public void windowActivated(WindowEvent e) {
 				super.windowActivated(e);
 				reloadRecents();
 				newWorkspace.requestFocusInWindow();
@@ -342,7 +416,8 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 			if (recentsList.getSelectedValue() != null) {
 				int m = JOptionPane.showConfirmDialog(WorkspaceSelector.this,
 						L10N.t("dialog.workspace_selector.delete_workspace.confirmation",
-								recentsList.getSelectedValue().getName()), L10N.t("common.confirmation"),
+								recentsList.getSelectedValue().getName()),
+						L10N.t("common.confirmation"),
 						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 				if (m == 0) {
 					FileIO.moveToTrash(recentsList.getSelectedValue().getPath().getParentFile());
@@ -363,15 +438,18 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		recentListMenu.add(openInSystemExplorer);
 
 		recentListMenu.addPopupMenuListener(new PopupMenuListener() {
-			@Override public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+			@Override
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 				recentsList.setSelectedIndex(recentsList.locationToIndex(recentsList.getMousePosition()));
 			}
 
-			@Override public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+			@Override
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
 
 			}
 
-			@Override public void popupMenuCanceled(PopupMenuEvent e) {
+			@Override
+			public void popupMenuCanceled(PopupMenuEvent e) {
 
 			}
 		});
@@ -379,21 +457,26 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		return recentListMenu;
 	}
 
-	@Override public void dragEnter(DropTargetDragEvent dtde) {
+	@Override
+	public void dragEnter(DropTargetDragEvent dtde) {
 		processDrag(dtde);
 	}
 
-	@Override public void dragOver(DropTargetDragEvent dtde) {
+	@Override
+	public void dragOver(DropTargetDragEvent dtde) {
 		processDrag(dtde);
 	}
 
-	@Override public void dropActionChanged(DropTargetDragEvent dtde) {
+	@Override
+	public void dropActionChanged(DropTargetDragEvent dtde) {
 	}
 
-	@Override public void dragExit(DropTargetEvent dtde) {
+	@Override
+	public void dragExit(DropTargetEvent dtde) {
 	}
 
-	@Override public void drop(DropTargetDropEvent dtde) {
+	@Override
+	public void drop(DropTargetDropEvent dtde) {
 		Transferable transferable = dtde.getTransferable();
 		if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
 			dtde.acceptDrop(dtde.getDropAction());
@@ -520,23 +603,26 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 	}
 
 	/*
-	private void initWebsitePanel() {
-        // Removed implementation
-	}
-	*/
+	 * private void initWebsitePanel() {
+	 * // Removed implementation
+	 * }
+	 */
 
-	@Nonnull public RecentWorkspaces getRecentWorkspaces() {
+	@Nonnull
+	public RecentWorkspaces getRecentWorkspaces() {
 		if (recentWorkspaces == null)
 			this.recentWorkspaces = new RecentWorkspaces();
 
 		return recentWorkspaces;
 	}
 
-	@Nullable public MCreatorApplication getApplication() {
+	@Nullable
+	public MCreatorApplication getApplication() {
 		return application;
 	}
 
-	@Override public NotificationsRenderer getNotificationsRenderer() {
+	@Override
+	public NotificationsRenderer getNotificationsRenderer() {
 		return notificationsRenderer;
 	}
 

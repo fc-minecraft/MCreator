@@ -47,7 +47,8 @@ public class GradleUtils {
 	public static BuildActionExecuter<Void> getGradleSyncLauncher(GeneratorConfiguration generatorConfiguration,
 			ProjectConnection projectConnection, String... additionalTasks) {
 		BuildAction<Void> syncBuildAction = GradleSyncBuildAction.loadFromIsolatedClassLoader();
-		BuildActionExecuter<Void> retval = projectConnection.action().projectsLoaded(syncBuildAction, unused -> {})
+		BuildActionExecuter<Void> retval = projectConnection.action().projectsLoaded(syncBuildAction, unused -> {
+		})
 				.build().forTasks(additionalTasks);
 		return configureLauncher(generatorConfiguration, retval); // make sure we have proper JVM, environment, ...
 	}
@@ -65,12 +66,46 @@ public class GradleUtils {
 
 	private static <T extends ConfigurableLauncher<T>> T configureLauncher(
 			GeneratorConfiguration generatorConfiguration, T launcher) {
-		// For some unexplainable reason, ForgeGradle eclipse model import does not generate
-		// all files if Xmx is passed. Likely some bug with Forge Gradle daemons where daemon
+
+		int xmx = PreferencesManager.PREFERENCES.gradle.xmx.get();
+
+		// For some unexplainable reason, ForgeGradle eclipse model import does not
+		// generate
+		// all files if Xmx is passed. Likely some bug with Forge Gradle daemons where
+		// daemon
 		// fails to operate correctly so new one needs to be created for model building
 		if (!(launcher instanceof ModelBuilder<?>
 				&& generatorConfiguration.getGeneratorFlavor() == GeneratorFlavor.FORGE))
-			launcher.addJvmArguments("-Xmx" + PreferencesManager.PREFERENCES.gradle.xmx.get() + "m");
+			launcher.addJvmArguments("-Xmx" + xmx + "m");
+
+		// --- OPTIMIZATIONS START ---
+
+		// Always use G1GC (modern standard) and enable caching/daemon
+		launcher.addJvmArguments("-XX:+UseG1GC");
+		launcher.withArguments("-Dorg.gradle.caching=true", "-Dorg.gradle.daemon=true");
+
+		// Logic split: Low-end PC vs High-end PC optimization
+		if (xmx < 1596) {
+			LOG.info(
+					"Gradle Optimizations: ECONOMY MODE enabled (< 1596MB). Parallel builds disabled, aggressive GC enabled.");
+			// ECONOMY MODE: If less than 1596MB RAM is allocated
+			// Enable aggressive string deduplication and fast cache clearing to save RAM
+			launcher.addJvmArguments(
+					"-XX:+UseStringDeduplication",
+					"-XX:SoftRefLRUPolicyMSPerMB=50");
+			// IMPORTANT: Do not enable parallel=true here, as multi-threaded builds consume
+			// too much memory
+		} else {
+			LOG.info(
+					"Gradle Optimizations: PERFORMANCE MODE enabled (>= 1596MB). Parallel builds and VFS watching enabled.");
+			// PERFORMANCE MODE: If memory is sufficient (4GB+)
+			// Enable parallel build and file system watching for speed
+			launcher.withArguments(
+					"-Dorg.gradle.parallel=true",
+					"-Dorg.gradle.vfs.watch=true");
+		}
+
+		// --- OPTIMIZATIONS END ---
 
 		// make sure Gradle reports in English so our error decoder works properly
 		launcher.addJvmArguments("-Duser.language=en");
@@ -86,14 +121,16 @@ public class GradleUtils {
 			launcher.withArguments(Arrays.asList("-Porg.gradle.java.installations.auto-detect=false",
 					"-Porg.gradle.java.installations.paths=" + java_home.replace('\\', '/')));
 
-		// some mod API toolchains (NeoGradle, Mod Dev Gradle) need to think they are running in IDE, so we make them think we are Eclipse
+		// some mod API toolchains (NeoGradle, Mod Dev Gradle) need to think they are
+		// running in IDE, so we make them think we are Eclipse
 		launcher.addJvmArguments("-Declipse.application=net.mcreator");
 
 		return launcher;
 	}
 
 	public static String getJavaHome() {
-		// check if JAVA_HOME was overwritten in preferences and return this one in such case
+		// check if JAVA_HOME was overwritten in preferences and return this one in such
+		// case
 		if (PreferencesManager.PREFERENCES.hidden.java_home.get() != null
 				&& PreferencesManager.PREFERENCES.hidden.java_home.get().isFile()) {
 			LOG.warn("Using java home override specified by users!");
@@ -104,7 +141,8 @@ public class GradleUtils {
 				LOG.error("Java home override from preferences is not valid!");
 		}
 
-		// otherwise, we try to set JAVA_HOME to the same Java as MCreator is launched with
+		// otherwise, we try to set JAVA_HOME to the same Java as MCreator is launched
+		// with
 		return System.getProperty("java.home");
 	}
 

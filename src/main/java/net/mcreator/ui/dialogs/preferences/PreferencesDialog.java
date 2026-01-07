@@ -54,6 +54,10 @@ public class PreferencesDialog extends MCreatorDialog {
 	private final Window parent;
 
 	public PreferencesDialog(Window parent, @Nullable String selectedTab) {
+		this(parent, selectedTab, false);
+	}
+
+	public PreferencesDialog(Window parent, @Nullable String selectedTab, boolean highlightOffline) {
 		super(parent);
 
 		this.parent = parent;
@@ -141,6 +145,11 @@ public class PreferencesDialog extends MCreatorDialog {
 		pack();
 		setSize(Math.max(940, getBounds().width), 540);
 		setLocationRelativeTo(parent);
+
+		if (highlightOffline) {
+			selectOfflineModeAndHighlight();
+		}
+
 		setVisible(true);
 	}
 
@@ -249,6 +258,19 @@ public class PreferencesDialog extends MCreatorDialog {
 
 	public void markChanged() {
 		apply.setEnabled(true);
+	}
+
+	private OfflineModePanel offlineModePanel;
+
+	public void registerOfflineModePanel(OfflineModePanel panel) {
+		this.offlineModePanel = panel;
+	}
+
+	public void selectOfflineModeAndHighlight() {
+		sections.setSelectedValue("Офлайн режим", true);
+		if (offlineModePanel != null) {
+			offlineModePanel.highlightDownload();
+		}
 	}
 
 }
