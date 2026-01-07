@@ -34,7 +34,7 @@ jobs:
     - name: Build and Export
       run: |
         chmod +x gradlew
-        ./gradlew exportAll
+        ./gradlew exportAll -Psnapshot=false
 
     - name: List artifacts
       run: ls -R build/export/
@@ -46,9 +46,9 @@ jobs:
         tag_name: build-${{ github.run_number }}
         name: "${{ github.event.head_commit.message || format('Build {0}', github.run_number) }}"
         files: |
-          build/export/*.zip
-          build/export/*.exe
-          build/export/*.tar.gz
-          build/export/*.dmg
+          build/export/MCreator*.zip
+          build/export/MCreator*.exe
+          build/export/MCreator*.tar.gz
+          build/export/MCreator*.dmg
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
