@@ -20,7 +20,7 @@ package net.mcreator.ui.workspace.selector;
 
 import net.mcreator.generator.GeneratorFlavor;
 import net.mcreator.ui.component.util.PanelUtils;
-import net.mcreator.ui.init.L10N;
+
 import net.mcreator.ui.laf.themes.Theme;
 import net.mcreator.util.StringUtils;
 import net.mcreator.util.image.ImageUtils;
@@ -28,11 +28,9 @@ import net.mcreator.util.image.ImageUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.util.Objects;
 
 class RecentWorkspacesRenderer extends JPanel implements ListCellRenderer<RecentWorkspaceEntry> {
 
-	private String version = null;
 	private boolean isSelected = false;
 
 	private final Font rotatedFont;
@@ -60,7 +58,8 @@ class RecentWorkspacesRenderer extends JPanel implements ListCellRenderer<Recent
 	@Override
 	public Component getListCellRendererComponent(JList<? extends RecentWorkspaceEntry> list,
 			RecentWorkspaceEntry value, int index, boolean isSelected, boolean cellHasFocus) {
-		this.version = value.getMCRVersion();
+
+		this.creationDate = value.getCreationDate();
 		this.isSelected = isSelected;
 
 		String path = value.getPath().getParentFile().getAbsolutePath().replace("\\", "/");
@@ -69,9 +68,10 @@ class RecentWorkspacesRenderer extends JPanel implements ListCellRenderer<Recent
 				isSelected ? Theme.current().getInterfaceAccentColor() : Theme.current().getAltForegroundColor());
 		pathLabel.setForeground(nameLabel.getForeground());
 
-		setToolTipText(L10N.t("dialog.workspace_selector.recent_workspace", value.getName(), path,
-				Objects.requireNonNullElse(value.getMCRVersion(), L10N.t("common.not_applicable"))));
-		setBorder(BorderFactory.createEmptyBorder(2, version != null ? 23 : 5, 3, 0));
+		setToolTipText("<html><b>" + value.getName() + "</b><br>" + path + "<br>" +
+				new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm").format(new java.util.Date(creationDate))
+				+ "</html>");
+		setBorder(BorderFactory.createEmptyBorder(2, 23, 3, 0)); // Always reserve space for date
 
 		if (value.getType() != GeneratorFlavor.UNKNOWN) {
 			ImageIcon icon = new ImageIcon(
@@ -90,10 +90,13 @@ class RecentWorkspacesRenderer extends JPanel implements ListCellRenderer<Recent
 		return this;
 	}
 
-	@Override protected void paintComponent(Graphics g) {
+	private long creationDate;
+
+	@Override
+	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		if (version != null) {
+		if (creationDate != 0) {
 			Graphics2D g2 = (Graphics2D) g;
 
 			g2.setColor(
@@ -101,9 +104,15 @@ class RecentWorkspacesRenderer extends JPanel implements ListCellRenderer<Recent
 
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-			String[] parts = version.split("\\.");
 			g2.setFont(rotatedFont);
-			g2.drawString(parts[0] + "." + parts[1], 15, 40);
+			String dateStr = new java.text.SimpleDateFormat("dd.MM").format(new java.util.Date(creationDate));
+			g2.drawString(dateStr, 15, 35); // Adjusted
+											// y
+											// position
+											// slightly
+											// for
+											// 11px
+											// font
 		}
 	}
 

@@ -27,12 +27,15 @@ import java.io.File;
 
 public final class RecentWorkspaceEntry {
 
-	@Nonnull private String name;
+	@Nonnull
+	private String name;
 	private GeneratorFlavor type;
 
-	@Nonnull private final String path;
+	@Nonnull
+	private final String path;
 
-	@Nullable private String mcrVersion;
+	@Nullable
+	private String mcrVersion;
 
 	public RecentWorkspaceEntry(Workspace workspace, File path, @Nullable String mcrVersion) {
 		this.name = workspace.getWorkspaceSettings().getModName();
@@ -47,30 +50,51 @@ public final class RecentWorkspaceEntry {
 		this.mcrVersion = source.getMCRVersion();
 	}
 
-	@Nonnull public File getPath() {
+	@Nonnull
+	public File getPath() {
 		return new File(path);
 	}
 
-	@Nonnull public String getName() {
+	@Nonnull
+	public String getName() {
 		return name;
 	}
 
-	@Nonnull public GeneratorFlavor getType() {
+	@Nonnull
+	public GeneratorFlavor getType() {
 		if (type == null)
 			return GeneratorFlavor.UNKNOWN;
 
 		return type;
 	}
 
-	@Nullable public String getMCRVersion() {
+	@Nullable
+	public String getMCRVersion() {
 		return mcrVersion;
 	}
 
-	@Override public int hashCode() {
+	private long creationDate = 0;
+
+	public long getCreationDate() {
+		if (creationDate == 0) {
+			try {
+				java.nio.file.attribute.BasicFileAttributes attrs = java.nio.file.Files
+						.readAttributes(getPath().toPath(), java.nio.file.attribute.BasicFileAttributes.class);
+				creationDate = attrs.creationTime().toMillis();
+			} catch (Exception e) {
+				creationDate = System.currentTimeMillis(); // Fallback
+			}
+		}
+		return creationDate;
+	}
+
+	@Override
+	public int hashCode() {
 		return path.hashCode();
 	}
 
-	@Override public boolean equals(Object obj) {
+	@Override
+	public boolean equals(Object obj) {
 		if (obj instanceof RecentWorkspaceEntry cmpObj)
 			return cmpObj.path.equals(path);
 		return false;
