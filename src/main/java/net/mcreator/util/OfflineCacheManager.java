@@ -15,7 +15,6 @@ import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -24,7 +23,6 @@ import java.util.Enumeration;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -33,6 +31,16 @@ public class OfflineCacheManager {
     private static final Logger LOG = LogManager.getLogger(OfflineCacheManager.class);
 
     private static final String MARKER_FILE_NAME = "offline_fabric_1.21.8_ready.marker";
+
+    private static final String COMMON_AW_CONTENT = "accessWidener v2 named\n" +
+            "\n" +
+            "accessible field net/minecraft/world/item/BucketItem content Lnet/minecraft/world/level/material/Fluid;\n"
+            +
+            "accessible field net/minecraft/world/level/block/LiquidBlock fluid Lnet/minecraft/world/level/material/FlowingFluid;\n"
+            +
+            "\n" +
+            "# Start of user code block custom AWs\n" +
+            "# End of user code block custom AWs";
     private static final String VERSIONS_FILE_NAME = "offline_versions.properties";
 
     // Fallback Versions (used if detection fails)
@@ -50,17 +58,27 @@ public class OfflineCacheManager {
     }
 
     public static String verifyCacheIntegrity() {
-        if (!isOfflineModeReady()) return "Кэш не готов (маркер отсутствует)";
+        if (!isOfflineModeReady())
+            return "Кэш не готов (маркер отсутствует)";
 
         File cache = getOfflineCacheDir();
         File versions = new File(cache, VERSIONS_FILE_NAME);
-        if (!versions.exists()) return "Ошибка: файл версий отсутствует";
+        if (!versions.exists())
+            return "Ошибка: файл версий отсутствует";
 
         File cachedProjectFiles = new File(cache, "cached_project_files");
-        if (!cachedProjectFiles.exists()) return "Ошибка: кэшированные файлы проекта отсутствуют";
-        if (!new File(cachedProjectFiles, ".classpath").exists()) return "Ошибка: .classpath не найден";
+        if (!cachedProjectFiles.exists())
+            return "Ошибка: кэшированные файлы проекта отсутствуют";
+        if (!new File(cachedProjectFiles, ".classpath").exists())
+            return "Ошибка: .classpath не найден";
 
-        return "Кэш цел (Проверено)";
+        File cachedBuildDir = new File(cache, "cached_build");
+        if (!cachedBuildDir.exists())
+            return "Ошибка: кэшированная папка build отсутствует (нужен перезапуск настройки)";
+        if (!cachedBuildDir.isDirectory() || cachedBuildDir.list().length == 0)
+            return "Ошибка: кэшированная папка build пуста";
+
+        return "Кэш цел (Проверено, оптимизация активна)";
     }
 
     public static long getCacheSize() {
@@ -74,7 +92,7 @@ public class OfflineCacheManager {
     public static void deleteOfflineCache() {
         File cache = getOfflineCacheDir();
         if (cache.exists()) {
-             FileIO.deleteDir(cache);
+            FileIO.deleteDir(cache);
         }
     }
 
@@ -92,8 +110,8 @@ public class OfflineCacheManager {
                         .max(Plugin::compareTo);
 
                 if (pluginOpt.isEmpty()) {
-                     LOG.error("No Fabric generator plugin found.");
-                     throw new RuntimeException("No Fabric generator plugin found.");
+                    LOG.error("No Fabric generator plugin found.");
+                    throw new RuntimeException("No Fabric generator plugin found.");
                 }
 
                 Plugin plugin = pluginOpt.get();
@@ -101,15 +119,14 @@ public class OfflineCacheManager {
                 String pluginId = plugin.getID();
                 LOG.info("Using plugin for offline template: " + pluginId);
 
-                // Detect versions from plugin
                 Properties versions = detectVersions(pluginFile);
                 String mcVersion = versions.getProperty("minecraft_version", FALLBACK_MC_VERSION);
                 String buildFileVersion = versions.getProperty("build_file_version", FALLBACK_BUILD_FILE_VERSION);
                 LOG.info("Detected versions - MC: " + mcVersion + ", Build: " + buildFileVersion);
 
-                // Save versions to cache dir
                 File versionsFile = new File(getOfflineCacheDir(), VERSIONS_FILE_NAME);
-                if (!versionsFile.getParentFile().exists()) versionsFile.getParentFile().mkdirs();
+                if (!versionsFile.getParentFile().exists())
+                    versionsFile.getParentFile().mkdirs();
                 try {
                     Properties p = new Properties();
                     p.setProperty("minecraft_version", mcVersion);
@@ -123,22 +140,21 @@ public class OfflineCacheManager {
 
                 boolean extracted = false;
 
-                // Extraction Logic
                 if (pluginFile.isDirectory()) {
-                     File[] files = pluginFile.listFiles();
-                     if (files != null) {
-                         for (File f : files) {
-                             if (f.isDirectory() && new File(f, "workspacebase").exists()) {
-                                 FileIO.copyDirectory(new File(f, "workspacebase"), tempDir);
-                                 extracted = true;
-                                 break;
-                             }
-                         }
-                     }
-                     if (!extracted && new File(pluginFile, "workspacebase").exists()) {
-                         FileIO.copyDirectory(new File(pluginFile, "workspacebase"), tempDir);
-                         extracted = true;
-                     }
+                    File[] files = pluginFile.listFiles();
+                    if (files != null) {
+                        for (File f : files) {
+                            if (f.isDirectory() && new File(f, "workspacebase").exists()) {
+                                FileIO.copyDirectory(new File(f, "workspacebase"), tempDir);
+                                extracted = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!extracted && new File(pluginFile, "workspacebase").exists()) {
+                        FileIO.copyDirectory(new File(pluginFile, "workspacebase"), tempDir);
+                        extracted = true;
+                    }
                 }
 
                 if (!extracted && ZipIO.checkIfZip(pluginFile)) {
@@ -148,7 +164,8 @@ public class OfflineCacheManager {
                         while (entries.hasMoreElements()) {
                             ZipEntry entry = entries.nextElement();
                             if (entry.getName().endsWith("workspacebase/build.gradle")) {
-                                workspaceBasePath = entry.getName().substring(0, entry.getName().length() - "build.gradle".length());
+                                workspaceBasePath = entry.getName().substring(0,
+                                        entry.getName().length() - "build.gradle".length());
                                 break;
                             }
                         }
@@ -159,7 +176,8 @@ public class OfflineCacheManager {
                                 ZipEntry entry = entries.nextElement();
                                 if (entry.getName().startsWith(workspaceBasePath)) {
                                     String relativePath = entry.getName().substring(workspaceBasePath.length());
-                                    if (relativePath.isEmpty()) continue;
+                                    if (relativePath.isEmpty())
+                                        continue;
 
                                     File dest = new File(tempDir, relativePath);
                                     if (entry.isDirectory()) {
@@ -178,18 +196,28 @@ public class OfflineCacheManager {
                 }
 
                 if (!extracted && pluginId.equals("generator-fabric-1.21.8") && pluginFile.isDirectory()) {
-                      File t = new File(pluginFile, "fabric-1.21.8/workspacebase");
-                      if (t.exists()) {
-                          FileIO.copyDirectory(t, tempDir);
-                          extracted = true;
-                      }
+                    File t = new File(pluginFile, "fabric-1.21.8/workspacebase");
+                    if (t.exists()) {
+                        FileIO.copyDirectory(t, tempDir);
+                        extracted = true;
+                    }
                 }
 
                 if (!extracted) {
-                     if (!new File(tempDir, "build.gradle").exists()) {
-                         LOG.error("Failed to extract template from " + pluginFile);
-                         throw new RuntimeException("Failed to extract template from plugin " + pluginId);
-                     }
+                    if (!new File(tempDir, "build.gradle").exists()) {
+                        LOG.error("Failed to extract template from " + pluginFile);
+                        throw new RuntimeException("Failed to extract template from plugin " + pluginId);
+                    }
+                }
+
+                File metaInf = new File(tempDir, "src/main/resources/META-INF");
+                metaInf.mkdirs();
+
+                File commonAw = new File(metaInf, "common.accesswidener");
+                try {
+                    FileIO.writeStringToFile(COMMON_AW_CONTENT, commonAw);
+                } catch (Exception e) {
+                    LOG.warn("Failed to create common.accesswidener", e);
                 }
 
                 statusCallback.accept("Настройка файлов сборки...");
@@ -203,23 +231,32 @@ public class OfflineCacheManager {
 
                 try (ProjectConnection connection = connector.connect()) {
                     BuildLauncher launcher = connection.newBuild();
-                    // Added downloadAssets (without loom: prefix to be safe) and eclipse which transitively relies on assets
-                    launcher.forTasks("dependencies", "eclipse", "downloadAssets", "genEclipseRuns");
-                    launcher.addJvmArguments("-Xmx2G");
+
+                    // Changed tasks:
+                    // 1. resolveDependencies (forces download of hidden artifacts like
+                    // mixin-extensions)
+                    // 2. build (forces full compilation and remapping to populate cache)
+                    launcher.forTasks("dependencies", "resolveDependencies", "eclipse", "downloadAssets",
+                            "genEclipseRuns",
+                            "validateAccessWidener", "genSourcesWithCfr", "build");
+
+                    // Memory optimization
+                    launcher.addJvmArguments("-Xmx1024m", "-XX:+UseSerialGC");
+                    launcher.addArguments("--build-cache", "--parallel");
 
                     launcher.addProgressListener(event -> {
                         statusCallback.accept(event.getDescriptor().getName());
                     }, OperationType.TASK);
 
-                    // Retry logic for the build launcher
                     int attempts = 0;
                     while (attempts < 3) {
                         try {
                             launcher.run();
-                            break; // Success
+                            break;
                         } catch (Exception e) {
                             attempts++;
-                            if (attempts >= 3) throw e;
+                            if (attempts >= 3)
+                                throw e;
                             LOG.warn("Gradle offline cache download attempt " + attempts + " failed, retrying...", e);
                             statusCallback.accept("Ошибка загрузки (Попытка " + attempts + "/3)...");
                             Thread.sleep(2000);
@@ -227,25 +264,48 @@ public class OfflineCacheManager {
                     }
                 }
 
-                // Cache IDE files (Eclipse .project, .classpath, .settings) to speed up new project creation
                 try {
                     File cachedProjectFiles = new File(getOfflineCacheDir(), "cached_project_files");
-                    if (!cachedProjectFiles.exists()) cachedProjectFiles.mkdirs();
+                    if (!cachedProjectFiles.exists())
+                        cachedProjectFiles.mkdirs();
 
                     File dotProject = new File(tempDir, ".project");
                     File dotClasspath = new File(tempDir, ".classpath");
                     File dotSettings = new File(tempDir, ".settings");
 
-                    if (dotProject.exists()) FileIO.copyFile(dotProject, new File(cachedProjectFiles, ".project"));
-                    if (dotClasspath.exists()) FileIO.copyFile(dotClasspath, new File(cachedProjectFiles, ".classpath"));
-                    if (dotSettings.exists()) FileIO.copyDirectory(dotSettings, new File(cachedProjectFiles, ".settings"));
+                    if (dotProject.exists())
+                        FileIO.copyFile(dotProject, new File(cachedProjectFiles, ".project"));
+                    if (dotClasspath.exists())
+                        FileIO.copyFile(dotClasspath, new File(cachedProjectFiles, ".classpath"));
+                    if (dotSettings.exists())
+                        FileIO.copyDirectory(dotSettings, new File(cachedProjectFiles, ".settings"));
                     LOG.info("Cached Eclipse project files for offline acceleration.");
                 } catch (Exception e) {
                     LOG.warn("Failed to cache Eclipse project files", e);
                 }
 
+                try {
+                    File cachedBuildDir = new File(getOfflineCacheDir(), "cached_build");
+                    if (cachedBuildDir.exists())
+                        FileIO.deleteDir(cachedBuildDir);
+                    cachedBuildDir.mkdirs();
+
+                    File buildDir = new File(tempDir, "build");
+                    if (buildDir.exists()) {
+                        FileIO.copyDirectory(buildDir, cachedBuildDir);
+                        LOG.info("Cached Gradle 'build' directory for offline acceleration.");
+                    } else {
+                        LOG.warn("Build directory not found after setup, cannot cache it.");
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Failed to cache build directory", e);
+                }
+
+                // REMOVED: .gradle directory caching to prevent absolute path issues
+
                 File marker = new File(getOfflineCacheDir(), MARKER_FILE_NAME);
-                if (!marker.getParentFile().exists()) marker.getParentFile().mkdirs();
+                if (!marker.getParentFile().exists())
+                    marker.getParentFile().mkdirs();
                 marker.createNewFile();
 
                 LOG.info("Offline cache download complete.");
@@ -269,7 +329,8 @@ public class OfflineCacheManager {
             if (pluginFile.isDirectory()) {
                 // Try to find generator.yaml recursively (depth 2)
                 File yaml = findFile(pluginFile, "generator.yaml", 2);
-                if (yaml != null) parseYamlVersions(new FileInputStream(yaml), props);
+                if (yaml != null)
+                    parseYamlVersions(new FileInputStream(yaml), props);
             } else if (ZipIO.checkIfZip(pluginFile)) {
                 try (ZipFile zip = ZipIO.openZipFile(pluginFile)) {
                     Enumeration<? extends ZipEntry> entries = zip.entries();
@@ -289,14 +350,18 @@ public class OfflineCacheManager {
     }
 
     private static File findFile(File dir, String name, int depth) {
-        if (depth < 0) return null;
+        if (depth < 0)
+            return null;
         File[] files = dir.listFiles();
-        if (files == null) return null;
+        if (files == null)
+            return null;
         for (File f : files) {
-            if (f.getName().equals(name)) return f;
+            if (f.getName().equals(name))
+                return f;
             if (f.isDirectory()) {
                 File res = findFile(f, name, depth - 1);
-                if (res != null) return res;
+                if (res != null)
+                    return res;
             }
         }
         return null;
@@ -322,8 +387,10 @@ public class OfflineCacheManager {
         String[] parts = line.split(":", 2);
         if (parts.length > 1) {
             String v = parts[1].trim();
-            if (v.startsWith("\"") && v.endsWith("\"")) return v.substring(1, v.length() - 1);
-            if (v.startsWith("'") && v.endsWith("'")) return v.substring(1, v.length() - 1);
+            if (v.startsWith("\"") && v.endsWith("\""))
+                return v.substring(1, v.length() - 1);
+            if (v.startsWith("'") && v.endsWith("'"))
+                return v.substring(1, v.length() - 1);
             return v;
         }
         return "";
@@ -335,10 +402,10 @@ public class OfflineCacheManager {
 
         // Inject repositories into mcreator.gradle
         String repos = "\nrepositories {\n" +
-                       "    maven { url 'https://maven.fabricmc.net/' }\n" +
-                       "    mavenCentral()\n" +
-                       "    maven { url 'https://libraries.minecraft.net/' }\n" +
-                       "}\n";
+                "    maven { url 'https://maven.fabricmc.net/' }\n" +
+                "    mavenCentral()\n" +
+                "    maven { url 'https://libraries.minecraft.net/' }\n" +
+                "}\n";
 
         if (mcreatorGradle.exists()) {
             String content = FileIO.readFileToString(mcreatorGradle);
@@ -359,86 +426,176 @@ public class OfflineCacheManager {
 
             // Regex for cases without ${} if any
             content = content.replaceAll("generator\\.getGeneratorMinecraftVersion\\(\\)", "'" + mcVersion + "'");
-            content = content.replaceAll("generator\\.getGeneratorBuildFileVersion\\(\\)", "'" + buildFileVersion + "'");
+            content = content.replaceAll("generator\\.getGeneratorBuildFileVersion\\(\\)",
+                    "'" + buildFileVersion + "'");
+
+            // Force build.gradle to use common.accesswidener
+            if (content.contains("accessWidenerPath")) {
+                content = content.replaceAll("file\\(\"src/main/resources/META-INF/[^\"]+\\.accesswidener\"\\)",
+                        "file(\"src/main/resources/META-INF/common.accesswidener\")");
+            } else {
+                content = content.replaceAll("src/main/resources/META-INF/.+\\.accesswidener",
+                        "src/main/resources/META-INF/common.accesswidener");
+            }
+
+            // Stabilize Refmap Name
+            if (content.contains("defaultRefmapName")) {
+                content = content.replaceAll("defaultRefmapName\\s*=.*", "defaultRefmapName = \"mixins.refmap.json\"");
+            }
+
+            // Stabilize Output Jar Name to prevent remapping on project name change
+            if (!content.contains("base.archivesName =")) {
+                content += "\nbase.archivesName = 'offline-mod'\n";
+            } else {
+                content = content.replaceAll("base.archivesName\\s*=.*", "base.archivesName = 'offline-mod'");
+            }
+
+            // Add task to force download of all dependencies including hidden compiler
+            // extensions
+            String resolveTask = "\n" +
+                    "task resolveDependencies {\n" +
+                    "    doLast {\n" +
+                    "        configurations.findAll { it.canBeResolved }.each { it.resolve() }\n" +
+                    "    }\n" +
+                    "}\n";
+            content += resolveTask;
 
             FileIO.writeStringToFile(content, buildGradle);
         }
 
         File gradleProps = new File(workspaceDir, "gradle.properties");
+        String content = "";
         if (gradleProps.exists()) {
-            String content = FileIO.readFileToString(gradleProps);
-            if (!content.contains("modid=")) {
-                content += "\nmodid=offline";
-            }
-            FileIO.writeStringToFile(content, gradleProps);
+            content = FileIO.readFileToString(gradleProps);
         }
+
+        if (!content.contains("modid=")) {
+            content += "\nmodid=offline";
+        }
+
+        if (!content.contains("org.gradle.caching=")) {
+            content += "\norg.gradle.caching=true";
+            content += "\norg.gradle.parallel=true";
+            content += "\norg.gradle.vfs.watch=true";
+            content += "\norg.gradle.jvmargs=-Xmx1024m -XX:+UseSerialGC";
+        }
+        FileIO.writeStringToFile(content, gradleProps);
     }
 
     /**
      * Applies offline mode fixes to an existing workspace.
-     * Use this when creating a new project in offline mode to ensure it matches the cached versions.
+     * Use this when creating a new project in offline mode to ensure it matches the
+     * cached versions.
      */
     public static void applyOfflineFixes(File workspaceDir) {
         LOG.info("Applying offline mode fixes to workspace: " + workspaceDir);
 
-        // Load versions from cache
         String mcVersion = FALLBACK_MC_VERSION;
         String buildFileVersion = FALLBACK_BUILD_FILE_VERSION;
         try {
-             File versionsFile = new File(getOfflineCacheDir(), VERSIONS_FILE_NAME);
-             if (versionsFile.exists()) {
-                 Properties p = new Properties();
-                 p.load(Files.newBufferedReader(versionsFile.toPath()));
-                 mcVersion = p.getProperty("minecraft_version", FALLBACK_MC_VERSION);
-                 buildFileVersion = p.getProperty("build_file_version", FALLBACK_BUILD_FILE_VERSION);
-             }
+            File versionsFile = new File(getOfflineCacheDir(), VERSIONS_FILE_NAME);
+            if (versionsFile.exists()) {
+                Properties p = new Properties();
+                p.load(Files.newBufferedReader(versionsFile.toPath()));
+                mcVersion = p.getProperty("minecraft_version", FALLBACK_MC_VERSION);
+                buildFileVersion = p.getProperty("build_file_version", FALLBACK_BUILD_FILE_VERSION);
+            }
         } catch (Exception e) {
             LOG.warn("Failed to load offline versions properties", e);
         }
 
         File mcreatorGradle = new File(workspaceDir, "mcreator.gradle");
         if (mcreatorGradle.exists()) {
-             String content = FileIO.readFileToString(mcreatorGradle);
-             if (!content.contains("maven { url 'https://maven.fabricmc.net/' }")) {
-                 String repos = "\nrepositories {\n" +
-                                "    maven { url 'https://maven.fabricmc.net/' }\n" +
-                                "    mavenCentral()\n" +
-                                "    maven { url 'https://libraries.minecraft.net/' }\n" +
-                                "}\n";
-                 content += repos;
-                 FileIO.writeStringToFile(content, mcreatorGradle);
-             }
+            String content = FileIO.readFileToString(mcreatorGradle);
+            if (!content.contains("maven { url 'https://maven.fabricmc.net/' }")) {
+                String repos = "\nrepositories {\n" +
+                        "    maven { url 'https://maven.fabricmc.net/' }\n" +
+                        "    mavenCentral()\n" +
+                        "    maven { url 'https://libraries.minecraft.net/' }\n" +
+                        "}\n";
+                content += repos;
+                FileIO.writeStringToFile(content, mcreatorGradle);
+            }
         }
 
         File buildGradle = new File(workspaceDir, "build.gradle");
         if (buildGradle.exists()) {
             String content = FileIO.readFileToString(buildGradle);
 
-            // NOTE: MCreator Fabric generator often puts version in gradle.properties or directly in build.gradle.
-
-            // Let's handle gradle.properties first
             File gradleProps = new File(workspaceDir, "gradle.properties");
             if (gradleProps.exists()) {
                 String props = FileIO.readFileToString(gradleProps);
                 props = props.replaceAll("minecraft_version=.*", "minecraft_version=" + mcVersion);
-                // Assume yarn matches mc version + build.1 usually
                 props = props.replaceAll("yarn_mappings=.*", "yarn_mappings=" + mcVersion + "+build.1");
-                props = props.replaceAll("loader_version=.*", "loader_version=" + "0.15.11"); // Still hardcoded stable loader for now
-                props = props.replaceAll("fabric_version=.*", "fabric_version=" + buildFileVersion); // API version
+                props = props.replaceAll("loader_version=.*", "loader_version=" + "0.15.11");
+                props = props.replaceAll("fabric_version=.*", "fabric_version=" + buildFileVersion);
+
+                if (!props.contains("org.gradle.caching=")) {
+                    props += "\norg.gradle.caching=true";
+                    props += "\norg.gradle.parallel=true";
+                    // CRITICAL: Limit user RAM usage
+                    props += "\norg.gradle.jvmargs=-Xmx1024m -XX:+UseSerialGC";
+                }
+
                 FileIO.writeStringToFile(props, gradleProps);
             }
 
-            // If the version is directly in build.gradle
             content = content.replaceAll("com\\.mojang:minecraft:[0-9\\.]+", "com.mojang:minecraft:" + mcVersion);
-            content = content.replaceAll("net\\.fabricmc:fabric-loader:[0-9\\.]+", "net.fabricmc:fabric-loader:0.15.11");
+            content = content.replaceAll("net\\.fabricmc:fabric-loader:[0-9\\.]+",
+                    "net.fabricmc:fabric-loader:0.15.11");
+            content = content.replaceAll("net\\.fabricmc:yarn:[0-9\\.+]+:v2",
+                    "net.fabricmc:yarn:" + mcVersion + "+build.1:v2");
 
-            // mappings "net.fabricmc:yarn:..."
-            content = content.replaceAll("net\\.fabricmc:yarn:[0-9\\.+]+:v2", "net.fabricmc:yarn:" + mcVersion + "+build.1:v2");
+            if (content.contains("accessWidenerPath")) {
+                content = content.replaceAll("file\\(\"src/main/resources/META-INF/[^\"]+\\.accesswidener\"\\)",
+                        "file(\"src/main/resources/META-INF/common.accesswidener\")");
+            }
+
+            if (content.contains("defaultRefmapName")) {
+                content = content.replaceAll("defaultRefmapName\\s*=.*", "defaultRefmapName = \"mixins.refmap.json\"");
+            }
+
+            // CRITICAL: Force output jar name to match cache, enabling cache hits for
+            // remapping
+            if (!content.contains("base.archivesName =")) {
+                content += "\nbase.archivesName = 'offline-mod'\n";
+            } else {
+                content = content.replaceAll("base.archivesName\\s*=.*", "base.archivesName = 'offline-mod'");
+            }
 
             FileIO.writeStringToFile(content, buildGradle);
         }
 
-        // Restore cached Eclipse files if available to skip initial sync
+        File metaInf = new File(workspaceDir, "src/main/resources/META-INF");
+        if (metaInf.exists() && metaInf.isDirectory()) {
+            File[] awFiles = metaInf
+                    .listFiles((dir, name) -> name.endsWith(".accesswidener") && !name.equals("common.accesswidener"));
+            if (awFiles != null) {
+                for (File aw : awFiles) {
+                    try {
+                        if (aw.exists()) {
+                            aw.delete();
+                        }
+                        File commonAw = new File(metaInf, "common.accesswidener");
+                        FileIO.writeStringToFile(COMMON_AW_CONTENT, commonAw);
+                        LOG.info("Overwrote " + aw.getName()
+                                + " and created common.accesswidener to match offline cache input.");
+                    } catch (Exception e) {
+                        LOG.warn("Failed to stabilize access widener " + aw.getName(), e);
+                    }
+                }
+            }
+        } else {
+            try {
+                File commonAw = new File(metaInf, "common.accesswidener");
+                if (!commonAw.exists()) {
+                    FileIO.writeStringToFile(COMMON_AW_CONTENT, commonAw);
+                }
+            } catch (Exception e) {
+                LOG.warn("Failed to create fallback common.accesswidener", e);
+            }
+        }
+
         File cachedProjectFiles = new File(getOfflineCacheDir(), "cached_project_files");
         if (cachedProjectFiles.exists()) {
             LOG.info("Restoring cached Eclipse files to accelerate workspace setup...");
@@ -447,12 +604,30 @@ public class OfflineCacheManager {
                 File dotClasspath = new File(cachedProjectFiles, ".classpath");
                 File dotSettings = new File(cachedProjectFiles, ".settings");
 
-                if (dotProject.exists()) FileIO.copyFile(dotProject, new File(workspaceDir, ".project"));
-                if (dotClasspath.exists()) FileIO.copyFile(dotClasspath, new File(workspaceDir, ".classpath"));
-                if (dotSettings.exists()) FileIO.copyDirectory(dotSettings, new File(workspaceDir, ".settings"));
+                if (dotProject.exists())
+                    FileIO.copyFile(dotProject, new File(workspaceDir, ".project"));
+                if (dotClasspath.exists())
+                    FileIO.copyFile(dotClasspath, new File(workspaceDir, ".classpath"));
+                if (dotSettings.exists())
+                    FileIO.copyDirectory(dotSettings, new File(workspaceDir, ".settings"));
             } catch (Exception e) {
                 LOG.warn("Failed to restore cached Eclipse files", e);
             }
         }
+
+        File cachedBuildDir = new File(getOfflineCacheDir(), "cached_build");
+        if (cachedBuildDir.exists() && cachedBuildDir.isDirectory()) {
+            LOG.info("Restoring cached Gradle 'build' directory (pre-remapped sources)...");
+            try {
+                File targetBuildDir = new File(workspaceDir, "build");
+                if (!targetBuildDir.exists())
+                    targetBuildDir.mkdirs();
+                FileIO.copyDirectory(cachedBuildDir, targetBuildDir);
+                LOG.info("Restored 'build' directory.");
+            } catch (Exception e) {
+                LOG.warn("Failed to restore cached build directory", e);
+            }
+        }
     }
+
 }
