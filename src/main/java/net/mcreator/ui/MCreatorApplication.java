@@ -38,7 +38,7 @@ import net.mcreator.plugin.events.PreGeneratorsLoadingEvent;
 import net.mcreator.plugin.modapis.ModAPIManager;
 import net.mcreator.preferences.PreferencesManager;
 import net.mcreator.ui.action.impl.AboutAction;
-import net.mcreator.ui.component.util.DiscordClient;
+
 import net.mcreator.ui.component.util.ThreadUtil;
 import net.mcreator.ui.dialogs.preferences.PreferencesDialog;
 import net.mcreator.ui.help.HelpLoader;
@@ -82,7 +82,7 @@ public final class MCreatorApplication {
 	private WorkspaceSelector workspaceSelector;
 	private DeviceInfo deviceInfo;
 	private GoogleAnalytics analytics;
-	private DiscordClient discordClient;
+
 	private TaskbarIntegration taskbarIntegration;
 
 	private MCreatorApplication(List<String> launchArguments) {
@@ -189,11 +189,6 @@ public final class MCreatorApplication {
 
 			analytics = new GoogleAnalytics(deviceInfo);
 			analytics.trackPage(AnalyticsConstants.PAGE_LAUNCH);
-
-			discordClient = new DiscordClient();
-
-			// Do not externalize this text
-			discordClient.updatePresence("Just opened", "Version " + Launcher.version.getMajorString());
 
 			splashScreen.setProgress(100, L10N.t("splash.loading_windows"));
 
@@ -381,8 +376,6 @@ public final class MCreatorApplication {
 		PreferencesManager.savePreferences(); // store any potential preferences changes
 		analytics.trackPageSync(AnalyticsConstants.PAGE_CLOSE); // track app close in sync mode
 
-		discordClient.close(); // close discord client
-
 		// we dispose all windows and exit fx platform
 		try {
 			LOG.debug("Stopping AWT and FX threads");
@@ -424,10 +417,6 @@ public final class MCreatorApplication {
 
 	public List<MCreator> getOpenMCreators() {
 		return openMCreators;
-	}
-
-	public DiscordClient getDiscordClient() {
-		return discordClient;
 	}
 
 	public TaskbarIntegration getTaskbarIntegration() {

@@ -132,7 +132,7 @@ dependencies {
     implementation("com.fifesoft:languagesupport:3.4.0") {
         dep -> dep.exclude group: 'org.mozilla', module: 'rhino'
     }
-    implementation "net.java.dev.jna:jna:5.18.1" // needed by discord-rpc.jar
+
 
     implementation "com.github.weisj:jsvg:2.0.0"
     implementation "me.friwi:jcefmaven:132.3.1"

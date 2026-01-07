@@ -40,8 +40,7 @@ public class SocialButtons extends JPanel {
 		add(new JEmptyBox(4, 4));
 		add(createButton("fb", "https://www.facebook.com/PyloDEV"));
 		add(new JEmptyBox(4, 4));
-		add(createButton("ds", "https://discord.gg/sBRCQPp5ez"));
-		add(new JEmptyBox(4, 4));
+
 		add(createButton("ig", "https://www.instagram.com/pylocompany/"));
 		setOpaque(false);
 	}
@@ -50,7 +49,8 @@ public class SocialButtons extends JPanel {
 		JLabel label = new JLabel(UIRES.SVG.getBuiltIn("social." + icon, 16, 18));
 		label.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		label.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent mouseEvent) {
+			@Override
+			public void mouseClicked(MouseEvent mouseEvent) {
 				DesktopUtils.browseSafe(url);
 			}
 		});

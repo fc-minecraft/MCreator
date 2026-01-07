@@ -40,7 +40,6 @@ public class UISection extends PreferencesSection {
 	public final BooleanEntry expandSectionsByDefault;
 	public final BooleanEntry autoReloadTabs;
 	public final BooleanEntry remindOfUnsavedChanges;
-	public final BooleanEntry discordRichPresenceEnable;
 
 	public UISection(String preferencesIdentifier) {
 		super(preferencesIdentifier);
@@ -54,10 +53,11 @@ public class UISection extends PreferencesSection {
 		expandSectionsByDefault = addEntry(new BooleanEntry("expandSectionsByDefault", false));
 		autoReloadTabs = addEntry(new BooleanEntry("autoReloadTabs", true));
 		remindOfUnsavedChanges = addEntry(new BooleanEntry("remindOfUnsavedChanges", false));
-		discordRichPresenceEnable = addEntry(new BooleanEntry("discordRichPresenceEnable", false));
+
 	}
 
-	@Override public String getSectionKey() {
+	@Override
+	public String getSectionKey() {
 		return "ui";
 	}
 

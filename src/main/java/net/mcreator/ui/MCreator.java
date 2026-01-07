@@ -55,7 +55,6 @@ import java.awt.event.*;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 public abstract class MCreator extends MCreatorFrame {
 
@@ -72,7 +71,8 @@ public abstract class MCreator extends MCreatorFrame {
 	private final MainMenuBar menuBar;
 	private final MainToolBar toolBar;
 
-	@Nullable private final JSplitPane splitPane;
+	@Nullable
+	private final JSplitPane splitPane;
 
 	private final DebugPanel debugPanel;
 
@@ -110,7 +110,8 @@ public abstract class MCreator extends MCreatorFrame {
 		setTitle(WindowTitleHelper.getWindowTitle(this));
 
 		addWindowListener(new WindowAdapter() {
-			@Override public void windowClosing(WindowEvent arg0) {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
 				closeThisMCreator(false);
 			}
 		});
@@ -136,18 +137,19 @@ public abstract class MCreator extends MCreatorFrame {
 		});
 
 		consoleTab = new MCreatorTabs.Tab(L10N.t("tab.console") + " ", gradleConsole, "Console", true, false) {
-			@Override public void paintComponent(Graphics g) {
+			@Override
+			public void paintComponent(Graphics g) {
 				super.paintComponent(g);
 				switch (gradleConsole.getStatus()) {
-				case GradleConsole.READY:
-					g.setColor(Theme.current().getForegroundColor());
-					break;
-				case GradleConsole.RUNNING:
-					g.setColor(new Color(158, 247, 89));
-					break;
-				case GradleConsole.ERROR:
-					g.setColor(new Color(0xFF5956));
-					break;
+					case GradleConsole.READY:
+						g.setColor(Theme.current().getForegroundColor());
+						break;
+					case GradleConsole.RUNNING:
+						g.setColor(new Color(158, 247, 89));
+						break;
+					case GradleConsole.ERROR:
+						g.setColor(new Color(0xFF5956));
+						break;
 				}
 				if (gradleConsole.isGradleSetupTaskRunning())
 					g.setColor(new Color(106, 247, 244));
@@ -155,7 +157,8 @@ public abstract class MCreator extends MCreatorFrame {
 			}
 		};
 		consoleTab.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
 					actionRegistry.buildWorkspace.doAction();
 			}
@@ -202,7 +205,8 @@ public abstract class MCreator extends MCreatorFrame {
 		add("North", toolBar);
 
 		addWindowListener(new WindowAdapter() {
-			@Override public void windowOpened(WindowEvent e) {
+			@Override
+			public void windowOpened(WindowEvent e) {
 				super.windowOpened(e);
 				// Finalize MCreator initialization when the window is fully opened
 				initializeMCreator();
@@ -239,7 +243,8 @@ public abstract class MCreator extends MCreatorFrame {
 				&& PreferencesManager.PREFERENCES.backups.backupOnVersionSwitch.get()) {
 			ShareableZIPManager.exportZIP(L10N.t("dialog.workspace.export_backup"),
 					new File(workspace.getFolderManager().getWorkspaceCacheDir(),
-							"FullBackup" + workspace.getMCreatorVersion() + ".zip"), this, true);
+							"FullBackup" + workspace.getMCreatorVersion() + ".zip"),
+					this, true);
 		}
 
 		// if we need to set up the workspace, we do so
@@ -249,8 +254,8 @@ public abstract class MCreator extends MCreatorFrame {
 							&& !Launcher.version.isDevelopment());
 		}
 
-		if (workspace.getMCreatorVersion()
-				< Launcher.version.versionlong) { // if this is the case, update the workspace files
+		if (workspace.getMCreatorVersion() < Launcher.version.versionlong) { // if this is the case, update the
+																				// workspace files
 			RegenerateCodeAction.regenerateCode(this, true, true);
 			workspace.setMCreatorVersion(Launcher.version.versionlong);
 			workspace.getFileManager().saveWorkspaceDirectlyAndWait();
@@ -258,7 +263,8 @@ public abstract class MCreator extends MCreatorFrame {
 			RegenerateCodeAction.regenerateCode(this, true, true);
 		}
 
-		// it is not safe to do user operations on workspace while it is being preloaded, so we lock the UI
+		// it is not safe to do user operations on workspace while it is being
+		// preloaded, so we lock the UI
 		setGlassPane(getPreloaderPane());
 		getGlassPane().setVisible(true);
 
@@ -284,7 +290,8 @@ public abstract class MCreator extends MCreatorFrame {
 	}
 
 	/**
-	 * Called every time generator is switched. Also called when MCreator is loaded for the first time.
+	 * Called every time generator is switched. Also called when MCreator is loaded
+	 * for the first time.
 	 */
 	public void workspaceGeneratorSwitched() {
 	}
@@ -321,7 +328,8 @@ public abstract class MCreator extends MCreatorFrame {
 
 			workspace.close();
 
-			try { // in case the window was already disposed by some other source to prevent crashes here
+			try { // in case the window was already disposed by some other source to prevent
+					// crashes here
 				dispose(); // close the window
 			} catch (Exception ignored) {
 			}
@@ -329,7 +337,8 @@ public abstract class MCreator extends MCreatorFrame {
 			application.getOpenMCreators().remove(this);
 
 			if (application.getOpenMCreators()
-					.isEmpty()) { // no MCreator windows left, close the app, or return to project selector if selected
+					.isEmpty()) { // no MCreator windows left, close the app, or return to project selector if
+									// selected
 				if (returnToProjectSelector)
 					application.showWorkspaceSelector();
 				else
@@ -341,23 +350,14 @@ public abstract class MCreator extends MCreatorFrame {
 		return false;
 	}
 
-	@Override public void setTitle(String title) {
+	@Override
+	public void setTitle(String title) {
 		super.setTitle(title);
 
 		if (application != null) {
-			String tabAddition = "";
-
-			if (mcreatorTabs.getCurrentTab() != null) {
-				tabAddition = " - " + mcreatorTabs.getCurrentTab().getText();
-			}
 
 			// Do not externalize this text
-			application.getDiscordClient()
-					.updatePresence("Working on " + workspace.getWorkspaceSettings().getModName() + tabAddition,
-							Launcher.version.getMajorString() + " for " + workspace.getGenerator()
-									.getGeneratorMinecraftVersion(),
-							"type-" + workspace.getGeneratorConfiguration().getGeneratorFlavor().name()
-									.toLowerCase(Locale.ENGLISH));
+
 		}
 	}
 
