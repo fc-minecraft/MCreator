@@ -23,14 +23,63 @@ import com.sun.management.OperatingSystemMXBean;
 import net.mcreator.preferences.PreferencesSection;
 import net.mcreator.preferences.entries.BooleanEntry;
 import net.mcreator.preferences.entries.IntegerEntry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.management.ManagementFactory;
 
 public class GradleSection extends PreferencesSection {
 
-	public static final int MAX_RAM =
-			(int) (((OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean()).getTotalMemorySize()
-					/ 1048576) - 1024;
+	private static final Logger LOG = LogManager.getLogger(GradleSection.class);
+
+	// Access to operating system memory statistics (JDK 14+ compatible interface)
+	private static final OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory
+			.getOperatingSystemMXBean();
+
+	/**
+	 * Absolute maximum RAM available for the slider in preferences.
+	 * Calculated based on TOTAL system memory.
+	 * Logic: Total RAM - 1024MB (Reserving absolute minimum 1GB for OS stability).
+	 */
+	public static final int MAX_RAM = (int) (osBean.getTotalMemorySize() / 1048576) - 1024;
+
+	/**
+	 * Calculates a smart default RAM allocation.
+	 * Logic:
+	 * 1. If Low/Mid-end PC: Be careful, look at FREE memory.
+	 * 2. If High-end PC (>12GB Total): Be aggressive, force at least 3GB, let OS
+	 * handle swapping.
+	 */
+	private static int getSmartDefaultRam() {
+		int totalRam = (int) (osBean.getTotalMemorySize() / 1048576);
+		int freeRam = (int) (osBean.getFreeMemorySize() / 1048576);
+
+		// Base calculation: Free RAM - 1.5GB buffer
+		int targetRam = freeRam - 1536;
+
+		LOG.info("Smart RAM Calc: Total: " + totalRam + "MB, Free: " + freeRam + "MB.");
+
+		// --- POWER USER OVERRIDE ---
+		// If the user has more than 12GB of TOTAL RAM, we assume the OS can handle
+		// swapping.
+		// We force a minimum of 3072MB (3GB) even if free RAM is currently low.
+		if (totalRam > 12000) {
+			if (targetRam < 3072) {
+				LOG.info("High-Spec PC detected (>12GB). Overriding safety buffer. Forcing minimum 3GB.");
+				targetRam = 3072;
+			}
+		}
+
+		// Final Constraints
+		if (targetRam > 4096)
+			targetRam = 4096; // Cap default at 4GB
+		if (targetRam < 1024)
+			targetRam = 1024; // Absolute floor 1GB
+
+		LOG.info("Smart RAM Decision: Setting default Xmx to: " + targetRam + "MB.");
+
+		return targetRam;
+	}
 
 	public final BooleanEntry buildOnSave;
 	public final BooleanEntry passLangToMinecraft;
@@ -44,11 +93,15 @@ public class GradleSection extends PreferencesSection {
 		buildOnSave = addEntry(new BooleanEntry("buildOnSave", false));
 		passLangToMinecraft = addEntry(new BooleanEntry("passLangToMinecraft", true));
 		enablePerformanceMonitor = addEntry(new BooleanEntry("enablePerformanceMonitor", false));
-		xmx = addEntry(new IntegerEntry("Xmx", Math.min(1536, MAX_RAM), 128, MAX_RAM));
+
+		// Initialize Xmx with the smart calculated default.
+		xmx = addEntry(new IntegerEntry("Xmx", Math.min(getSmartDefaultRam(), MAX_RAM), 128, MAX_RAM));
+
 		offline = addEntry(new BooleanEntry("offline", false));
 	}
 
-	@Override public String getSectionKey() {
+	@Override
+	public String getSectionKey() {
 		return "gradle";
 	}
 
