@@ -23,6 +23,7 @@ import net.mcreator.minecraft.DataListEntry;
 import net.mcreator.minecraft.MCItem;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.init.BlockItemIcons;
+import net.mcreator.ui.init.L10N;
 import net.mcreator.util.image.ImageUtils;
 import net.mcreator.workspace.Workspace;
 
@@ -39,8 +40,9 @@ public class DataListSelectorDialog extends ListSelectorDialog<DataListEntry> {
 		list.setCellRenderer(new DataListCellRenderer());
 	}
 
-	@Override Predicate<DataListEntry> getFilter(String term) {
-		return e -> e.getReadableName().toLowerCase(Locale.ENGLISH).contains(term.toLowerCase(Locale.ENGLISH));
+	@Override
+	Predicate<DataListEntry> getFilter(String term) {
+		return e -> L10N.t(e.getReadableName()).toLowerCase(Locale.ENGLISH).contains(term.toLowerCase(Locale.ENGLISH));
 	}
 
 	public static DataListEntry openSelectorDialog(MCreator mcreator,
@@ -68,11 +70,12 @@ public class DataListSelectorDialog extends ListSelectorDialog<DataListEntry> {
 				boolean cellHasFocus) {
 			var label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 			DataListEntry entry = (DataListEntry) value;
-			label.setText(entry.getReadableName());
+			label.setText(L10N.t(entry.getReadableName()));
 			if (value instanceof DataListEntry.Custom custom) {
 				setIcon(new ImageIcon(ImageUtils.resizeAA(
 						MCItem.getBlockIconBasedOnName(custom.getModElement().getWorkspace(), custom.getName())
-								.getImage(), 18)));
+								.getImage(),
+						18)));
 			} else if (entry.getTexture() != null) {
 				setIcon(new ImageIcon(
 						ImageUtils.resizeAA(BlockItemIcons.getIconForItem(entry.getTexture()).getImage(), 18)));

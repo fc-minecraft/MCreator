@@ -26,6 +26,8 @@
 
 package ${package}.init;
 
+import java.util.function.Function;
+
 <#assign hasTintedBlocks = false>
 <#list blocks as block>
 	<#if block.getModElement().getTypeString() == "block">

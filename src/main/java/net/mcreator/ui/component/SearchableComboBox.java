@@ -20,6 +20,7 @@ package net.mcreator.ui.component;
 
 import net.mcreator.minecraft.DataListEntry;
 import net.mcreator.ui.init.UIRES;
+import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.laf.themes.Theme;
 import net.mcreator.ui.validation.component.VComboBox;
 
@@ -62,24 +63,28 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 		addKeyListener(this);
 		addFocusListener(this);
 		addPopupMenuListener(new PopupMenuListener() {
-			@Override public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+			@Override
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 				dropDownVisible = true;
 				clearSearch();
 			}
 
-			@Override public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+			@Override
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
 				dropDownVisible = false;
 				clearSearch();
 			}
 
-			@Override public void popupMenuCanceled(PopupMenuEvent e) {
+			@Override
+			public void popupMenuCanceled(PopupMenuEvent e) {
 				dropDownVisible = false;
 				clearSearch();
 			}
 		});
 	}
 
-	@Override public void paint(Graphics g) {
+	@Override
+	public void paint(Graphics g) {
 		super.paint(g);
 
 		if (canSearch()) {
@@ -101,12 +106,14 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 		return dropDownVisible && entries.size() > 10;
 	}
 
-	@Override public void addItem(T item) {
+	@Override
+	public void addItem(T item) {
 		super.addItem(item);
 		entries.add(item);
 	}
 
-	@Override public void removeAllItems() {
+	@Override
+	public void removeAllItems() {
 		super.removeAllItems();
 		this.entries = new ArrayList<>();
 	}
@@ -127,7 +134,7 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 				T element = model.getElementAt(i);
 				String elementAsString;
 				if (element instanceof DataListEntry dle) {
-					elementAsString = dle.getReadableName();
+					elementAsString = L10N.t(dle.getReadableName());
 				} else {
 					elementAsString = element.toString();
 				}
@@ -148,18 +155,22 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 		comboFilter();
 	}
 
-	@Override public void focusGained(FocusEvent e) {
+	@Override
+	public void focusGained(FocusEvent e) {
 		clearSearch();
 	}
 
-	@Override public void focusLost(FocusEvent e) {
+	@Override
+	public void focusLost(FocusEvent e) {
 		clearSearch();
 	}
 
-	@Override public void keyTyped(KeyEvent e) {
+	@Override
+	public void keyTyped(KeyEvent e) {
 	}
 
-	@Override public void keyPressed(KeyEvent e) {
+	@Override
+	public void keyPressed(KeyEvent e) {
 		if (canSearch()) {
 			if (Character.isLetterOrDigit(e.getKeyChar()) || e.getKeyChar() == '_' || e.getKeyChar() == '-'
 					|| e.getKeyChar() == ':' || e.getKeyChar() == ' ') {
@@ -183,7 +194,8 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 		}
 	}
 
-	@Override public void keyReleased(KeyEvent e) {
+	@Override
+	public void keyReleased(KeyEvent e) {
 	}
 
 }

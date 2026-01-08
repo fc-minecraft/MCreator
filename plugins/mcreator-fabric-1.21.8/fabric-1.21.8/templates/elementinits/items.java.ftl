@@ -27,6 +27,8 @@
 
 package ${package}.init;
 
+import java.util.function.Function;
+
 <#assign hasBlocks = false>
 <#assign hasDoubleBlocks = false>
 <#assign chunks = items?chunk(2500)>

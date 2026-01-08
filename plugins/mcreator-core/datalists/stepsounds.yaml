@@ -1,242 +1,363 @@
 - GROUND:
   texture: DIRT
+  readable_name: datalist.stepsound.ground
 - EMPTY:
   texture: AIR
+  readable_name: datalist.stepsound.empty
 - WOOD:
   texture: PLANKS#0
+  readable_name: datalist.stepsound.wood
 - PLANT:
   texture: RED_FLOWER#0
+  readable_name: datalist.stepsound.plant
 - LILY_PADS:
   texture: WATERLILY
+  readable_name: datalist.stepsound.lily_pads
 - STONE:
   texture: STONE
+  readable_name: datalist.stepsound.stone
 - METAL:
   texture: IRON_BLOCK
+  readable_name: datalist.stepsound.metal
 - GLASS:
   texture: GLASS
+  readable_name: datalist.stepsound.glass
 - CLOTH:
   texture: WOOL#0
+  readable_name: datalist.stepsound.cloth
 - SAND:
   texture: SAND#0
+  readable_name: datalist.stepsound.sand
 - SNOW:
   texture: SNOW
+  readable_name: datalist.stepsound.snow
 - LADDER:
   texture: LADDER
+  readable_name: datalist.stepsound.ladder
 - ANVIL:
   texture: ANVIL
+  readable_name: datalist.stepsound.anvil
 - SLIME:
   texture: SLIME_BLOCK
+  readable_name: datalist.stepsound.slime
 - WET_GRASS:
   texture: GRASS
+  readable_name: datalist.stepsound.wet_grass
 - CORAL:
   texture: BUBBLE_CORAL_FAN
+  readable_name: datalist.stepsound.coral
 - BAMBOO:
   texture: BAMBOO
+  readable_name: datalist.stepsound.bamboo
 - BAMBOO_SAPLING:
   texture: BAMBOO_SAPLING
+  readable_name: datalist.stepsound.bamboo_sapling
 - SCAFFOLDING:
   texture: SCAFFOLDING
+  readable_name: datalist.stepsound.scaffolding
 - SWEET_BERRY_BUSH:
   texture: SWEET_BERRIES
+  readable_name: datalist.stepsound.sweet_berry_bush
 - CROP:
   texture: WHEAT
+  readable_name: datalist.stepsound.crop
 - STEM:
   texture: MELON_STEM
+  readable_name: datalist.stepsound.stem
 - VINE:
   texture: VINE
+  readable_name: datalist.stepsound.vine
 - NETHER_WART:
   texture: NETHER_WART
+  readable_name: datalist.stepsound.nether_wart
 - LANTERN:
   texture: LANTERN
+  readable_name: datalist.stepsound.lantern
 - HONEY:
   texture: HONEY_BLOCK
+  readable_name: datalist.stepsound.honey
 - HYPHAE:
   texture: CRIMSON_STEM
+  readable_name: datalist.stepsound.hyphae
 - NYLIUM:
   texture: CRIMSON_NYLIUM
+  readable_name: datalist.stepsound.nylium
 - FUNGUS:
   texture: CRIMSON_FUNGUS
+  readable_name: datalist.stepsound.fungus
 - ROOT:
   texture: WARPED_ROOTS
+  readable_name: datalist.stepsound.root
 - SHROOMLIGHT:
   texture: SHROOMLIGHT
+  readable_name: datalist.stepsound.shroomlight
 - NETHER_VINE:
   texture: WEEPING_VINES
+  readable_name: datalist.stepsound.nether_vine
 - NETHER_VINE_LOWER_PITCH:
   texture: WEEPING_VINES
+  readable_name: datalist.stepsound.nether_vine_lower_pitch
 - SOUL_SAND:
   texture: SOUL_SAND
+  readable_name: datalist.stepsound.soul_sand
 - SOUL_SOIL:
   texture: SOUL_SOIL
+  readable_name: datalist.stepsound.soul_soil
 - BASALT:
   texture: BASALT
+  readable_name: datalist.stepsound.basalt
 - WART:
   texture: NETHER_WART_BLOCK
+  readable_name: datalist.stepsound.wart
 - NETHERRACK:
   texture: NETHERRACK
+  readable_name: datalist.stepsound.netherrack
 - NETHER_BRICK:
   texture: NETHER_BRICK
+  readable_name: datalist.stepsound.nether_brick
 - NETHER_SPROUT:
   texture: NETHER_SPROUTS
+  readable_name: datalist.stepsound.nether_sprout
 - NETHER_ORE:
   texture: NETHER_GOLD_ORE
+  readable_name: datalist.stepsound.nether_ore
 - BONE:
   texture: BONE_BLOCK
+  readable_name: datalist.stepsound.bone
 - NETHERITE:
   texture: NETHERITE_BLOCK
+  readable_name: datalist.stepsound.netherite
 - ANCIENT_DEBRIS:
   texture: ANCIENT_DEBRIS
+  readable_name: datalist.stepsound.ancient_debris
 - LODESTONE:
   texture: LODESTONE
+  readable_name: datalist.stepsound.lodestone
 - CHAIN:
   texture: CHAIN
+  readable_name: datalist.stepsound.chain
 - NETHER_GOLD:
   texture: NETHER_GOLD_ORE
+  readable_name: datalist.stepsound.nether_gold
 - GILDED_BLACKSTONE:
   texture: GILDED_BLACKSTONE
+  readable_name: datalist.stepsound.gilded_blackstone
 - AMETHYST_BLOCK:
   texture: AMETHYST_BLOCK
+  readable_name: datalist.stepsound.amethyst_block
 - AMETHYST_CLUSTER:
   texture: AMETHYST_CLUSTER
+  readable_name: datalist.stepsound.amethyst_cluster
 - AZALEA:
   texture: AZALEA
+  readable_name: datalist.stepsound.azalea
 - AZALEA_LEAVES:
   texture: AZALEA_LEAVES
+  readable_name: datalist.stepsound.azalea_leaves
 - BIG_DRIPLEAF:
   texture: BIG_DRIPLEAF
+  readable_name: datalist.stepsound.big_dripleaf
 - CANDLE:
   texture: CANDLE
+  readable_name: datalist.stepsound.candle
 - CALCITE:
   texture: CALCITE
+  readable_name: datalist.stepsound.calcite
 - CAVE_VINES:
   texture: CAVE_VINES
+  readable_name: datalist.stepsound.cave_vines
 - COPPER:
   texture: COPPER_BLOCK
+  readable_name: datalist.stepsound.copper
 - COPPER_BULB:
   texture: COPPER_BULB
+  readable_name: datalist.stepsound.copper_bulb
 - COPPER_GRATE:
   texture: COPPER_GRATE
+  readable_name: datalist.stepsound.copper_grate
 - DEEPSLATE:
   texture: DEEPSLATE
+  readable_name: datalist.stepsound.deepslate
 - DEEPSLATE_BRICKS:
   texture: DEEPSLATE_BRICKS
+  readable_name: datalist.stepsound.deepslate_bricks
 - DEEPSLATE_TILES:
   texture: DEEPSLATE_TILES
+  readable_name: datalist.stepsound.deepslate_tiles
 - DRIPSTONE_BLOCK:
   texture: DRIPSTONE_BLOCK
+  readable_name: datalist.stepsound.dripstone_block
 - FLOWERING_AZALEA:
   texture: FLOWERING_AZALEA
+  readable_name: datalist.stepsound.flowering_azalea
 - GLOW_LICHEN:
   texture: GLOW_LICHEN
+  readable_name: datalist.stepsound.glow_lichen
 - HANGING_ROOTS:
   texture: HANGING_ROOTS
+  readable_name: datalist.stepsound.hanging_roots
 - LARGE_AMETHYST_BUD:
   texture: LARGE_AMETHYST_BUD
+  readable_name: datalist.stepsound.large_amethyst_bud
 - MEDIUM_AMETHYST_BUD:
   texture: MEDIUM_AMETHYST_BUD
+  readable_name: datalist.stepsound.medium_amethyst_bud
 - MOSS_CARPET:
   texture: MOSS_CARPET
+  readable_name: datalist.stepsound.moss_carpet
 - PINK_PETALS:
   texture: PINK_PETALS
+  readable_name: datalist.stepsound.pink_petals
 - LEAF_LITTER:
   texture: LEAF_LITTER
+  readable_name: datalist.stepsound.leaf_litter
 - MOSS_BLOCK:
   texture: MOSS_BLOCK
+  readable_name: datalist.stepsound.moss_block
 - POINTED_DRIPSTONE:
   texture: POINTED_DRIPSTONE
+  readable_name: datalist.stepsound.pointed_dripstone
 - POLISHED_DEEPSLATE:
   texture: POLISHED_DEEPSLATE
+  readable_name: datalist.stepsound.polished_deepslate
 - POLISHED_TUFF:
   texture: POLISHED_TUFF
+  readable_name: datalist.stepsound.polished_tuff
 - POWDER_SNOW:
   texture: POWDER_SNOW
+  readable_name: datalist.stepsound.powder_snow
 - ROOTED_DIRT:
   texture: ROOTED_DIRT
+  readable_name: datalist.stepsound.rooted_dirt
 - SCULK_SENSOR:
   texture: SCULK_SENSOR
+  readable_name: datalist.stepsound.sculk_sensor
 - SCULK_CATALYST:
   texture: SCULK_CATALYST
+  readable_name: datalist.stepsound.sculk_catalyst
 - SCULK:
   texture: SCULK
+  readable_name: datalist.stepsound.sculk
 - SCULK_VEIN:
   texture: SCULK_VEIN
+  readable_name: datalist.stepsound.sculk_vein
 - SCULK_SHRIEKER:
   texture: SCULK_SHRIEKER
+  readable_name: datalist.stepsound.sculk_shrieker
 - SMALL_AMETHYST_BUD:
   texture: SMALL_AMETHYST_BUD
+  readable_name: datalist.stepsound.small_amethyst_bud
 - SMALL_DRIPLEAF:
   texture: SMALL_DRIPLEAF
+  readable_name: datalist.stepsound.small_dripleaf
 - SPORE_BLOSSOM:
   texture: SPORE_BLOSSOM
+  readable_name: datalist.stepsound.spore_blossom
 - CACTUS_FLOWER:
   texture: CACTUS_FLOWER
+  readable_name: datalist.stepsound.cactus_flower
 - TUFF:
   texture: TUFF
+  readable_name: datalist.stepsound.tuff
 - TUFF_BRICKS:
   texture: TUFF_BRICKS
+  readable_name: datalist.stepsound.tuff_bricks
 - FROGLIGHT:
   texture: OCHRE_FROGLIGHT
+  readable_name: datalist.stepsound.froglight
 - FROGSPAWN:
   texture: FROGSPAWN
+  readable_name: datalist.stepsound.frogspawn
 - MANGROVE_ROOTS:
   texture: MANGROVE_ROOTS
+  readable_name: datalist.stepsound.mangrove_roots
 - MUDDY_MANGROVE_ROOTS:
   texture: MUDDY_MANGROVE_ROOTS
+  readable_name: datalist.stepsound.muddy_mangrove_roots
 - MUD:
   texture: MUD
+  readable_name: datalist.stepsound.mud
 - MUD_BRICKS:
   texture: MUD_BRICKS
+  readable_name: datalist.stepsound.mud_bricks
 - PACKED_MUD:
   texture: PACKED_MUD
+  readable_name: datalist.stepsound.packed_mud
 - HANGING_SIGN:
   texture: OAK_HANGING_SIGN
+  readable_name: datalist.stepsound.hanging_sign
 - NETHER_WOOD_HANGING_SIGN:
   texture: CRIMSON_HANGING_SIGN
+  readable_name: datalist.stepsound.nether_wood_hanging_sign
 - BAMBOO_WOOD_HANGING_SIGN:
   texture: BAMBOO_HANGING_SIGN
+  readable_name: datalist.stepsound.bamboo_wood_hanging_sign
 - BAMBOO_WOOD:
   texture: BAMBOO_PLANKS
+  readable_name: datalist.stepsound.bamboo_wood
 - NETHER_WOOD:
   texture: CRIMSON_PLANKS
+  readable_name: datalist.stepsound.nether_wood
 - CHERRY_WOOD:
   texture: CHERRY_PLANKS
+  readable_name: datalist.stepsound.cherry_wood
 - CHERRY_SAPLING:
   texture: CHERRY_SAPLING
+  readable_name: datalist.stepsound.cherry_sapling
 - CHERRY_LEAVES:
   texture: CHERRY_LEAVES
+  readable_name: datalist.stepsound.cherry_leaves
 - CHERRY_WOOD_HANGING_SIGN:
   texture: CHERRY_HANGING_SIGN
+  readable_name: datalist.stepsound.cherry_wood_hanging_sign
 - CHISELED_BOOKSHELF:
   texture: CHISELED_BOOKSHELF
+  readable_name: datalist.stepsound.chiseled_bookshelf
 - SUSPICIOUS_SAND:
   texture: SUSPICIOUS_SAND
+  readable_name: datalist.stepsound.suspicious_sand
 - SUSPICIOUS_GRAVEL:
   texture: SUSPICIOUS_GRAVEL
+  readable_name: datalist.stepsound.suspicious_gravel
 - DECORATED_POT:
   texture: DECORATED_POT
+  readable_name: datalist.stepsound.decorated_pot
 - DECORATED_POT_CRACKED:
   texture: DECORATED_POT
+  readable_name: datalist.stepsound.decorated_pot_cracked
 - TRIAL_SPAWNER:
   texture: TRIAL_SPAWNER
+  readable_name: datalist.stepsound.trial_spawner
 - SPONGE:
   texture: SPONGE#0
+  readable_name: datalist.stepsound.sponge
 - WET_SPONGE:
   texture: SPONGE#1
+  readable_name: datalist.stepsound.wet_sponge
 - VAULT:
   texture: VAULT
+  readable_name: datalist.stepsound.vault
 - CREAKING_HEART:
   texture: CREAKING_HEART
+  readable_name: datalist.stepsound.creaking_heart
 - HEAVY_CORE:
   texture: HEAVY_CORE
+  readable_name: datalist.stepsound.heavy_core
 - COBWEB:
   texture: WEB
+  readable_name: datalist.stepsound.cobweb
 - SPAWNER:
   texture: MOB_SPAWNER
+  readable_name: datalist.stepsound.spawner
 - RESIN:
   texture: RESIN_BLOCK
+  readable_name: datalist.stepsound.resin
 - RESIN_BRICKS:
   texture: RESIN_BRICKS
+  readable_name: datalist.stepsound.resin_bricks
 - IRON:
   texture: IRON_BLOCK
+  readable_name: datalist.stepsound.iron
 - DRIED_GHAST:
   texture: DRIED_GHAST
+  readable_name: datalist.stepsound.dried_ghast

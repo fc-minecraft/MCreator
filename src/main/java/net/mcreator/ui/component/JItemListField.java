@@ -158,7 +158,8 @@ public abstract class JItemListField<T> extends JPanel implements IValidable {
 		});
 
 		elementsList.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON2) {
 					int index = elementsList.locationToIndex(e.getPoint());
 					if (index >= 0)
@@ -194,7 +195,8 @@ public abstract class JItemListField<T> extends JPanel implements IValidable {
 		pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 		pane.setWheelScrollingEnabled(false);
 		pane.addMouseWheelListener(new MouseAdapter() {
-			@Override public void mouseWheelMoved(MouseWheelEvent evt) {
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent evt) {
 				int amount = evt.getScrollAmount();
 				if (evt.getWheelRotation() == 1) {
 					int value = pane.getHorizontalScrollBar().getValue()
@@ -322,7 +324,8 @@ public abstract class JItemListField<T> extends JPanel implements IValidable {
 	protected List<T> getExternalElementsToAdd() {
 		String element = VOptionPane.showInputDialog(mcreator, L10N.t("itemlistfield.addexternal.message"),
 				L10N.t("itemlistfield.addexternal.title"), null, new OptionPaneValidator() {
-					@Override public ValidationResult validate(JComponent component) {
+					@Override
+					public ValidationResult validate(JComponent component) {
 						String text = ((VTextField) component).getText();
 						if (!text.contains(":") || text.startsWith("minecraft:") || text.startsWith("mod:")
 								|| text.startsWith(mcreator.getWorkspaceSettings().getModID() + ":")) {
@@ -341,11 +344,13 @@ public abstract class JItemListField<T> extends JPanel implements IValidable {
 		return List.of();
 	}
 
-	@Nullable protected T fromExternalToElement(String external) {
+	@Nullable
+	protected T fromExternalToElement(String external) {
 		return null;
 	}
 
-	@Override public void setEnabled(boolean enabled) {
+	@Override
+	public void setEnabled(boolean enabled) {
 		add.setEnabled(enabled);
 		addexternal.setEnabled(enabled);
 		remove.setEnabled(enabled);
@@ -403,7 +408,8 @@ public abstract class JItemListField<T> extends JPanel implements IValidable {
 	private static final ImageIcon ERROR_ICON = IconUtils.resize(UIRES.get("18px.remove"), 13, 13);
 	private static final ImageIcon OK_ICON = IconUtils.resize(UIRES.get("18px.ok"), 13, 13);
 
-	@Override public void paint(Graphics g) {
+	@Override
+	public void paint(Graphics g) {
 		super.paint(g);
 
 		if (currentValidationResult != null) {
@@ -422,22 +428,25 @@ public abstract class JItemListField<T> extends JPanel implements IValidable {
 		}
 	}
 
-	@Override public ValidationResult getValidationStatus() {
+	@Override
+	public ValidationResult getValidationStatus() {
 		ValidationResult validationResult = validator == null ? null : validator.validateIfEnabled(this);
 
 		this.currentValidationResult = validationResult;
 
-		//repaint as new validation status might have to be rendered
+		// repaint as new validation status might have to be rendered
 		repaint();
 
 		return validationResult;
 	}
 
-	@Override public void setValidator(Validator validator) {
+	@Override
+	public void setValidator(Validator validator) {
 		this.validator = validator;
 	}
 
-	@Override public Validator getValidator() {
+	@Override
+	public Validator getValidator() {
 		return validator;
 	}
 
@@ -474,7 +483,7 @@ public abstract class JItemListField<T> extends JPanel implements IValidable {
 				Optional<DataListEntry> dataListEntryOpt = mappableElement.getDataListEntry();
 				if (dataListEntryOpt.isPresent()) {
 					DataListEntry dataListEntry = dataListEntryOpt.get();
-					setText(dataListEntry.getReadableName());
+					setText(L10N.t(dataListEntry.getReadableName()));
 					if (dataListEntry.getTexture() != null) {
 						setIcon(IconUtils.resize(BlockItemIcons.getIconForItem(dataListEntry.getTexture()), 18));
 					}

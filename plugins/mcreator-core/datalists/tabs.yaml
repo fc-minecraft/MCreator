@@ -1,33 +1,33 @@
 - BUILDING_BLOCKS:
   texture: BRICK_BLOCK
-  readable_name: Building Blocks
+  readable_name: datalist.tab.building_blocks
 - DECORATIONS:
   texture: GRASS
-  readable_name: Natural Blocks
+  readable_name: datalist.tab.decorations
 - REDSTONE:
   texture: REDSTONE
-  readable_name: Redstone Blocks
+  readable_name: datalist.tab.redstone
 - FOOD:
   texture: GOLDEN_APPLE
-  readable_name: Food & Drinks
+  readable_name: datalist.tab.food
 - TOOLS:
   texture: DIAMOND_PICKAXE
-  readable_name: Tools & Utilities
+  readable_name: datalist.tab.tools
 - COMBAT:
   texture: NETHERITE_SWORD
-  readable_name: Combat
+  readable_name: datalist.tab.combat
 - MATERIALS:
   texture: IRON_INGOT
-  readable_name: Ingredients
+  readable_name: datalist.tab.materials
 - MISC:
   texture: SPAWN_EGG#90
-  readable_name: Spawn Eggs
+  readable_name: datalist.tab.misc
 - TRANSPORTATION: # not ideal name, but kept for backward compatibility with old workspace and instead added readable_name
   texture: SIGN
-  readable_name: Functional Blocks
+  readable_name: datalist.tab.transportation
 - BREWING: # not ideal name, but kept for backward compatibility with old workspace and instead added readable_name
   texture: WOOL#9
-  readable_name: Colored Blocks
+  readable_name: datalist.tab.brewing
 - OP_BLOCKS:
   texture: COMMAND_BLOCK
-  readable_name: Operator Items
+  readable_name: datalist.tab.op_blocks

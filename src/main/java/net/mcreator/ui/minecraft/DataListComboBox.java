@@ -54,7 +54,8 @@ public class DataListComboBox extends SearchableComboBox<DataListEntry> {
 		setRenderer(new CustomRenderer(mcreator));
 	}
 
-	@Override public void addItem(DataListEntry item) {
+	@Override
+	public void addItem(DataListEntry item) {
 		if (item.isSupportedInWorkspace(mcreator.getWorkspace()))
 			super.addItem(item);
 	}
@@ -74,7 +75,9 @@ public class DataListComboBox extends SearchableComboBox<DataListEntry> {
 		super.setSelectedItem(dataListEntry);
 	}
 
-	@Override @Nonnull public DataListEntry getSelectedItem() {
+	@Override
+	@Nonnull
+	public DataListEntry getSelectedItem() {
 		Object superretval = super.getSelectedItem();
 		if (superretval == null)
 			return new DataListEntry.Null();
@@ -106,7 +109,7 @@ public class DataListComboBox extends SearchableComboBox<DataListEntry> {
 				setForeground(list.getForeground());
 			}
 
-			setText(value.getReadableName());
+			setText(L10N.t(value.getReadableName()));
 
 			if (value instanceof DataListEntry.Custom custom) {
 				setIcon(MCItem.getBlockIconBasedOnName(custom.getModElement().getWorkspace(), value.getName()));
