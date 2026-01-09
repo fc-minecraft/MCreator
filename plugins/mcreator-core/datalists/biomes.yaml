@@ -1,130 +1,130 @@
 - ocean:
-  readable_name: "Ocean"
+  readable_name: datalist.biome.ocean
 - plains:
-  readable_name: "Plains"
+  readable_name: datalist.biome.plains
 - desert:
-  readable_name: "Desert"
+  readable_name: datalist.biome.desert
 - mountains:
-  readable_name: "Windswept hills"
+  readable_name: datalist.biome.mountains
 - forest:
-  readable_name: "Forest"
+  readable_name: datalist.biome.forest
 - taiga:
-  readable_name: "Taiga"
+  readable_name: datalist.biome.taiga
 - mangrove_swamp:
-  readable_name: "Mangrove swamp"
+  readable_name: datalist.biome.mangrove_swamp
 - swamp:
-  readable_name: "Swamp"
+  readable_name: datalist.biome.swamp
 - river:
-  readable_name: "River"
+  readable_name: datalist.biome.river
 - nether:
-  readable_name: "Nether wastes"
+  readable_name: datalist.biome.nether
 - the_end:
-  readable_name: "The End"
+  readable_name: datalist.biome.the_end
 - frozen_ocean:
-  readable_name: "Frozen ocean"
+  readable_name: datalist.biome.frozen_ocean
 - frozen_river:
-  readable_name: "Frozen river"
+  readable_name: datalist.biome.frozen_river
 - snowy_tundra:
-  readable_name: "Snowy plains"
+  readable_name: datalist.biome.snowy_tundra
 - mushroom_fields:
-  readable_name: "Mushroom fields"
+  readable_name: datalist.biome.mushroom_fields
 - beaches:
-  readable_name: "Beach"
+  readable_name: datalist.biome.beaches
 - jungle:
-  readable_name: "Jungle"
+  readable_name: datalist.biome.jungle
 - jungle_edge:
-  readable_name: "Sparse jungle"
+  readable_name: datalist.biome.jungle_edge
 - deep_ocean:
-  readable_name: "Deep ocean"
+  readable_name: datalist.biome.deep_ocean
 - stone_beach:
-  readable_name: "Stony shore"
+  readable_name: datalist.biome.stone_beach
 - cold_beach:
-  readable_name: "Snowy beach"
+  readable_name: datalist.biome.cold_beach
 - birch_forest:
-  readable_name: "Birch forest"
+  readable_name: datalist.biome.birch_forest
 - roofed_forest:
-  readable_name: "Dark forest"
+  readable_name: datalist.biome.roofed_forest
 - taiga_cold:
-  readable_name: "Snowy taiga"
+  readable_name: datalist.biome.taiga_cold
 - redwood_taiga:
-  readable_name: "Old growth pine taiga"
+  readable_name: datalist.biome.redwood_taiga
 - extreme_hills_with_trees:
-  readable_name: "Windswept forest"
+  readable_name: datalist.biome.extreme_hills_with_trees
 - savanna:
-  readable_name: "Savanna"
+  readable_name: datalist.biome.savanna
 - savanna_rock:
-  readable_name: "Savanna plateau"
+  readable_name: datalist.biome.savanna_rock
 - badlands:
-  readable_name: "Badlands"
+  readable_name: datalist.biome.badlands
 - wooded_badlands_plateau:
-  readable_name: "Wooded badlands"
+  readable_name: datalist.biome.wooded_badlands_plateau
 - warm_ocean:
-  readable_name: "Warm ocean"
+  readable_name: datalist.biome.warm_ocean
 - lukewarm_ocean:
-  readable_name: "Lukewarm ocean"
+  readable_name: datalist.biome.lukewarm_ocean
 - cold_ocean:
-  readable_name: "Cold ocean"
+  readable_name: datalist.biome.cold_ocean
 - deep_lukewarm_ocean:
-  readable_name: "Deep lukewarm ocean"
+  readable_name: datalist.biome.deep_lukewarm_ocean
 - deep_cold_ocean:
-  readable_name: "Deep cold ocean"
+  readable_name: datalist.biome.deep_cold_ocean
 - deep_frozen_ocean:
-  readable_name: "Deep frozen ocean"
+  readable_name: datalist.biome.deep_frozen_ocean
 - mutated_plains:
-  readable_name: "Sunflower plains"
+  readable_name: datalist.biome.mutated_plains
 - mutated_extreme_hills:
-  readable_name: "Windswept gravelly hills"
+  readable_name: datalist.biome.mutated_extreme_hills
 - mutated_forest:
-  readable_name: "Flower forest"
+  readable_name: datalist.biome.mutated_forest
 - mutated_ice_flats:
-  readable_name: "Ice spikes"
+  readable_name: datalist.biome.mutated_ice_flats
 - mutated_birch_forest:
-  readable_name: "Old growth birch forest"
+  readable_name: datalist.biome.mutated_birch_forest
 - mutated_redwood_taiga:
-  readable_name: "Old growth spruce taiga"
+  readable_name: datalist.biome.mutated_redwood_taiga
 - mutated_savanna:
-  readable_name: "Windswept savanna"
+  readable_name: datalist.biome.mutated_savanna
 - mutated_mesa:
-  readable_name: "Eroded badlands"
+  readable_name: datalist.biome.mutated_mesa
 - bamboo_jungle:
-  readable_name: "Bamboo jungle"
+  readable_name: datalist.biome.bamboo_jungle
 - small_end_islands:
-  readable_name: "Small End islands"
+  readable_name: datalist.biome.small_end_islands
 - end_midlands:
-  readable_name: "End midlands"
+  readable_name: datalist.biome.end_midlands
 - end_highlands:
-  readable_name: "End highlands"
+  readable_name: datalist.biome.end_highlands
 - end_barrens:
-  readable_name: "End barrens"
+  readable_name: datalist.biome.end_barrens
 - void:
-  readable_name: "The void"
+  readable_name: datalist.biome.void
 - soul_sand_valley:
-  readable_name: "Soul sand valley"
+  readable_name: datalist.biome.soul_sand_valley
 - crimson_forest:
-  readable_name: "Crimson forest"
+  readable_name: datalist.biome.crimson_forest
 - warped_forest:
-  readable_name: "Warped forest"
+  readable_name: datalist.biome.warped_forest
 - basalt_deltas:
-  readable_name: "Basalt deltas"
+  readable_name: datalist.biome.basalt_deltas
 - dripstone_caves:
-  readable_name: "Dripstone caves"
+  readable_name: datalist.biome.dripstone_caves
 - lush_caves:
-  readable_name: "Lush caves"
+  readable_name: datalist.biome.lush_caves
 - deep_dark:
-  readable_name: "Deep dark"
+  readable_name: datalist.biome.deep_dark
 - meadow:
-  readable_name: "Meadow"
+  readable_name: datalist.biome.meadow
 - cherry_grove:
-  readable_name: "Cherry grove"
+  readable_name: datalist.biome.cherry_grove
 - grove:
-  readable_name: "Grove"
+  readable_name: datalist.biome.grove
 - snowy_slopes:
-  readable_name: "Snow slopes"
+  readable_name: datalist.biome.snowy_slopes
 - frozen_peaks:
-  readable_name: "Frozen peaks"
+  readable_name: datalist.biome.frozen_peaks
 - jagged_peaks:
-  readable_name: "Jagged peaks"
+  readable_name: datalist.biome.jagged_peaks
 - stony_peaks:
-  readable_name: "Stony peaks"
+  readable_name: datalist.biome.stony_peaks
 - pale_garden:
-  readable_name: "Pale garden"
+  readable_name: datalist.biome.pale_garden

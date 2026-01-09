@@ -35,6 +35,8 @@ import java.awt.event.KeyListener;
 import java.util.*;
 import java.util.List;
 
+import net.mcreator.workspace.resources.Model;
+
 public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, FocusListener {
 
 	private String searchTerm = "";
@@ -62,6 +64,20 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 	private void init() {
 		addKeyListener(this);
 		addFocusListener(this);
+		setRenderer(new DefaultListCellRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+					boolean cellHasFocus) {
+				super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+				if (value instanceof DataListEntry dle) {
+					setText(L10N.t(dle.getReadableName()));
+				} else if (value instanceof Model model && model.getType() == Model.Type.BUILTIN) {
+					setText(L10N.t(
+							"model.builtin." + model.getReadableName().toLowerCase(Locale.ENGLISH).replace(" ", "_")));
+				}
+				return this;
+			}
+		});
 		addPopupMenuListener(new PopupMenuListener() {
 			@Override
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
@@ -81,6 +97,18 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 				clearSearch();
 			}
 		});
+	}
+
+	@Override
+	public void configureEditor(ComboBoxEditor anEditor, Object anItem) {
+		Object itemToDisplay = anItem;
+		if (anItem instanceof DataListEntry dle) {
+			itemToDisplay = L10N.t(dle.getReadableName());
+		} else if (anItem instanceof Model model && model.getType() == Model.Type.BUILTIN) {
+			itemToDisplay = L10N
+					.t("model.builtin." + model.getReadableName().toLowerCase(Locale.ENGLISH).replace(" ", "_"));
+		}
+		super.configureEditor(anEditor, itemToDisplay);
 	}
 
 	@Override
@@ -135,6 +163,9 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 				String elementAsString;
 				if (element instanceof DataListEntry dle) {
 					elementAsString = L10N.t(dle.getReadableName());
+				} else if (element instanceof Model m && m.getType() == Model.Type.BUILTIN) {
+					elementAsString = L10N
+							.t("model.builtin." + m.getReadableName().toLowerCase(Locale.ENGLISH).replace(" ", "_"));
 				} else {
 					elementAsString = element.toString();
 				}

@@ -1,46 +1,69 @@
 - harp:
   texture: DIRT
+  readable_name: datalist.instrument.harp
 - basedrum:
   texture: STONE#0
+  readable_name: datalist.instrument.basedrum
 - snare:
   texture: SAND#0
+  readable_name: datalist.instrument.snare
 - hat:
   texture: GLASS
+  readable_name: datalist.instrument.hat
 - bass:
   texture: LOG#0
+  readable_name: datalist.instrument.bass
 - flute:
   texture: CLAY
+  readable_name: datalist.instrument.flute
 - bell:
   texture: GOLD_BLOCK
+  readable_name: datalist.instrument.bell
 - guitar:
   texture: WOOL#0
+  readable_name: datalist.instrument.guitar
 - chime:
   texture: PACKED_ICE
+  readable_name: datalist.instrument.chime
 - xylophone:
   texture: BONE_BLOCK
+  readable_name: datalist.instrument.xylophone
 - iron_xylophone:
   texture: IRON_BLOCK
+  readable_name: datalist.instrument.iron_xylophone
 - cow_bell:
   texture: SOUL_SAND
+  readable_name: datalist.instrument.cow_bell
 - didgeridoo:
   texture: FULL_PUMPKIN
+  readable_name: datalist.instrument.didgeridoo
 - bit:
   texture: EMERALD_BLOCK
+  readable_name: datalist.instrument.bit
 - banjo:
   texture: HAY_BLOCK
+  readable_name: datalist.instrument.banjo
 - pling:
   texture: GLOWSTONE
+  readable_name: datalist.instrument.pling
 - zombie:
   texture: SKULL#2
+  readable_name: datalist.instrument.zombie
 - skeleton:
   texture: SKULL#0
+  readable_name: datalist.instrument.skeleton
 - creeper:
   texture: SKULL#4
+  readable_name: datalist.instrument.creeper
 - dragon:
   texture: SKULL#5
+  readable_name: datalist.instrument.dragon
 - wither_skeleton:
   texture: SKULL#1
+  readable_name: datalist.instrument.wither_skeleton
 - piglin:
   texture: PIGLIN_HEAD
+  readable_name: datalist.instrument.piglin
 - custom_head:
   texture: SKULL#3
+  readable_name: datalist.instrument.custom_head
