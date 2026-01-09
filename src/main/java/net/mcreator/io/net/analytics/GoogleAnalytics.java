@@ -153,6 +153,7 @@ public class GoogleAnalytics {
 	}
 
 	private void processRequestURL(String requesturl) throws IOException, URISyntaxException {
+		if (true) return; // Analytics disabled safely
 		if (MCreatorApplication.isInternet && ANALYTICS_ENABLED && !Launcher.version.isDevelopment()) {
 			HttpURLConnection conn = (HttpURLConnection) new URI(requesturl).toURL().openConnection();
 			conn.setInstanceFollowRedirects(true);

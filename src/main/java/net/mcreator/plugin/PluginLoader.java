@@ -46,7 +46,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * <p>This class detects and then try to load all builtin or custom {@link Plugin}s. </p>
+ * <p>
+ * This class detects and then try to load all builtin or custom
+ * {@link Plugin}s.
+ * </p>
  */
 public class PluginLoader extends URLClassLoader {
 
@@ -55,7 +58,10 @@ public class PluginLoader extends URLClassLoader {
 	public static PluginLoader INSTANCE;
 
 	/**
-	 * <p>Set the value to the INSTANCE variable, so we can access values everywhere in the code.</p>
+	 * <p>
+	 * Set the value to the INSTANCE variable, so we can access values everywhere in
+	 * the code.
+	 * </p>
 	 */
 	public static void initInstance() {
 		INSTANCE = new PluginLoader();
@@ -75,7 +81,9 @@ public class PluginLoader extends URLClassLoader {
 	private final Set<Module> pluginsModules;
 
 	/**
-	 * <p>The core of the detection and loading</p>
+	 * <p>
+	 * The core of the detection and loading
+	 * </p>
 	 */
 	public PluginLoader() {
 		super(new URL[] {}, null);
@@ -115,10 +123,12 @@ public class PluginLoader extends URLClassLoader {
 				addURL(plugin.toURL());
 
 				if (PreferencesManager.PREFERENCES.hidden.enableJavaPlugins.get() && plugin.isJavaPlugin()) {
-					@SuppressWarnings("resource") DynamicURLClassLoader javaPluginCL = new DynamicURLClassLoader(
+					@SuppressWarnings("resource")
+					DynamicURLClassLoader javaPluginCL = new DynamicURLClassLoader(
 							"PluginClassLoader-" + plugin.getID(), new URL[] {},
 							Thread.currentThread().getContextClassLoader()) {
-						@Override protected Class<?> findClass(String name) throws ClassNotFoundException {
+						@Override
+						protected Class<?> findClass(String name) throws ClassNotFoundException {
 							try {
 								return super.findClass(name);
 							} catch (Exception e) {
@@ -131,8 +141,8 @@ public class PluginLoader extends URLClassLoader {
 									}
 								}
 
-								plugin.loaded_failure =
-										"internal error: " + e.getClass().getSimpleName() + ": " + e.getMessage();
+								plugin.loaded_failure = "internal error: " + e.getClass().getSimpleName() + ": "
+										+ e.getMessage();
 								LOG.error("Failed to load class {} for plugin {}", name, plugin.getID(), e);
 								throw e;
 							}
@@ -162,7 +172,7 @@ public class PluginLoader extends URLClassLoader {
 				new ConfigurationBuilder().setClassLoaders(new ClassLoader[] { this }).setUrls(getURLs())
 						.setScanners(Scanners.Resources).setExpandSuperTypes(false));
 
-		checkForPluginUpdates();
+		checkForPluginUpdates(false);
 
 		// Sort regular plugin list
 		List<Plugin> sortedPlugins = new ArrayList<>(plugins);
@@ -178,57 +188,95 @@ public class PluginLoader extends URLClassLoader {
 	}
 
 	/**
-	 * @param pattern <p>Returned file names will need to follow this {@link Pattern}.</p>
-	 * @return <p>The path into a {@link Plugin} of all files following the provided {@link Pattern}.</p>
+	 * @param pattern
+	 *                <p>
+	 *                Returned file names will need to follow this {@link Pattern}.
+	 *                </p>
+	 * @return
+	 *         <p>
+	 *         The path into a {@link Plugin} of all files following the provided
+	 *         {@link Pattern}.
+	 *         </p>
 	 */
 	public Set<String> getResources(Pattern pattern) {
 		return this.getResources(null, pattern);
 	}
 
 	/**
-	 * @param pkg <p>The path of directories the method will use to access wanted files. Sub folders need to be split with a dot.</p>
-	 * @return <p>The path into a {@link Plugin} of all files inside the provided folder.</p>
+	 * @param pkg
+	 *            <p>
+	 *            The path of directories the method will use to access wanted
+	 *            files. Sub folders need to be split with a dot.
+	 *            </p>
+	 * @return
+	 *         <p>
+	 *         The path into a {@link Plugin} of all files inside the provided
+	 *         folder.
+	 *         </p>
 	 */
 	public Set<String> getResourcesInPackage(String pkg) {
 		return this.getResources(pkg, null);
 	}
 
 	/**
-	 * @param pkg     <p>The path of directories the method will use to access wanted files. Sub folders need to be split with a dot.</p>
-	 * @param pattern <p>Returned file names will need to follow this {@link Pattern}.</p>
-	 * @return <p>The path into a {@link Plugin} of all files inside the provided folder following the provided {@link Pattern} .</p>
+	 * @param pkg
+	 *                <p>
+	 *                The path of directories the method will use to access wanted
+	 *                files. Sub folders need to be split with a dot.
+	 *                </p>
+	 * @param pattern
+	 *                <p>
+	 *                Returned file names will need to follow this {@link Pattern}.
+	 *                </p>
+	 * @return
+	 *         <p>
+	 *         The path into a {@link Plugin} of all files inside the provided
+	 *         folder following the provided {@link Pattern} .
+	 *         </p>
 	 */
 	public Set<String> getResources(@Nullable String pkg, @Nullable Pattern pattern) {
-		Set<String> reflectionsRetval =
-				pattern != null ? this.reflections.getResources(pattern) : this.reflections.getResources(".*");
+		Set<String> reflectionsRetval = pattern != null ? this.reflections.getResources(pattern)
+				: this.reflections.getResources(".*");
 		if (pkg == null)
 			return reflectionsRetval;
 		return reflectionsRetval.stream().filter(e -> e.replace("/", ".").startsWith(pkg)).collect(Collectors.toSet());
 	}
 
 	/**
-	 * @return <p> A {@link List} of all loaded plugins. Sorted by plugin weight.</p>
+	 * @return
+	 *         <p>
+	 *         A {@link List} of all loaded plugins. Sorted by plugin weight.
+	 *         </p>
 	 */
 	public Collection<Plugin> getPlugins() {
 		return Collections.unmodifiableCollection(plugins);
 	}
 
 	/**
-	 * @return <p> A {@link List} of all loaded Java plugins. Sorted by plugin weight.</p>
+	 * @return
+	 *         <p>
+	 *         A {@link List} of all loaded Java plugins. Sorted by plugin weight.
+	 *         </p>
 	 */
 	protected Collection<JavaPlugin> getJavaPlugins() {
 		return Collections.unmodifiableCollection(javaPlugins);
 	}
 
 	/**
-	 * @return <p>A list of all plugin updates detected.</p>
+	 * @return
+	 *         <p>
+	 *         A list of all plugin updates detected.
+	 *         </p>
 	 */
 	public Collection<PluginUpdateInfo> getPluginUpdates() {
 		return Collections.unmodifiableCollection(pluginUpdates);
 	}
 
 	/**
-	 * @return <p>A list of all plugin modules.</p>
+	 * @return
+	 *         <p>
+	 *         A list of all plugin modules.
+	 *         </p>
 	 */
 	public Collection<Module> getPluginModules() {
 		return Collections.unmodifiableCollection(pluginsModules);
@@ -255,7 +303,8 @@ public class PluginLoader extends URLClassLoader {
 		return loadList;
 	}
 
-	@Nullable synchronized private Plugin loadPlugin(File pluginFile, boolean builtin) {
+	@Nullable
+	synchronized private Plugin loadPlugin(File pluginFile, boolean builtin) {
 		if (pluginFile.isDirectory()) {
 			File pluginInfoFile = new File(pluginFile, "plugin.json");
 			if (pluginInfoFile.isFile()) {
@@ -293,7 +342,8 @@ public class PluginLoader extends URLClassLoader {
 		return null;
 	}
 
-	@Nullable private Plugin validatePlugin(Plugin plugin) {
+	@Nullable
+	private Plugin validatePlugin(Plugin plugin) {
 		if (!plugin.isBuiltin() && plugin.getSupportedVersions() == null) {
 			LOG.warn("Plugin {} does not specify supportedversions.", plugin.getID());
 			failedPlugins.add(new PluginLoadFailure(plugin, "plugin is missing supportedversions"));
@@ -307,7 +357,9 @@ public class PluginLoader extends URLClassLoader {
 		return plugin;
 	}
 
-	private void checkForPluginUpdates() {
+	public void checkForPluginUpdates(boolean force) {
+		if (!force)
+			return;
 		if (MCreatorApplication.isInternet
 				&& PreferencesManager.PREFERENCES.notifications.checkAndNotifyForPluginUpdates.get()) {
 			pluginUpdates.addAll(plugins.parallelStream().map(plugin -> {
@@ -319,10 +371,11 @@ public class PluginLoader extends URLClassLoader {
 									.get(plugin.getID()).getAsJsonObject();
 							String version = updateData.get("latest").getAsString();
 							if (!version.equals(plugin.getPluginVersion())) {
-								return new PluginUpdateInfo(plugin, version, updateData.has("changes") ?
-										updateData.get("changes").getAsJsonArray().asList().stream()
-												.map(JsonElement::getAsString).toList() :
-										null);
+								return new PluginUpdateInfo(plugin, version,
+										updateData.has("changes")
+												? updateData.get("changes").getAsJsonArray().asList().stream()
+														.map(JsonElement::getAsString).toList()
+												: null);
 							}
 						} catch (Exception e) {
 							LOG.warn("Failed to parse update info for plugin: {}", plugin.getID(), e);

@@ -51,27 +51,41 @@ public class MCreatorNetWebAPI implements IWebAPI {
 	private final Set<CompletableFuture<String[]>> newsFutures = new HashSet<>();
 	private final Set<CompletableFuture<String[]>> motwFutures = new HashSet<>();
 
-	@Override public boolean initAPI() {
-		CookieHandler.setDefault(null);
-
-		String appData = WebIO.readURLToString(MCreatorApplication.SERVER_DOMAIN + "/repository");
-		if (appData.isEmpty())
-			return false;
-
-		try {
-			updateInfo = new Gson().fromJson(appData, UpdateInfo.class);
-		} catch (Exception e) {
-			updateInfo = UpdateInfo.empty();
-			LOG.warn("Failed to parse update info", e);
-		}
-
+	@Override
+	public boolean initAPI() {
+		// Network access disabled safely
+		updateInfo = UpdateInfo.empty();
 		new Thread(() -> {
-			initAPIPrivate();
-			newsFutures.forEach(future -> future.complete(news));
-			motwFutures.forEach(future -> future.complete(motw));
+			// initAPIPrivate();
+			newsFutures.forEach(future -> future.complete(new String[0]));
+			motwFutures.forEach(future -> future.complete(new String[0]));
 		}, "WebAPI-Loader").start();
 
 		return true;
+
+		/*
+		 * CookieHandler.setDefault(null);
+		 * 
+		 * String appData = WebIO.readURLToString(MCreatorApplication.SERVER_DOMAIN +
+		 * "/repository");
+		 * if (appData.isEmpty())
+		 * return false;
+		 * 
+		 * try {
+		 * updateInfo = new Gson().fromJson(appData, UpdateInfo.class);
+		 * } catch (Exception e) {
+		 * updateInfo = UpdateInfo.empty();
+		 * LOG.warn("Failed to parse update info", e);
+		 * }
+		 * 
+		 * new Thread(() -> {
+		 * initAPIPrivate();
+		 * newsFutures.forEach(future -> future.complete(news));
+		 * motwFutures.forEach(future -> future.complete(motw));
+		 * }, "WebAPI-Loader").start();
+		 * 
+		 * return true;
+		 */
 	}
 
 	private void initAPIPrivate() {
@@ -118,8 +132,8 @@ public class MCreatorNetWebAPI implements IWebAPI {
 						continue;
 					motw[0] = ((Element) node).getElementsByTagName("title").item(1).getChildNodes().item(0)
 							.getNodeValue();
-					motw[1] =
-							MCreatorApplication.SERVER_DOMAIN + "/node/" + ((Element) node).getElementsByTagName("guid")
+					motw[1] = MCreatorApplication.SERVER_DOMAIN + "/node/"
+							+ ((Element) node).getElementsByTagName("guid")
 									.item(0).getChildNodes().item(0).getNodeValue().split("mcreator\\.net/")[1];
 					motw[2] = ((Element) node).getElementsByTagName("pubDate").item(0).getChildNodes().item(0)
 							.getNodeValue();
@@ -134,15 +148,19 @@ public class MCreatorNetWebAPI implements IWebAPI {
 		}
 	}
 
-	@Override @Nullable public UpdateInfo getUpdateInfo() {
+	@Override
+	@Nullable
+	public UpdateInfo getUpdateInfo() {
 		return updateInfo;
 	}
 
-	@Override public String getSearchURL(String searchTerm) {
+	@Override
+	public String getSearchURL(String searchTerm) {
 		return MCreatorApplication.SERVER_DOMAIN + "/search/content?keys=" + searchTerm.replace(' ', '+');
 	}
 
-	@Override public void getWebsiteNews(CompletableFuture<String[]> data) {
+	@Override
+	public void getWebsiteNews(CompletableFuture<String[]> data) {
 		if (news != null)
 			data.complete(news);
 		else
@@ -161,7 +179,8 @@ public class MCreatorNetWebAPI implements IWebAPI {
 	 * <li>[4] - mod of the week picture URL</li>
 	 * </ul>
 	 */
-	@Override public void getModOfTheWeekData(CompletableFuture<String[]> data) {
+	@Override
+	public void getModOfTheWeekData(CompletableFuture<String[]> data) {
 		if (motw != null)
 			data.complete(motw);
 		else

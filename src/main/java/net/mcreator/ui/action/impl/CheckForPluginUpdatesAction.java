@@ -22,10 +22,13 @@ import net.mcreator.ui.action.ActionRegistry;
 import net.mcreator.ui.action.BasicAction;
 import net.mcreator.ui.dialogs.UpdatePluginDialog;
 import net.mcreator.ui.init.L10N;
+import net.mcreator.plugin.PluginLoader;
 
 public class CheckForPluginUpdatesAction extends BasicAction {
 	public CheckForPluginUpdatesAction(ActionRegistry actionRegistry) {
-		super(actionRegistry, L10N.t("action.check_for_plugin_updates"),
-				e -> UpdatePluginDialog.showPluginUpdateDialog(actionRegistry.getMCreator(), true));
+		super(actionRegistry, L10N.t("action.check_for_plugin_updates"), e -> {
+			PluginLoader.INSTANCE.checkForPluginUpdates(true);
+			UpdatePluginDialog.showPluginUpdateDialog(actionRegistry.getMCreator(), true);
+		});
 	}
 }
