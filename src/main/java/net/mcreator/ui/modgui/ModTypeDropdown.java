@@ -38,14 +38,26 @@ public class ModTypeDropdown extends JPopupMenu {
 
 		List<ModElementType<?>> types = mcreator.getGeneratorStats().getSupportedModElementTypes();
 
-		if (types.size() > 14) {
-			List<ModElementType<?>> typestmp = new ArrayList<>(types);
+		int columns = 1;
+		if (types.size() > 30) {
+			columns = 3;
+		} else if (types.size() > 15) {
+			columns = 2;
+		}
 
-			int i = 0;
-			for (; i < Math.ceil(types.size() / 2d); i++)
-				typestmp.set(i * 2, types.get(i));
-			for (int j = 0; i < types.size(); i++, j++)
-				typestmp.set(j * 2 + 1, types.get(i));
+		if (columns > 1) {
+			List<ModElementType<?>> typestmp = new ArrayList<>(types);
+			int rows = (int) Math.ceil((double) types.size() / columns);
+
+			for (int c = 0; c < columns; c++) {
+				for (int r = 0; r < rows; r++) {
+					int index = r * columns + c;
+					int originalIndex = c * rows + r;
+					if (originalIndex < types.size() && index < types.size()) {
+						typestmp.set(index, types.get(originalIndex));
+					}
+				}
+			}
 
 			types = typestmp;
 		}
@@ -57,9 +69,9 @@ public class ModTypeDropdown extends JPopupMenu {
 			modTypeButton.addActionListener(actionEvent -> NewModElementDialog.showNameDialog(mcreator, type));
 			modTypeButton.setOpaque(false);
 
-			modTypeButton.setBorder(BorderFactory.createEmptyBorder());
+			modTypeButton.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
 
-			ComponentUtils.deriveFont(modTypeButton, 12);
+			modTypeButton.setFont(modTypeButton.getFont().deriveFont(Font.BOLD, 14f));
 
 			if (type.getShortcut() != null)
 				modTypeButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(type.getShortcut()));
@@ -69,7 +81,7 @@ public class ModTypeDropdown extends JPopupMenu {
 			add(modTypeButton);
 		});
 
-		setLayout(new GridLayout(-1, types.size() > 14 ? 2 : 1));
+		setLayout(new GridLayout(0, columns));
 	}
 
 }
