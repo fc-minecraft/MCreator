@@ -19,15 +19,17 @@
 package net.mcreator.ui.action.impl;
 
 import net.mcreator.Launcher;
+import net.mcreator.io.FileIO;
 import net.mcreator.ui.action.ActionRegistry;
 import net.mcreator.ui.action.BasicAction;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.init.AppIcon;
-import net.mcreator.ui.init.UIRES;
 import net.mcreator.ui.laf.themes.Theme;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.util.Arrays;
 
 public class AboutAction extends BasicAction {
 
@@ -36,31 +38,75 @@ public class AboutAction extends BasicAction {
 	}
 
 	public static void showDialog(Window parent) {
-		// Only "Close" button
-		Object[] options = { "Закрыть" };
+		JTabbedPane tabbedPane = new JTabbedPane();
 
+		// --- Tab 1: About ---
 		JPanel logoPanel = new JPanel(new BorderLayout(24, 24));
 		logoPanel.add("North", new JLabel(AppIcon.getAppIcon(128, 128)));
-		// Removed text logo, keeping just the icon for minimalism or custom branding if available
-		// logoPanel.add("Center", new JLabel(UIRES.SVG.getBuiltIn("logo", 250, (int) (250 * (63 / 350.0)))));
 		logoPanel.setBorder(BorderFactory.createEmptyBorder(0, 24, 0, 0));
 
-        // Simplified Russian text
-        String message = "MCreator FunCode Edition\n\n" +
-                "Версия: " + Launcher.version.getFullString() + "\n" +
-                "Разработано для обучения программированию.\n\n" +
-                "Сборка и адаптация специально для FunCode.";
+		String message = "MCreator FunCode Edition\n\n" +
+				"Версия: " + Launcher.version.getFullString() + "\n" +
+				"Разработано для обучения программированию.\n\n" +
+				"Сборка и адаптация специально для FunCode.\n" +
+				"Разработка FunCode версии: Nikita Gutsenkov";
 
 		JTextArea aboutLabel = new JTextArea(message);
-        aboutLabel.setEditable(false);
-        aboutLabel.setOpaque(false);
-        aboutLabel.setFont(Theme.current().getFont().deriveFont(14f));
+		aboutLabel.setEditable(false);
+		aboutLabel.setOpaque(false);
+		aboutLabel.setFont(Theme.current().getFont().deriveFont(14f));
 
-		JComponent dialogPanel = PanelUtils.westAndCenterElement(
+		JComponent aboutPanel = PanelUtils.westAndCenterElement(
 				PanelUtils.pullElementUp(PanelUtils.centerInPanel(logoPanel)), aboutLabel, 48, 48);
-		dialogPanel.setBorder(BorderFactory.createEmptyBorder(16, 0, 0, 32));
+		aboutPanel.setBorder(BorderFactory.createEmptyBorder(16, 0, 0, 32));
 
-		JOptionPane.showOptionDialog(parent, dialogPanel, "О программе",
+		tabbedPane.addTab("О программе", aboutPanel);
+
+		// --- Tab 2: Licenses ---
+		StringBuilder licenseText = new StringBuilder();
+		licenseText.append("MCreator is licensed under GPL v3.0\n\n");
+
+		File licenseFile = new File("LICENSE.txt");
+		if (licenseFile.exists()) {
+			licenseText.append(FileIO.readFileToString(licenseFile));
+		} else {
+			licenseText.append("License file not found.");
+		}
+
+		licenseText.append("\n\n-------------------------------\n");
+		licenseText.append("Third party licenses provided in 'license' folder:\n\n");
+
+		File licenseDir = new File("license");
+		if (licenseDir.isDirectory()) {
+			File[] files = licenseDir.listFiles();
+			if (files != null) {
+				Arrays.stream(files)
+						.sorted((f1, f2) -> f1.getName().compareToIgnoreCase(f2.getName()))
+						.forEach(f -> {
+							licenseText.append("=================================================================\n");
+							licenseText.append("LICENSE: ").append(f.getName()).append("\n");
+							licenseText.append("=================================================================\n\n");
+							licenseText.append(FileIO.readFileToString(f)).append("\n\n");
+						});
+			}
+		}
+
+		JTextArea licenseArea = new JTextArea(licenseText.toString());
+		licenseArea.setEditable(false);
+		licenseArea.setFont(Theme.current().getFont().deriveFont(12f));
+		// Use monospaced font for license text if possible, but theme font is cleaner.
+		// licenseArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+		JScrollPane scrollPane = new JScrollPane(licenseArea);
+		scrollPane.setPreferredSize(new Dimension(700, 500));
+		// Initial scroll to top
+		licenseArea.setCaretPosition(0);
+
+		tabbedPane.addTab("Лицензии", scrollPane);
+
+		// Show Dialog
+		Object[] options = { "Закрыть" };
+		JOptionPane.showOptionDialog(parent, tabbedPane, "О программе",
 				JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 	}
 }
