@@ -55,9 +55,11 @@ public class ModelComboBoxRenderer extends JLabel implements ListCellRenderer<Mo
 			setIcon(UIRES.get("model.small_obj"));
 		else if (value.getType() == Model.Type.JAVA)
 			setIcon(UIRES.get("model.small_java"));
-		else if (value.getType() == Model.Type.BUILTIN)
+		else if (value.getType() == Model.Type.BUILTIN) {
 			setIcon(UIRES.get("model.small_builtin"));
-		else
+			setText(net.mcreator.ui.init.L10N.t("model.builtin."
+					+ value.getReadableName().toLowerCase(java.util.Locale.ENGLISH).replace(" ", "_")));
+		} else
 			setIcon(new EmptyIcon(32, 32));
 
 		return this;

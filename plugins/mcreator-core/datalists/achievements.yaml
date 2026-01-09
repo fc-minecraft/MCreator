@@ -1,125 +1,250 @@
-- "No parent: root"
-- story/root
-- story/mine_stone
-- story/upgrade_tools
-- story/smelt_iron
-- story/obtain_armor
-- story/lava_bucket
-- story/iron_tools
-- story/deflect_arrow
-- story/form_obsidian
-- story/mine_diamond
-- story/enter_the_nether
-- story/shiny_gear
-- story/enchant_item
-- story/cure_zombie_villager
-- story/follow_ender_eye
-- story/enter_the_end
-- nether/root
-- nether/return_to_sender
-- nether/find_bastion
-- nether/obtain_ancient_debris
-- nether/fast_travel
-- nether/find_fortress
-- nether/obtain_crying_obsidian
-- nether/distract_piglin
-- nether/ride_strider
-- nether/uneasy_alliance
-- nether/loot_bastion
-- nether/use_lodestone
-- nether/netherite_armor
-- nether/get_wither_skull
-- nether/obtain_blaze_rod
-- nether/charge_respawn_anchor
-- nether/explore_nether
-- nether/summon_wither
-- nether/brew_potion
-- nether/create_beacon
-- nether/all_potions
-- nether/create_full_beacon
-- nether/all_effects
-- nether/ride_strider_in_overworld_lava
-- end/root
-- end/kill_dragon
-- end/dragon_egg
-- end/enter_end_gateway
-- end/respawn_dragon
-- end/dragon_breath
-- end/find_end_city
-- end/elytra
-- end/levitate
-- adventure/root
-- adventure/avoid_vibration
-- adventure/voluntary_exile
-- adventure/kill_a_mob
-- adventure/trade
-- adventure/honey_block_slide
-- adventure/ol_betsy
-- adventure/sleep_in_bed
-- adventure/hero_of_the_village
-- adventure/throw_trident
-- adventure/shoot_arrow
-- adventure/kill_all_mobs
-- adventure/totem_of_undying
-- adventure/summon_iron_golem
-- adventure/two_birds_one_arrow
-- adventure/whos_the_pillager_now
-- adventure/arbalistic
-- adventure/adventuring_time
-- adventure/very_very_frightening
-- adventure/sniper_duel
-- adventure/bullseye
-- adventure/lightning_rod_with_villager_no_fire
-- adventure/spyglass_at_dragon
-- adventure/spyglass_at_ghast
-- adventure/spyglass_at_parrot
-- adventure/walk_on_powder_snow_with_leather_boots
-- adventure/fall_from_world_height
-- adventure/play_jukebox_in_meadows
-- adventure/trade_at_world_height
-- adventure/heart_transplanter
-- adventure/kill_mob_near_sculk_catalyst
-- adventure/craft_decorated_pot_using_only_sherds
-- adventure/read_power_of_chiseled_bookshelf
-- adventure/salvage_sherd
-- adventure/trim_with_all_exclusive_armor_patterns
-- adventure/trim_with_any_armor_pattern
-- adventure/brush_armadillo
-- adventure/blowback
-- adventure/crafters_crafting_crafters
-- adventure/lighten_up
-- adventure/minecraft_trials_edition
-- adventure/overoverkill
-- adventure/revaulting
-- adventure/under_lock_and_key
-- adventure/who_needs_rockets
-- husbandry/root
-- husbandry/allay_deliver_cake_to_note_block
-- husbandry/allay_deliver_item_to_player
-- husbandry/axolotl_in_a_bucket
-- husbandry/balanced_diet
-- husbandry/breed_all_animals
-- husbandry/breed_an_animal
-- husbandry/complete_catalogue
-- husbandry/feed_snifflet
-- husbandry/fishy_business
-- husbandry/froglights
-- husbandry/kill_axolotl_target
-- husbandry/leash_all_frog_variants
-- husbandry/make_a_sign_glow
-- husbandry/obtain_netherite_hoe
-- husbandry/obtain_sniffer_egg
-- husbandry/plant_any_sniffer_seed
-- husbandry/plant_seed
-- husbandry/ride_a_boat_with_a_goat
-- husbandry/safely_harvest_honey
-- husbandry/silk_touch_nest
-- husbandry/tactical_fishing
-- husbandry/tadpole_in_a_bucket
-- husbandry/tame_an_animal
-- husbandry/wax_off
-- husbandry/wax_on
-- husbandry/remove_wolf_armor
-- husbandry/repair_wolf_armor
-- husbandry/whole_pack
-- husbandry/place_dried_ghast_in_water
+- name: "No parent: root"
+  readable_name: "datalist.achievement.no_parent"
+- name: "story/root"
+  readable_name: "datalist.achievement.story.root"
+- name: "story/mine_stone"
+  readable_name: "datalist.achievement.story.mine_stone"
+- name: "story/upgrade_tools"
+  readable_name: "datalist.achievement.story.upgrade_tools"
+- name: "story/smelt_iron"
+  readable_name: "datalist.achievement.story.smelt_iron"
+- name: "story/obtain_armor"
+  readable_name: "datalist.achievement.story.obtain_armor"
+- name: "story/lava_bucket"
+  readable_name: "datalist.achievement.story.lava_bucket"
+- name: "story/iron_tools"
+  readable_name: "datalist.achievement.story.iron_tools"
+- name: "story/deflect_arrow"
+  readable_name: "datalist.achievement.story.deflect_arrow"
+- name: "story/form_obsidian"
+  readable_name: "datalist.achievement.story.form_obsidian"
+- name: "story/mine_diamond"
+  readable_name: "datalist.achievement.story.mine_diamond"
+- name: "story/enter_the_nether"
+  readable_name: "datalist.achievement.story.enter_the_nether"
+- name: "story/shiny_gear"
+  readable_name: "datalist.achievement.story.shiny_gear"
+- name: "story/enchant_item"
+  readable_name: "datalist.achievement.story.enchant_item"
+- name: "story/cure_zombie_villager"
+  readable_name: "datalist.achievement.story.cure_zombie_villager"
+- name: "story/follow_ender_eye"
+  readable_name: "datalist.achievement.story.follow_ender_eye"
+- name: "story/enter_the_end"
+  readable_name: "datalist.achievement.story.enter_the_end"
+- name: "nether/root"
+  readable_name: "datalist.achievement.nether.root"
+- name: "nether/return_to_sender"
+  readable_name: "datalist.achievement.nether.return_to_sender"
+- name: "nether/find_bastion"
+  readable_name: "datalist.achievement.nether.find_bastion"
+- name: "nether/obtain_ancient_debris"
+  readable_name: "datalist.achievement.nether.obtain_ancient_debris"
+- name: "nether/fast_travel"
+  readable_name: "datalist.achievement.nether.fast_travel"
+- name: "nether/find_fortress"
+  readable_name: "datalist.achievement.nether.find_fortress"
+- name: "nether/obtain_crying_obsidian"
+  readable_name: "datalist.achievement.nether.obtain_crying_obsidian"
+- name: "nether/distract_piglin"
+  readable_name: "datalist.achievement.nether.distract_piglin"
+- name: "nether/ride_strider"
+  readable_name: "datalist.achievement.nether.ride_strider"
+- name: "nether/uneasy_alliance"
+  readable_name: "datalist.achievement.nether.uneasy_alliance"
+- name: "nether/loot_bastion"
+  readable_name: "datalist.achievement.nether.loot_bastion"
+- name: "nether/use_lodestone"
+  readable_name: "datalist.achievement.nether.use_lodestone"
+- name: "nether/netherite_armor"
+  readable_name: "datalist.achievement.nether.netherite_armor"
+- name: "nether/get_wither_skull"
+  readable_name: "datalist.achievement.nether.get_wither_skull"
+- name: "nether/obtain_blaze_rod"
+  readable_name: "datalist.achievement.nether.obtain_blaze_rod"
+- name: "nether/charge_respawn_anchor"
+  readable_name: "datalist.achievement.nether.charge_respawn_anchor"
+- name: "nether/explore_nether"
+  readable_name: "datalist.achievement.nether.explore_nether"
+- name: "nether/summon_wither"
+  readable_name: "datalist.achievement.nether.summon_wither"
+- name: "nether/brew_potion"
+  readable_name: "datalist.achievement.nether.brew_potion"
+- name: "nether/create_beacon"
+  readable_name: "datalist.achievement.nether.create_beacon"
+- name: "nether/all_potions"
+  readable_name: "datalist.achievement.nether.all_potions"
+- name: "nether/create_full_beacon"
+  readable_name: "datalist.achievement.nether.create_full_beacon"
+- name: "nether/all_effects"
+  readable_name: "datalist.achievement.nether.all_effects"
+- name: "nether/ride_strider_in_overworld_lava"
+  readable_name: "datalist.achievement.nether.ride_strider_in_overworld_lava"
+- name: "end/root"
+  readable_name: "datalist.achievement.end.root"
+- name: "end/kill_dragon"
+  readable_name: "datalist.achievement.end.kill_dragon"
+- name: "end/dragon_egg"
+  readable_name: "datalist.achievement.end.dragon_egg"
+- name: "end/enter_end_gateway"
+  readable_name: "datalist.achievement.end.enter_end_gateway"
+- name: "end/respawn_dragon"
+  readable_name: "datalist.achievement.end.respawn_dragon"
+- name: "end/dragon_breath"
+  readable_name: "datalist.achievement.end.dragon_breath"
+- name: "end/find_end_city"
+  readable_name: "datalist.achievement.end.find_end_city"
+- name: "end/elytra"
+  readable_name: "datalist.achievement.end.elytra"
+- name: "end/levitate"
+  readable_name: "datalist.achievement.end.levitate"
+- name: "adventure/root"
+  readable_name: "datalist.achievement.adventure.root"
+- name: "adventure/avoid_vibration"
+  readable_name: "datalist.achievement.adventure.avoid_vibration"
+- name: "adventure/voluntary_exile"
+  readable_name: "datalist.achievement.adventure.voluntary_exile"
+- name: "adventure/kill_a_mob"
+  readable_name: "datalist.achievement.adventure.kill_a_mob"
+- name: "adventure/trade"
+  readable_name: "datalist.achievement.adventure.trade"
+- name: "adventure/honey_block_slide"
+  readable_name: "datalist.achievement.adventure.honey_block_slide"
+- name: "adventure/ol_betsy"
+  readable_name: "datalist.achievement.adventure.ol_betsy"
+- name: "adventure/sleep_in_bed"
+  readable_name: "datalist.achievement.adventure.sleep_in_bed"
+- name: "adventure/hero_of_the_village"
+  readable_name: "datalist.achievement.adventure.hero_of_the_village"
+- name: "adventure/throw_trident"
+  readable_name: "datalist.achievement.adventure.throw_trident"
+- name: "adventure/shoot_arrow"
+  readable_name: "datalist.achievement.adventure.shoot_arrow"
+- name: "adventure/kill_all_mobs"
+  readable_name: "datalist.achievement.adventure.kill_all_mobs"
+- name: "adventure/totem_of_undying"
+  readable_name: "datalist.achievement.adventure.totem_of_undying"
+- name: "adventure/summon_iron_golem"
+  readable_name: "datalist.achievement.adventure.summon_iron_golem"
+- name: "adventure/two_birds_one_arrow"
+  readable_name: "datalist.achievement.adventure.two_birds_one_arrow"
+- name: "adventure/whos_the_pillager_now"
+  readable_name: "datalist.achievement.adventure.whos_the_pillager_now"
+- name: "adventure/arbalistic"
+  readable_name: "datalist.achievement.adventure.arbalistic"
+- name: "adventure/adventuring_time"
+  readable_name: "datalist.achievement.adventure.adventuring_time"
+- name: "adventure/very_very_frightening"
+  readable_name: "datalist.achievement.adventure.very_very_frightening"
+- name: "adventure/sniper_duel"
+  readable_name: "datalist.achievement.adventure.sniper_duel"
+- name: "adventure/bullseye"
+  readable_name: "datalist.achievement.adventure.bullseye"
+- name: "adventure/lightning_rod_with_villager_no_fire"
+  readable_name: "datalist.achievement.adventure.lightning_rod_with_villager_no_fire"
+- name: "adventure/spyglass_at_dragon"
+  readable_name: "datalist.achievement.adventure.spyglass_at_dragon"
+- name: "adventure/spyglass_at_ghast"
+  readable_name: "datalist.achievement.adventure.spyglass_at_ghast"
+- name: "adventure/spyglass_at_parrot"
+  readable_name: "datalist.achievement.adventure.spyglass_at_parrot"
+- name: "adventure/walk_on_powder_snow_with_leather_boots"
+  readable_name: "datalist.achievement.adventure.walk_on_powder_snow_with_leather_boots"
+- name: "adventure/fall_from_world_height"
+  readable_name: "datalist.achievement.adventure.fall_from_world_height"
+- name: "adventure/play_jukebox_in_meadows"
+  readable_name: "datalist.achievement.adventure.play_jukebox_in_meadows"
+- name: "adventure/trade_at_world_height"
+  readable_name: "datalist.achievement.adventure.trade_at_world_height"
+- name: "adventure/heart_transplanter"
+  readable_name: "datalist.achievement.adventure.heart_transplanter"
+- name: "adventure/kill_mob_near_sculk_catalyst"
+  readable_name: "datalist.achievement.adventure.kill_mob_near_sculk_catalyst"
+- name: "adventure/craft_decorated_pot_using_only_sherds"
+  readable_name: "datalist.achievement.adventure.craft_decorated_pot_using_only_sherds"
+- name: "adventure/read_power_of_chiseled_bookshelf"
+  readable_name: "datalist.achievement.adventure.read_power_of_chiseled_bookshelf"
+- name: "adventure/salvage_sherd"
+  readable_name: "datalist.achievement.adventure.salvage_sherd"
+- name: "adventure/trim_with_all_exclusive_armor_patterns"
+  readable_name: "datalist.achievement.adventure.trim_with_all_exclusive_armor_patterns"
+- name: "adventure/trim_with_any_armor_pattern"
+  readable_name: "datalist.achievement.adventure.trim_with_any_armor_pattern"
+- name: "adventure/brush_armadillo"
+  readable_name: "datalist.achievement.adventure.brush_armadillo"
+- name: "adventure/blowback"
+  readable_name: "datalist.achievement.adventure.blowback"
+- name: "adventure/crafters_crafting_crafters"
+  readable_name: "datalist.achievement.adventure.crafters_crafting_crafters"
+- name: "adventure/lighten_up"
+  readable_name: "datalist.achievement.adventure.lighten_up"
+- name: "adventure/minecraft_trials_edition"
+  readable_name: "datalist.achievement.adventure.minecraft_trials_edition"
+- name: "adventure/overoverkill"
+  readable_name: "datalist.achievement.adventure.overoverkill"
+- name: "adventure/revaulting"
+  readable_name: "datalist.achievement.adventure.revaulting"
+- name: "adventure/under_lock_and_key"
+  readable_name: "datalist.achievement.adventure.under_lock_and_key"
+- name: "adventure/who_needs_rockets"
+  readable_name: "datalist.achievement.adventure.who_needs_rockets"
+- name: "husbandry/root"
+  readable_name: "datalist.achievement.husbandry.root"
+- name: "husbandry/allay_deliver_cake_to_note_block"
+  readable_name: "datalist.achievement.husbandry.allay_deliver_cake_to_note_block"
+- name: "husbandry/allay_deliver_item_to_player"
+  readable_name: "datalist.achievement.husbandry.allay_deliver_item_to_player"
+- name: "husbandry/axolotl_in_a_bucket"
+  readable_name: "datalist.achievement.husbandry.axolotl_in_a_bucket"
+- name: "husbandry/balanced_diet"
+  readable_name: "datalist.achievement.husbandry.balanced_diet"
+- name: "husbandry/breed_all_animals"
+  readable_name: "datalist.achievement.husbandry.breed_all_animals"
+- name: "husbandry/breed_an_animal"
+  readable_name: "datalist.achievement.husbandry.breed_an_animal"
+- name: "husbandry/complete_catalogue"
+  readable_name: "datalist.achievement.husbandry.complete_catalogue"
+- name: "husbandry/feed_snifflet"
+  readable_name: "datalist.achievement.husbandry.feed_snifflet"
+- name: "husbandry/fishy_business"
+  readable_name: "datalist.achievement.husbandry.fishy_business"
+- name: "husbandry/froglights"
+  readable_name: "datalist.achievement.husbandry.froglights"
+- name: "husbandry/kill_axolotl_target"
+  readable_name: "datalist.achievement.husbandry.kill_axolotl_target"
+- name: "husbandry/leash_all_frog_variants"
+  readable_name: "datalist.achievement.husbandry.leash_all_frog_variants"
+- name: "husbandry/make_a_sign_glow"
+  readable_name: "datalist.achievement.husbandry.make_a_sign_glow"
+- name: "husbandry/obtain_netherite_hoe"
+  readable_name: "datalist.achievement.husbandry.obtain_netherite_hoe"
+- name: "husbandry/obtain_sniffer_egg"
+  readable_name: "datalist.achievement.husbandry.obtain_sniffer_egg"
+- name: "husbandry/plant_any_sniffer_seed"
+  readable_name: "datalist.achievement.husbandry.plant_any_sniffer_seed"
+- name: "husbandry/plant_seed"
+  readable_name: "datalist.achievement.husbandry.plant_seed"
+- name: "husbandry/ride_a_boat_with_a_goat"
+  readable_name: "datalist.achievement.husbandry.ride_a_boat_with_a_goat"
+- name: "husbandry/safely_harvest_honey"
+  readable_name: "datalist.achievement.husbandry.safely_harvest_honey"
+- name: "husbandry/silk_touch_nest"
+  readable_name: "datalist.achievement.husbandry.silk_touch_nest"
+- name: "husbandry/tactical_fishing"
+  readable_name: "datalist.achievement.husbandry.tactical_fishing"
+- name: "husbandry/tadpole_in_a_bucket"
+  readable_name: "datalist.achievement.husbandry.tadpole_in_a_bucket"
+- name: "husbandry/tame_an_animal"
+  readable_name: "datalist.achievement.husbandry.tame_an_animal"
+- name: "husbandry/wax_off"
+  readable_name: "datalist.achievement.husbandry.wax_off"
+- name: "husbandry/wax_on"
+  readable_name: "datalist.achievement.husbandry.wax_on"
+- name: "husbandry/remove_wolf_armor"
+  readable_name: "datalist.achievement.husbandry.remove_wolf_armor"
+- name: "husbandry/repair_wolf_armor"
+  readable_name: "datalist.achievement.husbandry.repair_wolf_armor"
+- name: "husbandry/whole_pack"
+  readable_name: "datalist.achievement.husbandry.whole_pack"
+- name: "husbandry/place_dried_ghast_in_water"
+  readable_name: "datalist.achievement.husbandry.place_dried_ghast_in_water"

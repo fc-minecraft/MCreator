@@ -71,6 +71,20 @@ public class FeatureGUI extends ModElementGUI<Feature> implements IBlocklyPanelH
 	private final JComboBox<String> generationStep = new JComboBox<>(
 			ElementUtil.getDataListAsStringArray("generationsteps"));
 
+	{
+		generationStep.setRenderer(new DefaultListCellRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+					boolean cellHasFocus) {
+				super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+				if (value instanceof String s) {
+					setText(L10N.t("datalist.genstep." + s.toLowerCase()));
+				}
+				return this;
+			}
+		});
+	}
+
 	private BlocklyEditorToolbar blocklyEditorToolbar;
 	private BlocklyPanel blocklyPanel;
 	private final CompileNotesPanel compileNotesPanel = new CompileNotesPanel();
@@ -83,15 +97,18 @@ public class FeatureGUI extends ModElementGUI<Feature> implements IBlocklyPanelH
 		super.finalizeGUI();
 	}
 
-	@Override public void addBlocklyChangedListener(BlocklyChangedListener listener) {
+	@Override
+	public void addBlocklyChangedListener(BlocklyChangedListener listener) {
 		blocklyChangedListeners.add(listener);
 	}
 
-	@Override protected void initGUI() {
+	@Override
+	protected void initGUI() {
 		generateCondition = new ProcedureSelector(this.withEntry("feature/generation_condition"), mcreator,
 				L10N.t("elementgui.feature.additional_generation_condition"), VariableTypeLoader.BuiltInTypes.LOGIC,
 				Dependency.fromString("x:number/y:number/z:number/world:world")).setDefaultName(
-				L10N.t("condition.common.no_additional")).makeInline();
+						L10N.t("condition.common.no_additional"))
+				.makeInline();
 
 		skipPlacement.setOpaque(false);
 
@@ -172,7 +189,8 @@ public class FeatureGUI extends ModElementGUI<Feature> implements IBlocklyPanelH
 				.lazyValidate(BlocklyAggregatedValidationResult.blocklyValidator(this));
 	}
 
-	@Override public synchronized List<BlocklyCompileNote> regenerateBlockAssemblies(boolean jsEventTriggeredChange) {
+	@Override
+	public synchronized List<BlocklyCompileNote> regenerateBlockAssemblies(boolean jsEventTriggeredChange) {
 		BlocklyBlockCodeGenerator blocklyBlockCodeGenerator = new BlocklyBlockCodeGenerator(externalBlocks,
 				mcreator.getGeneratorStats().getBlocklyBlocks(BlocklyEditorType.FEATURE));
 
@@ -212,7 +230,8 @@ public class FeatureGUI extends ModElementGUI<Feature> implements IBlocklyPanelH
 		return compileNotesArrayList;
 	}
 
-	@Override public void reloadDataLists() {
+	@Override
+	public void reloadDataLists() {
 		super.reloadDataLists();
 
 		AbstractProcedureSelector.ReloadContext context = AbstractProcedureSelector.ReloadContext.create(
@@ -228,7 +247,8 @@ public class FeatureGUI extends ModElementGUI<Feature> implements IBlocklyPanelH
 			regenerateBlockAssemblies(false);
 	}
 
-	@Override protected void openInEditingMode(Feature feature) {
+	@Override
+	protected void openInEditingMode(Feature feature) {
 		skipPlacement.setSelected(feature.skipPlacement);
 		generationStep.setSelectedItem(feature.generationStep);
 		restrictionBiomes.setListElements(feature.restrictionBiomes);
@@ -238,7 +258,8 @@ public class FeatureGUI extends ModElementGUI<Feature> implements IBlocklyPanelH
 		blocklyPanel.addTaskToRunAfterLoaded(() -> blocklyPanel.setXML(feature.featurexml));
 	}
 
-	@Override public Feature getElementFromGUI() {
+	@Override
+	public Feature getElementFromGUI() {
 		Feature feature = new Feature(modElement);
 		feature.skipPlacement = skipPlacement.isSelected();
 		feature.generationStep = (String) generationStep.getSelectedItem();
@@ -250,19 +271,23 @@ public class FeatureGUI extends ModElementGUI<Feature> implements IBlocklyPanelH
 		return feature;
 	}
 
-	@Override public Set<BlocklyPanel> getBlocklyPanels() {
+	@Override
+	public Set<BlocklyPanel> getBlocklyPanels() {
 		return Set.of(blocklyPanel);
 	}
 
-	@Override public @Nullable URI contextURL() throws URISyntaxException {
+	@Override
+	public @Nullable URI contextURL() throws URISyntaxException {
 		return new URI(MCreatorApplication.SERVER_DOMAIN + "/wiki/how-make-feature");
 	}
 
-	@Override public boolean isInitialXMLValid() {
+	@Override
+	public boolean isInitialXMLValid() {
 		return false;
 	}
 
-	@Override public void search(@Nullable String searchTerm) {
+	@Override
+	public void search(@Nullable String searchTerm) {
 		blocklyEditorToolbar.getSearchField().requestFocusInWindow();
 
 		if (searchTerm != null)

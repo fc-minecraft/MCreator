@@ -80,8 +80,7 @@ public class AchievementGUI extends ModElementGUI<Achievement> implements IBlock
 	private final JComboBox<String> achievementType = new TranslatedComboBox(
 			Map.entry("task", "elementgui.achievement.type.task"),
 			Map.entry("goal", "elementgui.achievement.type.goal"),
-			Map.entry("challenge", "elementgui.achievement.type.challenge")
-	);
+			Map.entry("challenge", "elementgui.achievement.type.challenge"));
 
 	private TextureComboBox background;
 
@@ -109,15 +108,18 @@ public class AchievementGUI extends ModElementGUI<Achievement> implements IBlock
 		super.finalizeGUI();
 	}
 
-	@Override public void addBlocklyChangedListener(BlocklyChangedListener listener) {
+	@Override
+	public void addBlocklyChangedListener(BlocklyChangedListener listener) {
 		blocklyChangedListeners.add(listener);
 	}
 
-	@Override protected void initGUI() {
+	@Override
+	protected void initGUI() {
 		achievementIcon = new MCItemHolder(mcreator, ElementUtil::loadBlocksAndItems).requireValue(
 				"elementgui.advancement.error_advancement_needs_icon");
 
-		background = new TextureComboBox(mcreator, TextureType.SCREEN, true, "Default");
+		background = new TextureComboBox(mcreator, TextureType.SCREEN, true,
+				L10N.t("elementgui.advancement.background.default"));
 
 		JPanel propertiesPanel = new JPanel(new GridLayout(7, 2, 10, 2));
 		JPanel logicPanel = new JPanel(new GridLayout(7, 2, 10, 2));
@@ -246,7 +248,8 @@ public class AchievementGUI extends ModElementGUI<Achievement> implements IBlock
 		}
 	}
 
-	@Override public synchronized List<BlocklyCompileNote> regenerateBlockAssemblies(boolean jsEventTriggeredChange) {
+	@Override
+	public synchronized List<BlocklyCompileNote> regenerateBlockAssemblies(boolean jsEventTriggeredChange) {
 		BlocklyBlockCodeGenerator blocklyBlockCodeGenerator = new BlocklyBlockCodeGenerator(externalBlocks,
 				mcreator.getGeneratorStats().getBlocklyBlocks(BlocklyEditorType.JSON_TRIGGER));
 
@@ -274,14 +277,16 @@ public class AchievementGUI extends ModElementGUI<Achievement> implements IBlock
 		return compileNotesArrayList;
 	}
 
-	@Override public void reloadDataLists() {
+	@Override
+	public void reloadDataLists() {
 		ComboBoxUtil.updateComboBoxContents(parentAchievement,
 				ElementUtil.loadAllAchievements(mcreator.getWorkspace()));
 
 		background.reload();
 	}
 
-	@Override public void openInEditingMode(Achievement achievement) {
+	@Override
+	public void openInEditingMode(Achievement achievement) {
 		achievementName.setText(achievement.achievementName);
 		achievementDescription.setText(achievement.achievementDescription);
 		achievementIcon.setBlock(achievement.achievementIcon);
@@ -300,7 +305,8 @@ public class AchievementGUI extends ModElementGUI<Achievement> implements IBlock
 		blocklyPanel.addTaskToRunAfterLoaded(() -> blocklyPanel.setXML(achievement.triggerxml));
 	}
 
-	@Override public Achievement getElementFromGUI() {
+	@Override
+	public Achievement getElementFromGUI() {
 		Achievement achievement = new Achievement(modElement);
 		achievement.achievementName = achievementName.getText();
 		achievement.achievementDescription = achievementDescription.getText();
@@ -324,15 +330,18 @@ public class AchievementGUI extends ModElementGUI<Achievement> implements IBlock
 		return achievement;
 	}
 
-	@Override public @Nullable URI contextURL() throws URISyntaxException {
+	@Override
+	public @Nullable URI contextURL() throws URISyntaxException {
 		return new URI(MCreatorApplication.SERVER_DOMAIN + "/wiki/how-make-achievement");
 	}
 
-	@Override public Set<BlocklyPanel> getBlocklyPanels() {
+	@Override
+	public Set<BlocklyPanel> getBlocklyPanels() {
 		return Set.of(blocklyPanel);
 	}
 
-	@Override public boolean isInitialXMLValid() {
+	@Override
+	public boolean isInitialXMLValid() {
 		return false;
 	}
 
