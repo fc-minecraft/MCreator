@@ -241,7 +241,7 @@ public class OfflineCacheManager {
                             "validateAccessWidener", "genSourcesWithCfr", "build");
 
                     // Memory optimization
-                    launcher.addJvmArguments("-Xmx1024m", "-XX:+UseSerialGC");
+                    launcher.addJvmArguments("-Xmx1024m");
                     launcher.addArguments("--build-cache", "--parallel");
 
                     launcher.addProgressListener(event -> {
@@ -477,7 +477,7 @@ public class OfflineCacheManager {
             content += "\norg.gradle.caching=true";
             content += "\norg.gradle.parallel=true";
             content += "\norg.gradle.vfs.watch=true";
-            content += "\norg.gradle.jvmargs=-Xmx1024m -XX:+UseSerialGC";
+            content += "\norg.gradle.jvmargs=-Xmx1024m";
         }
         FileIO.writeStringToFile(content, gradleProps);
     }
@@ -534,7 +534,7 @@ public class OfflineCacheManager {
                     props += "\norg.gradle.caching=true";
                     props += "\norg.gradle.parallel=true";
                     // CRITICAL: Limit user RAM usage
-                    props += "\norg.gradle.jvmargs=-Xmx1024m -XX:+UseSerialGC";
+                    props += "\norg.gradle.jvmargs=-Xmx1024m";
                 }
 
                 FileIO.writeStringToFile(props, gradleProps);

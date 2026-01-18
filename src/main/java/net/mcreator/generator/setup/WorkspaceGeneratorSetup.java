@@ -27,7 +27,7 @@ import net.mcreator.generator.setup.folders.AbstractFolderStructure;
 import net.mcreator.generator.template.InlineTemplatesHandler;
 import net.mcreator.io.FileIO;
 import net.mcreator.plugin.PluginLoader;
-import net.mcreator.preferences.PreferencesManager;
+
 import net.mcreator.ui.workspace.resources.TextureType;
 import net.mcreator.util.OfflineCacheManager;
 import net.mcreator.util.TestUtil;
@@ -71,7 +71,8 @@ public class WorkspaceGeneratorSetup {
 		FileIO.deleteDir(new File(workspace.getWorkspaceFolder(), "build/"));
 		FileIO.deleteDir(new File(workspace.getWorkspaceFolder(), "lib/"));
 
-		// attempt to delete AT files if Java (so outdated ATs are not applied during generator setup)
+		// attempt to delete AT files if Java (so outdated ATs are not applied during
+		// generator setup)
 		// they will be regenerated with next workspace build
 		if (newGenerator.getGeneratorFlavor().getBaseLanguage() == GeneratorFlavor.BaseLanguage.JAVA) {
 			new File(workspace.getWorkspaceFolder(), "src/main/resources/META-INF/accesstransformer.cfg").delete();
@@ -89,13 +90,16 @@ public class WorkspaceGeneratorSetup {
 			}
 		}
 
-		if (newGenerator.getGeneratorFlavor()
-				== GeneratorFlavor.NEOFORGE) { // If switching to NeoForge, delete mods.toml (Minecraft Forge mod specification file)
+		if (newGenerator.getGeneratorFlavor() == GeneratorFlavor.NEOFORGE) { // If switching to NeoForge, delete
+																				// mods.toml (Minecraft Forge mod
+																				// specification file)
 			new File(workspace.getWorkspaceFolder(), "src/main/resources/META-INF/mods.toml").delete();
 			new File(workspace.getWorkspaceFolder(),
-					"src/main/resources/mcmod.info").delete(); // also delete legacy mcmod.info used in early versions of Forge
-		} else if (newGenerator.getGeneratorFlavor()
-				== GeneratorFlavor.FORGE) { // If switching to Minecraft Forge, delete neoforge.mods.toml (NeoForge mod specification file)
+					"src/main/resources/mcmod.info").delete(); // also delete legacy mcmod.info used in early versions
+																// of Forge
+		} else if (newGenerator.getGeneratorFlavor() == GeneratorFlavor.FORGE) { // If switching to Minecraft Forge,
+																					// delete neoforge.mods.toml
+																					// (NeoForge mod specification file)
 			new File(workspace.getWorkspaceFolder(), "src/main/resources/META-INF/neoforge.mods.toml").delete();
 		}
 
@@ -136,10 +140,6 @@ public class WorkspaceGeneratorSetup {
 	}
 
 	public static void setupWorkspaceBase(Workspace workspace) {
-		if (PreferencesManager.PREFERENCES.gradle.offline.get() && OfflineCacheManager.isOfflineModeReady()) {
-			OfflineCacheManager.applyOfflineFixes(workspace.getWorkspaceFolder());
-		}
-
 		Set<String> fileNames = PluginLoader.INSTANCE.getResourcesInPackage(
 				workspace.getGenerator().getGeneratorName() + ".workspacebase");
 		for (String file : fileNames) {
@@ -163,6 +163,10 @@ public class WorkspaceGeneratorSetup {
 				LOG.error("Failed to copy workspace base file", e);
 				TestUtil.failIfTestingEnvironment();
 			}
+		}
+
+		if (OfflineCacheManager.isOfflineModeReady()) {
+			OfflineCacheManager.applyOfflineFixes(workspace.getWorkspaceFolder());
 		}
 	}
 
