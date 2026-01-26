@@ -23,6 +23,7 @@ import net.mcreator.preferences.PreferencesEntry;
 import net.mcreator.preferences.PreferencesSection;
 import net.mcreator.preferences.entries.BooleanEntry;
 import net.mcreator.preferences.entries.ColorEntry;
+import net.mcreator.preferences.entries.IntegerEntry;
 import net.mcreator.preferences.entries.LocaleEntry;
 import net.mcreator.preferences.entries.StringEntry;
 import net.mcreator.ui.init.L10N;
@@ -40,6 +41,8 @@ public class UISection extends PreferencesSection {
 	public final BooleanEntry expandSectionsByDefault;
 	public final BooleanEntry autoReloadTabs;
 	public final BooleanEntry remindOfUnsavedChanges;
+	public final BooleanEntry autoPurgeProjects;
+	public final IntegerEntry autoPurgeProjectsTime;
 
 	public UISection(String preferencesIdentifier) {
 		super(preferencesIdentifier);
@@ -52,6 +55,8 @@ public class UISection extends PreferencesSection {
 		nativeFileChooser = addEntry(new BooleanEntry("nativeFileChooser", true));
 		expandSectionsByDefault = addEntry(new BooleanEntry("expandSectionsByDefault", false));
 		autoReloadTabs = addEntry(new BooleanEntry("autoReloadTabs", true));
+		autoPurgeProjects = addEntry(new BooleanEntry("autoPurgeProjects", true));
+		autoPurgeProjectsTime = addEntry(new IntegerEntry("autoPurgeProjectsTime", 6, 1, 120));
 		remindOfUnsavedChanges = addEntry(new BooleanEntry("remindOfUnsavedChanges", false));
 
 	}

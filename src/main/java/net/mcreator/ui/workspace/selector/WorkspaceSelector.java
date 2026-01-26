@@ -29,6 +29,7 @@ import net.mcreator.io.OS;
 import net.mcreator.io.UserFolderManager;
 import net.mcreator.plugin.MCREvent;
 import net.mcreator.plugin.events.WorkspaceSelectorLoadedEvent;
+import net.mcreator.preferences.PreferencesManager;
 import net.mcreator.ui.MCreatorApplication;
 import net.mcreator.ui.action.impl.AboutAction;
 import net.mcreator.ui.component.util.ComponentUtils;
@@ -72,6 +73,8 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 	private final JPanel recentPanel = new JPanel(recentPanes);
 	private final WorkspaceOpenListener workspaceOpenListener;
 	private RecentWorkspaces recentWorkspaces = new RecentWorkspaces();
+
+	private boolean purged = false;
 
 	@Nullable
 	private final MCreatorApplication application;
@@ -342,6 +345,10 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 			public void windowActivated(WindowEvent e) {
 				super.windowActivated(e);
 				reloadRecents();
+				if (!purged) {
+					runAutoPurge();
+					purged = true;
+				}
 				newWorkspace.requestFocusInWindow();
 			}
 		});
@@ -602,6 +609,33 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 	@Override
 	public NotificationsRenderer getNotificationsRenderer() {
 		return notificationsRenderer;
+	}
+
+	private void runAutoPurge() {
+		if (PreferencesManager.PREFERENCES.ui.autoPurgeProjects.get()) {
+			int months = PreferencesManager.PREFERENCES.ui.autoPurgeProjectsTime.get();
+			long threshold = System.currentTimeMillis() - (long) months * 30 * 24 * 60 * 60 * 1000L;
+			boolean changed = false;
+
+			List<RecentWorkspaceEntry> currentList = new ArrayList<>(recentWorkspaces.getList());
+			for (RecentWorkspaceEntry entry : currentList) {
+				if (entry.getPath().exists()) {
+					long lastModified = entry.getPath().lastModified();
+					if (lastModified < threshold) {
+						if (FileIO.moveToTrash(entry.getPath().getParentFile())) {
+							recentWorkspaces.getList().remove(entry);
+							changed = true;
+							LOG.info("Auto-purged project: " + entry.getName());
+						}
+					}
+				}
+			}
+
+			if (changed) {
+				saveRecentWorkspaces();
+				reloadRecents();
+			}
+		}
 	}
 
 }
