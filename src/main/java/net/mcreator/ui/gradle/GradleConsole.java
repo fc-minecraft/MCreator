@@ -128,13 +128,16 @@ public class GradleConsole extends JPanel implements ISearchable {
 
 	private CancellationTokenSource cancellationSource = GradleConnector.newCancellationTokenSource();
 
-	// a flag to prevent infinite re-runs in case when re-run does not solve the build problem
+	// a flag to prevent infinite re-runs in case when re-run does not solve the
+	// build problem
 	public boolean rerunFlag = false;
 
 	// Gradle console may be associated with a debug client
-	@Nullable private JVMDebugClient debugClient = null;
+	@Nullable
+	private JVMDebugClient debugClient = null;
 
-	@Nullable private JMXMonitorClient jmxMonitorClient = null;
+	@Nullable
+	private JMXMonitorClient jmxMonitorClient = null;
 
 	public GradleConsole(MCreator ref) {
 		this.ref = ref;
@@ -153,7 +156,8 @@ public class GradleConsole extends JPanel implements ISearchable {
 						ProjectJarManager jarManager = ref.getGenerator().getProjectJarManager();
 						if (jarManager != null) {
 							if (fileurl.contains(
-									"/")) { // we don't have just FQDN but also module definition which we need to remove
+									"/")) { // we don't have just FQDN but also module definition which we need to
+											// remove
 								fileurl = fileurl.substring(fileurl.lastIndexOf("/") + 1);
 							}
 
@@ -194,7 +198,8 @@ public class GradleConsole extends JPanel implements ISearchable {
 
 				if (slock.isSelected() && fraction > 0.99)
 					slock.setSelected(false);
-				// only turn off scroll lock if scrolled more than 85% above the bottom, and we have at least 2000 scroll entries
+				// only turn off scroll lock if scrolled more than 85% above the bottom, and we
+				// have at least 2000 scroll entries
 				else if (!slock.isSelected() && fraction < 0.85 && maxValue > 2000)
 					slock.setSelected(true);
 			}
@@ -273,7 +278,8 @@ public class GradleConsole extends JPanel implements ISearchable {
 		KeyStrokes.registerKeyStroke(
 				KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), pan,
 				new AbstractAction() {
-					@Override public void actionPerformed(ActionEvent actionEvent) {
+					@Override
+					public void actionPerformed(ActionEvent actionEvent) {
 						searchen.setSelected(true);
 					}
 				});
@@ -329,7 +335,8 @@ public class GradleConsole extends JPanel implements ISearchable {
 
 		searchen.addChangeListener(e -> searchBar.setVisible(searchen.isSelected()));
 		searchBar.addComponentListener(new ComponentAdapter() {
-			@Override public void componentHidden(ComponentEvent e) {
+			@Override
+			public void componentHidden(ComponentEvent e) {
 				searchen.setSelected(false);
 			}
 		});
@@ -341,7 +348,8 @@ public class GradleConsole extends JPanel implements ISearchable {
 
 	private void scrollToBottom() {
 		if (!slock.isSelected() && pan.isDisplayable()) // check if pan is displayable,
-			// so we don't get IllegalComponentStateException: see http://www.oreilly.com/openbook/javawt/book/ch13.pdf, page 467
+			// so we don't get IllegalComponentStateException: see
+			// http://www.oreilly.com/openbook/javawt/book/ch13.pdf, page 467
 			pan.setCaretPosition(pan.getDocument().getLength());
 	}
 
@@ -385,10 +393,10 @@ public class GradleConsole extends JPanel implements ISearchable {
 		searchBar.reinstall(pan);
 
 		if (isGradleSync) {
-			append("Executing Gradle synchronization tasks", COLOR_TASK_START);
+			append(L10N.t("console.gradle.sync"), COLOR_TASK_START);
 			ref.getStatusBar().setGradleMessage("Gradle sync");
 		} else {
-			append("Executing Gradle task: " + command, COLOR_TASK_START);
+			append(L10N.t("console.gradle.task_executing") + command, COLOR_TASK_START);
 			ref.getStatusBar().setGradleMessage("Gradle: " + command);
 		}
 
@@ -398,7 +406,8 @@ public class GradleConsole extends JPanel implements ISearchable {
 			String deviceInfo = "Build info: MCreator " + Launcher.version.getFullString() + ", " + ref.getWorkspace()
 					.getGenerator().getGeneratorName() + ", " + ref.getApplication().getDeviceInfo().getSystemBits()
 					+ "-bit, " + ref.getApplication().getDeviceInfo().getRamAmountMB() + " MB, " + ref.getApplication()
-					.getDeviceInfo().getOsName() + ", JVM " + ref.getApplication().getDeviceInfo().getJvmVersion()
+							.getDeviceInfo().getOsName()
+					+ ", JVM " + ref.getApplication().getDeviceInfo().getJvmVersion()
 					+ ", JAVA_HOME: " + (java_home != null ? java_home : "Default (not set)") + ", started on: "
 					+ new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(Calendar.getInstance().getTime());
 			append(deviceInfo, COLOR_UNIMPORTANT);
@@ -412,7 +421,7 @@ public class GradleConsole extends JPanel implements ISearchable {
 			}
 
 			if (PreferencesManager.PREFERENCES.gradle.offline.get()) {
-				append("Gradle is running in offline mode. Some features may not work properly!", COLOR_LOGLEVEL_WARN);
+				append(L10N.t("console.gradle.offline_warning"), COLOR_LOGLEVEL_WARN);
 			}
 
 			append(" ");
@@ -460,17 +469,20 @@ public class GradleConsole extends JPanel implements ISearchable {
 
 						private boolean initial = true;
 
-						@Override public void connected(JMXConnector jmxConnector) {
+						@Override
+						public void connected(JMXConnector jmxConnector) {
 							cpuChart.clear();
 							memoryChart.clear();
 							mainScrollPane.getColumnHeader().setVisible(true);
 						}
 
-						@Override public void disconnected() {
+						@Override
+						public void disconnected() {
 							mainScrollPane.getColumnHeader().setVisible(false);
 						}
 
-						@Override public void dataRefresh(MemoryMXBean memoryMXBean, OperatingSystemMXBean osMXBean) {
+						@Override
+						public void dataRefresh(MemoryMXBean memoryMXBean, OperatingSystemMXBean osMXBean) {
 							if (initial) {
 								memoryChart.setYLimits(0,
 										(double) memoryMXBean.getHeapMemoryUsage().getMax() / 1024 / 1024);
@@ -604,7 +616,8 @@ public class GradleConsole extends JPanel implements ISearchable {
 		}
 
 		ResultHandler<Void> resultHandler = new ResultHandler<>() {
-			@Override public void onComplete(Void result) {
+			@Override
+			public void onComplete(Void result) {
 				SwingUtilities.invokeLater(() -> {
 					ref.getWorkspace().checkFailingGradleDependenciesAndClear(); // clear flag without checking
 
@@ -614,7 +627,8 @@ public class GradleConsole extends JPanel implements ISearchable {
 				});
 			}
 
-			@Override public void onFailure(GradleConnectionException failure) {
+			@Override
+			public void onFailure(GradleConnectionException failure) {
 				SwingUtilities.invokeLater(() -> {
 					AtomicBoolean errorhandled = new AtomicBoolean(false);
 
@@ -652,8 +666,9 @@ public class GradleConsole extends JPanel implements ISearchable {
 								|| GradleErrorDecoder.isErrorCausedByCorruptedCaches(taskErr.toString() + taskOut)) {
 							AtomicBoolean shouldReturn = new AtomicBoolean(false);
 							ThreadUtil.runOnSwingThreadAndWait(() -> {
-								Object[] options = { "Clear Gradle caches", "Clear entire Gradle folder",
-										"<html><font color=gray>Do nothing" };
+								Object[] options = { L10N.t("action.gradle.clear_caches.option.gradle_caches"),
+										L10N.t("action.gradle.clear_caches.option.gradle_folder"),
+										L10N.t("dialog.gradle_console.cache_cleanup_option.do_nothing") };
 								int reply = JOptionPane.showOptionDialog(ref,
 										L10N.t("dialog.gradle_console.gradle_caches_corrupted_message"),
 										L10N.t("dialog.gradle_console.gradle_caches_corrupted_title"),
@@ -678,10 +693,10 @@ public class GradleConsole extends JPanel implements ISearchable {
 									CodeErrorDialog.showCodeErrorDialog(ref, taskErr.toString() + taskOut)));
 						}
 						append(" ");
-						append("BUILD FAILED", COLOR_LOGLEVEL_ERROR);
+						append(L10N.t("console.gradle.build_failed"), COLOR_LOGLEVEL_ERROR);
 					} else if (failure instanceof BuildCancelledException) {
 						append(" ");
-						append("TASK CANCELED", COLOR_LOGLEVEL_WARN);
+						append(L10N.t("console.gradle.task_canceled"), COLOR_LOGLEVEL_WARN);
 						succeed();
 						taskComplete(GradleResultCode.STATUS_OK);
 						return;
@@ -689,7 +704,7 @@ public class GradleConsole extends JPanel implements ISearchable {
 							// workaround for MDK bug with gradle daemon
 							&& command.startsWith("run")) {
 						append(" ");
-						append("RUN COMPLETE", COLOR_TASK_COMPLETE);
+						append(L10N.t("console.gradle.run_complete"), COLOR_TASK_COMPLETE);
 						succeed();
 						taskComplete(GradleResultCode.STATUS_OK);
 						return;
@@ -703,7 +718,7 @@ public class GradleConsole extends JPanel implements ISearchable {
 						});
 
 						append(" ");
-						append("TASK EXECUTION FAILED", COLOR_LOGLEVEL_ERROR);
+						append(L10N.t("console.gradle.task_failed"), COLOR_LOGLEVEL_ERROR);
 					}
 
 					fail();
@@ -717,7 +732,8 @@ public class GradleConsole extends JPanel implements ISearchable {
 					if (resultcode == GradleResultCode.STATUS_OK)
 						resultcode = GradleResultCode.GRADLE_BUILD_FAILED;
 
-					MCREvent.event(new WorkspaceTaskFinishedEvent.TaskError(ref, resultcode, taskOut.toString(), taskErr.toString()));
+					MCREvent.event(new WorkspaceTaskFinishedEvent.TaskError(ref, resultcode, taskOut.toString(),
+							taskErr.toString()));
 
 					taskComplete(resultcode);
 				});
@@ -744,7 +760,9 @@ public class GradleConsole extends JPanel implements ISearchable {
 			}
 
 			private void taskComplete(GradleResultCode mcreatorGradleStatus) {
-				appendPlainText("Task completed in " + TimeUtils.millisToLongDHMS(System.currentTimeMillis() - millis),
+				appendPlainText(
+						L10N.t("console.gradle.task_completed_in")
+								+ TimeUtils.millisToLongDHMS(System.currentTimeMillis() - millis),
 						Color.gray);
 				append(" ");
 
@@ -928,7 +946,7 @@ public class GradleConsole extends JPanel implements ISearchable {
 						text.split("\\(")[1].split("\\)")[0], "", keyWord);
 				StyleConstants.setForeground(keyWord, Theme.current().getForegroundColor());
 				pan.insertString(")" + text.split("\\(")[1].split("\\)")[1], keyWord);
-			} catch (Exception ignored) {  // workspace can be null or we can fail to parse error link
+			} catch (Exception ignored) { // workspace can be null or we can fail to parse error link
 				// if we fail to print styled, fallback to plaintext
 				appendPlainText(text, Theme.current().getForegroundColor());
 			}
@@ -947,11 +965,13 @@ public class GradleConsole extends JPanel implements ISearchable {
 		scrollToBottom();
 	}
 
-	@Nullable public JVMDebugClient getDebugClient() {
+	@Nullable
+	public JVMDebugClient getDebugClient() {
 		return debugClient;
 	}
 
-	@Override public void search(@Nullable String searchTerm) {
+	@Override
+	public void search(@Nullable String searchTerm) {
 		if (!searchen.isSelected())
 			searchen.doClick();
 
@@ -960,6 +980,5 @@ public class GradleConsole extends JPanel implements ISearchable {
 		if (searchTerm != null)
 			searchBar.getSearchField().setText(searchTerm);
 	}
-
 
 }

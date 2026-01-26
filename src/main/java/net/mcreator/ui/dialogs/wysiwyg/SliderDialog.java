@@ -58,32 +58,61 @@ public class SliderDialog extends AbstractWYSIWYGDialog<Slider> {
 
 		JTextField sliderPrefix = new JTextField(8);
 		JMinMaxSpinner rangeSpinner = new JMinMaxSpinner(0.0, 10.0, -Double.MAX_VALUE, Double.MAX_VALUE, 1.0);
-		rangeSpinner.setPreferredSize(new Dimension(200, 20));
+		rangeSpinner.setPreferredSize(new Dimension(320, 28));
 		JSpinner valueSpinner = new JSpinner(new SpinnerNumberModel(5, -10000.0, 10000.0, 1));
-		valueSpinner.addChangeListener(e -> {
-			double d = (double) valueSpinner.getValue();
-			if (d < rangeSpinner.getMinValue())
-				valueSpinner.setValue(rangeSpinner.getMinValue());
-			else if (d > rangeSpinner.getMaxValue())
-				valueSpinner.setValue(rangeSpinner.getMaxValue());
-		});
 		JSpinner stepSpinner = new JSpinner(new SpinnerNumberModel(1, -10000.0, 10000.0, 1));
+
+		// Prevent infinite recursion
+		class RecursionGuard {
+			boolean isUpdating = false;
+		}
+		RecursionGuard guard = new RecursionGuard();
+
+		valueSpinner.addChangeListener(e -> {
+			if (guard.isUpdating)
+				return;
+			guard.isUpdating = true;
+			try {
+				double d = (double) valueSpinner.getValue();
+				if (d < rangeSpinner.getMinValue())
+					valueSpinner.setValue(rangeSpinner.getMinValue());
+				else if (d > rangeSpinner.getMaxValue())
+					valueSpinner.setValue(rangeSpinner.getMaxValue());
+			} finally {
+				guard.isUpdating = false;
+			}
+		});
+
 		stepSpinner.addChangeListener(e -> {
-			double d = (double) stepSpinner.getValue();
-			if ((rangeSpinner.getMaxValue() - rangeSpinner.getMinValue()) < d)
-				stepSpinner.setValue(rangeSpinner.getMaxValue() - rangeSpinner.getMinValue());
+			if (guard.isUpdating)
+				return;
+			guard.isUpdating = true;
+			try {
+				double d = (double) stepSpinner.getValue();
+				if ((rangeSpinner.getMaxValue() - rangeSpinner.getMinValue()) < d)
+					stepSpinner.setValue(rangeSpinner.getMaxValue() - rangeSpinner.getMinValue());
+			} finally {
+				guard.isUpdating = false;
+			}
 		});
 
 		rangeSpinner.addChangeListener(e -> {
-			double value = (double) valueSpinner.getValue();
-			if (value < rangeSpinner.getMinValue())
-				valueSpinner.setValue(rangeSpinner.getMinValue());
-			else if (value > rangeSpinner.getMaxValue())
-				valueSpinner.setValue(rangeSpinner.getMaxValue());
+			if (guard.isUpdating)
+				return;
+			guard.isUpdating = true;
+			try {
+				double value = (double) valueSpinner.getValue();
+				if (value < rangeSpinner.getMinValue())
+					valueSpinner.setValue(rangeSpinner.getMinValue());
+				else if (value > rangeSpinner.getMaxValue())
+					valueSpinner.setValue(rangeSpinner.getMaxValue());
 
-			double step = (double) stepSpinner.getValue();
-			if ((rangeSpinner.getMaxValue() - rangeSpinner.getMinValue()) < step)
-				stepSpinner.setValue(rangeSpinner.getMaxValue() - rangeSpinner.getMinValue());
+				double step = (double) stepSpinner.getValue();
+				if ((rangeSpinner.getMaxValue() - rangeSpinner.getMinValue()) < step)
+					stepSpinner.setValue(rangeSpinner.getMaxValue() - rangeSpinner.getMinValue());
+			} finally {
+				guard.isUpdating = false;
+			}
 		});
 		JTextField sliderSuffix = new JTextField(8);
 
