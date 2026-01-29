@@ -107,6 +107,9 @@ public final class MCreatorApplication {
 
 			UIRES.preloadImages();
 
+			// load translations after plugins are loaded
+			L10N.initTranslations();
+
 			// Now that UIRES is loaded, we can load the theme (theme can use UIRES icons)
 			ThemeManager.applySelectedTheme();
 
@@ -116,9 +119,6 @@ public final class MCreatorApplication {
 
 			// preload help entries cache
 			HelpLoader.preloadCache();
-
-			// load translations after plugins are loaded
-			L10N.initTranslations();
 
 			splashScreen.setProgress(35, L10N.t("splash.loading_plugin_data"));
 

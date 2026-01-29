@@ -74,7 +74,7 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 
 		setModal(true);
 		setTitle(L10N.t("dialog.textures_selector.title", type));
-		setSize(844, 480);
+		setSize(1100, 550);
 		setLocationRelativeTo(mcreator);
 
 		JPanel pn = new JPanel(new BorderLayout());
@@ -84,7 +84,8 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 		list.setCellRenderer(new Render());
 
 		list.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent mouseEvent) {
+			@Override
+			public void mouseClicked(MouseEvent mouseEvent) {
 				super.mouseClicked(mouseEvent);
 				if (mouseEvent.getClickCount() == 2)
 					select.doClick();
@@ -109,15 +110,18 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 		buttons.add(cancelButton);
 
 		filterField.getDocument().addDocumentListener(new DocumentListener() {
-			@Override public void removeUpdate(DocumentEvent arg0) {
+			@Override
+			public void removeUpdate(DocumentEvent arg0) {
 				model.refilter();
 			}
 
-			@Override public void insertUpdate(DocumentEvent arg0) {
+			@Override
+			public void insertUpdate(DocumentEvent arg0) {
 				model.refilter();
 			}
 
-			@Override public void changedUpdate(DocumentEvent arg0) {
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {
 				model.refilter();
 			}
 		});
@@ -153,11 +157,12 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 		});
 		pno.add(importTx);
 
-		pn.add("North", PanelUtils.westAndEastElement(pno, PanelUtils.totalCenterInPanel(pno2)));
+		pn.add("North", PanelUtils.westAndEastElement(pno, pno2, 20, 0));
 		pn.add("South", buttons);
 
 		addWindowListener(new WindowAdapter() {
-			@Override public void windowActivated(WindowEvent e) {
+			@Override
+			public void windowActivated(WindowEvent e) {
 				super.windowActivated(e);
 				reloadList();
 			}
@@ -179,7 +184,8 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 		layout.show(center, "load");
 
 		SwingWorker<List<Texture>, Void> worker = new SwingWorker<>() {
-			@Override protected List<Texture> doInBackground() {
+			@Override
+			protected List<Texture> doInBackground() {
 				List<Texture> result = new ArrayList<>(CustomTexture.getTexturesOfType(mcreator.getWorkspace(), type));
 				if (loadExternalTextures) {
 					result.addAll(ExternalTexture.getTexturesOfType(mcreator.getWorkspace(), type));
@@ -187,7 +193,8 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 				return result;
 			}
 
-			@Override protected void done() {
+			@Override
+			protected void done() {
 				try {
 					List<Texture> data = get();
 
@@ -255,34 +262,40 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 			filterItems = new ArrayList<>();
 		}
 
-		@Override public Texture getElementAt(int index) {
+		@Override
+		public Texture getElementAt(int index) {
 			if (index < filterItems.size())
 				return filterItems.get(index);
 			else
 				return null;
 		}
 
-		@Override public int getSize() {
+		@Override
+		public int getSize() {
 			return filterItems.size();
 		}
 
-		@Override public void addElement(Texture o) {
+		@Override
+		public void addElement(Texture o) {
 			items.add(o);
 			refilter();
 		}
 
-		@Override public void addAll(Collection<? extends Texture> collection) {
+		@Override
+		public void addAll(Collection<? extends Texture> collection) {
 			items.addAll(collection);
 			refilter();
 		}
 
-		@Override public void removeAllElements() {
+		@Override
+		public void removeAllElements() {
 			super.removeAllElements();
 			items.clear();
 			filterItems.clear();
 		}
 
-		@Override public boolean removeElement(Object a) {
+		@Override
+		public boolean removeElement(Object a) {
 			if (a instanceof Texture) {
 				items.remove(a);
 				filterItems.remove(a);

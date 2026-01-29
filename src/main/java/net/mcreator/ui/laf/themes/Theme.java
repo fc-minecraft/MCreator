@@ -37,8 +37,14 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * <p>A Theme can change images MCreator will use and redefine the colors and the style
- * of {@link net.mcreator.ui.blockly.BlocklyPanel} and {@link net.mcreator.ui.ide.RSyntaxTextAreaStyler} by creating a new {@link ColorScheme}</p>.
+ * <p>
+ * A Theme can change images MCreator will use and redefine the colors and the
+ * style
+ * of {@link net.mcreator.ui.blockly.BlocklyPanel} and
+ * {@link net.mcreator.ui.ide.RSyntaxTextAreaStyler} by creating a new
+ * {@link ColorScheme}
+ * </p>
+ * .
  */
 @SuppressWarnings({ "unused", "FieldCanBeLocal", "FieldMayBeFinal", "MismatchedQueryAndUpdateOfCollection" })
 public class Theme {
@@ -51,18 +57,24 @@ public class Theme {
 
 	// Theme public model start
 	private String name;
-	@Nullable private String description;
-	@Nullable private String version;
-	@Nullable private String credits;
+	@Nullable
+	private String description;
+	@Nullable
+	private String version;
+	@Nullable
+	private String credits;
 
-	@Nullable private ColorScheme colorScheme;
+	@Nullable
+	private ColorScheme colorScheme;
 
 	private String flatLafTheme = "FlatDarkLaf";
 
 	/**
-	 * See <a href="https://www.formdev.com/flatlaf/properties-files/">FlatLaf properties file format</a>.
+	 * See <a href="https://www.formdev.com/flatlaf/properties-files/">FlatLaf
+	 * properties file format</a>.
 	 * <p/>
-	 * One can add additional parameters from the theme JSON by defining them in the "flatLafOverrides" map.
+	 * One can add additional parameters from the theme JSON by defining them in the
+	 * "flatLafOverrides" map.
 	 */
 	private Map<String, String> flatLafOverrides = new HashMap<>();
 
@@ -116,22 +128,22 @@ public class Theme {
 			overrides.put("Objects.Grey", "@buttonArrowColor");
 			overrides.put("Objects.GreenAndroid", "@accentColor");
 		} else {
-            // Apply custom theme by default (FunCode Theme)
-            overrides.put("@accentColor", "#CEFF32");
-            overrides.put("@background", "#1E2A3C");
-            overrides.put("@foreground", "#FFFFFF");
-            overrides.put("Panel.background", "#1E2A3C");
-            overrides.put("Label.foreground", "#FFFFFF");
-            overrides.put("Button.background", "#53DDFF");
-            overrides.put("Button.foreground", "#000000");
+			// Apply custom theme by default (FunCode Theme)
+			overrides.put("@accentColor", "#CEFF32");
+			overrides.put("@background", "#1E2A3C");
+			overrides.put("@foreground", "#FFFFFF");
+			overrides.put("Panel.background", "#1E2A3C");
+			overrides.put("Label.foreground", "#FFFFFF");
+			overrides.put("Button.background", "#53DDFF");
+			overrides.put("Button.foreground", "#000000");
 
-            overrides.put("Objects.BlackText", "@foreground");
+			overrides.put("Objects.BlackText", "@foreground");
 			overrides.put("Objects.Grey", "@buttonArrowColor");
 			overrides.put("Objects.GreenAndroid", "@accentColor");
-        }
+		}
 
-        // Increase font size
-        overrides.put("defaultFont", "14");
+		// Increase font size
+		overrides.put("defaultFont", "14");
 
 		if (!disableMCreatorOverrides) {
 			overrides.put("Button.arc", "0");
@@ -181,51 +193,78 @@ public class Theme {
 		table.put("OptionPane.errorIcon", UIRES.get("laf.error"));
 		table.put("OptionPane.questionIcon", UIRES.get("laf.question"));
 		table.put("OptionPane.informationIcon", UIRES.get("laf.info"));
+
+		table.put("OptionPane.okButtonText", L10N.t("common.ok"));
+		table.put("OptionPane.cancelButtonText", L10N.t("common.cancel"));
+		table.put("OptionPane.yesButtonText", L10N.t("common.yes"));
+		table.put("OptionPane.noButtonText", L10N.t("common.no"));
+		table.put("OptionPane.nextButtonText", L10N.t("common.next"));
+		table.put("OptionPane.backButtonText", L10N.t("common.back"));
+		table.put("OptionPane.finishButtonText", L10N.t("common.finish"));
 	}
 
 	/**
-	 * The ID is the theme's registry name. It is used to differentiate each theme in the code.
+	 * The ID is the theme's registry name. It is used to differentiate each theme
+	 * in the code.
 	 * This ID is also the main folder's name of the theme.
 	 *
-	 * @return <p>The theme's ID</p>
+	 * @return
+	 *         <p>
+	 *         The theme's ID
+	 *         </p>
 	 */
 	public String getID() {
 		return id;
 	}
 
 	/**
-	 * @return <p>Its displayed name</p>
+	 * @return
+	 *         <p>
+	 *         Its displayed name
+	 *         </p>
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * @return <p>A description displayed in the {@link net.mcreator.ui.dialogs.preferences.ThemesPanel} if provided.</p>
+	 * @return
+	 *         <p>
+	 *         A description displayed in the
+	 *         {@link net.mcreator.ui.dialogs.preferences.ThemesPanel} if provided.
+	 *         </p>
 	 */
 	public String getDescription() {
 		// Description inside the JSON file
 		if (description != null)
 			return description;
-			// Localized description
+		// Localized description
 		else if (!L10N.t("theme." + id + ".description").equals("theme." + id + ".description"))
 			return L10N.t("theme." + id + ".description");
-			// No description
+		// No description
 		else
 			return "";
 	}
 
 	/**
-	 * @return <p>A String with optional credits to give to someone.</p>
+	 * @return
+	 *         <p>
+	 *         A String with optional credits to give to someone.
+	 *         </p>
 	 */
-	@Nullable public String getCredits() {
+	@Nullable
+	public String getCredits() {
 		return credits;
 	}
 
 	/**
-	 * @return <p>The theme's version if provided</p>
+	 * @return
+	 *         <p>
+	 *         The theme's version if provided
+	 *         </p>
 	 */
-	@Nullable public String getVersion() {
+	@Nullable
+	public String getVersion() {
 		return version;
 	}
 
@@ -238,24 +277,36 @@ public class Theme {
 	}
 
 	/**
-	 * This icon is only with {@link net.mcreator.ui.dialogs.preferences.ThemesPanel}.
+	 * This icon is only with
+	 * {@link net.mcreator.ui.dialogs.preferences.ThemesPanel}.
 	 *
-	 * @return <p>An {@link ImageIcon} representing the plugin.</p>
+	 * @return
+	 *         <p>
+	 *         An {@link ImageIcon} representing the plugin.
+	 *         </p>
 	 */
 	public ImageIcon getIcon() {
 		return icon;
 	}
 
 	/**
-	 * <p>To be detected, the name of the image file needs to be "icon.png" located into the main folder.</p>
+	 * <p>
+	 * To be detected, the name of the image file needs to be "icon.png" located
+	 * into the main folder.
+	 * </p>
 	 *
-	 * @param icon <p>An {@link ImageIcon} to display in {@link net.mcreator.ui.dialogs.preferences.ThemesPanel}</p>
+	 * @param icon
+	 *             <p>
+	 *             An {@link ImageIcon} to display in
+	 *             {@link net.mcreator.ui.dialogs.preferences.ThemesPanel}
+	 *             </p>
 	 */
 	public void setIcon(ImageIcon icon) {
 		this.icon = icon;
 	}
 
-	@Override public String toString() {
+	@Override
+	public String toString() {
 		return getID() + ": " + getName();
 	}
 
@@ -265,18 +316,19 @@ public class Theme {
 		if (colorScheme != null) {
 			return colorScheme.getBackgroundColor();
 		} else {
-            return new Color(0x1E2A3C);
+			return new Color(0x1E2A3C);
 		}
 	}
 
 	/**
-	 * @return Background of components (e.g. text fields, checkboxes and sound selectors)
+	 * @return Background of components (e.g. text fields, checkboxes and sound
+	 *         selectors)
 	 */
 	public Color getAltBackgroundColor() {
 		if (colorScheme != null) {
 			return colorScheme.getAltBackgroundColor();
 		} else {
-            return new Color(0x1E2A3C).brighter();
+			return new Color(0x1E2A3C).brighter();
 		}
 	}
 
@@ -287,40 +339,50 @@ public class Theme {
 		if (colorScheme != null) {
 			return colorScheme.getSecondAltBackgroundColor();
 		} else {
-            return new Color(0x1E2A3C).darker();
+			return new Color(0x1E2A3C).darker();
 		}
 	}
 
 	/**
-	 * @return <p>Color used for most of texts </p>
+	 * @return
+	 *         <p>
+	 *         Color used for most of texts
+	 *         </p>
 	 */
 	public Color getForegroundColor() {
 		if (colorScheme != null) {
 			return colorScheme.getForegroundColor();
 		} else {
-            return Color.WHITE;
+			return Color.WHITE;
 		}
 	}
 
 	/**
-	 * @return <p>Secondary text color </p>
+	 * @return
+	 *         <p>
+	 *         Secondary text color
+	 *         </p>
 	 */
 	public Color getAltForegroundColor() {
 		if (colorScheme != null) {
 			return colorScheme.getAltForegroundColor();
 		} else {
-            return Color.LIGHT_GRAY;
+			return Color.LIGHT_GRAY;
 		}
 	}
 
 	/**
-	 * @return <p>Returns the interfaceAccentColor if defined by theme, otherwise the one defined by the user in {@link PreferencesData}</p>
+	 * @return
+	 *         <p>
+	 *         Returns the interfaceAccentColor if defined by theme, otherwise the
+	 *         one defined by the user in {@link PreferencesData}
+	 *         </p>
 	 */
 	public Color getInterfaceAccentColor() {
 		if (colorScheme != null) {
 			return colorScheme.getInterfaceAccentColor();
 		} else {
-            return new Color(0xCEFF32);
+			return new Color(0xCEFF32);
 		}
 	}
 

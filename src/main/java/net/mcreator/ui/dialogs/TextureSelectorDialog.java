@@ -61,15 +61,18 @@ public class TextureSelectorDialog extends MCreatorDialog {
 
 		ComponentUtils.deriveFont(filterField, 12);
 		filterField.getDocument().addDocumentListener(new DocumentListener() {
-			@Override public void removeUpdate(DocumentEvent arg0) {
+			@Override
+			public void removeUpdate(DocumentEvent arg0) {
 				model.refilter();
 			}
 
-			@Override public void insertUpdate(DocumentEvent arg0) {
+			@Override
+			public void insertUpdate(DocumentEvent arg0) {
 				model.refilter();
 			}
 
-			@Override public void changedUpdate(DocumentEvent arg0) {
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {
 				model.refilter();
 			}
 		});
@@ -85,9 +88,9 @@ public class TextureSelectorDialog extends MCreatorDialog {
 
 		add("South", buttons);
 		add("Center", new JScrollPane(list));
-		add("North", PanelUtils.westAndEastElement(jtf, PanelUtils.totalCenterInPanel(pno2)));
+		add("North", PanelUtils.westAndEastElement(jtf, pno2, 20, 0));
 
-		setSize(740, 370);
+		setSize(950, 370);
 		setLocationRelativeTo(f);
 	}
 
@@ -128,23 +131,27 @@ public class TextureSelectorDialog extends MCreatorDialog {
 			filterItems = new ArrayList<>();
 		}
 
-		@Override public ResourcePointer getElementAt(int index) {
+		@Override
+		public ResourcePointer getElementAt(int index) {
 			if (index < filterItems.size())
 				return filterItems.get(index);
 			else
 				return null;
 		}
 
-		@Override public int getSize() {
+		@Override
+		public int getSize() {
 			return filterItems.size();
 		}
 
-		@Override public void addElement(ResourcePointer o) {
+		@Override
+		public void addElement(ResourcePointer o) {
 			items.add(o);
 			refilter();
 		}
 
-		@Override public boolean removeElement(Object a) {
+		@Override
+		public boolean removeElement(Object a) {
 			if (a instanceof ResourcePointer) {
 				items.remove(a);
 				filterItems.remove(a);
