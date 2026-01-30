@@ -201,6 +201,16 @@ public class Theme {
 		table.put("OptionPane.nextButtonText", L10N.t("common.next"));
 		table.put("OptionPane.backButtonText", L10N.t("common.back"));
 		table.put("OptionPane.finishButtonText", L10N.t("common.finish"));
+
+		table.put("ColorChooser.okText", L10N.t("common.ok"));
+		table.put("ColorChooser.cancelText", L10N.t("common.cancel"));
+		table.put("ColorChooser.resetText", L10N.t("common.reset"));
+		table.put("ColorChooser.previewText", L10N.t("dialog.animation_maker.preview"));
+		table.put("ColorChooser.swatchesNameText", L10N.t("colorchooser.swatches"));
+		table.put("ColorChooser.hsvNameText", L10N.t("colorchooser.hsv"));
+		table.put("ColorChooser.hslNameText", L10N.t("colorchooser.hsl"));
+		table.put("ColorChooser.rgbNameText", L10N.t("colorchooser.rgb"));
+		table.put("ColorChooser.cmykNameText", L10N.t("colorchooser.cmyk"));
 	}
 
 	/**

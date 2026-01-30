@@ -59,11 +59,11 @@ public class NewLayerDialog extends MCreatorDialog {
 		JPanel specialSettings = new JPanel(new CardLayout());
 		JPanel constraints = new JPanel(new GridLayout(4, 2, 5, 5));
 
-		//Basic settings
-		JTextField layerName = new JTextField("Layer");
+		// Basic settings
+		JTextField layerName = new JTextField(L10N.t("dialog.imageeditor.new_layer.default_name"));
 		JComboBox<String> layerType = new JComboBox<>(layerTypes);
 
-		//Filler settings
+		// Filler settings
 		JPanel colorSettings = new JPanel(new GridLayout(1, 2, 5, 5));
 		JColor colorChoser = new JColor(window, false, true);
 		colorSettings.add(L10N.label("dialog.imageeditor.base_color"));
@@ -76,7 +76,7 @@ public class NewLayerDialog extends MCreatorDialog {
 		templateSettings.add(L10N.label("dialog.imageeditor.base_texture"));
 		templateSettings.add(PanelUtils.totalCenterInPanel(templateChooserButton));
 
-		//Constraints
+		// Constraints
 		JSpinner width = new JSpinner(new SpinnerNumberModel(canvas.getWidth(), 0, 10000, 1));
 		JSpinner height = new JSpinner(new SpinnerNumberModel(canvas.getHeight(), 0, 10000, 1));
 		JSpinner offsetX = new JSpinner(new SpinnerNumberModel(0, -10000, 10000, 1));
@@ -113,19 +113,19 @@ public class NewLayerDialog extends MCreatorDialog {
 
 		ok.addActionListener(e -> {
 			switch (layerType.getSelectedIndex()) {
-			case 0:
-				canvas.addOnTop(new Layer((int) width.getValue(), (int) height.getValue(), (int) offsetX.getValue(),
-						(int) offsetY.getValue(), layerName.getText()));
-				break;
-			case 1:
-				canvas.addOnTop(new Layer((int) width.getValue(), (int) height.getValue(), (int) offsetX.getValue(),
-						(int) offsetY.getValue(), layerName.getText(), colorChoser.getColor()));
-				break;
-			case 2:
-				canvas.addOnTop(new Layer((int) width.getValue(), (int) height.getValue(), (int) offsetX.getValue(),
-						(int) offsetY.getValue(), layerName.getText(),
-						ImageMakerTexturesCache.CACHE.get(selection).getImage()));
-				break;
+				case 0:
+					canvas.addOnTop(new Layer((int) width.getValue(), (int) height.getValue(), (int) offsetX.getValue(),
+							(int) offsetY.getValue(), layerName.getText()));
+					break;
+				case 1:
+					canvas.addOnTop(new Layer((int) width.getValue(), (int) height.getValue(), (int) offsetX.getValue(),
+							(int) offsetY.getValue(), layerName.getText(), colorChoser.getColor()));
+					break;
+				case 2:
+					canvas.addOnTop(new Layer((int) width.getValue(), (int) height.getValue(), (int) offsetX.getValue(),
+							(int) offsetY.getValue(), layerName.getText(),
+							ImageMakerTexturesCache.CACHE.get(selection).getImage()));
+					break;
 			}
 			dispose();
 		});

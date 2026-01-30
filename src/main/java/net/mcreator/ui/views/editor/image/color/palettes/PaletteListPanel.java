@@ -42,23 +42,27 @@ public class PaletteListPanel extends ListEditPanel<ColorPalette> {
 		setList(palettes, new PaletteCellRenderer());
 	}
 
-	@Override protected void itemSelected(ColorPalette selected) {
+	@Override
+	protected void itemSelected(ColorPalette selected) {
 		if (colorPalettePanel != null && selected != null) {
 			colorPalettePanel.setPalette(selected);
 		}
 	}
 
-	@Override protected void itemDoubleClicked(ColorPalette selected) {
+	@Override
+	protected void itemDoubleClicked(ColorPalette selected) {
 		if (colorPalettePanel != null) {
 			palettePanel.setSelectedComponent(colorPalettePanel);
 		}
 	}
 
-	@Override public ColorPalette createNew(ColorPalette selected) {
-		return new ColorPalette("New Palette");
+	@Override
+	public ColorPalette createNew(ColorPalette selected) {
+		return new ColorPalette(L10N.t("palette.name.new"));
 	}
 
-	@Override public void promptEdit(ColorPalette selected) {
+	@Override
+	public void promptEdit(ColorPalette selected) {
 		String newName = (String) JOptionPane.showInputDialog(mcreator,
 				L10N.t("dialog.image_maker.palette.dialog.edit_palette.message"),
 				L10N.t("dialog.image_maker.palette.dialog.edit_palette.title"), JOptionPane.PLAIN_MESSAGE, null, null,
@@ -69,7 +73,8 @@ public class PaletteListPanel extends ListEditPanel<ColorPalette> {
 		}
 	}
 
-	@Override public String getItemName(ColorPalette selected) {
+	@Override
+	public String getItemName(ColorPalette selected) {
 		return selected.getName();
 	}
 
@@ -81,6 +86,7 @@ public class PaletteListPanel extends ListEditPanel<ColorPalette> {
 		return palettes;
 	}
 
-	public static final class PaletteStorage extends ArrayListListModel<ColorPalette> {}
+	public static final class PaletteStorage extends ArrayListListModel<ColorPalette> {
+	}
 
 }
