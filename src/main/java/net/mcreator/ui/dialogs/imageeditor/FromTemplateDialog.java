@@ -53,9 +53,38 @@ public class FromTemplateDialog extends MCreatorDialog {
 
 	private static final Logger LOG = LogManager.getLogger("From Template Dialog");
 
-	private static final String[] templateList = new String[] { "Random", "Sword", "Pickaxe", "Axe", "Shovel", "Hoe",
-			"Shears", "Music disc", "Drinkable potion", "Splash potion", "Lingering potion", "Ore", "Block", "Gem",
-			"Dye", "Spawn egg" };
+	private static class TemplateEntry {
+		final String id;
+		final String name;
+
+		TemplateEntry(String id, String key) {
+			this.id = id;
+			this.name = L10N.t(key);
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+
+	private static final TemplateEntry[] templateList = new TemplateEntry[] {
+			new TemplateEntry("Random", "dialog.imageeditor.template.random"),
+			new TemplateEntry("Sword", "dialog.imageeditor.template.sword"),
+			new TemplateEntry("Pickaxe", "dialog.imageeditor.template.pickaxe"),
+			new TemplateEntry("Axe", "dialog.imageeditor.template.axe"),
+			new TemplateEntry("Shovel", "dialog.imageeditor.template.shovel"),
+			new TemplateEntry("Hoe", "dialog.imageeditor.template.hoe"),
+			new TemplateEntry("Shears", "dialog.imageeditor.template.shears"),
+			new TemplateEntry("Music disc", "dialog.imageeditor.template.music_disc"),
+			new TemplateEntry("Drinkable potion", "dialog.imageeditor.template.drinkable_potion"),
+			new TemplateEntry("Splash potion", "dialog.imageeditor.template.splash_potion"),
+			new TemplateEntry("Lingering potion", "dialog.imageeditor.template.lingering_potion"),
+			new TemplateEntry("Ore", "dialog.imageeditor.template.ore"),
+			new TemplateEntry("Block", "dialog.imageeditor.template.block"),
+			new TemplateEntry("Gem", "dialog.imageeditor.template.gem"),
+			new TemplateEntry("Dye", "dialog.imageeditor.template.dye"),
+			new TemplateEntry("Spawn egg", "dialog.imageeditor.template.spawn_egg") };
 
 	private static final Color[] presetColors = new Color[] { Color.red, Color.green, Color.blue,
 			Theme.current().getInterfaceAccentColor(), Color.magenta, Color.cyan, new Color(244, 67, 54),
@@ -100,7 +129,7 @@ public class FromTemplateDialog extends MCreatorDialog {
 		JPanel templates = new JPanel(new GridLayout(2, 2, 5, 2));
 		templates.setBorder(new EmptyBorder(5, 2, 10, 2));
 
-		JComboBox<String> templateSelector = new JComboBox<>(templateList);
+		JComboBox<TemplateEntry> templateSelector = new JComboBox<>(templateList);
 		templateSelector.setSelectedIndex(0);
 		templates.add(L10N.label("dialog.imageeditor.template_generator"));
 		templates.add(templateSelector);
@@ -203,12 +232,14 @@ public class FromTemplateDialog extends MCreatorDialog {
 		final TimerTask[] task = new TimerTask[1];
 
 		randomize.addMouseListener(new MouseAdapter() {
-			@Override public void mousePressed(MouseEvent mouseEvent) {
+			@Override
+			public void mousePressed(MouseEvent mouseEvent) {
 				super.mousePressed(mouseEvent);
 				task[0] = new TimerTask() {
-					@Override public void run() {
+					@Override
+					public void run() {
 						if (templateSelector.getSelectedItem() != null)
-							generateFromTemplate((String) templateSelector.getSelectedItem());
+							generateFromTemplate(((TemplateEntry) templateSelector.getSelectedItem()).id);
 						else
 							generateFromTemplate("Random");
 					}
@@ -216,7 +247,8 @@ public class FromTemplateDialog extends MCreatorDialog {
 				timer.scheduleAtFixedRate(task[0], 0, 250);
 			}
 
-			@Override public void mouseReleased(MouseEvent mouseEvent) {
+			@Override
+			public void mouseReleased(MouseEvent mouseEvent) {
 				super.mouseReleased(mouseEvent);
 				task[0].cancel();
 			}
@@ -250,7 +282,7 @@ public class FromTemplateDialog extends MCreatorDialog {
 				}
 				if (cbs2.getSelectedItem() != null && !cbs2.getSelectedItem().toString().contains("(no image)")) {
 					ImageIcon layer2 = ImageUtils.rotate(new ImageIcon(ImageIO.read(
-									((ResourcePointer) Objects.requireNonNull(cbs2.getSelectedItem())).getStream())),
+							((ResourcePointer) Objects.requireNonNull(cbs2.getSelectedItem())).getStream())),
 							(Integer) ang1.getValue());
 					Layer second = new Layer(16, 16, 0, 0, cbs2.getSelectedItem().toString(),
 							ImageUtils.colorize(layer2, col1.getColor(), !type1.isSelected()).getImage());
@@ -258,7 +290,7 @@ public class FromTemplateDialog extends MCreatorDialog {
 				}
 				if (cbs3.getSelectedItem() != null && !cbs3.getSelectedItem().toString().contains("(no image)")) {
 					ImageIcon layer3 = ImageUtils.rotate(new ImageIcon(ImageIO.read(
-									((ResourcePointer) Objects.requireNonNull(cbs3.getSelectedItem())).getStream())),
+							((ResourcePointer) Objects.requireNonNull(cbs3.getSelectedItem())).getStream())),
 							(Integer) ang2.getValue());
 					Layer third = new Layer(16, 16, 0, 0, cbs3.getSelectedItem().toString(),
 							ImageUtils.colorize(layer3, col2.getColor(), !type2.isSelected()).getImage());
@@ -266,7 +298,7 @@ public class FromTemplateDialog extends MCreatorDialog {
 				}
 				if (cbs4.getSelectedItem() != null && !cbs4.getSelectedItem().toString().contains("(no image)")) {
 					ImageIcon layer4 = ImageUtils.rotate(new ImageIcon(ImageIO.read(
-									((ResourcePointer) Objects.requireNonNull(cbs4.getSelectedItem())).getStream())),
+							((ResourcePointer) Objects.requireNonNull(cbs4.getSelectedItem())).getStream())),
 							(Integer) ang3.getValue());
 					Layer fourth = new Layer(16, 16, 0, 0, cbs4.getSelectedItem().toString(),
 							ImageUtils.colorize(layer4, col4.getColor(), !type3.isSelected()).getImage());
@@ -282,7 +314,7 @@ public class FromTemplateDialog extends MCreatorDialog {
 		controls.add(PanelUtils.join(FlowLayout.CENTER, 5, 0, merge, ok), BorderLayout.EAST);
 		add(ComponentUtils.applyPadding(settings, 5, true, true, true, true), BorderLayout.CENTER);
 		add(ComponentUtils.applyPadding(controls, 5, true, true, true, true), BorderLayout.SOUTH);
-		setSize(900, 650);
+		setSize(1050, 650);
 		setResizable(false);
 		setLocationRelativeTo(window);
 	}
@@ -293,277 +325,286 @@ public class FromTemplateDialog extends MCreatorDialog {
 				templatesSorted.stream().filter(e -> e.toString().contains("noise")).toList());
 
 		switch (template) {
-		case "Sword":
-			cbs.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("tool_base_stick"))
-							.collect(Collectors.toList())));
-			if (Math.random() > 0.33) {
-				cbs2.setSelectedItem(ListUtils.getRandomItem(
-						templatesSorted.stream().filter(e -> e.toString().equals("tool_sword"))
+			case "Sword":
+				cbs.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("tool_base_stick"))
 								.collect(Collectors.toList())));
-				cbs3.setSelectedItem(noimage);
-			} else {
-				cbs2.setSelectedItem(ListUtils.getRandomItem(
-						templatesSorted.stream().filter(e -> e.toString().equals("tool_sword_blade"))
-								.collect(Collectors.toList())));
-				cbs3.setSelectedItem(ListUtils.getRandomItem(
-						templatesSorted.stream().filter(e -> e.toString().equals("tool_sword_handle"))
-								.collect(Collectors.toList())));
-				col2.setColor(ListUtils.getRandomItem(presetColors));
-				type2.setSelected(Math.random() < 0.4);
-				ang2.setValue(0);
-			}
-			cbs4.setSelectedItem(noimage);
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(Math.random() < 0.4);
-			ang1.setValue(0);
-			break;
-		case "Pickaxe":
-			cbs.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("tool_base_stick"))
-							.collect(Collectors.toList())));
-			cbs2.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("tool_pickaxe"))
-							.collect(Collectors.toList())));
-			cbs3.setSelectedItem(noimage);
-			cbs4.setSelectedItem(noimage);
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(Math.random() < 0.4);
-			ang1.setValue(0);
-			break;
-		case "Axe":
-			cbs.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("tool_base_stick"))
-							.collect(Collectors.toList())));
-			cbs2.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("tool_axe"))
-							.collect(Collectors.toList())));
-			cbs3.setSelectedItem(noimage);
-			cbs4.setSelectedItem(noimage);
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(Math.random() < 0.4);
-			ang1.setValue(0);
-			break;
-		case "Shovel":
-			cbs.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("tool_shovel_base"))
-							.collect(Collectors.toList())));
-			cbs2.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("tool_shovel_top"))
-							.collect(Collectors.toList())));
-			cbs3.setSelectedItem(noimage);
-			cbs4.setSelectedItem(noimage);
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(Math.random() < 0.4);
-			ang1.setValue(0);
-			break;
-		case "Hoe":
-			cbs.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("tool_base_stick"))
-							.collect(Collectors.toList())));
-			cbs2.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("tool_hoe"))
-							.collect(Collectors.toList())));
-			cbs3.setSelectedItem(noimage);
-			cbs4.setSelectedItem(noimage);
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(Math.random() < 0.4);
-			ang1.setValue(0);
-			break;
-		case "Shears":
-			cbs.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("shears_base"))
-							.collect(Collectors.toList())));
-			if (Math.random() > 0.9) {
-				cbs2.setSelectedItem(ListUtils.getRandomItem(
-						templatesSorted.stream().filter(e -> e.toString().equals("shears_base_mono"))
-								.collect(Collectors.toList())));
+				if (Math.random() > 0.33) {
+					cbs2.setSelectedItem(ListUtils.getRandomItem(
+							templatesSorted.stream().filter(e -> e.toString().equals("tool_sword"))
+									.collect(Collectors.toList())));
+					cbs3.setSelectedItem(noimage);
+				} else {
+					cbs2.setSelectedItem(ListUtils.getRandomItem(
+							templatesSorted.stream().filter(e -> e.toString().equals("tool_sword_blade"))
+									.collect(Collectors.toList())));
+					cbs3.setSelectedItem(ListUtils.getRandomItem(
+							templatesSorted.stream().filter(e -> e.toString().equals("tool_sword_handle"))
+									.collect(Collectors.toList())));
+					col2.setColor(ListUtils.getRandomItem(presetColors));
+					type2.setSelected(Math.random() < 0.4);
+					ang2.setValue(0);
+				}
+				cbs4.setSelectedItem(noimage);
 				col1.setColor(ListUtils.getRandomItem(presetColors));
 				type1.setSelected(Math.random() < 0.4);
 				ang1.setValue(0);
-			} else
-				cbs2.setSelectedItem(noimage);
-			cbs3.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("shears_blades"))
-							.collect(Collectors.toList())));
-			cbs4.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("shears_mechanism"))
-							.collect(Collectors.toList())));
-			if (Math.random() > 0.20) {
-				Color c = ListUtils.getRandomItem(presetColors);
-				boolean ctype = Math.random() < 0.4;
+				break;
+			case "Pickaxe":
+				cbs.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("tool_base_stick"))
+								.collect(Collectors.toList())));
+				cbs2.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("tool_pickaxe"))
+								.collect(Collectors.toList())));
+				cbs3.setSelectedItem(noimage);
+				cbs4.setSelectedItem(noimage);
+				col1.setColor(ListUtils.getRandomItem(presetColors));
+				type1.setSelected(Math.random() < 0.4);
+				ang1.setValue(0);
+				break;
+			case "Axe":
+				cbs.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("tool_base_stick"))
+								.collect(Collectors.toList())));
+				cbs2.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("tool_axe"))
+								.collect(Collectors.toList())));
+				cbs3.setSelectedItem(noimage);
+				cbs4.setSelectedItem(noimage);
+				col1.setColor(ListUtils.getRandomItem(presetColors));
+				type1.setSelected(Math.random() < 0.4);
+				ang1.setValue(0);
+				break;
+			case "Shovel":
+				cbs.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("tool_shovel_base"))
+								.collect(Collectors.toList())));
+				cbs2.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("tool_shovel_top"))
+								.collect(Collectors.toList())));
+				cbs3.setSelectedItem(noimage);
+				cbs4.setSelectedItem(noimage);
+				col1.setColor(ListUtils.getRandomItem(presetColors));
+				type1.setSelected(Math.random() < 0.4);
+				ang1.setValue(0);
+				break;
+			case "Hoe":
+				cbs.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("tool_base_stick"))
+								.collect(Collectors.toList())));
+				cbs2.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("tool_hoe"))
+								.collect(Collectors.toList())));
+				cbs3.setSelectedItem(noimage);
+				cbs4.setSelectedItem(noimage);
+				col1.setColor(ListUtils.getRandomItem(presetColors));
+				type1.setSelected(Math.random() < 0.4);
+				ang1.setValue(0);
+				break;
+			case "Shears":
+				cbs.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("shears_base"))
+								.collect(Collectors.toList())));
+				if (Math.random() > 0.9) {
+					cbs2.setSelectedItem(ListUtils.getRandomItem(
+							templatesSorted.stream().filter(e -> e.toString().equals("shears_base_mono"))
+									.collect(Collectors.toList())));
+					col1.setColor(ListUtils.getRandomItem(presetColors));
+					type1.setSelected(Math.random() < 0.4);
+					ang1.setValue(0);
+				} else
+					cbs2.setSelectedItem(noimage);
+				cbs3.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("shears_blades"))
+								.collect(Collectors.toList())));
+				cbs4.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("shears_mechanism"))
+								.collect(Collectors.toList())));
+				if (Math.random() > 0.20) {
+					Color c = ListUtils.getRandomItem(presetColors);
+					boolean ctype = Math.random() < 0.4;
 
-				col2.setColor(c);
-				type2.setSelected(ctype);
-				ang2.setValue(0);
+					col2.setColor(c);
+					type2.setSelected(ctype);
+					ang2.setValue(0);
 
-				col4.setColor(c);
-				type3.setSelected(ctype);
-				ang3.setValue(0);
-			} else {
+					col4.setColor(c);
+					type3.setSelected(ctype);
+					ang3.setValue(0);
+				} else {
+					col2.setColor(ListUtils.getRandomItem(presetColors));
+					type2.setSelected(Math.random() < 0.4);
+					ang2.setValue(0);
+
+					col4.setColor(ListUtils.getRandomItem(presetColors));
+					type3.setSelected(Math.random() < 0.4);
+					ang3.setValue(0);
+				}
+				break;
+			case "Music disc":
+				if (Math.random() < 0.75) {
+					cbs.setSelectedItem(ListUtils.getRandomItem(
+							templatesSorted.stream().filter(e -> e.toString().equals("record"))
+									.collect(Collectors.toList())));
+				} else {
+					cbs.setSelectedItem(ListUtils.getRandomItem(
+							templatesSorted.stream().filter(e -> e.toString().equals("record_broken"))
+									.collect(Collectors.toList())));
+				}
+
+				cbs2.setSelectedItem(ListUtils.getRandomItem(templatesSorted.stream()
+						.filter(e -> e.toString().equals("record_mid_0") || e.toString().equals("record_mid_1"))
+						.collect(Collectors.toList())));
+				col1.setColor(ListUtils.getRandomItem(presetColors));
+				type1.setSelected(Math.random() < 0.4);
+				ang1.setValue(0);
+
+				if (Math.random() < 0.9)
+					cbs3.setSelectedItem(ListUtils.getRandomItem(
+							templatesSorted.stream().filter(e -> e.toString().startsWith("record_mid_"))
+									.collect(Collectors.toList())));
+				else
+					cbs3.setSelectedItem(noimage);
 				col2.setColor(ListUtils.getRandomItem(presetColors));
 				type2.setSelected(Math.random() < 0.4);
 				ang2.setValue(0);
 
+				if (Math.random() < 0.7)
+					cbs4.setSelectedItem(ListUtils.getRandomItem(
+							templatesSorted.stream().filter(e -> e.toString().startsWith("record_mid_"))
+									.collect(Collectors.toList())));
+				else
+					cbs4.setSelectedItem(noimage);
 				col4.setColor(ListUtils.getRandomItem(presetColors));
 				type3.setSelected(Math.random() < 0.4);
 				ang3.setValue(0);
-			}
-			break;
-		case "Music disc":
-			if (Math.random() < 0.75) {
-				cbs.setSelectedItem(ListUtils.getRandomItem(
-						templatesSorted.stream().filter(e -> e.toString().equals("record"))
-								.collect(Collectors.toList())));
-			} else {
-				cbs.setSelectedItem(ListUtils.getRandomItem(
-						templatesSorted.stream().filter(e -> e.toString().equals("record_broken"))
-								.collect(Collectors.toList())));
-			}
-
-			cbs2.setSelectedItem(ListUtils.getRandomItem(templatesSorted.stream()
-					.filter(e -> e.toString().equals("record_mid_0") || e.toString().equals("record_mid_1"))
-					.collect(Collectors.toList())));
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(Math.random() < 0.4);
-			ang1.setValue(0);
-
-			if (Math.random() < 0.9)
+				break;
+			case "Drinkable potion":
+				generatePotionFluid();
 				cbs3.setSelectedItem(ListUtils.getRandomItem(
-						templatesSorted.stream().filter(e -> e.toString().startsWith("record_mid_"))
+						templatesSorted.stream().filter(e -> e.toString().equals("potion_bottle_overlay"))
 								.collect(Collectors.toList())));
-			else
-				cbs3.setSelectedItem(noimage);
-			col2.setColor(ListUtils.getRandomItem(presetColors));
-			type2.setSelected(Math.random() < 0.4);
-			ang2.setValue(0);
-
-			if (Math.random() < 0.7)
-				cbs4.setSelectedItem(ListUtils.getRandomItem(
-						templatesSorted.stream().filter(e -> e.toString().startsWith("record_mid_"))
-								.collect(Collectors.toList())));
-			else
+				col2.setColor(Color.white);
+				type2.setSelected(false);
+				ang2.setValue(0);
 				cbs4.setSelectedItem(noimage);
-			col4.setColor(ListUtils.getRandomItem(presetColors));
-			type3.setSelected(Math.random() < 0.4);
-			ang3.setValue(0);
-			break;
-		case "Drinkable potion":
-			generatePotionFluid();
-			cbs3.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("potion_bottle_overlay"))
-							.collect(Collectors.toList())));
-			col2.setColor(Color.white);
-			type2.setSelected(false);
-			ang2.setValue(0);
-			cbs4.setSelectedItem(noimage);
-			break;
-		case "Splash potion":
-			generatePotionFluid();
-			cbs3.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("potion_bottle_overlay_splash"))
-							.collect(Collectors.toList())));
-			col2.setColor(Color.white);
-			type2.setSelected(false);
-			ang2.setValue(0);
-			cbs4.setSelectedItem(noimage);
-			break;
-		case "Lingering potion":
-			generatePotionFluid();
-			cbs3.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("potion_bottle_overlay_lingering"))
-							.collect(Collectors.toList())));
-			col2.setColor(Color.white);
-			type2.setSelected(false);
-			ang2.setValue(0);
-			cbs4.setSelectedItem(noimage);
-			break;
-		case "Ore":
-			cbs.setSelectedItem(randomNoise);
-			cbs2.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().matches("ore\\d+")).toList()));
-			cbs3.setSelectedItem(noimage);
-			cbs4.setSelectedItem(noimage);
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(Math.random() < 0.4);
-			ang1.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 270, 0, 0 }));
-			break;
-		case "Block":
-			ResourcePointer randomTexture = ListUtils.getRandomItem(templatesSorted.stream()
-					.filter(e -> e.toString().contains("block") || e.toString().contains("pattern") || e.toString()
-							.contains("noise") || e.toString().contains("machine") || e.toString().contains("plank")
-							|| e.toString().contains("log") || e.toString().contains("wood") || e.toString()
-							.contains("leaves") || e.toString().contains("stone_") || e.toString()
-							.contains("stonebrick") || e.toString().contains("dirt")).toList());
-			// We want cbs and cbs2 to be the same if "randomTexture" isn't a noise.
-			// If "randomTexture" is a noise, then we set cbs2 to be that noise, and cbs can be completely random. (won't be filtered like "randomTexture")
-			// If "randomTexture" is not a noise, we set cbs and cbs2 to be that "randomTexture"
-			cbs.setSelectedItem(randomTexture.toString().contains("noise") ?
-					ListUtils.getRandomItem(templatesSorted) :
-					randomTexture);
-			cbs2.setSelectedItem(randomTexture);
-			cbs3.setSelectedItem(randomTexture.toString().contains("machine") ? randomNoise : noimage);
-			cbs4.setSelectedItem(noimage);
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			col2.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(Math.random() < 0.4);
-			type2.setSelected(Math.random() < 0.4);
-			ang1.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 90, 0, 0 }));
-			ang2.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 90, 0, 0 }));
-			break;
-		case "Gem":
-			ResourcePointer randomGem = ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().contains("Gem") || e.toString().contains("gem"))
-							.toList());
-			cbs.setSelectedItem(randomGem);
-			cbs2.setSelectedItem(randomGem);
-			cbs3.setSelectedItem(noimage);
-			cbs4.setSelectedItem(noimage);
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(Math.random() < 0.4);
-			ang1.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 90, 0, 0 }));
-			break;
-		case "Dye":
-			ResourcePointer randomDye = ListUtils.getRandomItem(templatesSorted.stream()
-					.filter(e -> e.toString().contains("dye") && !e.toString().contains("full") && !e.toString()
-							.contains("top")).toList());
-			ResourcePointer randomTopDye = ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().contains("dye") && e.toString().contains("top"))
-							.toList());
-			cbs.setSelectedItem(randomDye);
-			cbs2.setSelectedItem(randomDye);
-			// If the "randomDye" is a bottom type, we set cbs & cbs2 to be that bottom, and the cbs3 to be its top
-			cbs3.setSelectedItem(randomDye.toString().contains("bottom") ? randomTopDye : noimage);
-			cbs4.setSelectedItem(noimage);
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			col2.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(Math.random() < 0.4);
-			type2.setSelected(Math.random() < 0.4);
-			ang1.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 90, 0, 0 }));
-			ang2.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 90, 0, 0 }));
-			break;
-		case "Spawn egg":
-			cbs.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("egg_base"))
-							.collect(Collectors.toList())));
-			cbs2.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("egg_base"))
-							.collect(Collectors.toList())));
-			cbs3.setSelectedItem(ListUtils.getRandomItem(
-					templatesSorted.stream().filter(e -> e.toString().equals("egg_accent"))
-							.collect(Collectors.toList())));
-			cbs4.setSelectedItem(noimage);
-			col1.setColor(ListUtils.getRandomItem(presetColors));
-			type1.setSelected(true);
-			col2.setColor(ListUtils.getRandomItem(presetColors));
-			type2.setSelected(true);
-			ang1.setValue(0);
-			ang2.setValue(0);
-			ang3.setValue(0);
-			break;
-		default:
-			randomizeSetup();
-			break;
+				break;
+			case "Splash potion":
+				generatePotionFluid();
+				cbs3.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("potion_bottle_overlay_splash"))
+								.collect(Collectors.toList())));
+				col2.setColor(Color.white);
+				type2.setSelected(false);
+				ang2.setValue(0);
+				cbs4.setSelectedItem(noimage);
+				break;
+			case "Lingering potion":
+				generatePotionFluid();
+				cbs3.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("potion_bottle_overlay_lingering"))
+								.collect(Collectors.toList())));
+				col2.setColor(Color.white);
+				type2.setSelected(false);
+				ang2.setValue(0);
+				cbs4.setSelectedItem(noimage);
+				break;
+			case "Ore":
+				cbs.setSelectedItem(randomNoise);
+				cbs2.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().matches("ore\\d+")).toList()));
+				cbs3.setSelectedItem(noimage);
+				cbs4.setSelectedItem(noimage);
+				col1.setColor(ListUtils.getRandomItem(presetColors));
+				type1.setSelected(Math.random() < 0.4);
+				ang1.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 270, 0, 0 }));
+				break;
+			case "Block":
+				ResourcePointer randomTexture = ListUtils.getRandomItem(templatesSorted.stream()
+						.filter(e -> e.toString().contains("block") || e.toString().contains("pattern") || e.toString()
+								.contains("noise") || e.toString().contains("machine") || e.toString().contains("plank")
+								|| e.toString().contains("log") || e.toString().contains("wood") || e.toString()
+										.contains("leaves")
+								|| e.toString().contains("stone_") || e.toString()
+										.contains("stonebrick")
+								|| e.toString().contains("dirt"))
+						.toList());
+				// We want cbs and cbs2 to be the same if "randomTexture" isn't a noise.
+				// If "randomTexture" is a noise, then we set cbs2 to be that noise, and cbs can
+				// be completely random. (won't be filtered like "randomTexture")
+				// If "randomTexture" is not a noise, we set cbs and cbs2 to be that
+				// "randomTexture"
+				cbs.setSelectedItem(
+						randomTexture.toString().contains("noise") ? ListUtils.getRandomItem(templatesSorted)
+								: randomTexture);
+				cbs2.setSelectedItem(randomTexture);
+				cbs3.setSelectedItem(randomTexture.toString().contains("machine") ? randomNoise : noimage);
+				cbs4.setSelectedItem(noimage);
+				col1.setColor(ListUtils.getRandomItem(presetColors));
+				col2.setColor(ListUtils.getRandomItem(presetColors));
+				type1.setSelected(Math.random() < 0.4);
+				type2.setSelected(Math.random() < 0.4);
+				ang1.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 90, 0, 0 }));
+				ang2.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 90, 0, 0 }));
+				break;
+			case "Gem":
+				ResourcePointer randomGem = ListUtils.getRandomItem(
+						templatesSorted.stream()
+								.filter(e -> e.toString().contains("Gem") || e.toString().contains("gem"))
+								.toList());
+				cbs.setSelectedItem(randomGem);
+				cbs2.setSelectedItem(randomGem);
+				cbs3.setSelectedItem(noimage);
+				cbs4.setSelectedItem(noimage);
+				col1.setColor(ListUtils.getRandomItem(presetColors));
+				type1.setSelected(Math.random() < 0.4);
+				ang1.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 90, 0, 0 }));
+				break;
+			case "Dye":
+				ResourcePointer randomDye = ListUtils.getRandomItem(templatesSorted.stream()
+						.filter(e -> e.toString().contains("dye") && !e.toString().contains("full") && !e.toString()
+								.contains("top"))
+						.toList());
+				ResourcePointer randomTopDye = ListUtils.getRandomItem(
+						templatesSorted.stream()
+								.filter(e -> e.toString().contains("dye") && e.toString().contains("top"))
+								.toList());
+				cbs.setSelectedItem(randomDye);
+				cbs2.setSelectedItem(randomDye);
+				// If the "randomDye" is a bottom type, we set cbs & cbs2 to be that bottom, and
+				// the cbs3 to be its top
+				cbs3.setSelectedItem(randomDye.toString().contains("bottom") ? randomTopDye : noimage);
+				cbs4.setSelectedItem(noimage);
+				col1.setColor(ListUtils.getRandomItem(presetColors));
+				col2.setColor(ListUtils.getRandomItem(presetColors));
+				type1.setSelected(Math.random() < 0.4);
+				type2.setSelected(Math.random() < 0.4);
+				ang1.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 90, 0, 0 }));
+				ang2.setValue(ListUtils.getRandomItem(new Integer[] { 0, 90, 180, 90, 0, 0 }));
+				break;
+			case "Spawn egg":
+				cbs.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("egg_base"))
+								.collect(Collectors.toList())));
+				cbs2.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("egg_base"))
+								.collect(Collectors.toList())));
+				cbs3.setSelectedItem(ListUtils.getRandomItem(
+						templatesSorted.stream().filter(e -> e.toString().equals("egg_accent"))
+								.collect(Collectors.toList())));
+				cbs4.setSelectedItem(noimage);
+				col1.setColor(ListUtils.getRandomItem(presetColors));
+				type1.setSelected(true);
+				col2.setColor(ListUtils.getRandomItem(presetColors));
+				type2.setSelected(true);
+				ang1.setValue(0);
+				ang2.setValue(0);
+				ang3.setValue(0);
+				break;
+			default:
+				randomizeSetup();
+				break;
 		}
 
 		cbs.revalidate();
@@ -601,23 +642,29 @@ public class FromTemplateDialog extends MCreatorDialog {
 		cbs.setSelectedItem(ListUtils.getRandomItem(templatesSorted));
 
 		if (Math.random() < 0.8)
-			cbs2.setSelectedItem(ListUtils.getRandomItem(templatesSorted.stream().filter(e ->
-					!(e.toString().contains("noise") || e.toString().contains("pattern") || e.toString()
-							.contains("oreblock")) || Math.random() > 0.4).collect(Collectors.toList())));
+			cbs2.setSelectedItem(
+					ListUtils.getRandomItem(templatesSorted.stream()
+							.filter(e -> !(e.toString().contains("noise") || e.toString().contains("pattern")
+									|| e.toString()
+											.contains("oreblock"))
+									|| Math.random() > 0.4)
+							.collect(Collectors.toList())));
 		else
 			cbs2.setSelectedItem(noimage);
 
 		if (Math.random() < 0.25)
 			cbs3.setSelectedItem(ListUtils.getRandomItem(templatesSorted.stream()
 					.filter(e -> !(e.toString().contains("noise") || e.toString().contains("pattern") || e.toString()
-							.contains("oreblock") || Math.random() > 0.2)).collect(Collectors.toList())));
+							.contains("oreblock") || Math.random() > 0.2))
+					.collect(Collectors.toList())));
 		else
 			cbs3.setSelectedItem(noimage);
 
 		if (Math.random() < 0.1)
 			cbs4.setSelectedItem(ListUtils.getRandomItem(templatesSorted.stream()
 					.filter(e -> !(e.toString().contains("noise") || e.toString().contains("pattern") || e.toString()
-							.contains("oreblock"))).collect(Collectors.toList())));
+							.contains("oreblock")))
+					.collect(Collectors.toList())));
 		else
 			cbs4.setSelectedItem(noimage);
 
@@ -647,13 +694,13 @@ public class FromTemplateDialog extends MCreatorDialog {
 			ImageIcon joined = new ImageIcon(
 					ImageIO.read(((ResourcePointer) Objects.requireNonNull(cbs.getSelectedItem())).getStream()));
 			ImageIcon pl2 = ImageUtils.rotate(new ImageIcon(
-							ImageIO.read(((ResourcePointer) Objects.requireNonNull(cbs2.getSelectedItem())).getStream())),
+					ImageIO.read(((ResourcePointer) Objects.requireNonNull(cbs2.getSelectedItem())).getStream())),
 					(Integer) ang1.getValue());
 			ImageIcon pl3 = ImageUtils.rotate(new ImageIcon(
-							ImageIO.read(((ResourcePointer) Objects.requireNonNull(cbs3.getSelectedItem())).getStream())),
+					ImageIO.read(((ResourcePointer) Objects.requireNonNull(cbs3.getSelectedItem())).getStream())),
 					(Integer) ang2.getValue());
 			ImageIcon pl4 = ImageUtils.rotate(new ImageIcon(
-							ImageIO.read(((ResourcePointer) Objects.requireNonNull(cbs4.getSelectedItem())).getStream())),
+					ImageIO.read(((ResourcePointer) Objects.requireNonNull(cbs4.getSelectedItem())).getStream())),
 					(Integer) ang3.getValue());
 
 			if (cbs2.getSelectedItem() != null && !cbs2.getSelectedItem().toString().contains("(no image)"))
