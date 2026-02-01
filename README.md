@@ -1,19 +1,13 @@
-[![MCreator](https://mcreator.net/image/brand/mcreator300s.png)](https://mcreator.net/)
+[![MCreator](https://mcreator.net/image/brand/mcreator300s.png)]()
 
-[![License](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](https://github.com/MCreator/MCreator/blob/master/LICENSE.txt)
-[![Build](https://img.shields.io/github/actions/workflow/status/MCreator/MCreator/test.yml?style=flat-square&branch=master)](https://github.com/MCreator/MCreator/actions/workflows/test.yml)
-[![Javadoc](https://img.shields.io/badge/java-doc-%44cc11?style=flat-square)](https://mcreator.github.io/MCreator)
-[![Download](https://img.shields.io/badge/Download-release-%2393c54b?style=flat-square)](https://mcreator.net/download)
 # MCreator - Minecraft Mod Maker
-
-<img align="right" width="300" src="https://mcreator.net/image/about/about1.png">
 
 MCreator is a software used to make Minecraft Java Edition mods, Minecraft Bedrock Edition Add-Ons, and data packs using an intuitive easy-to-learn interface or with an integrated code editor. 
 
 
 ## License and trademark
 
-MCreator is licensed under the GPL-3.0 license (with exceptions implemented as specified in section 7 of GPL-3.0) if not otherwise stated in source files or other files of this project. Copyright 2020 Pylo and [contributors](https://github.com/MCreator/MCreator/graphs/contributors).
+MCreator is licensed under the GPL-3.0 license (with exceptions implemented as specified in section 7 of GPL-3.0) if not otherwise stated in source files or other files of this project. Copyright 2020 Pylo and contributors.
 
 MCreator is a trademark of Pylo. Custom distributions of this software may not include Pylo or MCreator trademark (trademark name and logo) to not confuse the software with the official distribution of MCreator project.
 MCreator and Pylo brand files in this repository are not covered by the GPL-3.0 license.
