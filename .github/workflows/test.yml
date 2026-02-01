@@ -49,7 +49,10 @@ jobs:
       - name: Reset Pre-release Tag
         if: steps.release_info.outputs.prerelease == 'true'
         continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          gh release delete pre-release --cleanup-tag -y || true
           git push --delete origin pre-release || true
           git tag -d pre-release || true
 
