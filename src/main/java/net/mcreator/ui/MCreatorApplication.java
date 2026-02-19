@@ -274,40 +274,36 @@ public final class MCreatorApplication {
 			Workspace workspace = Workspace.readFromFS(workspaceFile, this.workspaceSelector);
 			if (forceRegenerate)
 				workspace.requireRegenerate();
-			if (workspace.getMCreatorVersion() > Launcher.version.versionlong
-					&& !MCreatorVersionNumber.isBuildNumberDevelopment(workspace.getMCreatorVersion())) {
-				ThreadUtil.runOnSwingThreadAndWait(() -> JOptionPane.showMessageDialog(workspaceSelector,
-						L10N.t("dialog.workspace.open_failed_message"), L10N.t("dialog.workspace.open_failed_title"),
-						JOptionPane.ERROR_MESSAGE));
-			} else {
-				AtomicReference<MCreator> openResult = new AtomicReference<>(null);
+			if (forceRegenerate)
+				workspace.requireRegenerate();
 
-				ThreadUtil.runOnSwingThreadAndWait(() -> {
-					MCreator mcreator = MCreator.create(this, workspace);
-					if (!this.openMCreators.contains(mcreator)) {
-						this.workspaceSelector.setVisible(false);
-						this.openMCreators.add(mcreator);
-						mcreator.setVisible(true);
-						mcreator.requestFocusInWindow();
-						mcreator.toFront();
-						analytics.trackPage(AnalyticsConstants.PAGE_WORKSPACE_OPEN);
-						openResult.set(mcreator);
-					} else { // already open, just focus it
-						LOG.warn("Trying to open already open workspace, bringing it to the front.");
-						for (MCreator openmcreator : openMCreators) {
-							if (openmcreator.equals(mcreator)) {
-								openmcreator.requestFocusInWindow();
-								openmcreator.toFront();
-							}
+			AtomicReference<MCreator> openResult = new AtomicReference<>(null);
+
+			ThreadUtil.runOnSwingThreadAndWait(() -> {
+				MCreator mcreator = MCreator.create(this, workspace);
+				if (!this.openMCreators.contains(mcreator)) {
+					this.workspaceSelector.setVisible(false);
+					this.openMCreators.add(mcreator);
+					mcreator.setVisible(true);
+					mcreator.requestFocusInWindow();
+					mcreator.toFront();
+					analytics.trackPage(AnalyticsConstants.PAGE_WORKSPACE_OPEN);
+					openResult.set(mcreator);
+				} else { // already open, just focus it
+					LOG.warn("Trying to open already open workspace, bringing it to the front.");
+					for (MCreator openmcreator : openMCreators) {
+						if (openmcreator.equals(mcreator)) {
+							openmcreator.requestFocusInWindow();
+							openmcreator.toFront();
 						}
 					}
-				});
+				}
+			});
 
-				this.workspaceSelector.addOrUpdateRecentWorkspace(
-						new RecentWorkspaceEntry(workspace, workspaceFile, Launcher.version.getFullString()));
+			this.workspaceSelector.addOrUpdateRecentWorkspace(
+					new RecentWorkspaceEntry(workspace, workspaceFile, Launcher.version.getFullString()));
 
-				return openResult.get();
-			}
+			return openResult.get();
 		} catch (CorruptedWorkspaceFileException corruptedWorkspaceFile) {
 			LOG.fatal("Failed to open workspace!", corruptedWorkspaceFile);
 

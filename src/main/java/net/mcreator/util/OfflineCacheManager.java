@@ -45,6 +45,7 @@ public class OfflineCacheManager {
 
     // Fallback Versions (used if detection fails)
     private static final String FALLBACK_MC_VERSION = "1.21.8";
+    private static final String FALLBACK_LOADER_VERSION = "0.17.2";
     private static final String FALLBACK_BUILD_FILE_VERSION = "0.133.4";
 
     public static File getOfflineCacheDir() {
@@ -491,6 +492,7 @@ public class OfflineCacheManager {
         LOG.info("Applying offline mode fixes to workspace: " + workspaceDir);
 
         String mcVersion = FALLBACK_MC_VERSION;
+        String loaderVersion = FALLBACK_LOADER_VERSION;
         String buildFileVersion = FALLBACK_BUILD_FILE_VERSION;
         try {
             File versionsFile = new File(getOfflineCacheDir(), VERSIONS_FILE_NAME);
@@ -498,6 +500,7 @@ public class OfflineCacheManager {
                 Properties p = new Properties();
                 p.load(Files.newBufferedReader(versionsFile.toPath()));
                 mcVersion = p.getProperty("minecraft_version", FALLBACK_MC_VERSION);
+                loaderVersion = p.getProperty("loader_version", FALLBACK_LOADER_VERSION);
                 buildFileVersion = p.getProperty("build_file_version", FALLBACK_BUILD_FILE_VERSION);
             }
         } catch (Exception e) {
@@ -527,13 +530,12 @@ public class OfflineCacheManager {
                 String props = FileIO.readFileToString(gradleProps);
                 props = props.replaceAll("minecraft_version=.*", "minecraft_version=" + mcVersion);
                 props = props.replaceAll("yarn_mappings=.*", "yarn_mappings=" + mcVersion + "+build.1");
-                props = props.replaceAll("loader_version=.*", "loader_version=" + "0.15.11");
+                props = props.replaceAll("loader_version=.*", "loader_version=" + loaderVersion);
                 props = props.replaceAll("fabric_version=.*", "fabric_version=" + buildFileVersion);
 
                 if (!props.contains("org.gradle.caching=")) {
                     props += "\norg.gradle.caching=true";
                     props += "\norg.gradle.parallel=true";
-                    // CRITICAL: Limit user RAM usage
                     props += "\norg.gradle.jvmargs=-Xmx1024m";
                 }
 
@@ -542,7 +544,7 @@ public class OfflineCacheManager {
 
             content = content.replaceAll("com\\.mojang:minecraft:[0-9\\.]+", "com.mojang:minecraft:" + mcVersion);
             content = content.replaceAll("net\\.fabricmc:fabric-loader:[0-9\\.]+",
-                    "net.fabricmc:fabric-loader:0.15.11");
+                    "net.fabricmc:fabric-loader:" + loaderVersion);
             content = content.replaceAll("net\\.fabricmc:yarn:[0-9\\.+]+:v2",
                     "net.fabricmc:yarn:" + mcVersion + "+build.1:v2");
 
