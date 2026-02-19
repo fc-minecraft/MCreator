@@ -271,7 +271,13 @@ public class OfflineCacheManager {
                             "genEclipseRuns", "genSourcesWithCfr", "validateAccessWidener", "build");
 
                     // Memory optimization
-                    launcher.addJvmArguments("-Xmx1024m");
+                    long totalMem = ((com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory
+                            .getOperatingSystemMXBean()).getTotalMemorySize();
+                    if (totalMem > 10737418240L) { // > 10GB
+                        launcher.addJvmArguments("-Xmx4096m");
+                    } else {
+                        launcher.addJvmArguments("-Xmx1024m");
+                    }
                     launcher.addArguments("--build-cache", "--parallel");
 
                     launcher.addProgressListener(event -> {
@@ -508,7 +514,13 @@ public class OfflineCacheManager {
             content += "\norg.gradle.caching=true";
             content += "\norg.gradle.parallel=true";
             content += "\norg.gradle.vfs.watch=true";
-            content += "\norg.gradle.jvmargs=-Xmx1024m";
+            long totalMem = ((com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory
+                    .getOperatingSystemMXBean()).getTotalMemorySize();
+            if (totalMem > 10737418240L) { // > 10GB
+                content += "\norg.gradle.jvmargs=-Xmx4096m";
+            } else {
+                content += "\norg.gradle.jvmargs=-Xmx1024m";
+            }
         }
         FileIO.writeStringToFile(content, gradleProps);
     }
@@ -567,7 +579,13 @@ public class OfflineCacheManager {
                 if (!props.contains("org.gradle.caching=")) {
                     props += "\norg.gradle.caching=true";
                     props += "\norg.gradle.parallel=true";
-                    props += "\norg.gradle.jvmargs=-Xmx1024m";
+                    long totalMem = ((com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory
+                            .getOperatingSystemMXBean()).getTotalMemorySize();
+                    if (totalMem > 10737418240L) { // > 10GB
+                        props += "\norg.gradle.jvmargs=-Xmx4096m";
+                    } else {
+                        props += "\norg.gradle.jvmargs=-Xmx1024m";
+                    }
                 }
 
                 FileIO.writeStringToFile(props, gradleProps);
