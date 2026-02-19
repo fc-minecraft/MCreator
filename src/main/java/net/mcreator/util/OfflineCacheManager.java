@@ -131,6 +131,7 @@ public class OfflineCacheManager {
                 try {
                     Properties p = new Properties();
                     p.setProperty("minecraft_version", mcVersion);
+                    p.setProperty("loader_version", FALLBACK_LOADER_VERSION); // Default to current fallback
                     p.setProperty("build_file_version", buildFileVersion);
                     p.store(Files.newBufferedWriter(versionsFile.toPath()), "Offline Mode Versions");
                 } catch (Exception ex) {
@@ -528,10 +529,11 @@ public class OfflineCacheManager {
             File gradleProps = new File(workspaceDir, "gradle.properties");
             if (gradleProps.exists()) {
                 String props = FileIO.readFileToString(gradleProps);
-                props = props.replaceAll("minecraft_version=.*", "minecraft_version=" + mcVersion);
-                props = props.replaceAll("yarn_mappings=.*", "yarn_mappings=" + mcVersion + "+build.1");
-                props = props.replaceAll("loader_version=.*", "loader_version=" + loaderVersion);
-                props = props.replaceAll("fabric_version=.*", "fabric_version=" + buildFileVersion);
+                props = props.replaceAll("(?m)^minecraft_version=.*", "minecraft_version=" + mcVersion);
+                props = props.replaceAll("(?m)^yarn_mappings=.*", "yarn_mappings=" + mcVersion + "+build.1");
+                props = props.replaceAll("(?m)^fabric_loader_version=.*", "fabric_loader_version=" + loaderVersion);
+                props = props.replaceAll("(?m)^loader_version=.*", "loader_version=" + loaderVersion);
+                props = props.replaceAll("(?m)^fabric_version=.*", "fabric_version=" + buildFileVersion);
 
                 if (!props.contains("org.gradle.caching=")) {
                     props += "\norg.gradle.caching=true";
