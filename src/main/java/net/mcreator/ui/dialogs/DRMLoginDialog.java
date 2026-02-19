@@ -382,7 +382,7 @@ public class DRMLoginDialog extends JDialog {
     }
 
     public static void showAndWait() {
-        if (DRMAuthManager.validate())
+        if (DRMAuthManager.hasValidSession())
             return;
 
         SwingUtilities.invokeLater(() -> {

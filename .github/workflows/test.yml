@@ -125,6 +125,8 @@ jobs:
           # Стандартная команда запуска сборки
           ARGS="generateExportReport exportLinux exportWindows --parallel --build-cache --configure-on-demand -Dorg.gradle.jvmargs=-Xmx3g -Dorg.gradle.vfs.watch=false -Dorg.gradle.console=plain -Porg.gradle.java.installations.paths="""
           
+          ARGS="$ARGS -Pobfuscate=true"
+          
           if [[ "$SNAPSHOT" == "true" ]]; then
             ARGS="$ARGS -Psnapshot=true"
           fi

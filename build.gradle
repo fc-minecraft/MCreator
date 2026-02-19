@@ -67,6 +67,7 @@ configurations {
     macX64
     macAarch64
     linux64
+    proguard
 
     // Optimized configuration selection logic
     if (isWindows) {
@@ -109,6 +110,9 @@ configurations.linux64.attributes {
 dependencies {
     // from lib folder
     implementation fileTree(dir: 'lib', include: ['*.jar'])
+
+    proguard 'com.guardsquare:proguard-base:7.6.1'
+    proguard 'com.guardsquare:proguard-core:7.6.1'
 
     // from maven
     implementation "commons-io:commons-io:2.21.0"

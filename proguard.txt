@@ -1,0 +1,57 @@
+-dontnote **
+-dontwarn **
+-ignorewarnings
+
+# Optimization is currently disabled due to IncompleteClassHierarchyException crashes 
+# with complex Swing/Gradle library hierarchies on some systems.
+-dontoptimize
+
+# Preverification can also cause hierarchy crashes if libraries are missing.
+# We disable it to be safe, as it is mainly a performance hint for the JVM.
+-dontpreverify
+
+# Enable access modification for better shrinking
+-allowaccessmodification
+
+# Strip trace/debug logs 
+-assumenosideeffects class org.apache.logging.log4j.Logger {
+    public void trace(...);
+    public void debug(...);
+}
+
+# Remove debug info to harden against decompilation
+-renamesourcefileattribute SourceFile
+-keepattributes Exceptions,InnerClasses,Signature,Deprecated,*Annotation*,EnclosingMethod
+
+# Keep entry point
+-keep public class net.mcreator.Launcher {
+    public static void main(java.lang.String[]);
+}
+
+# Keep common Swing and internal classes to avoid preverification/shrinking issues
+-keep class javax.swing.** { *; }
+-keep class java.awt.** { *; }
+-keep class org.gradle.** { *; }
+
+# Keep the plugin API (public interfaces/classes) but ALLOW OBfuscation of private/internal members
+-keep public class !net.mcreator.ui.init.**, net.mcreator.** {
+    public protected *;
+}
+
+# Keep serializable classes for Java serialization compatibility
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+
+# Keep Gson parameters to avoid JSON serialization breaking
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+-keep class * {
+    @com.google.gson.annotations.Expose <fields>;
+}

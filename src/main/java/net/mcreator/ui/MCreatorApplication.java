@@ -407,7 +407,7 @@ public final class MCreatorApplication {
 		StartupNotifications.handleStartupNotifications(workspaceSelector);
 
 		// Perform DRM Check AFTER showing the window
-		if (!net.mcreator.ui.init.DRMAuthManager.validate()) {
+		if (!net.mcreator.ui.init.DRMAuthManager.hasValidSession()) {
 			net.mcreator.ui.dialogs.DRMLoginDialog dialog = new net.mcreator.ui.dialogs.DRMLoginDialog(
 					workspaceSelector);
 			dialog.setVisible(true); // Modal, blocks until closed

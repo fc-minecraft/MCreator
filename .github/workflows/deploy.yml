@@ -60,6 +60,12 @@ jobs:
           export WIN_CERT_STOREPASS="$(gcloud auth print-access-token)"
           echo "$WIN_CERT_PEM" > codesign-chain.pem
           xvfb-run -a gradle generateExportReport exportWindows exportLinux
+          mkdir -p build/export_regular
+          mv build/export/* build/export_regular/
+          xvfb-run -a gradle exportWindows exportLinux -Pobfuscate=true
+          for f in build/export/*; do mv "$f" "build/export/drm-$(basename "$f")"; done
+          mv build/export_regular/* build/export/
+          rm -rf build/export_regular
       - name: Build and Export Snapshot Using Gradle
         if: github.event.inputs.release-type == 'snapshot'
         env:
@@ -70,6 +76,12 @@ jobs:
           export WIN_CERT_STOREPASS="$(gcloud auth print-access-token)"
           echo "$WIN_CERT_PEM" > codesign-chain.pem
           xvfb-run -a gradle generateExportReport exportWindows exportLinux -Psnapshot=true
+          mkdir -p build/export_regular
+          mv build/export/* build/export_regular/
+          xvfb-run -a gradle exportWindows exportLinux -Psnapshot=true -Pobfuscate=true
+          for f in build/export/*; do mv "$f" "build/export/drm-$(basename "$f")"; done
+          mv build/export_regular/* build/export/
+          rm -rf build/export_regular
       - name: Determine Export Version
         id: determineExportVersion
         run: |
@@ -143,12 +155,26 @@ jobs:
         if: github.event.inputs.release-type == 'release'
         env:
           MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
-        run: gradle generateExportReport exportMac -Pbuilddate=${{ needs.export1.outputs.build_date }}
+        run: |
+          gradle generateExportReport exportMac -Pbuilddate=${{ needs.export1.outputs.build_date }}
+          mkdir -p build/export_regular
+          mv build/export/* build/export_regular/
+          gradle exportMac -Pbuilddate=${{ needs.export1.outputs.build_date }} -Pobfuscate=true
+          for f in build/export/*; do mv "$f" "build/export/drm-$(basename "$f")"; done
+          mv build/export_regular/* build/export/
+          rm -rf build/export_regular
       - name: Build and Export Snapshot Using Gradle
         if: github.event.inputs.release-type == 'snapshot'
         env:
           MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
-        run: gradle generateExportReport exportMac -Psnapshot=true -Pbuilddate=${{ needs.export1.outputs.build_date }}
+        run: |
+          gradle generateExportReport exportMac -Psnapshot=true -Pbuilddate=${{ needs.export1.outputs.build_date }}
+          mkdir -p build/export_regular
+          mv build/export/* build/export_regular/
+          gradle exportMac -Psnapshot=true -Pbuilddate=${{ needs.export1.outputs.build_date }} -Pobfuscate=true
+          for f in build/export/*; do mv "$f" "build/export/drm-$(basename "$f")"; done
+          mv build/export_regular/* build/export/
+          rm -rf build/export_regular
       - name: Upload Binaries and Tag Release
         uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd
         with:

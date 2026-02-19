@@ -114,6 +114,60 @@ tasks.register('exportAll') {
     dependsOn generateExportReport
 }
 
+tasks.register('obfuscateJar', JavaExec) {
+    classpath = configurations.proguard
+    mainClass.set('proguard.ProGuard')
+    
+    doFirst {
+        def inFile = file('build/libs/mcreator.jar')
+        def outFile = file("build/tmp/mcreator-obf.jar")
+        outFile.parentFile.mkdirs()
+        
+        def libs = (configurations.compileClasspath + configurations.runtimeClasspath).findAll { it.exists() && it.isFile() }.collect { it.absolutePath }.unique()
+        
+        def javaHome = System.getProperty('java.home')
+        def argsList = [
+            '@proguard.txt',
+            '-injars', inFile.absolutePath,
+            '-outjars', outFile.absolutePath
+        ]
+        
+        // Robust Java Runtime detection for ProGuard 7+
+        def addedJmods = false
+        ["${javaHome}", "${javaHome}/..", "${javaHome}/../../"].each { path ->
+            def dir = file("${path}/jmods")
+            if (dir.exists() && !addedJmods) {
+                dir.listFiles()?.findAll { it.name.endsWith('.jmod') }?.each { 
+                    argsList.add('-libraryjars')
+                    argsList.add(it.absolutePath + "(!**.jar;!module-info.class)")
+                }
+                addedJmods = true
+            }
+        }
+        
+        if (!addedJmods) {
+            argsList.add('-libraryjars')
+            argsList.add(javaHome)
+        }
+        
+        libs.each { argsList.add('-libraryjars'); argsList.add(it) }
+        
+        args = argsList
+    }
+    
+    doLast {
+        copy {
+            from file("build/tmp/mcreator-obf.jar")
+            into file('build/libs')
+            rename { 'mcreator.jar' }
+        }
+    }
+}
+
+if (project.hasProperty('obfuscate')) {
+    jar.finalizedBy 'obfuscateJar'
+}
+
 apply from: 'platform/windows/windows.gradle'
 apply from: 'platform/linux/linux.gradle'
 apply from: 'platform/mac/mac.gradle'

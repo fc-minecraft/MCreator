@@ -17,69 +17,68 @@ import java.time.temporal.ChronoUnit;
 public class DRMAuthManager {
 
     private static final Logger LOG = LogManager.getLogger("DRM");
-    // "Fortress" Mode Constants
-    private static final String HMAC_SECRET = "MCREATOR_DRM_SECRET_2024_HARDENED";
-    private static final byte[] SALT = new byte[] { 0x4D, 0x43, 0x72, 0x65, 0x61, 0x74, 0x6F, 0x72 }; // "MCreator"
-    private static final File AUTH_FILE = new File(System.getProperty("user.home"), ".mcreator/drm_auth.bin"); // Binary
-                                                                                                               // file
+    private static final File AUTH_FILE = new File(System.getProperty("user.home"), ".mcreator/drm_auth.bin");
     private static final Gson GSON = new GsonBuilder().create();
     private static AuthData currentSession;
+
+    // Obfuscated memory for Secrets
+    private static String getHmacSecret() {
+        byte[] e = new byte[] { 24, 22, 7, 16, 20, 1, 26, 7, 10, 17, 7, 24, 10, 6, 16, 22, 7, 16, 1, 10, 103, 101, 103,
+                97, 10, 29, 20, 7, 17, 16, 27, 16, 17 };
+        for (int i = 0; i < e.length; i++)
+            e[i] ^= 0x55;
+        return new String(e, StandardCharsets.UTF_8);
+    }
+
+    private static byte[] getSalt() {
+        byte[] e = new byte[] { 24, 22, 39, 48, 52, 33, 58, 39 };
+        for (int i = 0; i < e.length; i++)
+            e[i] ^= 0x55;
+        return e;
+    }
 
     private static String getApiBaseUrl() {
         if (PreferencesManager.PREFERENCES != null && PreferencesManager.PREFERENCES.hidden != null) {
             String url = PreferencesManager.PREFERENCES.hidden.drmApiUrl.get();
             if (url == null || url.isEmpty())
                 return "https://api.funcode.school/api/auth";
-            // Append /api/auth if not present, assuming user gives domain like
-            // https://api.funcode.school
             return url.endsWith("/") ? url + "api/auth" : url + "/api/auth";
         }
-        return "https://api.funcode.school/api/auth"; // Fallback
+        return "https://api.funcode.school/api/auth";
     }
 
-    public static synchronized boolean validate() {
-        if (currentSession == null) {
+    // Internal centralized fetch, but explicit external validation
+    private static synchronized AuthData getActiveSession() {
+        if (currentSession == null)
             loadSession();
-        }
-
-        if (currentSession == null) {
-            return false;
-        }
-
-        // Check expiration
+        if (currentSession == null)
+            return null;
         try {
-            // 1. Check if token corrupted/tampered (Format check)
-            Instant.parse(currentSession.authExpire);
-
             Instant now = Instant.now();
-
-            // 2. Rolling Timestamp Check (Anti-Time-Travel)
             if (currentSession.lastCheckedTime != null) {
                 Instant lastChecked = Instant.parse(currentSession.lastCheckedTime);
-                if (now.isBefore(lastChecked.minusSeconds(600))) { // 10 mins buffer for sync
-                    LOG.error("System time tampering detected! Current: " + now + ", Last: " + lastChecked);
-                    logout();
-                    return false;
+                if (now.isBefore(lastChecked.minusSeconds(600))) {
+                    LOG.error("System time tampering detected!");
+                    return null;
                 }
             }
-
-            // Check auth expiration
-            Instant expireTime = Instant.parse(currentSession.authExpire);
-            if (now.isAfter(expireTime)) {
-                LOG.info("Session expired.");
-                return false;
-            }
-
-            // Update rolling timestamp
-            currentSession.lastCheckedTime = now.toString();
-            saveSession(); // Re-encrypt with new time
-
-            return true;
+            if (now.isAfter(Instant.parse(currentSession.authExpire)))
+                return null;
+            return currentSession;
         } catch (Exception e) {
-            LOG.error("Failed to parse expiration date or validate session", e);
-            logout(); // Corrupted data
-            return false;
+            return null;
         }
+    }
+
+    public static synchronized boolean hasValidSession() {
+        AuthData session = getActiveSession();
+        if (session != null) {
+            session.lastCheckedTime = Instant.now().toString();
+            saveSession();
+            return true;
+        }
+        logout();
+        return false;
     }
 
     public static synchronized String login(String login, String password) throws IOException {
@@ -95,11 +94,11 @@ public class DRMAuthManager {
             data.login = login;
             data.authExpire = resp.authExpire;
             data.refreshExpire = resp.refreshExpire;
-            data.lastCheckedTime = Instant.now().toString(); // Init timestamp
+            data.lastCheckedTime = Instant.now().toString();
 
             currentSession = data;
             saveSession();
-            return null; // Success
+            return null;
         } else {
             return "Неверный ответ от сервера";
         }
@@ -113,12 +112,13 @@ public class DRMAuthManager {
     }
 
     public static long getDaysRemaining() {
-        if (!validate())
+        // Decentralized check #1
+        AuthData sess = getActiveSession();
+        if (sess == null)
             return 0;
         try {
-            Instant expireTime = Instant.parse(currentSession.authExpire);
-            long days = ChronoUnit.DAYS.between(Instant.now(), expireTime);
-            return Math.max(0, days);
+            Instant expireTime = Instant.parse(sess.authExpire);
+            return Math.max(0, ChronoUnit.DAYS.between(Instant.now(), expireTime));
         } catch (Exception e) {
             return 0;
         }
@@ -131,19 +131,25 @@ public class DRMAuthManager {
         return "Неизвестно";
     }
 
-    /**
-     * Anti-Patching: Critical components calls this.
-     * If session is invalid/null (bypassed login), it throws exception or crashes
-     * JVM.
-     */
     public static void validateOrCrash() {
-        if (currentSession == null || currentSession.token == null) {
-            // Tampering detected.
-            // In a real scenario, we might want to be subtle, but for now:
-            throw new SecurityException("Runtime Integrity Check Failed: Invalid Session");
+        // Decentralized check #2: Independent File Validation to avoid single point of
+        // failure
+        if (!AUTH_FILE.exists())
+            throw new SecurityException("Runtime Integrity Check Failed: No Session");
+        try {
+            byte[] encryptedData = java.nio.file.Files.readAllBytes(AUTH_FILE.toPath());
+            String json = decrypt(encryptedData);
+            AuthData data = GSON.fromJson(json, AuthData.class);
+            if (data.token == null)
+                throw new SecurityException("Invalid Token");
+
+            Instant expireTime = Instant.parse(data.authExpire);
+            if (Instant.now().isAfter(expireTime)) {
+                throw new SecurityException("Session Expired");
+            }
+        } catch (Exception e) {
+            throw new SecurityException("Runtime Integrity Check Failed: " + e.getMessage());
         }
-        // Additional integrity checks could go here (e.g. check standard hash of known
-        // classes)
     }
 
     // --- ENCRYPTION & STORAGE (HWID) ---
@@ -156,7 +162,7 @@ public class DRMAuthManager {
             String decryptedJson = decrypt(encryptedData);
             currentSession = GSON.fromJson(decryptedJson, AuthData.class);
         } catch (Exception e) {
-            LOG.warn("Failed to load/decrypt auth session (HWID mismatch or tampering)", e);
+            LOG.warn("Failed to load/decrypt auth session (HWID mismatch or tampering)");
             currentSession = null;
         }
     }
@@ -175,37 +181,74 @@ public class DRMAuthManager {
     }
 
     private static javax.crypto.SecretKey getSecretKey() throws Exception {
-        // HWID Generation: OS + User + Arch + Processors
-        String hwid = System.getProperty("os.name") +
-                System.getProperty("os.arch") +
-                System.getProperty("os.version") +
-                Runtime.getRuntime().availableProcessors() +
-                System.getenv("PROCESSOR_IDENTIFIER") +
-                System.getenv("COMPUTERNAME") +
-                System.getProperty("user.name");
+        StringBuilder hwidBuilder = new StringBuilder();
+        try {
+            java.util.Enumeration<java.net.NetworkInterface> networkInterfaces = java.net.NetworkInterface
+                    .getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                java.net.NetworkInterface ni = networkInterfaces.nextElement();
+                byte[] hardwareAddress = ni.getHardwareAddress();
+                if (hardwareAddress != null) {
+                    for (byte b : hardwareAddress)
+                        hwidBuilder.append(String.format("%02X", b));
+                }
+            }
+        } catch (Exception e) {
+        }
 
-        // Hash HWID + Secret
+        hwidBuilder.append(System.getProperty("os.name"));
+        hwidBuilder.append(System.getProperty("os.arch"));
+        hwidBuilder.append(Runtime.getRuntime().availableProcessors());
+
+        String envProcessor = System.getenv("PROCESSOR_IDENTIFIER");
+        if (envProcessor != null)
+            hwidBuilder.append(envProcessor);
+
+        String envComputer = System.getenv("COMPUTERNAME");
+        if (envComputer == null)
+            envComputer = System.getenv("HOSTNAME");
+        if (envComputer != null)
+            hwidBuilder.append(envComputer);
+
+        String hwid = hwidBuilder.toString();
+
         javax.crypto.SecretKeyFactory factory = javax.crypto.SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         javax.crypto.spec.PBEKeySpec spec = new javax.crypto.spec.PBEKeySpec(
-                (hwid + HMAC_SECRET).toCharArray(),
-                SALT,
+                (hwid + getHmacSecret()).toCharArray(),
+                getSalt(),
                 65536,
                 256);
         return new javax.crypto.spec.SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
     }
 
     private static byte[] encrypt(String data) throws Exception {
-        javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/ECB/PKCS5Padding"); // ECB for simplicity in
-                                                                                              // this context, or CBC
-                                                                                              // with Iv
-        cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, getSecretKey());
-        return cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
+        javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding");
+        byte[] iv = new byte[16];
+        new java.security.SecureRandom().nextBytes(iv);
+        javax.crypto.spec.IvParameterSpec ivSpec = new javax.crypto.spec.IvParameterSpec(iv);
+        cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, getSecretKey(), ivSpec);
+
+        byte[] encrypted = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
+
+        byte[] combined = new byte[iv.length + encrypted.length];
+        System.arraycopy(iv, 0, combined, 0, iv.length);
+        System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
+        return combined;
     }
 
-    private static String decrypt(byte[] data) throws Exception {
-        javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(javax.crypto.Cipher.DECRYPT_MODE, getSecretKey());
-        return new String(cipher.doFinal(data), StandardCharsets.UTF_8);
+    private static String decrypt(byte[] combined) throws Exception {
+        if (combined.length < 16)
+            throw new Exception("Invalid data");
+        byte[] iv = new byte[16];
+        System.arraycopy(combined, 0, iv, 0, iv.length);
+        javax.crypto.spec.IvParameterSpec ivSpec = new javax.crypto.spec.IvParameterSpec(iv);
+
+        byte[] encrypted = new byte[combined.length - 16];
+        System.arraycopy(combined, 16, encrypted, 0, encrypted.length);
+
+        javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(javax.crypto.Cipher.DECRYPT_MODE, getSecretKey(), ivSpec);
+        return new String(cipher.doFinal(encrypted), StandardCharsets.UTF_8);
     }
 
     // --- NETWORK ---
@@ -251,7 +294,7 @@ public class DRMAuthManager {
 
                 String errorMsg = "Ошибка авторизации: " + code + " " + response.toString();
                 LOG.error(errorMsg);
-                System.err.println(errorMsg); // Explicit console output
+                System.err.println(errorMsg);
                 throw new IOException("Сервер вернул ошибку " + code + ": " + response.toString());
             } catch (Exception e) {
                 if (code == 403 || code == 401) {
@@ -293,6 +336,6 @@ public class DRMAuthManager {
         String login;
         String authExpire;
         String refreshExpire;
-        String lastCheckedTime; // For Rolling Timestamp
+        String lastCheckedTime;
     }
 }
