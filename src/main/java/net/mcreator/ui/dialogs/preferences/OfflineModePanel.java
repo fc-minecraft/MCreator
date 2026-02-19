@@ -20,6 +20,8 @@ public class OfflineModePanel extends JPanel {
     private final JButton deleteButton;
     private final JButton verifyButton;
     private final JButton openFolderButton;
+    private final JButton exportButton;
+    private final JButton importButton;
     private final JCheckBox offlineModeCheckbox;
     private final JProgressBar progressBar;
     private final JTextArea logArea;
@@ -43,6 +45,9 @@ public class OfflineModePanel extends JPanel {
         deleteButton = new JButton("Очистить офлайн кэш");
         verifyButton = new JButton("Проверить целостность");
         openFolderButton = new JButton("Открыть папку кэша");
+
+        exportButton = new JButton("Экспорт кэша");
+        importButton = new JButton("Импорт кэша");
 
         offlineModeCheckbox = new JCheckBox("Всегда запускать Gradle в офлайн режиме");
         offlineModeCheckbox.setOpaque(false);
@@ -71,6 +76,9 @@ public class OfflineModePanel extends JPanel {
                     result.startsWith("Ошибка") ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE);
         });
         openFolderButton.addActionListener(e -> DesktopUtils.openSafe(OfflineCacheManager.getOfflineCacheDir()));
+
+        exportButton.addActionListener(this::exportAction);
+        importButton.addActionListener(this::importAction);
 
         // Layout
         GridBagConstraints gbc = new GridBagConstraints();
@@ -114,6 +122,13 @@ public class OfflineModePanel extends JPanel {
         subButtons.add(openFolderButton);
         add(subButtons, gbc);
 
+        gbc.gridy++;
+        JPanel ioButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        ioButtons.setOpaque(false);
+        ioButtons.add(exportButton);
+        ioButtons.add(importButton);
+        add(ioButtons, gbc);
+
         // Add to dialog
         String name = "Офлайн режим";
         JScrollPane scrollPane = new JScrollPane(PanelUtils.pullElementUp(this));
@@ -126,6 +141,96 @@ public class OfflineModePanel extends JPanel {
         dialog.registerOfflineModePanel(this);
 
         updateStatus();
+    }
+
+    private void setButtonsEnabled(boolean enabled) {
+        downloadButton.setEnabled(enabled);
+        deleteButton.setEnabled(enabled);
+        offlineModeCheckbox.setEnabled(enabled);
+        exportButton.setEnabled(enabled);
+        importButton.setEnabled(enabled);
+    }
+
+    private void exportAction(ActionEvent e) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Экспорт кэша офлайн режима");
+        fileChooser.setSelectedFile(new java.io.File("mcreator_offline_cache.zip"));
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("ZIP Archive", "zip"));
+
+        if (fileChooser.showSaveDialog(dialog) == JFileChooser.APPROVE_OPTION) {
+            java.io.File dest = fileChooser.getSelectedFile();
+            if (!dest.getName().toLowerCase().endsWith(".zip"))
+                dest = new java.io.File(dest.getParentFile(), dest.getName() + ".zip");
+
+            setButtonsEnabled(false);
+            progressBar.setVisible(true);
+            statusLabel.setText("Статус: Экспорт...");
+            statusLabel.setForeground(Color.WHITE);
+            logArea.setText("");
+
+            OfflineCacheManager.exportOfflineCache(dest,
+                    (status) -> SwingUtilities.invokeLater(() -> {
+                        logArea.append(status + "\n");
+                        logArea.setCaretPosition(logArea.getDocument().getLength());
+                        statusLabel.setText("Статус: " + status);
+                    }),
+                    () -> { // Success
+                        updateStatus();
+                        setButtonsEnabled(true);
+                        progressBar.setVisible(false);
+                        JOptionPane.showMessageDialog(dialog, "Кэш успешно экспортирован!");
+                    },
+                    () -> { // Error
+                        updateStatus();
+                        setButtonsEnabled(true);
+                        progressBar.setVisible(false);
+                        JOptionPane.showMessageDialog(dialog, "Ошибка экспорта. Проверьте лог.", "Ошибка",
+                                JOptionPane.ERROR_MESSAGE);
+                    });
+        }
+    }
+
+    private void importAction(ActionEvent e) {
+        int confirm = JOptionPane.showConfirmDialog(dialog,
+                "Вы уверены, что хотите импортировать кэш?\n" +
+                        "ВНИМАНИЕ: Текущий кэш будет полностью удален и заменен импортированным.",
+                "Подтверждение импорта", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Импорт кэша офлайн режима");
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("ZIP Archive", "zip"));
+
+            if (fileChooser.showOpenDialog(dialog) == JFileChooser.APPROVE_OPTION) {
+                java.io.File src = fileChooser.getSelectedFile();
+
+                setButtonsEnabled(false);
+                progressBar.setVisible(true);
+                statusLabel.setText("Статус: Импорт...");
+                statusLabel.setForeground(Color.WHITE);
+                logArea.setText("");
+
+                OfflineCacheManager.importOfflineCache(src,
+                        (status) -> SwingUtilities.invokeLater(() -> {
+                            logArea.append(status + "\n");
+                            logArea.setCaretPosition(logArea.getDocument().getLength());
+                            statusLabel.setText("Статус: " + status);
+                        }),
+                        () -> { // Success
+                            updateStatus();
+                            setButtonsEnabled(true);
+                            progressBar.setVisible(false);
+                            JOptionPane.showMessageDialog(dialog, "Кэш успешно импортирован!");
+                        },
+                        () -> { // Error
+                            updateStatus();
+                            setButtonsEnabled(true);
+                            progressBar.setVisible(false);
+                            JOptionPane.showMessageDialog(dialog, "Ошибка импорта. Проверьте лог.", "Ошибка",
+                                    JOptionPane.ERROR_MESSAGE);
+                        });
+            }
+        }
     }
 
     public void highlightDownload() {

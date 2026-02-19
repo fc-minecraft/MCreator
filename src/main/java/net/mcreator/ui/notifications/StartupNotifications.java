@@ -19,23 +19,19 @@
 
 package net.mcreator.ui.notifications;
 
-import net.mcreator.Launcher;
-import net.mcreator.io.net.api.update.UpdateInfo;
 import net.mcreator.plugin.PluginLoadFailure;
 import net.mcreator.plugin.PluginLoader;
 import net.mcreator.plugin.PluginUpdateInfo;
 import net.mcreator.preferences.PreferencesManager;
-import net.mcreator.ui.MCreatorApplication;
-import net.mcreator.ui.component.util.ThreadUtil;
-import net.mcreator.ui.dialogs.UpdateNotifyDialog;
 import net.mcreator.ui.dialogs.UpdatePluginDialog;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
-import net.mcreator.util.DesktopUtils;
 import net.mcreator.util.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException; // Added for exception
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -45,14 +41,25 @@ public class StartupNotifications {
 
 	public static <T extends Window & INotificationConsumer> void handleStartupNotifications(T parent) {
 		if (!notificationsHandled) {
-			ThreadUtil.runOnSwingThreadAndWait(() -> {
+			Runnable action = () -> {
 				// those show now dialogs initially, only notifications
 				handleUpdatesPlugin(parent);
 				handlePluginLoadFails(parent);
+				handleWindowsDefenderExclusions(parent);
 
 				// dialog if enabled, otherwise last in chain so this notification is on the top
 				handleUpdatesCore(parent);
-			});
+			};
+
+			if (SwingUtilities.isEventDispatchThread()) {
+				action.run();
+			} else {
+				try {
+					SwingUtilities.invokeAndWait(action);
+				} catch (InterruptedException | InvocationTargetException e) {
+					action.run(); // Fallback just run it if waiting fails or interrupted
+				}
+			}
 
 			notificationsHandled = true;
 		}
@@ -98,6 +105,54 @@ public class StartupNotifications {
 								JOptionPane.WARNING_MESSAGE);
 					}));
 		}
+	}
+
+	private static <T extends Window & INotificationConsumer> void handleWindowsDefenderExclusions(T parent) {
+		if (net.mcreator.io.OS.getOS() != net.mcreator.io.OS.WINDOWS)
+			return;
+
+		// Check if we already asked
+		if (PreferencesManager.PREFERENCES.ui.defenderExclusionAsked.get())
+			return;
+
+		// We do this check in background to not freeze UI
+		new Thread(() -> {
+			try {
+				File gradleCache = net.mcreator.util.OfflineCacheManager.getOfflineCacheDir();
+				if (!gradleCache.exists())
+					return;
+
+				String path = gradleCache.getAbsolutePath();
+				ProcessBuilder pb = new ProcessBuilder("powershell", "-Command",
+						"Get-MpPreference | Select-Object -ExpandProperty ExclusionPath");
+				Process p = pb.start();
+				String output = new String(p.getInputStream().readAllBytes());
+
+				if (!output.contains(path)) {
+					SwingUtilities.invokeLater(() -> {
+						parent.addNotification(UIRES.get("18px.warning"),
+								"Антивирус может замедлять работу программы.<br>Добавить MCreator в исключения?",
+								new NotificationsRenderer.ActionButton("Добавить", e -> {
+									try {
+										String cmd = "Start-Process powershell -Verb RunAs -WindowStyle Hidden -ArgumentList 'Add-MpPreference -ExclusionPath \""
+												+ path + "\"'";
+										new ProcessBuilder("powershell", "-Command", cmd).start();
+										PreferencesManager.PREFERENCES.ui.defenderExclusionAsked.set(true);
+										PreferencesManager.savePreferences();
+									} catch (Exception ex) {
+										ex.printStackTrace();
+									}
+								}),
+								new NotificationsRenderer.ActionButton("Не спрашивать", e -> {
+									PreferencesManager.PREFERENCES.ui.defenderExclusionAsked.set(true);
+									PreferencesManager.savePreferences();
+								}));
+					});
+				}
+			} catch (Exception e) {
+				// Ignore if check fails
+			}
+		}).start();
 	}
 
 }

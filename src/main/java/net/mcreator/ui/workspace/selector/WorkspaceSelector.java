@@ -123,8 +123,54 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 						workspaceOpenListener.workspaceOpened(newWorkspaceDialog.getWorkspaceFile());
 				});
 
-		actions.add("North", newWorkspace);
-		actions.add("Center", subactions);
+		boolean showCompleteSetup = !net.mcreator.util.OfflineCacheManager.isOfflineModeReady();
+		if (showCompleteSetup) {
+			JButton completeSetupBtn = mainWorkspaceButton("ЗАВЕРШИТЬ НАСТРОЙКУ", null,
+					e -> {
+						new PreferencesDialog(WorkspaceSelector.this, "Офлайн режим", true);
+						if (net.mcreator.util.OfflineCacheManager.isOfflineModeReady()) {
+							JButton btn = (JButton) e.getSource();
+							Container parent = btn.getParent();
+							if (parent != null) {
+								parent.remove(btn);
+								parent.revalidate();
+								parent.repaint();
+							}
+						}
+					});
+			completeSetupBtn.setForeground(new Color(255, 80, 80));
+			completeSetupBtn.setFont(completeSetupBtn.getFont().deriveFont(Font.BOLD));
+
+			Timer glowTimer = new Timer(50, new ActionListener() {
+				float phase = 0f;
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (!isDisplayable()) {
+						((Timer) e.getSource()).stop();
+						return;
+					}
+					phase += 0.1f;
+					int red = 255;
+					int greenBlue = (int) (100 + 50 * Math.sin(phase)); // 50 to 150
+					completeSetupBtn.setBackground(new Color(red, greenBlue, greenBlue));
+				}
+			});
+			glowTimer.start();
+
+			actions.add("North", completeSetupBtn);
+			// Move new workspace to center top of subactions or keep as is?
+			// User said "Button Finish Setup needs to be moved UP".
+			// Let's put it at the very top, and move New Workspace down or keep both?
+			// To avoid layout break, let's put New Workspace in Center (top of it)
+			JPanel centerWrapper = new JPanel(new BorderLayout());
+			centerWrapper.add("North", newWorkspace);
+			centerWrapper.add("Center", subactions);
+			actions.add("Center", centerWrapper);
+		} else {
+			actions.add("North", newWorkspace);
+			actions.add("Center", subactions);
+		}
 
 		addWorkspaceButton(L10N.t("dialog.workspace_selector.open_workspace"), UIRES.get("opnwrk"), e -> {
 			File workspaceFile = FileDialogs.getOpenDialog(this, new String[] { ".mcreator" });
@@ -162,6 +208,7 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		ComponentUtils.deriveFont(prefs, 15); // Increased font size
 		prefs.setForeground(Theme.current().getForegroundColor());
 		prefs.setBorder(BorderFactory.createEmptyBorder());
+		prefs.setVerticalTextPosition(SwingConstants.CENTER); // FIX ALIGNMENT
 		prefs.setHorizontalTextPosition(JLabel.LEFT);
 		prefs.addMouseListener(new MouseAdapter() {
 			@Override
@@ -184,6 +231,7 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		ComponentUtils.deriveFont(version, 15); // Increased font size
 		version.setForeground(Theme.current().getForegroundColor());
 		version.setHorizontalTextPosition(SwingConstants.LEFT);
+		version.setVerticalTextPosition(SwingConstants.CENTER); // FIX ALIGNMENT
 		version.setIcon(UIRES.get("info"));
 		version.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		southcenterleft.add(version);
@@ -203,65 +251,12 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		gbc.anchor = GridBagConstraints.WEST;
 		southSubComponent.add(southcenterleft, gbc);
 
-		// Center: Button (if visible)
-		boolean showCompleteSetup = !net.mcreator.util.OfflineCacheManager.isOfflineModeReady();
-		boolean debugShowSetup = false; // TOGGLE
-
-		if (showCompleteSetup || debugShowSetup) {
-			// Clean design: Standard Label, Bold, Red, Pulsing Color
-			JLabel completeSetup = new JLabel("ЗАВЕРШИТЬ НАСТРОЙКУ");
-			completeSetup.setCursor(new Cursor(Cursor.HAND_CURSOR));
-			// Use Bold font to stand out, but keep same size to avoid displacement
-			completeSetup.setFont(completeSetup.getFont().deriveFont(Font.BOLD));
-			completeSetup.setOpaque(false);
-
-			// Initial Color
-			completeSetup.setForeground(new Color(255, 60, 60)); // Base Red
-			completeSetup.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-
-			if (showCompleteSetup) {
-				Timer glowTimer = new Timer(50, new ActionListener() { // Faster 50ms for smoother animation
-					float phase = 0f;
-
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						if (!isDisplayable()) {
-							((Timer) e.getSource()).stop();
-							return;
-						}
-						phase += 0.15f;
-						// Pulse between Red and White-Red
-						// R = 255
-						// G, B = oscillates 0 to 180 (Whiteish)
-						int gb = (int) (90 + 90 * Math.sin(phase));
-						// Clamp just in case
-						gb = Math.max(0, Math.min(255, gb));
-
-						completeSetup.setForeground(new Color(255, gb, gb));
-					}
-				});
-				glowTimer.start();
-			}
-
-			completeSetup.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					new PreferencesDialog(WorkspaceSelector.this, "Офлайн режим", true);
-				}
-			});
-
-			gbc.gridx = 1;
-			gbc.weightx = 0;
-			gbc.anchor = GridBagConstraints.CENTER;
-			gbc.insets = new Insets(0, 0, 0, 0); // Reset insets
-
-			// Wrap in standard FlowLayout (vgap=5) to match southcenterleft (Version)
-			JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
-			wrapper.setOpaque(false);
-			wrapper.add(completeSetup);
-
-			southSubComponent.add(wrapper, gbc);
-		}
+		// Center: Button (if visible) moved to top actions
+		gbc.gridx = 1;
+		gbc.weightx = 0;
+		gbc.anchor = GridBagConstraints.CENTER;
+		gbc.insets = new Insets(0, 0, 0, 0); // Reset insets
+		southSubComponent.add(new JPanel(null), gbc); // Empty spacer
 
 		// Right: Settings
 		gbc.gridx = 2;

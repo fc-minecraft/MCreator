@@ -72,9 +72,10 @@ public class OfflineCacheManager {
             p.load(Files.newBufferedReader(versions.toPath()));
             String loaderVersion = p.getProperty("loader_version", "0.0.0");
 
-            // Simple version comparison (assumes format x.y.z)
-            if (compareVersions(loaderVersion, FALLBACK_LOADER_VERSION) < 0) {
-                return "Кэш устарел (Fabric Loader " + loaderVersion + " < " + FALLBACK_LOADER_VERSION + ")";
+            // Strict check: mismatched version is invalid, even if newer (to ensure
+            // consistency)
+            if (!loaderVersion.equals(FALLBACK_LOADER_VERSION)) {
+                return "Версия кэша не совпадает (" + loaderVersion + " != " + FALLBACK_LOADER_VERSION + ")";
             }
         } catch (Exception e) {
             return "Ошибка чтения версий кэша: " + e.getMessage();
@@ -92,20 +93,7 @@ public class OfflineCacheManager {
         if (!cachedBuildDir.isDirectory() || cachedBuildDir.list().length == 0)
             return "Ошибка: кэшированная папка build пуста";
 
-        return "Кэш цел (Проверено, оптимизация активна)";
-    }
-
-    private static int compareVersions(String v1, String v2) {
-        String[] p1 = v1.split("\\.");
-        String[] p2 = v2.split("\\.");
-        int len = Math.max(p1.length, p2.length);
-        for (int i = 0; i < len; i++) {
-            int n1 = i < p1.length ? Integer.parseInt(p1[i]) : 0;
-            int n2 = i < p2.length ? Integer.parseInt(p2[i]) : 0;
-            if (n1 != n2)
-                return n1 - n2;
-        }
-        return 0;
+        return "Кэш цел (Версия " + FALLBACK_LOADER_VERSION + ")";
     }
 
     public static long getCacheSize() {
@@ -123,8 +111,22 @@ public class OfflineCacheManager {
         }
     }
 
+    private static final java.util.concurrent.atomic.AtomicBoolean isDownloading = new java.util.concurrent.atomic.AtomicBoolean(
+            false);
+
     public static void downloadOfflineFiles(Consumer<String> statusCallback, Runnable onComplete, Runnable onError) {
+        if (isDownloading.getAndSet(true)) {
+            LOG.warn("Offline download is already running. Ignoring duplicate request.");
+            return;
+        }
+
         new Thread(() -> {
+
+            // Delete marker immediately to mark cache as invalid during update
+            File marker = new File(getOfflineCacheDir(), MARKER_FILE_NAME);
+            if (marker.exists())
+                marker.delete();
+
             File tempDir = null;
             try {
                 LOG.info("Starting offline cache download...");
@@ -264,9 +266,11 @@ public class OfflineCacheManager {
                     // 1. resolveDependencies (forces download of hidden artifacts like
                     // mixin-extensions)
                     // 2. build (forces full compilation and remapping to populate cache)
+                    // 3. Removed genSourcesWithCfr (slow and not strictly needed for offline
+                    // launch)
                     launcher.forTasks("dependencies", "resolveDependencies", "eclipse", "downloadAssets",
                             "genEclipseRuns",
-                            "validateAccessWidener", "genSourcesWithCfr", "build");
+                            "validateAccessWidener", "build");
 
                     // Memory optimization
                     launcher.addJvmArguments("-Xmx1024m");
@@ -331,7 +335,7 @@ public class OfflineCacheManager {
 
                 // REMOVED: .gradle directory caching to prevent absolute path issues
 
-                File marker = new File(getOfflineCacheDir(), MARKER_FILE_NAME);
+                marker = new File(getOfflineCacheDir(), MARKER_FILE_NAME);
                 if (!marker.getParentFile().exists())
                     marker.getParentFile().mkdirs();
                 marker.createNewFile();
@@ -347,6 +351,7 @@ public class OfflineCacheManager {
                 if (tempDir != null) {
                     FileIO.deleteDir(tempDir);
                 }
+                isDownloading.set(false);
             }
         }).start();
     }
@@ -628,18 +633,28 @@ public class OfflineCacheManager {
 
         File cachedProjectFiles = new File(getOfflineCacheDir(), "cached_project_files");
         if (cachedProjectFiles.exists()) {
-            LOG.info("Restoring cached Eclipse files to accelerate workspace setup...");
             try {
                 File dotProject = new File(cachedProjectFiles, ".project");
                 File dotClasspath = new File(cachedProjectFiles, ".classpath");
                 File dotSettings = new File(cachedProjectFiles, ".settings");
 
-                if (dotProject.exists())
+                boolean restored = false;
+
+                if (dotProject.exists() && !new File(workspaceDir, ".project").exists()) {
                     FileIO.copyFile(dotProject, new File(workspaceDir, ".project"));
-                if (dotClasspath.exists())
+                    restored = true;
+                }
+                if (dotClasspath.exists() && !new File(workspaceDir, ".classpath").exists()) {
                     FileIO.copyFile(dotClasspath, new File(workspaceDir, ".classpath"));
-                if (dotSettings.exists())
+                    restored = true;
+                }
+                if (dotSettings.exists() && !new File(workspaceDir, ".settings").exists()) {
                     FileIO.copyDirectory(dotSettings, new File(workspaceDir, ".settings"));
+                    restored = true;
+                }
+
+                if (restored)
+                    LOG.info("Restored cached Eclipse files to accelerate workspace setup.");
             } catch (Exception e) {
                 LOG.warn("Failed to restore cached Eclipse files", e);
             }
@@ -647,17 +662,66 @@ public class OfflineCacheManager {
 
         File cachedBuildDir = new File(getOfflineCacheDir(), "cached_build");
         if (cachedBuildDir.exists() && cachedBuildDir.isDirectory()) {
-            LOG.info("Restoring cached Gradle 'build' directory (pre-remapped sources)...");
             try {
                 File targetBuildDir = new File(workspaceDir, "build");
-                if (!targetBuildDir.exists())
-                    targetBuildDir.mkdirs();
-                FileIO.copyDirectory(cachedBuildDir, targetBuildDir);
-                LOG.info("Restored 'build' directory.");
+                if (!targetBuildDir.exists() || (targetBuildDir.isDirectory() && targetBuildDir.list() != null
+                        && targetBuildDir.list().length == 0)) {
+                    LOG.info("Restoring cached Gradle 'build' directory (pre-remapped sources)...");
+                    if (!targetBuildDir.exists())
+                        targetBuildDir.mkdirs();
+                    FileIO.copyDirectory(cachedBuildDir, targetBuildDir);
+                    LOG.info("Restored 'build' directory.");
+                }
             } catch (Exception e) {
                 LOG.warn("Failed to restore cached build directory", e);
             }
         }
+    }
+
+    public static void exportOfflineCache(java.io.File destination, java.util.function.Consumer<String> statusCallback,
+            Runnable onComplete, Runnable onError) {
+        if (isDownloading.getAndSet(true)) {
+            LOG.warn("Offline cache operation is already running. Ignoring export request.");
+            return;
+        }
+        new Thread(() -> {
+            try {
+                statusCallback.accept("Экспорт кэша...");
+                net.mcreator.io.zip.ZipIO.zipDir(getOfflineCacheDir().getAbsolutePath(), destination.getAbsolutePath());
+                statusCallback.accept("Экспорт завершен!");
+                javax.swing.SwingUtilities.invokeLater(onComplete);
+            } catch (Exception e) {
+                LOG.error("Failed to export offline cache", e);
+                javax.swing.SwingUtilities.invokeLater(onError);
+            } finally {
+                isDownloading.set(false);
+            }
+        }).start();
+    }
+
+    public static void importOfflineCache(java.io.File source, java.util.function.Consumer<String> statusCallback,
+            Runnable onComplete, Runnable onError) {
+        if (isDownloading.getAndSet(true)) {
+            LOG.warn("Offline cache operation is already running. Ignoring import request.");
+            return;
+        }
+        new Thread(() -> {
+            try {
+                statusCallback.accept("Очистка старого кэша...");
+                deleteOfflineCache();
+
+                statusCallback.accept("Импорт кэша...");
+                net.mcreator.io.zip.ZipIO.unzip(source.getAbsolutePath(), getOfflineCacheDir().getAbsolutePath());
+
+                statusCallback.accept("Импорт завершен!");
+                javax.swing.SwingUtilities.invokeLater(onComplete);
+            } catch (Exception e) {
+                LOG.error("Failed to import offline cache", e);
+                javax.swing.SwingUtilities.invokeLater(onError);
+            } finally {
+                isDownloading.set(false);
+            }
+        }).start();
     }
 
 }

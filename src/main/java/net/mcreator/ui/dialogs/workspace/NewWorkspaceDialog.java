@@ -88,20 +88,22 @@ public class NewWorkspaceDialog extends MCreatorDialog {
 		AbstractWorkspacePanel resourcepackWorkspacePanel = new ResourcepackWorkspacePanel(this);
 		AbstractWorkspacePanel addonWorkspacePanel = new AddonWorkspacePanel(this);
 
-		JPanel buttons = new JPanel();
+		JPanel buttons = new JPanel(new BorderLayout());
 
+		JPanel rightButtons = new JPanel(new GridLayout(1, 0, 5, 0));
 		JButton ok = L10N.button("dialog.new_workspace.button_new");
-		buttons.add(ok);
-
-		JButton cancel = L10N.button("common.cancel");
-		buttons.add(cancel);
-
-		buttons.add(new JEmptyBox(2, 2));
+		rightButtons.add(ok);
 
 		JButton help = L10N.button("common.help");
-		buttons.add(help);
+		rightButtons.add(help);
 
-		buttons.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
+		buttons.add(rightButtons, BorderLayout.EAST);
+
+		JButton cancel = L10N.button("common.cancel");
+		// Move Cancel to far left (West) to avoid accidental click near 'Create'
+		buttons.add(cancel, BorderLayout.WEST);
+
+		buttons.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
 		add("South", buttons);
 
 		ok.addActionListener(e -> {
@@ -309,7 +311,8 @@ public class NewWorkspaceDialog extends MCreatorDialog {
 			GeneratorConfiguration suggestedGenerator = GeneratorConfiguration.getRecommendedGeneratorForBaseLanguage(
 					Generator.GENERATOR_CACHE.values().stream()
 							.filter(e -> GeneratorFlavor.OFFICIAL_FLAVORS.contains(e.getGeneratorFlavor()))
-							.collect(Collectors.toSet()), GeneratorFlavor.BaseLanguage.JAVA);
+							.collect(Collectors.toSet()),
+					GeneratorFlavor.BaseLanguage.JAVA);
 			if (suggestedGenerator != null) {
 				selectType(suggestedGenerator.getGeneratorFlavor());
 			} else {
@@ -331,33 +334,33 @@ public class NewWorkspaceDialog extends MCreatorDialog {
 
 	private void selectType(GeneratorFlavor flavor) {
 		switch (flavor) {
-		case FORGE:
-			forge.doClick();
-			break;
-		case NEOFORGE:
-			neoforge.doClick();
-			break;
-		case FABRIC:
-			fabric.doClick();
-			break;
-		case QUILT:
-			quilt.doClick();
-			break;
-		case SPIGOT:
-			spigot.doClick();
-			break;
-		case PAPER:
-			paper.doClick();
-			break;
-		case ADDON:
-			addon.doClick();
-			break;
-		case DATAPACK:
-			datapack.doClick();
-			break;
-		case RESOURCEPACK:
-			resourcepack.doClick();
-			break;
+			case FORGE:
+				forge.doClick();
+				break;
+			case NEOFORGE:
+				neoforge.doClick();
+				break;
+			case FABRIC:
+				fabric.doClick();
+				break;
+			case QUILT:
+				quilt.doClick();
+				break;
+			case SPIGOT:
+				spigot.doClick();
+				break;
+			case PAPER:
+				paper.doClick();
+				break;
+			case ADDON:
+				addon.doClick();
+				break;
+			case DATAPACK:
+				datapack.doClick();
+				break;
+			case RESOURCEPACK:
+				resourcepack.doClick();
+				break;
 		}
 	}
 
@@ -371,7 +374,8 @@ public class NewWorkspaceDialog extends MCreatorDialog {
 		button.setEnabled(false);
 		button.setToolTipText(L10N.t("dialog.new_workspace.disabled.tooltip"));
 		button.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				super.mouseReleased(e);
 				int option = JOptionPane.showConfirmDialog(null,
 						L10N.t("dialog.new_workspace.dialog_plugin_needed.text"),

@@ -43,6 +43,7 @@ public class UISection extends PreferencesSection {
 	public final BooleanEntry remindOfUnsavedChanges;
 	public final BooleanEntry autoPurgeProjects;
 	public final IntegerEntry autoPurgeProjectsTime;
+	public final BooleanEntry defenderExclusionAsked;
 
 	public UISection(String preferencesIdentifier) {
 		super(preferencesIdentifier);
@@ -58,6 +59,7 @@ public class UISection extends PreferencesSection {
 		autoPurgeProjects = addEntry(new BooleanEntry("autoPurgeProjects", true));
 		autoPurgeProjectsTime = addEntry(new IntegerEntry("autoPurgeProjectsTime", 6, 1, 120));
 		remindOfUnsavedChanges = addEntry(new BooleanEntry("remindOfUnsavedChanges", false));
+		defenderExclusionAsked = addEntry(new BooleanEntry("defenderExclusionAsked", false));
 
 	}
 
