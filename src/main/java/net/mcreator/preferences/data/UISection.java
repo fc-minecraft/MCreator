@@ -44,6 +44,7 @@ public class UISection extends PreferencesSection {
 	public final BooleanEntry autoPurgeProjects;
 	public final IntegerEntry autoPurgeProjectsTime;
 	public final BooleanEntry defenderExclusionAsked;
+	public final BooleanEntry enableFileLogging;
 
 	public UISection(String preferencesIdentifier) {
 		super(preferencesIdentifier);
@@ -60,7 +61,7 @@ public class UISection extends PreferencesSection {
 		autoPurgeProjectsTime = addEntry(new IntegerEntry("autoPurgeProjectsTime", 6, 1, 120));
 		remindOfUnsavedChanges = addEntry(new BooleanEntry("remindOfUnsavedChanges", false));
 		defenderExclusionAsked = addEntry(new BooleanEntry("defenderExclusionAsked", false));
-
+		enableFileLogging = addEntry(new BooleanEntry("enableFileLogging", false));
 	}
 
 	@Override

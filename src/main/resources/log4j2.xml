@@ -27,7 +27,7 @@
         <Logger name="net.mcreator" level="ALL"/>
         <Root level="ALL">
             <AppenderRef ref="CONSOLE" level="ALL"/>
-            <AppenderRef ref="ROLLINGFILE" level="ALL"/>
+            <AppenderRef ref="ROLLINGFILE" level="${sys:log_file_level}"/>
         </Root>
     </Loggers>
 </Configuration>

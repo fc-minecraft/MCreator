@@ -33,6 +33,26 @@ public class LoggingSystem {
 	public static void init() {
 		System.setProperty("log_directory", UserFolderManager.getFileFromUserFolder("").getAbsolutePath());
 
+		// Manually check preferences for file logging before full initialization
+		String logLevel = "OFF";
+		try {
+			java.io.File prefFile = UserFolderManager.getFileFromUserFolder("userpreferences");
+			if (prefFile.isFile()) {
+				// Simple check to avoid full JSON parsing overhead if possible, or just strict
+				// check
+				String content = new String(java.nio.file.Files.readAllBytes(prefFile.toPath()));
+				// We look for "enableFileLogging": true
+				// This is a naive check but effective for bootstrapping without loading all
+				// prefs dependencies
+				if (content.contains("\"enableFileLogging\": true")) {
+					logLevel = "ALL";
+				}
+			}
+		} catch (Exception e) {
+			// Ignore errors, default to OFF
+		}
+		System.setProperty("log_file_level", logLevel);
+
 		if (OS.getOS() == OS.WINDOWS && ManagementFactory.getRuntimeMXBean().getInputArguments().stream()
 				.noneMatch(arg -> arg.contains("idea_rt.jar"))) {
 			System.setProperty("log_disable_ansi", "true");
@@ -40,7 +60,7 @@ public class LoggingSystem {
 			System.setProperty("log_disable_ansi", "false");
 		}
 
-		//noinspection resource
+		// noinspection resource
 		System.setErr(new PrintStream(
 				new LoggingOutputStream(LogManager.getLogger("STDERR"), Level.ERROR).withCustomLogAction(log -> {
 					// Fail tests if anything but JavaFX configuration error is logged to STDERR
