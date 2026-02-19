@@ -37,7 +37,7 @@ tasks.register('extractJcefWin64', Copy) {
     from {
         configurations.win64.filter { it.name.contains('jcef-natives') }.collect { zipTree(it) }
     }
-    include "**/*.dll", "**/*.pak", "**/*.bin", "**/*.dat", "**/*.json", "**/*.exe"
+    include "**"
     exclude "META-INF/**"
     into 'build/export/win64/jcef-bundle'
 }

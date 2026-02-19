@@ -9,7 +9,7 @@ tasks.register('extractJcefMacX64', Copy) {
     from {
         configurations.macX64.filter { it.name.contains('jcef-natives') }.collect { zipTree(it) }
     }
-    include "**/*.dylib", "**/*.pak", "**/*.bin", "**/*.dat", "**/*.json", "**/*.so"
+    include "**"
     exclude "META-INF/**"
     into 'build/export/mac_x64/MCreator.app/Contents/MacOS/jcef-bundle'
 }
@@ -71,7 +71,7 @@ tasks.register('extractJcefMacAarch64', Copy) {
     from {
         configurations.macAarch64.filter { it.name.contains('jcef-natives') }.collect { zipTree(it) }
     }
-    include "**/*.dylib", "**/*.pak", "**/*.bin", "**/*.dat", "**/*.json", "**/*.so"
+    include "**"
     exclude "META-INF/**"
     into 'build/export/mac_aarch64/MCreator.app/Contents/MacOS/jcef-bundle'
 }

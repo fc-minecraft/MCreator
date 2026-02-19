@@ -67,6 +67,19 @@ public class OfflineCacheManager {
         if (!versions.exists())
             return "Ошибка: файл версий отсутствует";
 
+        try {
+            Properties p = new Properties();
+            p.load(Files.newBufferedReader(versions.toPath()));
+            String loaderVersion = p.getProperty("loader_version", "0.0.0");
+
+            // Simple version comparison (assumes format x.y.z)
+            if (compareVersions(loaderVersion, FALLBACK_LOADER_VERSION) < 0) {
+                return "Кэш устарел (Fabric Loader " + loaderVersion + " < " + FALLBACK_LOADER_VERSION + ")";
+            }
+        } catch (Exception e) {
+            return "Ошибка чтения версий кэша: " + e.getMessage();
+        }
+
         File cachedProjectFiles = new File(cache, "cached_project_files");
         if (!cachedProjectFiles.exists())
             return "Ошибка: кэшированные файлы проекта отсутствуют";
@@ -80,6 +93,19 @@ public class OfflineCacheManager {
             return "Ошибка: кэшированная папка build пуста";
 
         return "Кэш цел (Проверено, оптимизация активна)";
+    }
+
+    private static int compareVersions(String v1, String v2) {
+        String[] p1 = v1.split("\\.");
+        String[] p2 = v2.split("\\.");
+        int len = Math.max(p1.length, p2.length);
+        for (int i = 0; i < len; i++) {
+            int n1 = i < p1.length ? Integer.parseInt(p1[i]) : 0;
+            int n2 = i < p2.length ? Integer.parseInt(p2[i]) : 0;
+            if (n1 != n2)
+                return n1 - n2;
+        }
+        return 0;
     }
 
     public static long getCacheSize() {

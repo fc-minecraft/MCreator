@@ -3,7 +3,7 @@ tasks.register('extractJcefLinux64', Copy) {
     from {
         configurations.linux64.filter { it.name.contains('jcef-natives') }.collect { zipTree(it) }
     }
-    include "**/*.so", "**/*.pak", "**/*.bin", "**/*.dat", "**/*.json"
+    include "**"
     exclude "META-INF/**"
     into 'build/export/linux64/jcef-bundle'
 }

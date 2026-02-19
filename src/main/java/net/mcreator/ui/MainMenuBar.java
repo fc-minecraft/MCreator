@@ -158,9 +158,12 @@ public abstract class MainMenuBar extends JMenuBar {
 		JButton logoutBtn = new JButton("Выйти (" + days + " дн.)");
 		logoutBtn.setFocusable(false);
 		logoutBtn.addActionListener(e -> {
-			net.mcreator.ui.init.DRMAuthManager.logout();
-			// Restart or exit
-			mcreator.getActionRegistry().exitMCreator.actionPerformed(null);
+			if (JOptionPane.showConfirmDialog(mcreator, L10N.t("dialog.logout.confirm"), L10N.t("dialog.logout.title"),
+					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+				net.mcreator.ui.init.DRMAuthManager.logout();
+				// Restart or exit
+				mcreator.getActionRegistry().exitMCreator.actionPerformed(null);
+			}
 		});
 		add(logoutBtn);
 	}
