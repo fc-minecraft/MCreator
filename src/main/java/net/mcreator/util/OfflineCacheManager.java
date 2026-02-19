@@ -266,11 +266,9 @@ public class OfflineCacheManager {
                     // 1. resolveDependencies (forces download of hidden artifacts like
                     // mixin-extensions)
                     // 2. build (forces full compilation and remapping to populate cache)
-                    // 3. Removed genSourcesWithCfr (slow and not strictly needed for offline
                     // launch)
                     launcher.forTasks("dependencies", "resolveDependencies", "eclipse", "downloadAssets",
-                            "genEclipseRuns",
-                            "validateAccessWidener", "build");
+                            "genEclipseRuns", "genSourcesWithCfr", "validateAccessWidener", "build");
 
                     // Memory optimization
                     launcher.addJvmArguments("-Xmx1024m");
