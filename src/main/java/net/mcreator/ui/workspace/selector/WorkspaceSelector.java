@@ -89,6 +89,15 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 	private final JList<RecentWorkspaceEntry> recentsList = new JList<>(defaultListModel);
 	private final JPopupMenu recentListPopupMenu;
 
+	private JLabel drmStatusLabel;
+
+	public void refreshDRMStatus() {
+		if (drmStatusLabel != null) {
+			long days = net.mcreator.ui.init.DRMAuthManager.getDaysRemaining();
+			drmStatusLabel.setText("Лицензия: " + days + " дн.");
+		}
+	}
+
 	public WorkspaceSelector(@Nullable MCreatorApplication application, WorkspaceOpenListener workspaceOpenListener) {
 		this.workspaceOpenListener = workspaceOpenListener;
 		this.application = application;
@@ -258,6 +267,27 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 		gbc.gridx = 2;
 		gbc.weightx = 1.0;
 		gbc.anchor = GridBagConstraints.EAST;
+
+		// DRM Status & Logout
+		long days = net.mcreator.ui.init.DRMAuthManager.getDaysRemaining();
+		drmStatusLabel = new JLabel("Лицензия: " + days + " дн.");
+		drmStatusLabel.setForeground(Theme.current().getForegroundColor());
+		ComponentUtils.deriveFont(drmStatusLabel, 14);
+
+		JButton logoutBtn = new JButton("Выйти");
+		ComponentUtils.deriveFont(logoutBtn, 14);
+		logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		logoutBtn.addActionListener(e -> {
+			net.mcreator.ui.init.DRMAuthManager.logout();
+			// Restart application to show login dialog again
+			application.closeApplication();
+		});
+
+		// Add DRM info before the preferences button (which is already in southcenter)
+		// Result: [Status] [Logout] [Settings] (Right aligned)
+		southcenter.add(drmStatusLabel, 0);
+		southcenter.add(logoutBtn, 1);
+
 		southSubComponent.add(southcenter, gbc);
 
 		JComponent centerComponent = PanelUtils.centerAndSouthElement(

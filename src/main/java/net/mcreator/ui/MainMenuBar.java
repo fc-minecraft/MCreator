@@ -19,20 +19,15 @@
 package net.mcreator.ui;
 
 import net.mcreator.io.OS;
-import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.ide.CodeEditorView;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.laf.themes.Theme;
 import net.mcreator.ui.views.editor.image.ImageMakerView;
 import net.mcreator.ui.workspace.selector.RecentWorkspaceEntry;
-import net.mcreator.util.DesktopUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.io.IOException;
 
 public abstract class MainMenuBar extends JMenuBar {
 
@@ -42,14 +37,16 @@ public abstract class MainMenuBar extends JMenuBar {
 	private final MCreator mcreator;
 
 	protected MainMenuBar(MCreator mcreator) {
-		this.mcreator = mcreator;
+		// Anti-Patching Check
+		net.mcreator.ui.init.DRMAuthManager.validateOrCrash();
 
-		boolean macOSscreenMenuBar =
-				OS.getOS() == OS.MAC && "true".equals(System.getProperty("apple.laf.useScreenMenuBar"));
+		this.mcreator = mcreator;
+		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
+		boolean macOSscreenMenuBar = OS.getOS() == OS.MAC
+				&& "true".equals(System.getProperty("apple.laf.useScreenMenuBar"));
 
 		setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.current().getSecondAltBackgroundColor()));
-
-
 
 		JMenu file = L10N.menu("menubar.file");
 		file.setMnemonic('F');
@@ -154,6 +151,18 @@ public abstract class MainMenuBar extends JMenuBar {
 		help.add(mcreator.getActionRegistry().aboutMCreator);
 		help.setMnemonic('H');
 		add(help);
+
+		// DRM Logout Button
+		add(Box.createHorizontalGlue());
+		long days = net.mcreator.ui.init.DRMAuthManager.getDaysRemaining();
+		JButton logoutBtn = new JButton("Выйти (" + days + " дн.)");
+		logoutBtn.setFocusable(false);
+		logoutBtn.addActionListener(e -> {
+			net.mcreator.ui.init.DRMAuthManager.logout();
+			// Restart or exit
+			mcreator.getActionRegistry().exitMCreator.actionPerformed(null);
+		});
+		add(logoutBtn);
 	}
 
 	protected abstract void assembleMenuBar(MCreator mcreator);

@@ -405,6 +405,16 @@ public final class MCreatorApplication {
 		workspaceSelector.setVisible(true);
 
 		StartupNotifications.handleStartupNotifications(workspaceSelector);
+
+		// Perform DRM Check AFTER showing the window
+		if (!net.mcreator.ui.init.DRMAuthManager.validate()) {
+			net.mcreator.ui.dialogs.DRMLoginDialog dialog = new net.mcreator.ui.dialogs.DRMLoginDialog(
+					workspaceSelector);
+			dialog.setVisible(true); // Modal, blocks until closed
+
+			// Refresh status after login
+			workspaceSelector.refreshDRMStatus();
+		}
 	}
 
 	List<RecentWorkspaceEntry> getRecentWorkspaces() {

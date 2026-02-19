@@ -42,7 +42,7 @@ public class PreferencesDialog extends MCreatorDialog {
 	final DefaultListModel<String> model = new DefaultListModel<>();
 	final JPanel preferences = new JPanel();
 
-	private final Map<String, JPanel> sectionPanels = new HashMap<>();
+	final Map<String, JPanel> sectionPanels = new HashMap<>();
 
 	private final JList<String> sections = new JList<>(model);
 	private final CardLayout preferencesLayout = new CardLayout();
@@ -168,6 +168,8 @@ public class PreferencesDialog extends MCreatorDialog {
 		new ThemesPanel(this);
 
 		new OfflineModePanel(this);
+
+		new DRMPanel(this);
 
 		// Consolidate templates into one section
 		createPreferenceSection("templates");

@@ -37,17 +37,20 @@ public class HiddenSection extends PreferencesSection {
 	public final StringEntry uiTheme;
 	public final BooleanEntry enableJavaPlugins;
 	public final StringEntry lastWebsiteNewsRead;
+	public final StringEntry drmApiUrl;
 
 	HiddenSection(String preferencesIdentifier) {
 		super(preferencesIdentifier);
 
 		fullScreen = addEntry(new BooleanEntry("fullScreen", false));
 		java_home = addEntry(new HiddenEntry<>("java_home", null) {
-			@Override public void setValueFromJsonElement(JsonElement object) {
+			@Override
+			public void setValueFromJsonElement(JsonElement object) {
 				this.value = new File(object.getAsString());
 			}
 
-			@Override public JsonElement getSerializedValue() {
+			@Override
+			public JsonElement getSerializedValue() {
 				if (value != null) {
 					return new JsonPrimitive(value.getAbsolutePath());
 				} else {
@@ -58,15 +61,17 @@ public class HiddenSection extends PreferencesSection {
 		uiTheme = addEntry(new StringEntry("uiTheme", "midnight"));
 		enableJavaPlugins = addEntry(new BooleanEntry("enableJavaPlugins", false));
 		lastWebsiteNewsRead = addEntry(new StringEntry("lastWebsiteNewsRead", ""));
+		drmApiUrl = addEntry(new StringEntry("drmApiUrl", "https://api.funcode.school"));
 	}
 
-	@Override public boolean isVisible() {
+	@Override
+	public boolean isVisible() {
 		return false;
 	}
 
-	@Override public String getSectionKey() {
+	@Override
+	public String getSectionKey() {
 		return "hidden";
 	}
 
 }
-
