@@ -40,12 +40,29 @@ public class BlocklyTemplateDropdown extends JScrollablePopupMenu {
 	private static final Logger LOG = LogManager.getLogger(BlocklyTemplateDropdown.class);
 
 	/**
-	 * <p>This component will display in the form of a scrollable list, all templates found by {@link net.mcreator.io.TemplatesLoader}.
-	 * This component is a part of {@link BlocklyEditorToolbar}.</p>
+	 * <p>
+	 * This component will display in the form of a scrollable list, all templates
+	 * found by {@link net.mcreator.io.TemplatesLoader}.
+	 * This component is a part of {@link BlocklyEditorToolbar}.
+	 * </p>
 	 *
-	 * @param blocklyPanel    <p>The {@link BlocklyPanel} to use for some features</p>
-	 * @param templatesSorted <p>This list contains a {@link ResourcePointer} pointing to every template found in plugins or in the user's folder.</p>
-	 * @param procedureGUI    <p>When a {@link ProcedureGUI} is passed, features specific to {@link net.mcreator.element.types.Procedure} such as variables are enabled.</p>
+	 * @param blocklyPanel
+	 *                        <p>
+	 *                        The {@link BlocklyPanel} to use for some features
+	 *                        </p>
+	 * @param templatesSorted
+	 *                        <p>
+	 *                        This list contains a {@link ResourcePointer} pointing
+	 *                        to every template found in plugins or in the user's
+	 *                        folder.
+	 *                        </p>
+	 * @param procedureGUI
+	 *                        <p>
+	 *                        When a {@link ProcedureGUI} is passed, features
+	 *                        specific to
+	 *                        {@link net.mcreator.element.types.Procedure} such as
+	 *                        variables are enabled.
+	 *                        </p>
 	 */
 	public BlocklyTemplateDropdown(BlocklyPanel blocklyPanel, List<ResourcePointer> templatesSorted,
 			ProcedureGUI procedureGUI) {
@@ -55,7 +72,17 @@ public class BlocklyTemplateDropdown extends JScrollablePopupMenu {
 		setMaximumVisibleRows(20);
 		for (ResourcePointer template : templatesSorted) {
 			try {
-				JMenuItem modTypeButton = new JMenuItem(template.toString());
+				String templateName = template.toString();
+				String translationKey = "template." + blocklyPanel.getType().registryName() + "."
+						+ templateName.replaceAll("[^a-zA-Z0-9]+", "_").toLowerCase(java.util.Locale.ENGLISH);
+				String translatedName = net.mcreator.ui.init.L10N.t(translationKey);
+				if (translatedName == null || translatedName.equals(translationKey)) {
+					translatedName = net.mcreator.ui.init.L10N.t(templateName);
+					if (translatedName == null || translatedName.equals(templateName)) {
+						translatedName = templateName;
+					}
+				}
+				JMenuItem modTypeButton = new JMenuItem(translatedName);
 
 				String procedureXml;
 

@@ -28,8 +28,9 @@ public class JCEFHelper {
                 initialized = true;
                 return;
             }
-            
-            if (initialized) return;
+
+            if (initialized)
+                return;
             if (initializing) {
                 try {
                     lock.wait();
@@ -43,14 +44,16 @@ public class JCEFHelper {
 
         try {
             CefAppBuilder builder = new CefAppBuilder();
-            builder.setInstallDir(new File("jcef-bundle"));
+            builder.setInstallDir(net.mcreator.io.UserFolderManager.getFileFromUserFolder("jcef-bundle"));
             builder.setProgressHandler(new IProgressHandler() {
                 @Override
                 public void handleProgress(EnumProgress state, float percent) {
-                    String msg = "Загрузка компонентов... " + ((int)percent) + "%";
-                    if (percent < 0) msg = "Загрузка компонентов...";
+                    String msg = "Загрузка компонентов... " + ((int) percent) + "%";
+                    if (percent < 0)
+                        msg = "Загрузка компонентов...";
                     LOG.info("JCEF Init: " + state + " " + percent + "%");
-                    if (statusUpdater != null) statusUpdater.accept(msg);
+                    if (statusUpdater != null)
+                        statusUpdater.accept(msg);
                 }
             });
 
@@ -65,8 +68,8 @@ public class JCEFHelper {
             builder.addJcefArgs("--disable-site-isolation-trials");
             builder.addJcefArgs("--proxy-server=direct://");
             builder.addJcefArgs("--proxy-bypass-list=*");
-            
-            builder.addJcefArgs("--disable-web-security"); 
+
+            builder.addJcefArgs("--disable-web-security");
             builder.addJcefArgs("--allow-file-access-from-files");
 
             int cores = Runtime.getRuntime().availableProcessors();
@@ -77,15 +80,15 @@ public class JCEFHelper {
             builder.setAppHandler(new MavenCefAppHandlerAdapter() {
                 @Override
                 public void stateHasChanged(org.cef.CefApp.CefAppState state) {
-                   if (state == CefApp.CefAppState.TERMINATED) {
-                       // Handle termination
-                   }
+                    if (state == CefApp.CefAppState.TERMINATED) {
+                        // Handle termination
+                    }
                 }
             });
 
             cefApp = builder.build();
 
-            // МЫ НЕ РЕГИСТРИРУЕМ ЗДЕСЬ СХЕМЫ. 
+            // МЫ НЕ РЕГИСТРИРУЕМ ЗДЕСЬ СХЕМЫ.
             // Это делает BlocklyPanel через client.addRequestHandler.
 
             synchronized (lock) {

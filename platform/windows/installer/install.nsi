@@ -52,12 +52,9 @@ InstallDir "$PROGRAMFILES${BITS}\Pylo\MCreator"
 
 !define MUI_ABORTWARNING
 
-!insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE ".\win${BITS}\LICENSE.txt"
-!insertmacro MUI_PAGE_DIRECTORY
-!insertmacro MUI_PAGE_INSTFILES
-!insertmacro MUI_PAGE_FINISH
+AutoCloseWindow true
 
+!insertmacro MUI_PAGE_INSTFILES
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW un.ModifyUnConfirm
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE un.ModifyUnConfirmLeave
 !insertmacro MUI_UNPAGE_WELCOME
@@ -72,12 +69,12 @@ Function .onInit
 ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" "UninstallString"
 
 ${If} $0 != ""
-${AndIf} ${Cmd} `MessageBox MB_YESNO|MB_ICONQUESTION "Installer has detected a previous version of MCreator installed. \
-                 If you intend to install the new version in the same folder as the \
-                 old version, you NEED to uninstall the old version first. \
-                 Do you want to uninstall previous version?" /SD IDYES IDYES`
 	Call UninstallPrevious
 ${EndIf}
+FunctionEnd
+
+Function .onInstSuccess
+  Exec '"$INSTDIR\mcreator.exe"'
 FunctionEnd
 
 Section "MCreator ${MCREATOR_VERSION}" Installation
@@ -123,6 +120,10 @@ SectionEnd
 
 Var keepUserData
 Var keepUserDataState
+
+Function un.onInit
+  StrCpy $keepUserDataState 1
+FunctionEnd
 
 Function un.ModifyUnConfirm
     ${NSD_CreateCheckbox} 120u -25u 70% 20u "Keep settings, recent workspaces list, and caches"
@@ -186,8 +187,13 @@ Function UninstallPrevious
         Call GetParent
         Pop $1
 
-        ; Run the uninstaller
-        ExecWait '"$0" _?=$1'
+        RMDir /r "$1\jdk\*.*"
+        RMDir /r "$1\lib\*.*"
+        RMDir /r "$1\license\*.*"
+        RMDir /r "$1\plugins\*.*"
+        Delete "$1\mcreator.exe"
+        Delete "$1\mcreator.bat"
+        Delete "$1\LICENSE.txt"
     ${EndIf}
 FunctionEnd
 
