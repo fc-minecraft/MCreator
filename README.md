@@ -1,4 +1,3 @@
-
 ## License and trademark
 
 MCreator is licensed under the GPL-3.0 license (with exceptions implemented as specified in section 7 of GPL-3.0) if not otherwise stated in source files or other files of this project. Copyright 2020 Pylo and contributors.
