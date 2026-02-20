@@ -54,7 +54,7 @@ public class HelpLoader {
 
 		PluginLoader.INSTANCE.getResources("help." + L10N.getLocaleString(), Pattern.compile("^[^$].*\\.md$")).forEach(
 				e -> LOCALIZED_CACHE.put(FilenameUtilsPatched.removeExtension(
-								e.replaceFirst("help/" + L10N.getLocaleString() + "/", "")),
+						e.replaceFirst("help/" + L10N.getLocaleString() + "/", "")),
 						FileIO.readResourceToString(PluginLoader.INSTANCE, e)));
 
 		List<Extension> extensionList = Arrays.asList(TablesExtension.create(), AutolinkExtension.create());
@@ -72,7 +72,8 @@ public class HelpLoader {
 		return Math.min(100, (int) Math.ceil(langcount * 100d / (double) DEFAULT_CACHE.size()));
 	}
 
-	@Nullable private static String getFromCache(String key) {
+	@Nullable
+	private static String getFromCache(String key) {
 		return LOCALIZED_CACHE.computeIfAbsent(key, DEFAULT_CACHE::get);
 	}
 
@@ -102,7 +103,7 @@ public class HelpLoader {
 					if (helpText.contains("${") || helpText.contains("<#")) {
 						try {
 							Map<String, Object> dataModel = new HashMap<>();
-							//noinspection InstantiationOfUtilityClass
+							// noinspection InstantiationOfUtilityClass
 							dataModel.put("l10n", new L10N());
 
 							if (helpContext instanceof ModElementHelpContext<?> meHelpContext) {
@@ -136,13 +137,9 @@ public class HelpLoader {
 					helpString.append(L10N.t("help_loader.no_help_entry", helpContext.entry()));
 				}
 
-				if (uri != null && helpContext.contextName() != null) {
-					helpString.append(L10N.t("help_loader.learn_about", uri.toString(), helpContext.contextName()));
-				}
-
 				return helpString.toString();
 			} else if (uri != null && helpContext.contextName() != null) {
-				return L10N.t("help_loader.no_entry_learn_more", uri.toString(), helpContext.contextName());
+				return L10N.t("help_loader.no_help_found");
 			}
 		}
 
