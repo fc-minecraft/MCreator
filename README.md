@@ -1,9 +1,3 @@
-[![MCreator](https://mcreator.net/image/brand/mcreator300s.png)]()
-
-# MCreator - Minecraft Mod Maker
-
-MCreator is a software used to make Minecraft Java Edition mods, Minecraft Bedrock Edition Add-Ons, and data packs using an intuitive easy-to-learn interface or with an integrated code editor. 
-
 
 ## License and trademark
 
