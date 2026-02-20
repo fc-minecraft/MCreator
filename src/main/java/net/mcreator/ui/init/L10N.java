@@ -52,8 +52,7 @@ public class L10N {
 			Map.entry("splash.loading_generators", "Загрузка генераторов"),
 			Map.entry("splash.loading_generator", "Загрузка генератора: {0}"),
 			Map.entry("splash.initiating_session", "Инициализация сессии"),
-			Map.entry("splash.loading_windows", "Загрузка окон")
-	);
+			Map.entry("splash.loading_windows", "Загрузка окон"));
 
 	private static ResourceBundle rb;
 	private static ResourceBundle rb_en;
@@ -146,6 +145,12 @@ public class L10N {
 
 	public static String t(String key, Object... parameters) {
 		return t_impl(rb, key, parameters);
+	}
+
+	public static boolean hasTranslation(String key) {
+		if (rb == null)
+			return false;
+		return rb.containsKey(key);
 	}
 
 	public static String t_en(String key, Object... parameters) {

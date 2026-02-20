@@ -41,7 +41,8 @@ public class DataListEntry {
 	private String texture;
 	private Object other;
 
-	@Nullable public List<String> required_apis;
+	@Nullable
+	public List<String> required_apis;
 
 	private final Set<GeneratorConfiguration> supportedGenerators;
 
@@ -79,6 +80,24 @@ public class DataListEntry {
 	}
 
 	public String getReadableName() {
+		String vanillaName = name;
+		if (vanillaName.startsWith("Blocks."))
+			vanillaName = vanillaName.substring(7).toLowerCase(java.util.Locale.ENGLISH);
+		else if (vanillaName.startsWith("Items."))
+			vanillaName = vanillaName.substring(6).toLowerCase(java.util.Locale.ENGLISH);
+		else if (vanillaName.startsWith("Entities."))
+			vanillaName = vanillaName.substring(9).toLowerCase(java.util.Locale.ENGLISH);
+		if (vanillaName.contains("#"))
+			vanillaName = vanillaName.substring(0, vanillaName.indexOf('#'));
+
+		if (net.mcreator.ui.init.L10N.hasTranslation("block.minecraft." + vanillaName)) {
+			return net.mcreator.ui.init.L10N.t("block.minecraft." + vanillaName);
+		} else if (net.mcreator.ui.init.L10N.hasTranslation("item.minecraft." + vanillaName)) {
+			return net.mcreator.ui.init.L10N.t("item.minecraft." + vanillaName);
+		} else if (net.mcreator.ui.init.L10N.hasTranslation("entity.minecraft." + vanillaName)) {
+			return net.mcreator.ui.init.L10N.t("entity.minecraft." + vanillaName);
+		}
+
 		if (readableName == null) {
 			if (name.startsWith(NameMapper.MCREATOR_PREFIX)) {
 				return WordUtils.capitalizeFully(
@@ -89,6 +108,16 @@ public class DataListEntry {
 				return WordUtils.capitalizeFully(StringUtils.machineToReadableName(name));
 			}
 		}
+
+		String secondaryKey = readableName.toLowerCase(java.util.Locale.ENGLISH).replace(" ", "_");
+		if (net.mcreator.ui.init.L10N.hasTranslation("block.minecraft." + secondaryKey)) {
+			return net.mcreator.ui.init.L10N.t("block.minecraft." + secondaryKey);
+		} else if (net.mcreator.ui.init.L10N.hasTranslation("item.minecraft." + secondaryKey)) {
+			return net.mcreator.ui.init.L10N.t("item.minecraft." + secondaryKey);
+		} else if (net.mcreator.ui.init.L10N.hasTranslation("entity.minecraft." + secondaryKey)) {
+			return net.mcreator.ui.init.L10N.t("entity.minecraft." + secondaryKey);
+		}
+
 		return readableName;
 	}
 
@@ -114,15 +143,18 @@ public class DataListEntry {
 		return other;
 	}
 
-	@Override public String toString() {
+	@Override
+	public String toString() {
 		return name;
 	}
 
-	@Override public boolean equals(Object o) {
+	@Override
+	public boolean equals(Object o) {
 		return o instanceof DataListEntry && name.equals(((DataListEntry) o).name);
 	}
 
-	@Override public int hashCode() {
+	@Override
+	public int hashCode() {
 		return name.hashCode();
 	}
 
@@ -176,7 +208,8 @@ public class DataListEntry {
 			super("");
 		}
 
-		@Override public boolean isSupportedInWorkspace(Workspace workspace) {
+		@Override
+		public boolean isSupportedInWorkspace(Workspace workspace) {
 			return true;
 		}
 
@@ -188,7 +221,8 @@ public class DataListEntry {
 			super(name);
 		}
 
-		@Override public boolean isSupportedInWorkspace(Workspace workspace) {
+		@Override
+		public boolean isSupportedInWorkspace(Workspace workspace) {
 			return true;
 		}
 
@@ -214,7 +248,8 @@ public class DataListEntry {
 			return modElement;
 		}
 
-		@Override public boolean isSupportedInWorkspace(Workspace workspace) {
+		@Override
+		public boolean isSupportedInWorkspace(Workspace workspace) {
 			return true;
 		}
 

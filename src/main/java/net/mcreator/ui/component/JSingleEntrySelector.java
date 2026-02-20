@@ -82,16 +82,17 @@ public abstract class JSingleEntrySelector<T> extends JPanel implements IValidab
 		});
 		remove.addActionListener(e -> setEntry(null));
 
-		readableText.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+		readableText.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
 		readableText.setHorizontalAlignment(JTextField.CENTER);
 		readableText.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2)
 					edit.doClick();
 			}
 		});
 		ComponentUtils.deriveFont(readableText, 14);
-		readableText.setPreferredSize(getPreferredSize());
+		readableText.setOpaque(true);
 
 		add("Center", readableText);
 
@@ -115,7 +116,8 @@ public abstract class JSingleEntrySelector<T> extends JPanel implements IValidab
 		updateReadableText();
 	}
 
-	@Override public void setEnabled(boolean enabled) {
+	@Override
+	public void setEnabled(boolean enabled) {
 		readableText.setEnabled(enabled);
 		edit.setEnabled(enabled);
 		remove.setEnabled(enabled);
@@ -131,6 +133,7 @@ public abstract class JSingleEntrySelector<T> extends JPanel implements IValidab
 		if (currentEntry == null) {
 			readableText.setText(defaultText);
 			readableText.setForeground(Theme.current().getAltForegroundColor());
+			readableText.setBackground(Theme.current().getAltBackgroundColor());
 			readableText.setToolTipText(readableText.getText());
 			return;
 		} else if (currentEntry instanceof MappableElement mappableElement) {
@@ -164,6 +167,8 @@ public abstract class JSingleEntrySelector<T> extends JPanel implements IValidab
 				readableText.setIcon(IconUtils.resize(
 						MCItem.getBlockIconBasedOnName(mcreator.getWorkspace(), currentEntry.toString()), 18));
 		}
+
+		readableText.setBackground(Theme.current().getBackgroundColor());
 		readableText.setForeground(Theme.current().getForegroundColor());
 		readableText.setToolTipText(
 				isSupported ? readableText.getText() : L10N.t("single_entry_selector.unsupported_entry"));
@@ -189,15 +194,16 @@ public abstract class JSingleEntrySelector<T> extends JPanel implements IValidab
 	private static final ImageIcon ERROR_ICON = IconUtils.resize(UIRES.get("18px.remove"), 13, 13);
 	private static final ImageIcon OK_ICON = IconUtils.resize(UIRES.get("18px.ok"), 13, 13);
 
-	@Override public void paint(Graphics g) {
+	@Override
+	public void paint(Graphics g) {
 		super.paint(g);
 
 		if (currentValidationResult != null) {
 			g.setColor(currentValidationResult.type().getColor());
 			switch (currentValidationResult.type()) {
-			case WARNING -> WARNING_ICON.paintIcon(this, g, 0, 0);
-			case ERROR -> ERROR_ICON.paintIcon(this, g, 0, 0);
-			case PASSED -> OK_ICON.paintIcon(this, g, 0, 0);
+				case WARNING -> WARNING_ICON.paintIcon(this, g, 0, 0);
+				case ERROR -> ERROR_ICON.paintIcon(this, g, 0, 0);
+				case PASSED -> OK_ICON.paintIcon(this, g, 0, 0);
 			}
 
 			if (currentValidationResult.type() != ValidationResult.Type.PASSED) {
@@ -206,21 +212,24 @@ public abstract class JSingleEntrySelector<T> extends JPanel implements IValidab
 		}
 	}
 
-	@Override public ValidationResult getValidationStatus() {
+	@Override
+	public ValidationResult getValidationStatus() {
 		ValidationResult validationResult = validator == null ? null : validator.validateIfEnabled(this);
 		this.currentValidationResult = validationResult;
 
-		//repaint as new validation status might have to be rendered
+		// repaint as new validation status might have to be rendered
 		repaint();
 
 		return validationResult;
 	}
 
-	@Override public void setValidator(Validator validator) {
+	@Override
+	public void setValidator(Validator validator) {
 		this.validator = validator;
 	}
 
-	@Override public Validator getValidator() {
+	@Override
+	public Validator getValidator() {
 		return validator;
 	}
 }

@@ -104,6 +104,10 @@ public class ImageUtils {
 		return resizeImage(toBufferedImage(image), w, h);
 	}
 
+	public static Image resizeNN(Image image, int w, int h) {
+		return resizeImageWithNN(toBufferedImage(image), w, h);
+	}
+
 	public static Image resizeAA(Image image, int w, int h) {
 		return resizeImageWithAA(toBufferedImage(image), w, h);
 	}
@@ -327,18 +331,49 @@ public class ImageUtils {
 	}
 
 	/**
-	 * Generates a cuboid image given the textures, the dimensions, and the offsets on the axes.
+	 * Generates a cuboid image given the textures, the dimensions, and the offsets
+	 * on the axes.
 	 *
-	 * @param top   <p>The top face texture</p>
-	 * @param front <p>The front face texture</p>
-	 * @param side  <p>The side (right) face texture</p>
-	 * @param x     <p>The length of the cuboid (width of the side face)</p>
-	 * @param y     <p>The height of the cuboid</p>
-	 * @param z     <p>The width of the cuboid (width of the front face)</p>
-	 * @param xOff  <p>The horizontal offset of the cuboid, towards the front face</p>
-	 * @param yOff  <p>The vertical offset of the cuboid, towards the top face</p>
-	 * @param zOff  <p>The horizontal of the cuboid, towards the side face</p>
-	 * @return <p>Returns generated image.</p>
+	 * @param top
+	 *              <p>
+	 *              The top face texture
+	 *              </p>
+	 * @param front
+	 *              <p>
+	 *              The front face texture
+	 *              </p>
+	 * @param side
+	 *              <p>
+	 *              The side (right) face texture
+	 *              </p>
+	 * @param x
+	 *              <p>
+	 *              The length of the cuboid (width of the side face)
+	 *              </p>
+	 * @param y
+	 *              <p>
+	 *              The height of the cuboid
+	 *              </p>
+	 * @param z
+	 *              <p>
+	 *              The width of the cuboid (width of the front face)
+	 *              </p>
+	 * @param xOff
+	 *              <p>
+	 *              The horizontal offset of the cuboid, towards the front face
+	 *              </p>
+	 * @param yOff
+	 *              <p>
+	 *              The vertical offset of the cuboid, towards the top face
+	 *              </p>
+	 * @param zOff
+	 *              <p>
+	 *              The horizontal of the cuboid, towards the side face
+	 *              </p>
+	 * @return
+	 *         <p>
+	 *         Returns generated image.
+	 *         </p>
 	 */
 	public static BufferedImage generateCuboidImage(Image top, Image front, Image side, int x, int y, int z, int xOff,
 			int yOff, int zOff) {
@@ -358,16 +393,18 @@ public class ImageUtils {
 
 		// Front face
 		Point2D f1 = new Point2D.Double(16 - xTot, xTot / 2d), f2 = new Point2D.Double(16 - xTot,
-				16 + xTot / 2d), f3 = new Point2D.Double(32 - xTot, 24 + xTot / 2d), f4 = new Point2D.Double(32 - xTot,
-				8 + xTot / 2d);
+				16 + xTot / 2d), f3 = new Point2D.Double(32 - xTot, 24 + xTot / 2d),
+				f4 = new Point2D.Double(32 - xTot,
+						8 + xTot / 2d);
 		g2d.drawImage(ImageTransformUtil.computeImage(
-						eraseExceptRect(resizeAndCrop(front, 32), 2 * zOff, 32 - 2 * yTot, 2 * z, 2 * y), f1, f2, f3, f4), null,
+				eraseExceptRect(resizeAndCrop(front, 32), 2 * zOff, 32 - 2 * yTot, 2 * z, 2 * y), f1, f2, f3, f4), null,
 				null);
 
 		// Side face
 		Point2D r1 = new Point2D.Double(zTot, 8 + zTot / 2d), r2 = new Point2D.Double(zTot,
-				24 + zTot / 2d), r3 = new Point2D.Double(16 + zTot, 16 + zTot / 2d), r4 = new Point2D.Double(16 + zTot,
-				zTot / 2d);
+				24 + zTot / 2d), r3 = new Point2D.Double(16 + zTot, 16 + zTot / 2d),
+				r4 = new Point2D.Double(16 + zTot,
+						zTot / 2d);
 		g2d.drawImage(ImageTransformUtil.computeImage(
 				darken(eraseExceptRect(resizeAndCrop(side, 32), 32 - 2 * xTot, 32 - 2 * yTot, 2 * x, 2 * y)), r1, r2,
 				r3, r4), null, null);
@@ -435,6 +472,19 @@ public class ImageUtils {
 		BufferedImage resizedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = resizedImage.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.drawImage(originalImage, 0, 0, w, h, null);
+		g.dispose();
+		return resizedImage;
+	}
+
+	private static BufferedImage resizeImageWithNN(BufferedImage originalImage, int w, int h) {
+		// Optimization to not resize images that are already the correct size
+		if (originalImage.getWidth() == w && originalImage.getHeight() == h)
+			return originalImage;
+
+		BufferedImage resizedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = resizedImage.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 		g.drawImage(originalImage, 0, 0, w, h, null);
 		g.dispose();
 		return resizedImage;
@@ -513,15 +563,42 @@ public class ImageUtils {
 	/**
 	 * Merges two images to make a single image
 	 *
-	 * @param first   <p>The first image to draw on the new image</p>
-	 * @param second  <p>The second image to draw on the new image</p>
-	 * @param width   <p>The width of the final image</p>
-	 * @param height  <p>The height of the final image</p>
-	 * @param xFirst  <p>The x position of the first image on the final image</p>
-	 * @param yFirst  <p>The y position of the first image on the final image</p>
-	 * @param xSecond <p>The x position of the second image on the final image</p>
-	 * @param ySecond <p>The y position of the second image on the final image</p>
-	 * @return <p>Returns the generated image.</p>
+	 * @param first
+	 *                <p>
+	 *                The first image to draw on the new image
+	 *                </p>
+	 * @param second
+	 *                <p>
+	 *                The second image to draw on the new image
+	 *                </p>
+	 * @param width
+	 *                <p>
+	 *                The width of the final image
+	 *                </p>
+	 * @param height
+	 *                <p>
+	 *                The height of the final image
+	 *                </p>
+	 * @param xFirst
+	 *                <p>
+	 *                The x position of the first image on the final image
+	 *                </p>
+	 * @param yFirst
+	 *                <p>
+	 *                The y position of the first image on the final image
+	 *                </p>
+	 * @param xSecond
+	 *                <p>
+	 *                The x position of the second image on the final image
+	 *                </p>
+	 * @param ySecond
+	 *                <p>
+	 *                The y position of the second image on the final image
+	 *                </p>
+	 * @return
+	 *         <p>
+	 *         Returns the generated image.
+	 *         </p>
 	 */
 	public static BufferedImage mergeTwoImages(Image first, Image second, int width, int height, int xFirst, int yFirst,
 			int xSecond, int ySecond) {
@@ -543,9 +620,19 @@ public class ImageUtils {
 	/**
 	 * Checks if two images have the same width and the same height
 	 *
-	 * @param first  <p>The first image</p>
-	 * @param second <p>The second image</p>
-	 * @return <p>Returns true if the provided images have the same width and the same height</p>
+	 * @param first
+	 *               <p>
+	 *               The first image
+	 *               </p>
+	 * @param second
+	 *               <p>
+	 *               The second image
+	 *               </p>
+	 * @return
+	 *         <p>
+	 *         Returns true if the provided images have the same width and the same
+	 *         height
+	 *         </p>
 	 */
 	public static boolean checkIfSameSize(Image first, Image second) {
 		return checkIfSameWidth(first, second) && checkIfSameHeight(first, second);
@@ -554,13 +641,36 @@ public class ImageUtils {
 	/**
 	 * Generates a smooth squircle shape
 	 *
-	 * @param color    <p>Color of the generated smooth squircle</p>
-	 * @param fac      <p>Upscale factor (generates a bigger image before downscaling to get better visual results)</p>
-	 * @param radius   <p>The squircle corner radius</p>
-	 * @param width    <p>Squircle width</p>
-	 * @param height   <p>Squircle height</p>
-	 * @param observer <p>Observer used when drawing the image (can be the current swing component)</p>
-	 * @return <p>The generated image</p>
+	 * @param color
+	 *                 <p>
+	 *                 Color of the generated smooth squircle
+	 *                 </p>
+	 * @param fac
+	 *                 <p>
+	 *                 Upscale factor (generates a bigger image before downscaling
+	 *                 to get better visual results)
+	 *                 </p>
+	 * @param radius
+	 *                 <p>
+	 *                 The squircle corner radius
+	 *                 </p>
+	 * @param width
+	 *                 <p>
+	 *                 Squircle width
+	 *                 </p>
+	 * @param height
+	 *                 <p>
+	 *                 Squircle height
+	 *                 </p>
+	 * @param observer
+	 *                 <p>
+	 *                 Observer used when drawing the image (can be the current
+	 *                 swing component)
+	 *                 </p>
+	 * @return
+	 *         <p>
+	 *         The generated image
+	 *         </p>
 	 */
 	public static Image generateSquircle(Color color, int fac, int radius, int width, int height,
 			ImageObserver observer) {
@@ -582,13 +692,36 @@ public class ImageUtils {
 	/**
 	 * Crops the input image in a squircle shape
 	 *
-	 * @param original <p>The original image</p>
-	 * @param fac      <p>Upscale factor (upscales the image before cropping to produce smooth edges after downscaling to the desired size)</p>
-	 * @param radius   <p>The squircle corner radius</p>
-	 * @param width    <p>Squircle width</p>
-	 * @param height   <p>Squircle height</p>
-	 * @param observer <p>Observer used when drawing the image (can be the current swing component)</p>
-	 * @return <p>The cropped image</p>
+	 * @param original
+	 *                 <p>
+	 *                 The original image
+	 *                 </p>
+	 * @param fac
+	 *                 <p>
+	 *                 Upscale factor (upscales the image before cropping to produce
+	 *                 smooth edges after downscaling to the desired size)
+	 *                 </p>
+	 * @param radius
+	 *                 <p>
+	 *                 The squircle corner radius
+	 *                 </p>
+	 * @param width
+	 *                 <p>
+	 *                 Squircle width
+	 *                 </p>
+	 * @param height
+	 *                 <p>
+	 *                 Squircle height
+	 *                 </p>
+	 * @param observer
+	 *                 <p>
+	 *                 Observer used when drawing the image (can be the current
+	 *                 swing component)
+	 *                 </p>
+	 * @return
+	 *         <p>
+	 *         The cropped image
+	 *         </p>
 	 */
 	public static Image cropSquircle(Image original, int fac, int radius, int width, int height,
 			ImageObserver observer) {
@@ -609,12 +742,30 @@ public class ImageUtils {
 	/**
 	 * Generates a shadow that fits squircle cropped images.
 	 *
-	 * @param radius          <p>The squircle corner radius</p>
-	 * @param shadowRadius    <p>Width of the blur shadow</p>
-	 * @param shadowExtension <p>The squircle extension</p>
-	 * @param width           <p>Squircle width</p>
-	 * @param height          <p>Squircle height</p>
-	 * @return <p>Returns the generated shadow.</p>
+	 * @param radius
+	 *                        <p>
+	 *                        The squircle corner radius
+	 *                        </p>
+	 * @param shadowRadius
+	 *                        <p>
+	 *                        Width of the blur shadow
+	 *                        </p>
+	 * @param shadowExtension
+	 *                        <p>
+	 *                        The squircle extension
+	 *                        </p>
+	 * @param width
+	 *                        <p>
+	 *                        Squircle width
+	 *                        </p>
+	 * @param height
+	 *                        <p>
+	 *                        Squircle height
+	 *                        </p>
+	 * @return
+	 *         <p>
+	 *         Returns the generated shadow.
+	 *         </p>
 	 */
 	public static Image generateShadow(int radius, int shadowRadius, int shadowExtension, int width, int height) {
 		BufferedImage im = new BufferedImage(width + 2 * ((shadowRadius * 2) + shadowExtension),
@@ -642,8 +793,14 @@ public class ImageUtils {
 	/**
 	 * Generates a gaussian kernel compatible with java.awt.image.Kernel objects.
 	 *
-	 * @param radius <p>The gaussian kernel radius</p>
-	 * @return <p>The generated kernel</p>
+	 * @param radius
+	 *               <p>
+	 *               The gaussian kernel radius
+	 *               </p>
+	 * @return
+	 *         <p>
+	 *         The generated kernel
+	 *         </p>
 	 */
 	public static float[] generateGaussianKernel(int radius) {
 		int shrad = radius * 2 + 1;

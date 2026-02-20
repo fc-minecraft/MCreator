@@ -125,12 +125,16 @@ public class MCItemHolder extends JButton implements IValidable {
 		setFocusPainted(false);
 		setOpaque(false);
 		setBorder(BorderFactory.createEmptyBorder());
+		setPreferredSize(new Dimension(38, 38));
+		setMinimumSize(new Dimension(38, 38));
 		addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (isEnabled() && (e.getButton() != MouseEvent.BUTTON3 || openOnRightClick)) {
 					if ((e.getButton() == MouseEvent.BUTTON2
 							|| e.getX() > 1 && e.getX() < 11 && e.getY() < getHeight() - 1
-							&& e.getY() > getHeight() - 11) && !block.isEmpty()) {
+									&& e.getY() > getHeight() - 11)
+							&& !block.isEmpty()) {
 						setBlock(null);
 					} else {
 						bs.setVisible(true); // show block selector
@@ -139,28 +143,31 @@ public class MCItemHolder extends JButton implements IValidable {
 				}
 			}
 
-			@Override public void mouseExited(MouseEvent e) {
+			@Override
+			public void mouseExited(MouseEvent e) {
 				removeButtonHover = false;
 				repaint();
 			}
 		});
 		addMouseMotionListener(new MouseMotionAdapter() {
-			@Override public void mouseMoved(MouseEvent e) {
+			@Override
+			public void mouseMoved(MouseEvent e) {
 				super.mouseMoved(e);
-				removeButtonHover =
-						e.getX() > 1 && e.getX() < 11 && e.getY() < getHeight() - 1 && e.getY() > getHeight() - 11;
+				removeButtonHover = e.getX() > 1 && e.getX() < 11 && e.getY() < getHeight() - 1
+						&& e.getY() > getHeight() - 11;
 				repaint();
 			}
 		});
 	}
 
-	@Override public void paintComponent(Graphics g) {
+	@Override
+	public void paintComponent(Graphics g) {
 
 		if (showValidation && validator != null && currentValidationResult != null
 				&& currentValidationResult.type() != ValidationResult.Type.PASSED)
 			g.setColor(currentValidationResult.type() == ValidationResult.Type.ERROR ? err : warn);
 		else
-			g.setColor(isEnabled() ? bg : bg.brighter());
+			g.setColor(isEnabled() ? (block.isEmpty() ? bg.darker() : bg) : bg.brighter());
 
 		g.fillRect(0, 0, getWidth(), getHeight());
 
@@ -207,12 +214,11 @@ public class MCItemHolder extends JButton implements IValidable {
 	}
 
 	private void updateTooltipText() {
-		boolean hasValidationMessage =
-				currentValidationResult != null && currentValidationResult.type() != ValidationResult.Type.PASSED;
+		boolean hasValidationMessage = currentValidationResult != null
+				&& currentValidationResult.type() != ValidationResult.Type.PASSED;
 		if (!block.isEmpty()) {
-			this.setToolTipText(getBlock().getMappedValue() + (hasValidationMessage ?
-					"\n" + currentValidationResult.message() :
-					""));
+			this.setToolTipText(getBlock().getMappedValue()
+					+ (hasValidationMessage ? "\n" + currentValidationResult.message() : ""));
 		} else if (hasValidationMessage) {
 			this.setToolTipText(currentValidationResult.message());
 		} else {
@@ -220,16 +226,17 @@ public class MCItemHolder extends JButton implements IValidable {
 		}
 	}
 
-	//validation code
+	// validation code
 	private Validator validator = null;
 	private ValidationResult currentValidationResult = null;
 
-	@Override public ValidationResult getValidationStatus() {
+	@Override
+	public ValidationResult getValidationStatus() {
 		ValidationResult validationResult = validator == null ? null : validator.validateIfEnabled(this);
 
 		this.currentValidationResult = validationResult;
 
-		//repaint as new validation status might have to be rendered
+		// repaint as new validation status might have to be rendered
 		repaint();
 		// Update tooltip text as validation status might have changed
 		updateTooltipText();
@@ -237,11 +244,13 @@ public class MCItemHolder extends JButton implements IValidable {
 		return validationResult;
 	}
 
-	@Override public void setValidator(Validator validator) {
+	@Override
+	public void setValidator(Validator validator) {
 		this.validator = validator;
 	}
 
-	@Override public Validator getValidator() {
+	@Override
+	public Validator getValidator() {
 		return validator;
 	}
 }

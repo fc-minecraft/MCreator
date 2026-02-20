@@ -162,8 +162,9 @@ public class MCItem extends DataListEntry {
 
 			if (retval != null && retval.getImage() != null && retval.getImage().getWidth(null) > -1
 					&& retval.getImage().getHeight(null) > -1) {
-				// The image is cropped to fix an issue with long animated textures
-				return new ImageIcon(ImageUtils.resizeAndCrop(retval.getImage(), 32));
+				// The image is resized with nearest neighbor to fix an issue with long animated
+				// textures and avoid blur
+				return new ImageIcon(ImageUtils.resizeNN(retval.getImage(), 32, 32));
 			}
 
 		} catch (Exception e) {
@@ -195,7 +196,8 @@ public class MCItem extends DataListEntry {
 			setDescription(element.getType().getDescription());
 		}
 
-		@Override public boolean isSupportedInWorkspace(Workspace workspace) {
+		@Override
+		public boolean isSupportedInWorkspace(Workspace workspace) {
 			return true;
 		}
 	}
@@ -208,7 +210,8 @@ public class MCItem extends DataListEntry {
 			icon = MCItem.getBlockIconBasedOnName(workspace, "TAG:" + name);
 		}
 
-		@Override public boolean isSupportedInWorkspace(Workspace workspace) {
+		@Override
+		public boolean isSupportedInWorkspace(Workspace workspace) {
 			return true;
 		}
 
@@ -221,7 +224,8 @@ public class MCItem extends DataListEntry {
 			icon = MCItem.getBlockIconBasedOnName(workspace, "POTION:" + potion.getName());
 		}
 
-		@Override public boolean isSupportedInWorkspace(Workspace workspace) {
+		@Override
+		public boolean isSupportedInWorkspace(Workspace workspace) {
 			return true;
 		}
 	}

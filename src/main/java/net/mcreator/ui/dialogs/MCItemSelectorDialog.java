@@ -38,6 +38,7 @@ public class MCItemSelectorDialog extends SearchableSelectorDialog<MCItem> {
 
 	private final JList<MCItem> list = new JList<>(model);
 	private final JTextField jtf = new JTextField(16);
+	private final JSlider sizeSlider = new JSlider(16, 128, 32);
 
 	private ActionListener itemSelectedListener;
 
@@ -56,7 +57,8 @@ public class MCItemSelectorDialog extends SearchableSelectorDialog<MCItem> {
 		jtf.setEnabled(false);
 
 		list.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent evt) {
+			@Override
+			public void mouseClicked(MouseEvent evt) {
 				if (evt.getClickCount() == 2) {
 					int index = list.locationToIndex(evt.getPoint());
 					if (index > 0) {
@@ -107,10 +109,29 @@ public class MCItemSelectorDialog extends SearchableSelectorDialog<MCItem> {
 
 		buttons.add(useSelectedButton);
 
-		add("South", PanelUtils.westAndEastElement(PanelUtils.centerInPanel(cancelButton), buttons));
+		JPanel bottomPanel = new JPanel(new BorderLayout(10, 10));
+		bottomPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		bottomPanel.add(PanelUtils.centerInPanel(cancelButton), BorderLayout.WEST);
+
+		sizeSlider.setOpaque(false);
+		sizeSlider.setMajorTickSpacing(16);
+		sizeSlider.setSnapToTicks(true);
+
+		sizeSlider.addChangeListener(e -> {
+			int size = sizeSlider.getValue();
+			list.setFixedCellWidth(size + 16);
+			list.setFixedCellHeight(size + 16);
+			list.repaint();
+		});
+		bottomPanel.add(sizeSlider, BorderLayout.CENTER);
+		bottomPanel.add(buttons, BorderLayout.EAST);
+
+		add("South", bottomPanel);
 
 		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 		list.setVisibleRowCount(0);
+		list.setFixedCellWidth(32 + 16);
+		list.setFixedCellHeight(32 + 16);
 
 		list.addListSelectionListener(event -> {
 			MCItem bl = list.getSelectedValue();
@@ -149,14 +170,23 @@ public class MCItemSelectorDialog extends SearchableSelectorDialog<MCItem> {
 
 		JPanel mainComponent = new JPanel(new BorderLayout());
 		mainComponent.add("North", top);
-		mainComponent.add("Center", new JScrollPane(list));
+
+		JScrollPane scrollPane = new JScrollPane(list);
+		scrollPane.getVerticalScrollBar().putClientProperty("ScrollBar.showButtons", true);
+		scrollPane.getVerticalScrollBar().putClientProperty("JScrollBar.showButtons", true);
+		scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(16, 0));
+		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+		mainComponent.add("Center", scrollPane);
 		add("Center", mainComponent);
 
-		setSize(hasPotions ? 970 : 900, 425);
+		setSize(hasPotions ? 1100 : 1000, 600);
+		setPreferredSize(new Dimension(hasPotions ? 1100 : 1000, 600));
 		setLocationRelativeTo(mcreator);
 
 		this.addWindowListener(new WindowAdapter() {
-			@Override public void windowClosing(WindowEvent e) {
+			@Override
+			public void windowClosing(WindowEvent e) {
 				list.clearSelection();
 				dispose();
 			}
@@ -167,18 +197,28 @@ public class MCItemSelectorDialog extends SearchableSelectorDialog<MCItem> {
 		this.itemSelectedListener = itemSelectedListener;
 	}
 
-	static class Render extends JLabel implements ListCellRenderer<MCItem> {
+	class Render extends JLabel implements ListCellRenderer<MCItem> {
+
+		public Render() {
+			setHorizontalAlignment(SwingConstants.CENTER);
+			setVerticalAlignment(SwingConstants.CENTER);
+		}
 
 		@Override
 		public Component getListCellRendererComponent(JList<? extends MCItem> list, MCItem value, int index,
 				boolean isSelected, boolean cellHasFocus) {
-			setToolTipText("<html>" + value.getReadableName() + (value.getDescription().isEmpty() ?
-					"" :
-					("<br><small>" + value.getDescription())));
-			if (value.icon.getIconWidth() != 32)
-				setIcon(new ImageIcon(ImageUtils.resize(value.icon.getImage(), 32)));
-			else
-				setIcon(value.icon);
+			setToolTipText("<html>" + value.getReadableName()
+					+ (value.getDescription().isEmpty() ? "" : ("<br><small>" + value.getDescription())));
+
+			int size = sizeSlider.getValue();
+			try {
+				if (value.icon.getIconWidth() != size || value.icon.getIconHeight() != size)
+					setIcon(new ImageIcon(ImageUtils.resizeNN(value.icon.getImage(), size, size)));
+				else
+					setIcon(value.icon);
+			} catch (Exception e) {
+				setIcon(MCItem.DEFAULT_ICON);
+			}
 
 			if (isSelected) {
 				setOpaque(true);
@@ -192,11 +232,13 @@ public class MCItemSelectorDialog extends SearchableSelectorDialog<MCItem> {
 
 	}
 
-	@Override Predicate<MCItem> getFilter(String term) {
+	@Override
+	Predicate<MCItem> getFilter(String term) {
 		String lowercaseTerm = term.toLowerCase(Locale.ENGLISH);
 		return item -> item.getName().toLowerCase(Locale.ENGLISH).contains(lowercaseTerm) || item.getReadableName()
-				.toLowerCase(Locale.ENGLISH).contains(lowercaseTerm) || item.getType().toLowerCase(Locale.ENGLISH)
-				.contains(lowercaseTerm);
+				.toLowerCase(Locale.ENGLISH).contains(lowercaseTerm)
+				|| item.getType().toLowerCase(Locale.ENGLISH)
+						.contains(lowercaseTerm);
 	}
 
 	public MCItem getSelectedMCItem() {

@@ -82,7 +82,52 @@ public class DataListLoader {
 
 									if (elementName != null) {
 										DataListEntry entry = new DataListEntry(elementName);
-										entry.setReadableName((String) element.get("readable_name"));
+
+										String localizedName = elementName;
+
+										String vanillaName = elementName;
+										if (vanillaName.startsWith("Blocks."))
+											vanillaName = vanillaName.substring(7).toLowerCase(Locale.ENGLISH);
+										else if (vanillaName.startsWith("Items."))
+											vanillaName = vanillaName.substring(6).toLowerCase(Locale.ENGLISH);
+										else if (vanillaName.startsWith("Entities."))
+											vanillaName = vanillaName.substring(9).toLowerCase(Locale.ENGLISH);
+										if (vanillaName.contains("#"))
+											vanillaName = vanillaName.substring(0, vanillaName.indexOf('#'));
+
+										if (net.mcreator.ui.init.L10N
+												.hasTranslation("block.minecraft." + vanillaName)) {
+											localizedName = net.mcreator.ui.init.L10N
+													.t("block.minecraft." + vanillaName);
+										} else if (net.mcreator.ui.init.L10N
+												.hasTranslation("item.minecraft." + vanillaName)) {
+											localizedName = net.mcreator.ui.init.L10N
+													.t("item.minecraft." + vanillaName);
+										} else if (net.mcreator.ui.init.L10N
+												.hasTranslation("entity.minecraft." + vanillaName)) {
+											localizedName = net.mcreator.ui.init.L10N
+													.t("entity.minecraft." + vanillaName);
+										} else if (element.get("readable_name") != null) {
+											localizedName = (String) element.get("readable_name");
+
+											String secondaryKey = localizedName.toLowerCase(Locale.ENGLISH).replace(" ",
+													"_");
+											if (net.mcreator.ui.init.L10N
+													.hasTranslation("block.minecraft." + secondaryKey)) {
+												localizedName = net.mcreator.ui.init.L10N
+														.t("block.minecraft." + secondaryKey);
+											} else if (net.mcreator.ui.init.L10N
+													.hasTranslation("item.minecraft." + secondaryKey)) {
+												localizedName = net.mcreator.ui.init.L10N
+														.t("item.minecraft." + secondaryKey);
+											} else if (net.mcreator.ui.init.L10N
+													.hasTranslation("entity.minecraft." + secondaryKey)) {
+												localizedName = net.mcreator.ui.init.L10N
+														.t("entity.minecraft." + secondaryKey);
+											}
+										}
+										entry.setReadableName(localizedName);
+
 										entry.setType((String) element.get("type"));
 										entry.setDescription((String) element.get("description"));
 										entry.setOther(element.get("other"));
