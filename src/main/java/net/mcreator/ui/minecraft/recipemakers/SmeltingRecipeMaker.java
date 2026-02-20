@@ -38,13 +38,13 @@ public class SmeltingRecipeMaker extends AbstractRecipeMaker {
 		cb1 = new MCItemHolder(mcreator, itemsWithTags, true).disableRightClick();
 		cb2 = new MCItemHolder(mcreator, items);
 
-		cb1.setBounds(97, 30, 28, 28);
-		cb2.setBounds(200, 61, 28, 28);
+		cb1.setIconSize(48).setBounds(194, 60, 56, 56);
+		cb2.setIconSize(48).setBounds(400, 122, 56, 56);
 
 		imagePanel.add(cb1);
 		imagePanel.add(cb2);
 
-		setPreferredSize(new Dimension(306, 145));
+		setPreferredSize(new Dimension(612, 290));
 	}
 
 	public MItemBlock getBlock() {
@@ -55,18 +55,21 @@ public class SmeltingRecipeMaker extends AbstractRecipeMaker {
 		return cb2.getBlock();
 	}
 
-	@Override public void setEnabled(boolean enabled) {
+	@Override
+	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		cb1.setEnabled(enabled);
 		cb2.setEnabled(enabled);
 	}
 
-	@Override protected void setupImageExport(boolean exportedYet) {
+	@Override
+	protected void setupImageExport(boolean exportedYet) {
 		cb1.setValidationShownFlag(exportedYet);
 		cb2.setValidationShownFlag(exportedYet);
 	}
 
-	@Override public List<MCItemHolder> getIngredientSlots() {
+	@Override
+	public List<MCItemHolder> getIngredientSlots() {
 		return List.of(cb1);
 	}
 }

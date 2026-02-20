@@ -42,22 +42,23 @@ public class StoneCutterRecipeMaker extends AbstractRecipeMaker {
 		cb1 = new MCItemHolder(mcreator, itemsWithTags, true).disableRightClick();
 		cb2 = new MCItemHolder(mcreator, items);
 
-		cb1.setBounds(97, 61, 28, 28);
-		cb2.setBounds(200, 61, 28, 28);
+		cb1.setIconSize(48).setBounds(194, 122, 56, 56);
+		cb2.setIconSize(48).setBounds(400, 122, 56, 56);
 
 		imagePanel.add(cb1);
 		imagePanel.add(cb2);
 
 		sp = new JSpinner(new SpinnerNumberModel(1, 1, 99, 1));
-		sp.setBounds(196, 108, 53, 22);
+		ComponentUtils.deriveFont(sp, 20);
+		sp.setBounds(392, 216, 106, 44);
 		imagePanel.add(sp);
 
-		drop.setBounds(203, 109, 38, 17);
+		drop.setBounds(406, 218, 76, 34);
 		drop.setVisible(false);
 		drop.setForeground(Color.white);
-		imagePanel.add(ComponentUtils.deriveFont(drop, 16));
+		imagePanel.add(ComponentUtils.deriveFont(drop, 32));
 
-		setPreferredSize(new Dimension(306, 145));
+		setPreferredSize(new Dimension(612, 290));
 	}
 
 	public MItemBlock getBlock() {
@@ -68,14 +69,16 @@ public class StoneCutterRecipeMaker extends AbstractRecipeMaker {
 		return cb2.getBlock();
 	}
 
-	@Override public void setEnabled(boolean enabled) {
+	@Override
+	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		cb1.setEnabled(enabled);
 		cb2.setEnabled(enabled);
 		sp.setEnabled(enabled);
 	}
 
-	@Override protected void setupImageExport(boolean exportedYet) {
+	@Override
+	protected void setupImageExport(boolean exportedYet) {
 		cb1.setValidationShownFlag(exportedYet);
 		cb2.setValidationShownFlag(exportedYet);
 		sp.setVisible(exportedYet);
@@ -83,7 +86,8 @@ public class StoneCutterRecipeMaker extends AbstractRecipeMaker {
 		drop.setVisible(!exportedYet);
 	}
 
-	@Override public List<MCItemHolder> getIngredientSlots() {
+	@Override
+	public List<MCItemHolder> getIngredientSlots() {
 		return List.of(cb1);
 	}
 }

@@ -32,7 +32,8 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Abstract class for recipe makers used in the Recipe element GUI. This class handles the background panel and the
+ * Abstract class for recipe makers used in the Recipe element GUI. This class
+ * handles the background panel and the
  * export button.
  */
 public abstract class AbstractRecipeMaker extends JPanel {
@@ -41,13 +42,15 @@ public abstract class AbstractRecipeMaker extends JPanel {
 	protected final ImagePanel imagePanel;
 
 	protected AbstractRecipeMaker(Image backgroundImage) {
-		imagePanel = new ImagePanel(backgroundImage);
+		Image scaledBg = net.mcreator.util.image.ImageUtils.resizeNN(backgroundImage,
+				backgroundImage.getWidth(null) * 2, backgroundImage.getHeight(null) * 2);
+		imagePanel = new ImagePanel(scaledBg);
 		imagePanel.fitToImage();
 		imagePanel.setLayout(null);
 
 		export.setContentAreaFilled(false);
 		export.setMargin(new Insets(0, 0, 0, 0));
-		export.setBounds(260, 13, 24, 24);
+		export.setBounds(520, 26, 48, 48);
 		export.setFocusPainted(false);
 		export.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		imagePanel.add(export);
@@ -70,7 +73,8 @@ public abstract class AbstractRecipeMaker extends JPanel {
 		add(imagePanel);
 	}
 
-	@Override public void setEnabled(boolean enabled) {
+	@Override
+	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		export.setEnabled(enabled);
 	}
@@ -78,7 +82,8 @@ public abstract class AbstractRecipeMaker extends JPanel {
 	/**
 	 * This method is called before and after the recipe is exported as a .png file.
 	 *
-	 * @param exportedYet This parameter is false before the image is generated, true after.
+	 * @param exportedYet This parameter is false before the image is generated,
+	 *                    true after.
 	 */
 	protected abstract void setupImageExport(boolean exportedYet);
 

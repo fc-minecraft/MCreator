@@ -45,8 +45,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class ItemExtensionGUI extends ModElementGUI<ItemExtension> {
-	private final MCItemHolder item = new MCItemHolder(mcreator, ElementUtil::loadBlocksAndItems).requireValue(
-			"elementgui.item_extension.error_extension_needs_item");
+	private final MCItemHolder item = new MCItemHolder(mcreator, ElementUtil::loadBlocksAndItems).setIconSize(48)
+			.requireValue(
+					"elementgui.item_extension.error_extension_needs_item");
 
 	private final JCheckBox enableFuel = L10N.checkbox("elementgui.common.enable");
 	private ProcedureSelector fuelSuccessCondition;
@@ -66,8 +67,9 @@ public class ItemExtensionGUI extends ModElementGUI<ItemExtension> {
 		super.finalizeGUI();
 	}
 
-	@Override protected void initGUI() {
-		//Fuel
+	@Override
+	protected void initGUI() {
+		// Fuel
 		enableFuel.setOpaque(false);
 		enableFuel.addActionListener(e -> updateFuelElements());
 
@@ -81,9 +83,11 @@ public class ItemExtensionGUI extends ModElementGUI<ItemExtension> {
 
 		JComponent fuelTopPanel = PanelUtils.gridElements(2, 2, 0, 2,
 				HelpUtils.wrapWithHelpButton(this.withEntry("item_extension/enable_fuel"),
-						L10N.label("elementgui.item_extension.enable_fuel")), enableFuel,
+						L10N.label("elementgui.item_extension.enable_fuel")),
+				enableFuel,
 				HelpUtils.wrapWithHelpButton(this.withEntry("item_extension/burn_time"),
-						L10N.label("elementgui.item_extension.burn_time")), fuelPower);
+						L10N.label("elementgui.item_extension.burn_time")),
+				fuelPower);
 
 		JComponent fuelPanel = PanelUtils.northAndCenterElement(fuelTopPanel, fuelSuccessCondition, 0, 2);
 		fuelPanel.setBorder(BorderFactory.createTitledBorder(
@@ -94,7 +98,8 @@ public class ItemExtensionGUI extends ModElementGUI<ItemExtension> {
 		// Compostable
 		JComponent compostPanel = PanelUtils.gridElements(1, 2, 0, 2,
 				HelpUtils.wrapWithHelpButton(this.withEntry("item_extension/layer_chance"),
-						L10N.label("elementgui.item_extension.layer_chance")), compostLayerChance);
+						L10N.label("elementgui.item_extension.layer_chance")),
+				compostLayerChance);
 		compostPanel.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createLineBorder(Theme.current().getForegroundColor(), 1),
 				L10N.t("elementgui.item_extension.compost_properties"), TitledBorder.LEADING,
@@ -104,18 +109,22 @@ public class ItemExtensionGUI extends ModElementGUI<ItemExtension> {
 		dispenseSuccessCondition = new ProcedureSelector(this.withEntry("item_extension/dispense_success_condition"),
 				mcreator, L10N.t("elementgui.item_extension.dispense_success_condition"),
 				VariableTypeLoader.BuiltInTypes.LOGIC, Dependency.fromString(
-				"x:number/y:number/z:number/world:world/itemstack:itemstack/direction:direction")).makeInline();
+						"x:number/y:number/z:number/world:world/itemstack:itemstack/direction:direction"))
+				.makeInline();
 
 		dispenseResultItemstack = new ProcedureSelector(this.withEntry("item_extension/dispense_result_itemstack"),
 				mcreator, L10N.t("elementgui.item_extension.dispense_result_itemstack"),
 				VariableTypeLoader.BuiltInTypes.ITEMSTACK, Dependency.fromString(
-				"x:number/y:number/z:number/world:world/itemstack:itemstack/direction:direction/success:boolean")).setDefaultName(
-						L10N.t("elementgui.item_extension.dispense_result_itemstack.default")).makeInline()
+						"x:number/y:number/z:number/world:world/itemstack:itemstack/direction:direction/success:boolean"))
+				.setDefaultName(
+						L10N.t("elementgui.item_extension.dispense_result_itemstack.default"))
+				.makeInline()
 				.makeReturnValueOptional();
 
 		JComponent canDispense = PanelUtils.gridElements(1, 2, 0, 0,
 				HelpUtils.wrapWithHelpButton(this.withEntry("item_extension/has_dispense_behavior"),
-						L10N.label("elementgui.item_extension.has_dispense_behavior")), hasDispenseBehavior);
+						L10N.label("elementgui.item_extension.has_dispense_behavior")),
+				hasDispenseBehavior);
 
 		hasDispenseBehavior.setOpaque(false);
 		hasDispenseBehavior.setSelected(false);
@@ -149,7 +158,8 @@ public class ItemExtensionGUI extends ModElementGUI<ItemExtension> {
 		addPage(PanelUtils.totalCenterInPanel(parameters)).validate(pageGroup);
 	}
 
-	@Override public void reloadDataLists() {
+	@Override
+	public void reloadDataLists() {
 		super.reloadDataLists();
 
 		AbstractProcedureSelector.ReloadContext context = AbstractProcedureSelector.ReloadContext.create(
@@ -171,7 +181,8 @@ public class ItemExtensionGUI extends ModElementGUI<ItemExtension> {
 		fuelSuccessCondition.setEnabled(enableFuel.isSelected());
 	}
 
-	@Override protected void openInEditingMode(ItemExtension itemExtension) {
+	@Override
+	protected void openInEditingMode(ItemExtension itemExtension) {
 		item.setBlock(itemExtension.item);
 		enableFuel.setSelected(itemExtension.enableFuel);
 		fuelPower.setSelectedProcedure(itemExtension.fuelPower);
@@ -185,7 +196,8 @@ public class ItemExtensionGUI extends ModElementGUI<ItemExtension> {
 		updateDispenseElements();
 	}
 
-	@Override public ItemExtension getElementFromGUI() {
+	@Override
+	public ItemExtension getElementFromGUI() {
 		ItemExtension itemExtension = new ItemExtension(modElement);
 		itemExtension.item = item.getBlock();
 		itemExtension.enableFuel = enableFuel.isSelected();
@@ -198,7 +210,8 @@ public class ItemExtensionGUI extends ModElementGUI<ItemExtension> {
 		return itemExtension;
 	}
 
-	@Override public @Nullable URI contextURL() throws URISyntaxException {
+	@Override
+	public @Nullable URI contextURL() throws URISyntaxException {
 		return new URI(MCreatorApplication.SERVER_DOMAIN + "/wiki/how-make-item-extension");
 	}
 }

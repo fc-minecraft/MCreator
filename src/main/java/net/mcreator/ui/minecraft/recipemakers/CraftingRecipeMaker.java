@@ -49,7 +49,8 @@ public class CraftingRecipeMaker extends AbstractRecipeMaker {
 		MouseAdapter cloneAdapter = new MouseAdapter() {
 			private static final int buttonsDownMask = MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.BUTTON2_DOWN_MASK;
 
-			@Override public void mouseEntered(MouseEvent e) {
+			@Override
+			public void mouseEntered(MouseEvent e) {
 				if (e.getSource() instanceof MCItemHolder mcItemHolder) {
 					if ((e.getModifiersEx() & buttonsDownMask) != 0 && lastItemBlock != null) {
 						mcItemHolder.setBlock(lastItemBlock);
@@ -57,7 +58,8 @@ public class CraftingRecipeMaker extends AbstractRecipeMaker {
 				}
 			}
 
-			@Override public void mousePressed(MouseEvent e) {
+			@Override
+			public void mousePressed(MouseEvent e) {
 				if (e.getSource() instanceof MCItemHolder mcItemHolder) {
 					lastItemBlock = mcItemHolder.getBlock();
 				}
@@ -66,23 +68,26 @@ public class CraftingRecipeMaker extends AbstractRecipeMaker {
 
 		for (int i = 0; i < 9; i++) {
 			recipeSlots[i] = new MCItemHolder(mcreator, itemsWithTags, true).disableRightClick();
+			recipeSlots[i].setIconSize(48);
 			recipeSlots[i].addMouseListener(cloneAdapter);
 			recipeSlots[i].setMargin(new Insets(0, 0, 0, 0));
-			recipeSlots[i].setBounds(51 + 31 * (i % 3), 29 + 31 * (i / 3), 28, 28);
+			recipeSlots[i].setBounds(102 + 62 * (i % 3), 58 + 62 * (i / 3), 56, 56);
 		}
 
 		outputItem = new MCItemHolder(mcreator, items);
+		outputItem.setIconSize(48);
 		outputItem.setMargin(new Insets(0, 0, 0, 0));
-		outputItem.setBounds(210, 58, 28, 28);
+		outputItem.setBounds(420, 116, 56, 56);
 
 		sp = new JSpinner(new SpinnerNumberModel(1, 1, 99, 1));
-		sp.setBounds(205, 106, 53, 22);
+		ComponentUtils.deriveFont(sp, 20);
+		sp.setBounds(410, 212, 106, 44);
 		imagePanel.add(sp);
 
-		drop.setBounds(212, 109, 38, 17);
+		drop.setBounds(424, 218, 76, 34);
 		drop.setVisible(false);
 		drop.setForeground(Color.white);
-		imagePanel.add(ComponentUtils.deriveFont(drop, 16));
+		imagePanel.add(ComponentUtils.deriveFont(drop, 32));
 
 		for (int i = 0; i < 9; i++) {
 			imagePanel.add(recipeSlots[i]);
@@ -90,11 +95,11 @@ public class CraftingRecipeMaker extends AbstractRecipeMaker {
 		imagePanel.add(outputItem);
 
 		shapeless.setVisible(false);
-		shapeless.setBounds(156, 97, 23, 19);
+		shapeless.setBounds(312, 194, 46, 38);
 
 		imagePanel.add(shapeless);
 
-		setPreferredSize(new Dimension(300, 145));
+		setPreferredSize(new Dimension(600, 290));
 	}
 
 	public void setShapeless(boolean shapeless) {
@@ -109,7 +114,8 @@ public class CraftingRecipeMaker extends AbstractRecipeMaker {
 		return false;
 	}
 
-	@Override public void setEnabled(boolean enabled) {
+	@Override
+	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		for (int i = 0; i < 9; i++) {
 			recipeSlots[i].setEnabled(enabled);
@@ -119,7 +125,8 @@ public class CraftingRecipeMaker extends AbstractRecipeMaker {
 		shapeless.setEnabled(enabled);
 	}
 
-	@Override protected void setupImageExport(boolean exportedYet) {
+	@Override
+	protected void setupImageExport(boolean exportedYet) {
 		for (int i = 0; i < 9; i++) {
 			recipeSlots[i].setValidationShownFlag(exportedYet);
 		}
@@ -129,7 +136,8 @@ public class CraftingRecipeMaker extends AbstractRecipeMaker {
 		drop.setVisible(!exportedYet);
 	}
 
-	@Override public List<MCItemHolder> getIngredientSlots() {
+	@Override
+	public List<MCItemHolder> getIngredientSlots() {
 		return List.of(recipeSlots);
 	}
 }

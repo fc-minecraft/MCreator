@@ -40,31 +40,34 @@ public class BrewingRecipeMaker extends AbstractRecipeMaker {
 		cb2 = new MCItemHolder(mcreator, itemsWithTags, true);
 		cb3 = new MCItemHolder(mcreator, itemsWithPotions, false, true);
 
-		cb1.setBounds(65, 88, 28, 28);
-		cb2.setBounds(65, 26, 28, 28);
-		cb3.setBounds(210, 50, 41, 41);
+		cb1.setIconSize(48).setBounds(130, 176, 56, 56);
+		cb2.setIconSize(48).setBounds(130, 52, 56, 56);
+		cb3.setIconSize(72).setBounds(420, 100, 82, 82);
 
 		imagePanel.add(cb1);
 		imagePanel.add(cb2);
 		imagePanel.add(cb3);
 
-		setPreferredSize(new Dimension(306, 145));
+		setPreferredSize(new Dimension(612, 290));
 	}
 
-	@Override public void setEnabled(boolean enabled) {
+	@Override
+	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		cb1.setEnabled(enabled);
 		cb2.setEnabled(enabled);
 		cb3.setEnabled(enabled);
 	}
 
-	@Override protected void setupImageExport(boolean exportedYet) {
+	@Override
+	protected void setupImageExport(boolean exportedYet) {
 		cb1.setValidationShownFlag(exportedYet);
 		cb2.setValidationShownFlag(exportedYet);
 		cb3.setValidationShownFlag(exportedYet);
 	}
 
-	@Override public List<MCItemHolder> getIngredientSlots() {
+	@Override
+	public List<MCItemHolder> getIngredientSlots() {
 		return List.of(cb1, cb2);
 	}
 }

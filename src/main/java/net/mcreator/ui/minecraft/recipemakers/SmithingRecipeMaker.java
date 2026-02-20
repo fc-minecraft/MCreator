@@ -41,20 +41,21 @@ public class SmithingRecipeMaker extends AbstractRecipeMaker {
 		cb2 = new MCItemHolder(mcreator, itemsWithTags, true).disableRightClick();
 		cb3 = new MCItemHolder(mcreator, items);
 
-		cb4.setBounds(18, 60, 28, 28);
-		cb1.setBounds(85, 60, 28, 28);
-		cb2.setBounds(152, 60, 28, 28);
-		cb3.setBounds(246, 60, 28, 28);
+		cb4.setIconSize(48).setBounds(36, 120, 56, 56);
+		cb1.setIconSize(48).setBounds(170, 120, 56, 56);
+		cb2.setIconSize(48).setBounds(304, 120, 56, 56);
+		cb3.setIconSize(48).setBounds(492, 120, 56, 56);
 
 		imagePanel.add(cb4);
 		imagePanel.add(cb1);
 		imagePanel.add(cb2);
 		imagePanel.add(cb3);
 
-		setPreferredSize(new Dimension(306, 145));
+		setPreferredSize(new Dimension(612, 290));
 	}
 
-	@Override public void setEnabled(boolean enabled) {
+	@Override
+	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		cb4.setEnabled(enabled);
 		cb1.setEnabled(enabled);
@@ -62,14 +63,16 @@ public class SmithingRecipeMaker extends AbstractRecipeMaker {
 		cb3.setEnabled(enabled);
 	}
 
-	@Override protected void setupImageExport(boolean exportedYet) {
+	@Override
+	protected void setupImageExport(boolean exportedYet) {
 		cb1.setValidationShownFlag(exportedYet);
 		cb2.setValidationShownFlag(exportedYet);
 		cb3.setValidationShownFlag(exportedYet);
 		cb4.setValidationShownFlag(exportedYet);
 	}
 
-	@Override public List<MCItemHolder> getIngredientSlots() {
+	@Override
+	public List<MCItemHolder> getIngredientSlots() {
 		return List.of(cb4, cb1, cb2);
 	}
 }

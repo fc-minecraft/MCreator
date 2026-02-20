@@ -24,6 +24,7 @@ import net.mcreator.ui.MCreator;
 import net.mcreator.ui.dialogs.MCItemSelectorDialog;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
+
 import net.mcreator.ui.validation.IValidable;
 import net.mcreator.ui.validation.ValidationResult;
 import net.mcreator.ui.validation.Validator;
@@ -42,6 +43,8 @@ public class MCItemHolder extends JButton implements IValidable {
 	private static final Color err = new Color(204, 166, 175);
 	private static final Color warn = new Color(236, 238, 207);
 	private static final Color bg = new Color(140, 140, 140);
+
+	private int iconSize = 25;
 
 	private String block = "";
 	private final MCItemSelectorDialog bs;
@@ -86,12 +89,12 @@ public class MCItemHolder extends JButton implements IValidable {
 
 	public void setBlock(MItemBlock mItemBlock) {
 		if (mItemBlock != null && mItemBlock.isValidReference()) {
-			setIcon(new ImageIcon(ImageUtils.resizeAA(
+			setIcon(new ImageIcon(ImageUtils.resizeNN(
 					MCItem.getBlockIconBasedOnName(mcreator.getWorkspace(), mItemBlock.getUnmappedValue()).getImage(),
-					25)));
+					iconSize, iconSize)));
 			this.block = mItemBlock.getUnmappedValue();
 		} else {
-			setIcon(new EmptyIcon(25, 25));
+			setIcon(new EmptyIcon(iconSize, iconSize));
 			block = "";
 		}
 		listeners.forEach(listener -> listener.actionPerformed(new ActionEvent("", 0, "")));
@@ -119,14 +122,14 @@ public class MCItemHolder extends JButton implements IValidable {
 
 	private void initGUI() {
 		setMargin(new Insets(0, 0, 0, 0));
-		setIcon(new EmptyIcon(25, 25));
+		setIcon(new EmptyIcon(iconSize, iconSize));
 		setCursor(new Cursor(Cursor.HAND_CURSOR));
 		setContentAreaFilled(false);
 		setFocusPainted(false);
 		setOpaque(false);
 		setBorder(BorderFactory.createEmptyBorder());
-		setPreferredSize(new Dimension(38, 38));
-		setMinimumSize(new Dimension(38, 38));
+		setPreferredSize(new Dimension(iconSize + 5, iconSize + 5));
+		setMinimumSize(new Dimension(iconSize + 5, iconSize + 5));
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -181,7 +184,7 @@ public class MCItemHolder extends JButton implements IValidable {
 				} else {
 					removeIcon = UIRES.get("18px.remove");
 				}
-				g.drawImage(removeIcon.getImage(), 0, getHeight() - 11, 11, 11, null);
+				g.drawImage(removeIcon.getImage(), 0, getHeight() - 14, 14, 14, null);
 			}
 
 			if (validator != null && currentValidationResult != null) {
@@ -210,6 +213,18 @@ public class MCItemHolder extends JButton implements IValidable {
 		if (considerAirAsEmpty)
 			validator.considerAirAsEmpty();
 		this.setValidator(validator);
+		return this;
+	}
+
+	public MCItemHolder setIconSize(int iconSize) {
+		this.iconSize = iconSize;
+		setPreferredSize(new Dimension(iconSize + 5, iconSize + 5));
+		setMinimumSize(new Dimension(iconSize + 5, iconSize + 5));
+		if (block != null && !block.isEmpty()) {
+			setBlock(new MItemBlock(mcreator.getWorkspace(), block));
+		} else {
+			setIcon(new EmptyIcon(iconSize, iconSize));
+		}
 		return this;
 	}
 
