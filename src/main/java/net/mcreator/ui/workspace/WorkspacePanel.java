@@ -83,7 +83,8 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("EqualsBetweenInconvertibleTypes") public class WorkspacePanel extends AbstractMainWorkspacePanel {
+@SuppressWarnings("EqualsBetweenInconvertibleTypes")
+public class WorkspacePanel extends AbstractMainWorkspacePanel {
 
 	private final FilterModel dml = new FilterModel();
 
@@ -134,7 +135,8 @@ import java.util.regex.Pattern;
 	private final JRadioButtonMenuItem sortType = new JRadioButtonMenuItem(L10N.t("workspace.elements.list.sort_type"));
 
 	private final OptionPaneValidator folderNameValidator = new OptionPaneValidator() {
-		@Override public ValidationResult validate(JComponent component) {
+		@Override
+		public ValidationResult validate(JComponent component) {
 			String folderName = ((JTextField) component).getText();
 
 			if (!folderName.matches("[A-Za-z0-9._ -]+")) {
@@ -201,7 +203,8 @@ import java.util.regex.Pattern;
 		list.setAdditionalDNDComponent(elementsBreadcrumb);
 
 		list.addMouseMotionListener(new MouseAdapter() {
-			@Override public void mouseMoved(MouseEvent e) {
+			@Override
+			public void mouseMoved(MouseEvent e) {
 				super.mouseMoved(e);
 				int idx = list.locationToIndex(e.getPoint());
 				IElement element = list.getModel().getElementAt(idx);
@@ -213,7 +216,8 @@ import java.util.regex.Pattern;
 		});
 
 		list.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				IElement selected = list.getSelectedValue();
 
 				if (e.isConsumed())
@@ -258,7 +262,8 @@ import java.util.regex.Pattern;
 		});
 
 		list.addKeyListener(new KeyAdapter() {
-			@Override public void keyPressed(KeyEvent e) {
+			@Override
+			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_F && e.isControlDown()) {
 					if (e.isShiftDown()) {
 						searchModElementsUsages();
@@ -307,7 +312,8 @@ import java.util.regex.Pattern;
 		JPanel se = new JPanel(new BorderLayout());
 
 		search.addKeyListener(new KeyAdapter() {
-			@Override public void keyPressed(KeyEvent e) {
+			@Override
+			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_DOWN && list.getModel().getSize() > 0) {
 					list.clearSelection();
 					list.setSelectedIndex(0);
@@ -454,7 +460,8 @@ import java.util.regex.Pattern;
 		detailsIcons.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
 
 		sp.addMouseWheelListener(new MouseAdapter() {
-			@Override public void mouseWheelMoved(MouseWheelEvent e) {
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
 				super.mouseWheelMoved(e);
 				if (e.isControlDown()) {
 					if (e.getWheelRotation() < 0) {
@@ -542,7 +549,7 @@ import java.util.regex.Pattern;
 		for (ModElementType<?> type : mcreator.getGeneratorStats().getSupportedModElementTypes()) {
 			filterPopup.add(new UnregisteredAction(type.getReadableName(), e -> toggleFilter(
 					"f:" + type.getReadableName().replace(" ", "").toLowerCase(Locale.ENGLISH))).setIcon(
-					IconUtils.resize(type.getIcon(), 16, 16)));
+							IconUtils.resize(type.getIcon(), 16, 16)));
 		}
 
 		filter.addActionListener(e -> filterPopup.show(filter, -1, 26));
@@ -616,7 +623,8 @@ import java.util.regex.Pattern;
 		pne.setOpaque(false);
 
 		but1.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (but1.isEnabled())
 					new ModTypeDropdown(mcreator).show(e.getComponent(), e.getComponent().getWidth() + 5, -3);
 			}
@@ -626,7 +634,8 @@ import java.util.regex.Pattern;
 		pne.add(but1);
 
 		but2.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (but2.isEnabled() && list.getSelectedValue() instanceof ModElement)
 					editCurrentlySelectedModElement((ModElement) list.getSelectedValue(), but2,
 							e.getComponent().getWidth() + 8, 0);
@@ -637,7 +646,8 @@ import java.util.regex.Pattern;
 		pne.add(but2);
 
 		but2a.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (but2a.isEnabled())
 					duplicateCurrentlySelectedModElement();
 			}
@@ -647,7 +657,8 @@ import java.util.regex.Pattern;
 		pne.add(but2a);
 
 		but3.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				deleteCurrentlySelectedModElement();
 			}
 		});
@@ -656,7 +667,8 @@ import java.util.regex.Pattern;
 		pne.add(but3);
 
 		but5.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (but5.isEnabled() && list.getSelectedValue() instanceof ModElement) {
 					editCurrentlySelectedModElementAsCode((ModElement) list.getSelectedValue(), but5,
 							e.getComponent().getWidth() + 8, 0);
@@ -668,7 +680,8 @@ import java.util.regex.Pattern;
 		pne.add(but5);
 
 		but5a.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (but5a.isEnabled()) {
 					lockCode();
 				}
@@ -681,7 +694,8 @@ import java.util.regex.Pattern;
 		JPanel toolp;
 		if (mcreator.hasBackgroundImage()) {
 			toolp = new JPanel(new BorderLayout(0, 0)) {
-				@Override public void paintComponent(Graphics g) {
+				@Override
+				public void paintComponent(Graphics g) {
 					g.setColor(ColorUtils.applyAlpha(Theme.current().getAltBackgroundColor(), 100));
 					g.fillRect(0, 0, getWidth(), getHeight());
 					super.paintComponent(g);
@@ -700,9 +714,11 @@ import java.util.regex.Pattern;
 		emptct.setOpaque(false);
 
 		String[] workspaceEmptyTip = L10N.t("workspace.elements.empty.tip").split("%1");
-		emptct.add(ComponentUtils.deriveFont(new JLabel(workspaceEmptyTip[0]), 24));
+		emptct.add(ComponentUtils.deriveFont(new JLabel("<html><center>" + workspaceEmptyTip[0] + "</center></html>"),
+				24));
 		emptct.add(new JLabel(IconUtils.resize(UIRES.get("wrk_add"), 32, 32)));
-		emptct.add(ComponentUtils.deriveFont(new JLabel(workspaceEmptyTip[1]), 24));
+		emptct.add(ComponentUtils.deriveFont(new JLabel("<html><center>" + workspaceEmptyTip[1] + "</center></html>"),
+				24));
 
 		JPanel emptbtpd = new JPanel(new BorderLayout());
 		emptbtpd.setOpaque(false);
@@ -748,7 +764,8 @@ import java.util.regex.Pattern;
 
 		codeElement.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.ALT_DOWN_MASK));
 		codeElement.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				super.mouseClicked(e);
 			}
 		});
@@ -793,10 +810,10 @@ import java.util.regex.Pattern;
 		updateElementListRenderer();
 	}
 
-	@Override protected String getSearchPlaceholderText() {
-		return currentTabPanel instanceof WorkspacePanelMods ?
-				L10N.t("workspace.elements.list.search_folder") :
-				L10N.t("workspace.elements.list.search_list");
+	@Override
+	protected String getSearchPlaceholderText() {
+		return currentTabPanel instanceof WorkspacePanelMods ? L10N.t("workspace.elements.list.search_folder")
+				: L10N.t("workspace.elements.list.search_list");
 	}
 
 	public void switchFolder(FolderElement switchTo) {
@@ -836,7 +853,8 @@ import java.util.regex.Pattern;
 		refilterWorkspaceTab();
 	}
 
-	@Override protected void afterVerticalTabChanged() {
+	@Override
+	protected void afterVerticalTabChanged() {
 		search.repaint();
 		modElementsBar.setVisible(currentTabPanel instanceof WorkspacePanelMods);
 		subTabs.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_CONTENT_SEPARATOR,
@@ -845,60 +863,60 @@ import java.util.regex.Pattern;
 
 	private void updateElementListRenderer() {
 		switch (mcreator.getWorkspaceUserSettings().workspacePanelIconSize) {
-		case TILES -> {
-			list.setCellRenderer(new TilesModListRender());
-			list.setFixedCellHeight(72);
-			list.setFixedCellWidth(287);
-			list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-			view.setIcon(UIRES.get("16px.tiles"));
-			view.setText(L10N.t("workspace.elements.list.tiles"));
-			detailsbar.setVisible(false);
-		}
-		case LARGE -> {
-			list.setCellRenderer(new LargeIconModListRender());
-			list.setFixedCellHeight(97);
-			list.setFixedCellWidth(90);
-			list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-			view.setIcon(UIRES.get("16px.large"));
-			view.setText(L10N.t("workspace.elements.list.large"));
-			detailsbar.setVisible(false);
-		}
-		case MEDIUM -> {
-			list.setCellRenderer(new MediumIconModListRender());
-			list.setFixedCellHeight(52);
-			list.setFixedCellWidth(287);
-			list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-			view.setIcon(UIRES.get("16px.medium"));
-			view.setText(L10N.t("workspace.elements.list.medium"));
-			detailsbar.setVisible(false);
-		}
-		case SMALL -> {
-			list.setCellRenderer(new SmallIconModListRender(true));
-			list.setFixedCellHeight(32);
-			list.setFixedCellWidth(200);
-			list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-			view.setIcon(UIRES.get("16px.small"));
-			view.setText(L10N.t("workspace.elements.list.small"));
-			detailsbar.setVisible(false);
-		}
-		case LIST -> {
-			list.setCellRenderer(new ListIconModListRender());
-			list.setFixedCellHeight(28);
-			list.setFixedCellWidth(-1);
-			list.setLayoutOrientation(JList.VERTICAL);
-			view.setIcon(UIRES.get("16px.list"));
-			view.setText(L10N.t("workspace.elements.list.list"));
-			detailsbar.setVisible(false);
-		}
-		case DETAILS -> {
-			list.setCellRenderer(new DetailsIconModListRender());
-			list.setFixedCellHeight(24);
-			list.setFixedCellWidth(-1);
-			list.setLayoutOrientation(JList.VERTICAL);
-			view.setIcon(UIRES.get("16px.details"));
-			view.setText(L10N.t("workspace.elements.list.details"));
-			detailsbar.setVisible(true);
-		}
+			case TILES -> {
+				list.setCellRenderer(new TilesModListRender());
+				list.setFixedCellHeight(72);
+				list.setFixedCellWidth(287);
+				list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+				view.setIcon(UIRES.get("16px.tiles"));
+				view.setText(L10N.t("workspace.elements.list.tiles"));
+				detailsbar.setVisible(false);
+			}
+			case LARGE -> {
+				list.setCellRenderer(new LargeIconModListRender());
+				list.setFixedCellHeight(97);
+				list.setFixedCellWidth(90);
+				list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+				view.setIcon(UIRES.get("16px.large"));
+				view.setText(L10N.t("workspace.elements.list.large"));
+				detailsbar.setVisible(false);
+			}
+			case MEDIUM -> {
+				list.setCellRenderer(new MediumIconModListRender());
+				list.setFixedCellHeight(52);
+				list.setFixedCellWidth(287);
+				list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+				view.setIcon(UIRES.get("16px.medium"));
+				view.setText(L10N.t("workspace.elements.list.medium"));
+				detailsbar.setVisible(false);
+			}
+			case SMALL -> {
+				list.setCellRenderer(new SmallIconModListRender(true));
+				list.setFixedCellHeight(32);
+				list.setFixedCellWidth(200);
+				list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+				view.setIcon(UIRES.get("16px.small"));
+				view.setText(L10N.t("workspace.elements.list.small"));
+				detailsbar.setVisible(false);
+			}
+			case LIST -> {
+				list.setCellRenderer(new ListIconModListRender());
+				list.setFixedCellHeight(28);
+				list.setFixedCellWidth(-1);
+				list.setLayoutOrientation(JList.VERTICAL);
+				view.setIcon(UIRES.get("16px.list"));
+				view.setText(L10N.t("workspace.elements.list.list"));
+				detailsbar.setVisible(false);
+			}
+			case DETAILS -> {
+				list.setCellRenderer(new DetailsIconModListRender());
+				list.setFixedCellHeight(24);
+				list.setFixedCellWidth(-1);
+				list.setLayoutOrientation(JList.VERTICAL);
+				view.setIcon(UIRES.get("16px.details"));
+				view.setText(L10N.t("workspace.elements.list.details"));
+				detailsbar.setVisible(true);
+			}
 		}
 	}
 
@@ -1023,7 +1041,8 @@ import java.util.regex.Pattern;
 						L10N.t("workspace.elements.duplicate_message", mu.getName()),
 						L10N.t("workspace.elements.duplicate_element", mu.getName()), mu.getElementIcon(),
 						new OptionPaneValidator() {
-							@Override public ValidationResult validate(JComponent component) {
+							@Override
+							public ValidationResult validate(JComponent component) {
 								return new ModElementNameValidator(mcreator.getWorkspace(), (VTextField) component,
 										L10N.t("common.mod_element_name")).validate();
 							}
@@ -1039,8 +1058,9 @@ import java.util.regex.Pattern;
 									.generatableElementToJSON(generatableElementOriginal), duplicateModElement);
 
 					if (generatableElementDuplicate instanceof NamespacedGeneratableElement) {
-						((NamespacedGeneratableElement) generatableElementDuplicate).name = RegistryNameFixer.fromCamelCase(
-								modName);
+						((NamespacedGeneratableElement) generatableElementDuplicate).name = RegistryNameFixer
+								.fromCamelCase(
+										modName);
 					}
 
 					mcreator.getGenerator().generateElement(generatableElementDuplicate);
@@ -1114,13 +1134,15 @@ import java.util.regex.Pattern;
 		for (BaseType baseType : mu.getBaseTypesProvided()) {
 			modElementGlobalFiles.addAll(mcreator.getGenerator().getGlobalTemplatesListForDefinition(
 					mcreator.getGenerator().getGeneratorConfiguration().getDefinitionsProvider()
-							.getBaseTypeDefinition(baseType), new AtomicInteger()));
+							.getBaseTypeDefinition(baseType),
+					new AtomicInteger()));
 		}
 
 		if (modElementFiles.size() + modElementGlobalFiles.size() > 1)
 			new ModElementCodeDropdown(mcreator, modElementFiles.stream().filter(e -> !(e instanceof ListTemplate))
 					.sorted((o1, o2) -> o1.getPathInWorkspace(mcreator.getWorkspace())
-							.compareToIgnoreCase(o2.getPathInWorkspace(mcreator.getWorkspace()))).toList(),
+							.compareToIgnoreCase(o2.getPathInWorkspace(mcreator.getWorkspace())))
+					.toList(),
 					modElementGlobalFiles, modElementListFiles).show(component, x, y);
 		else if (modElementFiles.size() == 1)
 			ProjectFileOpener.openCodeFile(mcreator, modElementFiles.getFirst().getFile());
@@ -1247,41 +1269,48 @@ import java.util.regex.Pattern;
 			filterItems = new ArrayList<>();
 		}
 
-		@Override public void addAll(Collection<? extends IElement> collection) {
+		@Override
+		public void addAll(Collection<? extends IElement> collection) {
 			items.addAll(collection);
 			refilter();
 		}
 
-		@Override public IElement getElementAt(int index) {
+		@Override
+		public IElement getElementAt(int index) {
 			if (!filterItems.isEmpty() && index < filterItems.size())
 				return filterItems.get(index);
 			else
 				return null;
 		}
 
-		@Override public int indexOf(Object elem) {
+		@Override
+		public int indexOf(Object elem) {
 			if (elem instanceof IElement)
 				return filterItems.indexOf(elem);
 			else
 				return -1;
 		}
 
-		@Override public int getSize() {
+		@Override
+		public int getSize() {
 			return filterItems.size();
 		}
 
-		@Override public void addElement(IElement o) {
+		@Override
+		public void addElement(IElement o) {
 			items.add(o);
 			refilter();
 		}
 
-		@Override public void removeAllElements() {
+		@Override
+		public void removeAllElements() {
 			super.removeAllElements();
 			items.clear();
 			filterItems.clear();
 		}
 
-		@Override public boolean removeElement(Object a) {
+		@Override
+		public boolean removeElement(Object a) {
 			if (a instanceof IElement) {
 				items.remove(a);
 				filterItems.remove(a);
@@ -1332,7 +1361,8 @@ import java.util.regex.Pattern;
 
 			filterItems.addAll(items.stream().filter(e -> e instanceof FolderElement)
 					.filter(item -> currentFolder.getDirectFolderChildren().contains(item) || (flattenFolders
-							&& recursiveFolderChildren.contains(item))).filter(item -> {
+							&& recursiveFolderChildren.contains(item)))
+					.filter(item -> {
 						if (!filters.isEmpty() || !metfilters.isEmpty() || !excludedMetfilters.isEmpty())
 							return false;
 
@@ -1354,8 +1384,8 @@ import java.util.regex.Pattern;
 				Collections.reverse(filterItems);
 			}
 
-			final Predicate<ModElement> conditionSubFolders = item -> currentFolder.equals(item.getFolderPath()) || (
-					flattenFolders && recursiveFolderChildren.stream()
+			final Predicate<ModElement> conditionSubFolders = item -> currentFolder.equals(item.getFolderPath())
+					|| (flattenFolders && recursiveFolderChildren.stream()
 							.anyMatch(folder -> folder.equals(item.getFolderPath())));
 
 			final Predicate<ModElement> conditionByKeyWord = item -> {
@@ -1384,9 +1414,9 @@ import java.util.regex.Pattern;
 
 					boolean matches = false;
 					switch (filterType) {
-					case "locked" -> matches = item.isCodeLocked();
-					case "ok" -> matches = item.doesCompile();
-					case "err" -> matches = !item.doesCompile();
+						case "locked" -> matches = item.isCodeLocked();
+						case "ok" -> matches = item.doesCompile();
+						case "err" -> matches = !item.doesCompile();
 					}
 
 					if (isExcluded) {
@@ -1416,7 +1446,8 @@ import java.util.regex.Pattern;
 
 			filterItems.addAll(items.stream()
 					.filter(e -> e instanceof ModElement me && conditionSubFolders.test(me) && conditionByKeyWord.test(
-							me) && conditionByFilters.test(me) && conditionMetFilters.test(me)).map(e -> (ModElement) e)
+							me) && conditionByFilters.test(me) && conditionMetFilters.test(me))
+					.map(e -> (ModElement) e)
 					.sorted(ModElement.getComparator(mcreator.getWorkspace(), items)).toList());
 
 			fireContentsChanged(this, 0, getSize());
@@ -1430,7 +1461,8 @@ import java.util.regex.Pattern;
 			add(contents);
 		}
 
-		@Override public void reloadElements() {
+		@Override
+		public void reloadElements() {
 			if (mcreator.getWorkspaceSettings() != null) {
 				// first we need to get current folder from the workspace
 				// as current reference to the folder may be out of date (e.g. reload from disk)
@@ -1493,7 +1525,8 @@ import java.util.regex.Pattern;
 			}
 		}
 
-		@Override public void refilterElements() {
+		@Override
+		public void refilterElements() {
 			dml.refilter();
 		}
 	}

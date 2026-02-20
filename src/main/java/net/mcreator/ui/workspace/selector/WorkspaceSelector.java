@@ -198,17 +198,16 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 
 		logoPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
 
-		JPanel southcenter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JPanel southcenter = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+		southcenter.setOpaque(false);
 
-		// Removed Donate button
-
+		// Settings
 		JLabel prefs = new JLabel(L10N.t("dialog.workspace_selector.preferences"));
 		prefs.setIcon(UIRES.get("settings"));
 		prefs.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		ComponentUtils.deriveFont(prefs, 15); // Increased font size
+		ComponentUtils.deriveFont(prefs, 13);
 		prefs.setForeground(Theme.current().getForegroundColor());
-		prefs.setBorder(BorderFactory.createEmptyBorder());
-		prefs.setVerticalTextPosition(SwingConstants.CENTER); // FIX ALIGNMENT
+		prefs.setVerticalTextPosition(SwingConstants.CENTER);
 		prefs.setHorizontalTextPosition(JLabel.LEFT);
 		prefs.addMouseListener(new MouseAdapter() {
 			@Override
@@ -216,9 +215,32 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 				new PreferencesDialog(WorkspaceSelector.this, null);
 			}
 		});
+
+		// DRM Status
+		long days = net.mcreator.ui.init.DRMAuthManager.getDaysRemaining();
+		drmStatusLabel = new JLabel("Лицензия: " + days + " дн.");
+		drmStatusLabel.setForeground(Theme.current().getForegroundColor());
+		ComponentUtils.deriveFont(drmStatusLabel, 13);
+
+		// Logout Button
+		JLabel logoutBtn = new JLabel("<html><u>Выйти</u></html>");
+		ComponentUtils.deriveFont(logoutBtn, 13);
+		logoutBtn.setForeground(Theme.current().getForegroundColor());
+		logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		logoutBtn.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				net.mcreator.ui.init.DRMAuthManager.logout();
+				application.closeApplication();
+			}
+		});
+
+		southcenter.add(drmStatusLabel);
+		southcenter.add(logoutBtn);
 		southcenter.add(prefs);
 
-		JPanel southcenterleft = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel southcenterleft = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+		southcenterleft.setOpaque(false);
 
 		JLabel version = L10N.label("dialog.workspace_selector.version",
 				Launcher.version.isSnapshot() ? Launcher.version.getMajorString() : Launcher.version.getFullString());
@@ -228,62 +250,19 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 				AboutAction.showDialog(WorkspaceSelector.this);
 			}
 		});
-		ComponentUtils.deriveFont(version, 15); // Increased font size
+		ComponentUtils.deriveFont(version, 13);
 		version.setForeground(Theme.current().getForegroundColor());
 		version.setHorizontalTextPosition(SwingConstants.LEFT);
-		version.setVerticalTextPosition(SwingConstants.CENTER); // FIX ALIGNMENT
+		version.setVerticalTextPosition(SwingConstants.CENTER);
 		version.setIcon(UIRES.get("info"));
 		version.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		southcenterleft.add(version);
 
-		JPanel southSubComponent = new JPanel(new GridBagLayout());
+		JPanel southSubComponent = new JPanel(new BorderLayout());
 		southSubComponent.setOpaque(false);
-		southSubComponent.setBorder(BorderFactory.createEmptyBorder(0, 25, 20, 25));
-
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridy = 0;
-		gbc.weighty = 0;
-		gbc.fill = GridBagConstraints.VERTICAL;
-
-		// Left: Version
-		gbc.gridx = 0;
-		gbc.weightx = 1.0;
-		gbc.anchor = GridBagConstraints.WEST;
-		southSubComponent.add(southcenterleft, gbc);
-
-		// Center: Button (if visible) moved to top actions
-		gbc.gridx = 1;
-		gbc.weightx = 0;
-		gbc.anchor = GridBagConstraints.CENTER;
-		gbc.insets = new Insets(0, 0, 0, 0); // Reset insets
-		southSubComponent.add(new JPanel(null), gbc); // Empty spacer
-
-		// Right: Settings
-		gbc.gridx = 2;
-		gbc.weightx = 1.0;
-		gbc.anchor = GridBagConstraints.EAST;
-
-		// DRM Status & Logout
-		long days = net.mcreator.ui.init.DRMAuthManager.getDaysRemaining();
-		drmStatusLabel = new JLabel("Лицензия: " + days + " дн.");
-		drmStatusLabel.setForeground(Theme.current().getForegroundColor());
-		ComponentUtils.deriveFont(drmStatusLabel, 14);
-
-		JButton logoutBtn = new JButton("Выйти");
-		ComponentUtils.deriveFont(logoutBtn, 14);
-		logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		logoutBtn.addActionListener(e -> {
-			net.mcreator.ui.init.DRMAuthManager.logout();
-			// Restart application to show login dialog again
-			application.closeApplication();
-		});
-
-		// Add DRM info before the preferences button (which is already in southcenter)
-		// Result: [Status] [Logout] [Settings] (Right aligned)
-		southcenter.add(drmStatusLabel, 0);
-		southcenter.add(logoutBtn, 1);
-
-		southSubComponent.add(southcenter, gbc);
+		southSubComponent.setBorder(BorderFactory.createEmptyBorder(0, 15, 20, 15));
+		southSubComponent.add("West", southcenterleft);
+		southSubComponent.add("East", southcenter);
 
 		JComponent centerComponent = PanelUtils.centerAndSouthElement(
 				PanelUtils.northAndCenterElement(logoPanel, PanelUtils.totalCenterInPanel(actions)), southSubComponent);

@@ -49,7 +49,11 @@ public class AboutAction extends BasicAction {
 				"Версия: " + Launcher.version.getFullString() + "\n" +
 				"Разработано для обучения программированию.\n\n" +
 				"Сборка и адаптация специально для FunCode.\n" +
-				"Разработка FunCode версии: Nikita Gutsenkov";
+				"Разработка FunCode версии: Nikita Gutsenkov\n\n" +
+				"© FunCode. Все авторские права защищены.\n" +
+				"Продукт защищен технологией DRM (Digital Rights Management).\n" +
+				"Любое несанкционированное копирование, распространение\n" +
+				"или модификация данного ПО строго запрещены.";
 
 		JTextArea aboutLabel = new JTextArea(message);
 		aboutLabel.setEditable(false);

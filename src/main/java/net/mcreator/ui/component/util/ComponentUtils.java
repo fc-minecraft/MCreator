@@ -43,10 +43,21 @@ public class ComponentUtils {
 	}
 
 	public static <T extends JComponent> T deriveFont(T component, float param) {
-		Font font = component.getFont();
-		if (font == null)
-			font = Theme.current().getFont();
-		component.setFont(font.deriveFont(param));
+		String styleSize = String.valueOf(param);
+		if (styleSize.endsWith(".0")) {
+			styleSize = styleSize.substring(0, styleSize.length() - 2);
+		}
+
+		Object existing = component.getClientProperty("FlatLaf.style");
+		if (existing instanceof String && !((String) existing).isEmpty()) {
+			String style = (String) existing;
+			style = style.replaceAll("font:[^;]+;?", "");
+			component.putClientProperty("FlatLaf.style",
+					style + (style.endsWith(";") || style.isEmpty() ? "" : "; ") + "font: " + styleSize);
+		} else {
+			component.putClientProperty("FlatLaf.style", "font: " + styleSize);
+		}
+
 		return component;
 	}
 
@@ -66,7 +77,8 @@ public class ComponentUtils {
 		lab.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		lab.setToolTipText("More info");
 		lab.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				DesktopUtils.browseSafe(url);
 			}
 		});
