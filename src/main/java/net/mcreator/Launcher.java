@@ -43,6 +43,17 @@ public class Launcher {
 	public static MCreatorVersionNumber version;
 
 	public static void main(String[] args) {
+		try {
+			Properties conf = new Properties();
+			conf.load(Launcher.class.getResourceAsStream("/mcreator.conf"));
+			version = new MCreatorVersionNumber(conf);
+		} catch (IOException e) {
+			// fallback if version loading fails, though it shouldn't
+			Properties p = new Properties();
+			p.setProperty("mcreator", "0.0.0");
+			version = new MCreatorVersionNumber(p);
+		}
+
 		LoggingSystem.init();
 
 		TerribleModuleHacks.openAllFor(ClassLoader.getSystemClassLoader().getUnnamedModule());
@@ -51,14 +62,6 @@ public class Launcher {
 		UTF8Forcer.forceGlobalUTF8();
 
 		final Logger LOG = LogManager.getLogger("Launcher"); // init logger after log directory is set
-
-		try {
-			Properties conf = new Properties();
-			conf.load(Launcher.class.getResourceAsStream("/mcreator.conf"));
-			version = new MCreatorVersionNumber(conf);
-		} catch (IOException e) {
-			LOG.error("Failed to read MCreator config", e);
-		}
 
 		LOG.info("Starting MCreator {}", version);
 

@@ -16,11 +16,19 @@ plugins {
     id "io.sentry.jvm.gradle" version "6.1.0"
 }
 
+// Load .env file
+if (file(".env").exists()) {
+    file(".env").readLines().each {
+        def (key, value) = it.tokenize('=')
+        if (key && value) System.setProperty(key, value)
+    }
+}
+
 sentry {
     includeSourceContext = true
     org = "funcode-by"
     projectName = "mcreator"
-    authToken = "0975ebd65747b04d6c350e12a39d8faa290519caa7c90ca0c02affdd206a4e4f"
+    authToken = System.getProperty("SENTRY_AUTH_TOKEN") ?: System.getenv("SENTRY_AUTH_TOKEN")
 }
 
 repositories {

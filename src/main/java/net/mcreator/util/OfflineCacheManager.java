@@ -1,5 +1,6 @@
 package net.mcreator.util;
 
+import io.sentry.Sentry;
 import net.mcreator.io.FileIO;
 import net.mcreator.io.zip.ZipIO;
 import net.mcreator.plugin.PluginLoader;
@@ -121,6 +122,7 @@ public class OfflineCacheManager {
         }
 
         new Thread(() -> {
+            long startTime = System.currentTimeMillis();
 
             // Delete marker immediately to mark cache as invalid during update
             File marker = new File(getOfflineCacheDir(), MARKER_FILE_NAME);
@@ -355,6 +357,8 @@ public class OfflineCacheManager {
                 if (tempDir != null) {
                     FileIO.deleteDir(tempDir);
                 }
+                long duration = System.currentTimeMillis() - startTime;
+                Sentry.metrics().distribution("offline_cache_init_time", (double) duration);
                 isDownloading.set(false);
             }
         }).start();

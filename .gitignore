@@ -40,3 +40,5 @@ hs_err_pid*
 plugins/mcreator-fabric-generator/
 /bin/
 /jcef-bundle/
+# LOCAL SECRETS
+.env

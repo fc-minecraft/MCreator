@@ -20,7 +20,10 @@
 package net.mcreator.io;
 
 import net.mcreator.Launcher;
+import io.sentry.ITransaction;
+import io.sentry.ProfileLifecycle;
 import io.sentry.Sentry;
+import io.sentry.SpanStatus;
 import net.mcreator.util.DefaultExceptionHandler;
 import net.mcreator.util.LoggingOutputStream;
 import net.mcreator.util.TestUtil;
@@ -31,6 +34,8 @@ import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 
 public class LoggingSystem {
+
+	private static ITransaction rootTransaction;
 
 	public static void init() {
 		System.setProperty("log_directory", UserFolderManager.getFileFromUserFolder("").getAbsolutePath());
@@ -78,8 +83,15 @@ public class LoggingSystem {
 			options.setRelease(Launcher.version.getFullString());
 			options.setEnvironment(Launcher.version.isDevelopment() ? "development" : "production");
 			options.setTracesSampleRate(1.0);
-			options.setProfilesSampleRate(1.0);
 			options.setSendDefaultPii(true);
+
+			if (OS.getOS() == OS.WINDOWS) {
+				options.setProfilesSampleRate(0.0);
+			} else {
+				options.setProfilesSampleRate(1.0);
+				options.setProfileSessionSampleRate(1.0);
+				options.setProfileLifecycle(ProfileLifecycle.TRACE);
+			}
 
 			options.setBeforeSend((event, hint) -> {
 				if (event.getMessage() != null && event.getMessage().getFormatted() != null) {
@@ -112,7 +124,26 @@ public class LoggingSystem {
 			});
 		});
 
+		Sentry.configureScope(scope -> {
+			scope.setTag("os.name", System.getProperty("os.name"));
+			scope.setTag("os.version", System.getProperty("os.version"));
+			scope.setTag("os.arch", System.getProperty("os.arch"));
+			scope.setTag("java.version", System.getProperty("java.version"));
+			scope.setTag("java.vendor", System.getProperty("java.vendor"));
+			scope.setTag("cpu.cores", String.valueOf(Runtime.getRuntime().availableProcessors()));
+			scope.setTag("memory.max", String.valueOf(Runtime.getRuntime().maxMemory() / 1024 / 1024) + "MB");
+		});
+
 		Thread.setDefaultUncaughtExceptionHandler(new DefaultExceptionHandler());
+
+		rootTransaction = Sentry.startTransaction("MCreator Session", "app.lifecycle");
+	}
+
+	public static void stop() {
+		if (rootTransaction != null) {
+			rootTransaction.finish(SpanStatus.OK);
+			rootTransaction = null;
+		}
 	}
 
 }

@@ -26,6 +26,7 @@ import net.mcreator.generator.Generator;
 import net.mcreator.generator.GeneratorConfiguration;
 import net.mcreator.io.FileIO;
 import net.mcreator.io.DeviceInfo;
+import net.mcreator.io.LoggingSystem;
 import net.mcreator.io.net.api.IWebAPI;
 import net.mcreator.io.net.api.MCreatorNetWebAPI;
 import net.mcreator.minecraft.DataListLoader;
@@ -259,6 +260,7 @@ public final class MCreatorApplication {
 	 * @return MCreator if new instance, null if existing is open or open failed
 	 */
 	public MCreator openWorkspaceInMCreator(File workspaceFile, boolean forceRegenerate) {
+		long startTime = System.currentTimeMillis();
 		this.workspaceSelector.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 		try {
 			Workspace workspace = Workspace.readFromFS(workspaceFile, this.workspaceSelector);
@@ -328,6 +330,8 @@ public final class MCreatorApplication {
 			reportFailedWorkspaceOpen(e);
 		} finally {
 			this.workspaceSelector.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			long duration = System.currentTimeMillis() - startTime;
+			io.sentry.Sentry.metrics().distribution("project_load_time", (double) duration);
 		}
 
 		return null;
@@ -386,6 +390,7 @@ public final class MCreatorApplication {
 		}
 
 		LOG.debug("Exiting MCreator");
+		LoggingSystem.stop();
 		System.exit(0); // actually exit MCreator
 	}
 
