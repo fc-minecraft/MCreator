@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
+<Configuration status="warn">
     <Appenders>
         <Console name="CONSOLE" target="SYSTEM_OUT">
             <PatternLayout
@@ -22,12 +21,21 @@
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
+        <Sentry name="Sentry" 
+                minimumBreadcrumbLevel="DEBUG" 
+                minimumEventLevel="WARN">
+            <Filters>
+                <RegexFilter regex="(?s).*(?i)(Unsupported JavaFX configuration|PlatformImpl startup|SLF4J: Defaulting to no-operation).*" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex=".*(?i)(java\.net\.ConnectException|java\.net\.UnknownHostException).*" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+        </Sentry>
     </Appenders>
     <Loggers>
         <Logger name="net.mcreator" level="ALL"/>
         <Root level="ALL">
             <AppenderRef ref="CONSOLE" level="ALL"/>
             <AppenderRef ref="ROLLINGFILE" level="${sys:log_file_level}"/>
+            <AppenderRef ref="Sentry" level="DEBUG" />
         </Root>
     </Loggers>
 </Configuration>

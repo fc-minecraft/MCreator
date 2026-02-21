@@ -19,6 +19,8 @@
 
 package net.mcreator.io;
 
+import net.mcreator.Launcher;
+import io.sentry.Sentry;
 import net.mcreator.util.DefaultExceptionHandler;
 import net.mcreator.util.LoggingOutputStream;
 import net.mcreator.util.TestUtil;
@@ -69,6 +71,47 @@ public class LoggingSystem {
 					}
 				}), true));
 		System.setOut(new PrintStream(new LoggingOutputStream(LogManager.getLogger("STDOUT"), Level.INFO), true));
+
+		Sentry.init(options -> {
+			options.setDsn(
+					"https://c152e8bf2346827a81d9a21dba561a30@o4510923143512064.ingest.de.sentry.io/4510923157536848");
+			options.setRelease(Launcher.version.getFullString());
+			options.setEnvironment(Launcher.version.isDevelopment() ? "development" : "production");
+			options.setTracesSampleRate(1.0);
+			options.setProfilesSampleRate(1.0);
+			options.setSendDefaultPii(true);
+
+			options.setBeforeSend((event, hint) -> {
+				if (event.getMessage() != null && event.getMessage().getFormatted() != null) {
+					String msg = event.getMessage().getFormatted();
+					// Ignore JavaFX startup warnings and other common "noisy" logs
+					if (msg.contains("Unsupported JavaFX configuration") || msg.contains(
+							"com.sun.javafx.application.PlatformImpl startup")
+							|| msg.contains(
+									"SLF4J: Defaulting to no-operation (NOP) logger implementation"))
+						return null;
+
+					// Ignore common non-critical network errors
+					if (msg.contains("java.net.ConnectException") || msg.contains("java.net.UnknownHostException")
+							|| msg.contains("java.net.SocketException"))
+						return null;
+				}
+
+				if (event.getExceptions() != null) {
+					for (io.sentry.protocol.SentryException ex : event.getExceptions()) {
+						if (ex.getType() != null && (ex.getType().contains("ConnectException") || ex.getType().contains(
+								"UnknownHostException") || ex.getType().contains("SocketException")))
+							return null;
+						if (ex.getValue() != null && (ex.getValue().contains("Unsupported JavaFX configuration")
+								|| ex.getValue().contains("com.sun.javafx.application.PlatformImpl startup")))
+							return null;
+					}
+				}
+
+				return event;
+			});
+		});
+
 		Thread.setDefaultUncaughtExceptionHandler(new DefaultExceptionHandler());
 	}
 

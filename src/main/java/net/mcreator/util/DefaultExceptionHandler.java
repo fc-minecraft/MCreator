@@ -18,15 +18,20 @@
 
 package net.mcreator.util;
 
+import io.sentry.Sentry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Arrays;
 
 public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
 
 	private static final Logger LOG = LogManager.getLogger("Exception");
 
-	@Override public void uncaughtException(Thread thread, Throwable throwable) {
+	@Override
+	public void uncaughtException(Thread thread, Throwable throwable) {
 		LOG.error("Uncaught exception in {}", thread.getName(), throwable);
+		Sentry.captureException(throwable);
 	}
 
 }

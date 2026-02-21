@@ -1,5 +1,11 @@
 import java.text.SimpleDateFormat
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
 plugins {
     id "java"
     id "idea"
@@ -7,6 +13,14 @@ plugins {
     id 'edu.sc.seis.launch4j' version '4.0.0'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.3'
     id 'org.openjfx.javafxplugin' version '0.1.0'
+    id "io.sentry.jvm.gradle" version "6.1.0"
+}
+
+sentry {
+    includeSourceContext = true
+    org = "funcode-by"
+    projectName = "mcreator"
+    authToken = "0975ebd65747b04d6c350e12a39d8faa290519caa7c90ca0c02affdd206a4e4f"
 }
 
 repositories {
@@ -141,6 +155,10 @@ dependencies {
     implementation "com.github.weisj:jsvg:2.0.0"
     implementation "me.friwi:jcefmaven:132.3.1"
 
+    implementation "io.sentry:sentry:8.33.0"
+    implementation "io.sentry:sentry-log4j2:8.33.0"
+    implementation "io.sentry:sentry-async-profiler:8.33.0"
+
     def jcef_natives_version = 'jcef-1770317+cef-132.3.1+g144febe+chromium-132.0.6834.83'
     win64 "me.friwi:jcef-natives-windows-amd64:${jcef_natives_version}"
     linux64 "me.friwi:jcef-natives-linux-amd64:${jcef_natives_version}"
@@ -224,6 +242,17 @@ tasks.register('runMCreator', JavaExec.class) {
     classpath += sourceSets.main.runtimeClasspath
 
     mainClass.set("net.mcreator.Launcher")
+
+    if (file("lib/sentry-opentelemetry-agent-8.33.0.jar").exists()) {
+        jvmArgs "-javaagent:lib/sentry-opentelemetry-agent-8.33.0.jar"
+        environment "SENTRY_PROPERTIES_FILE", "src/main/resources/sentry.properties"
+
+        // Disable default OTLP exporters to avoid connection errors to localhost:4318
+        // Data will still be sent to Sentry via the Sentry agent integration
+        environment "OTEL_TRACES_EXPORTER", "none"
+        environment "OTEL_METRICS_EXPORTER", "none"
+        environment "OTEL_LOGS_EXPORTER", "none"
+    }
 }
 
 apply from: 'platform/setup.gradle'
