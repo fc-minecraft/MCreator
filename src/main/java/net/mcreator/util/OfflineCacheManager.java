@@ -2,6 +2,7 @@ package net.mcreator.util;
 
 import io.sentry.Sentry;
 import net.mcreator.io.FileIO;
+import net.mcreator.io.UserFolderManager;
 import net.mcreator.io.zip.ZipIO;
 import net.mcreator.plugin.PluginLoader;
 import net.mcreator.plugin.Plugin;
@@ -93,6 +94,12 @@ public class OfflineCacheManager {
             return "Ошибка: кэшированная папка build отсутствует (нужен перезапуск настройки)";
         if (!cachedBuildDir.isDirectory() || cachedBuildDir.list().length == 0)
             return "Ошибка: кэшированная папка build пуста";
+
+        // Check for Fabric Loom plugin in global cache
+        File loomCache = new File(UserFolderManager.getGradleHome(),
+                "caches/modules-2/files-2.1/net.fabricmc/fabric-loom");
+        if (!loomCache.exists() || !loomCache.isDirectory() || loomCache.list().length == 0)
+            return "Ошибка: Плагин Fabric Loom не найден в кэше Gradle. Офлайн режим может не работать.";
 
         return "Кэш цел (Версия " + FALLBACK_LOADER_VERSION + ")";
     }
@@ -619,6 +626,7 @@ public class OfflineCacheManager {
             }
 
             FileIO.writeStringToFile(content, buildGradle);
+            LOG.info("Offline fixes applied to build.gradle for workspace: " + workspaceDir);
         }
 
         File metaInf = new File(workspaceDir, "src/main/resources/META-INF");

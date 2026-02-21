@@ -30,8 +30,9 @@ import org.apache.logging.log4j.Logger;
 import org.gradle.tooling.*;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GradleUtils {
@@ -82,7 +83,10 @@ public class GradleUtils {
 
 		// Always use G1GC (modern standard) and enable caching/daemon
 		launcher.addJvmArguments("-XX:+UseG1GC");
-		launcher.withArguments("-Dorg.gradle.caching=true", "-Dorg.gradle.daemon=true");
+
+		List<String> buildArgs = new ArrayList<>();
+		buildArgs.add("-Dorg.gradle.caching=true");
+		buildArgs.add("-Dorg.gradle.daemon=true");
 
 		// Logic split: Low-end PC vs High-end PC optimization
 		if (xmx < 1596) {
@@ -100,9 +104,8 @@ public class GradleUtils {
 					"Gradle Optimizations: PERFORMANCE MODE enabled (>= 1596MB). Parallel builds and VFS watching enabled.");
 			// PERFORMANCE MODE: If memory is sufficient (4GB+)
 			// Enable parallel build and file system watching for speed
-			launcher.withArguments(
-					"-Dorg.gradle.parallel=true",
-					"-Dorg.gradle.vfs.watch=true");
+			buildArgs.add("-Dorg.gradle.parallel=true");
+			buildArgs.add("-Dorg.gradle.vfs.watch=true");
 		}
 
 		// --- OPTIMIZATIONS END ---
@@ -117,9 +120,12 @@ public class GradleUtils {
 		// use custom set of environment variables to prevent system overrides
 		launcher.setEnvironmentVariables(getEnvironment(java_home));
 
-		if (java_home != null)
-			launcher.withArguments(Arrays.asList("-Porg.gradle.java.installations.auto-detect=false",
-					"-Porg.gradle.java.installations.paths=" + java_home.replace('\\', '/')));
+		if (java_home != null) {
+			buildArgs.add("-Porg.gradle.java.installations.auto-detect=false");
+			buildArgs.add("-Porg.gradle.java.installations.paths=" + java_home.replace('\\', '/'));
+		}
+
+		launcher.withArguments(buildArgs);
 
 		// some mod API toolchains (NeoGradle, Mod Dev Gradle) need to think they are
 		// running in IDE, so we make them think we are Eclipse
