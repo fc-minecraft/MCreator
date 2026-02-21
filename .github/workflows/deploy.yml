@@ -82,6 +82,19 @@ jobs:
           echo "mcr_version=$MCR_VERSION" >> $GITHUB_OUTPUT
           echo "mc_version=$MC_VERSION" >> $GITHUB_OUTPUT
           echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
+      - name: Create Sentry Release
+        if: github.event.inputs.release-type == 'release'
+        shell: bash
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: funcode-by
+          SENTRY_PROJECT: mcreator
+        run: |
+          curl -sL https://sentry.io/get-cli/ | bash
+          VERSION=${{ steps.determineExportVersion.outputs.mcr_version }}
+          sentry-cli releases new "$VERSION"
+          sentry-cli releases set-commits "$VERSION" --auto
+          sentry-cli releases finalize "$VERSION"
       - name: Upload Binaries and Tag Release
         uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd
         with:
@@ -149,6 +162,19 @@ jobs:
         env:
           MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
         run: gradle generateExportReport exportMac -Psnapshot=true -Pbuilddate=${{ needs.export1.outputs.build_date }}
+      - name: Create Sentry Release
+        if: github.event.inputs.release-type == 'release'
+        shell: bash
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: funcode-by
+          SENTRY_PROJECT: mcreator
+        run: |
+          curl -sL https://sentry.io/get-cli/ | bash
+          VERSION=${{ needs.export1.outputs.mcr_version }}
+          sentry-cli releases new "$VERSION"
+          sentry-cli releases set-commits "$VERSION" --auto
+          sentry-cli releases finalize "$VERSION"
       - name: Upload Binaries and Tag Release
         uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd
         with:
