@@ -25,9 +25,7 @@ import net.mcreator.element.ModElementTypeLoader;
 import net.mcreator.generator.Generator;
 import net.mcreator.generator.GeneratorConfiguration;
 import net.mcreator.io.FileIO;
-import net.mcreator.io.net.analytics.AnalyticsConstants;
-import net.mcreator.io.net.analytics.DeviceInfo;
-import net.mcreator.io.net.analytics.GoogleAnalytics;
+import net.mcreator.io.DeviceInfo;
 import net.mcreator.io.net.api.IWebAPI;
 import net.mcreator.io.net.api.MCreatorNetWebAPI;
 import net.mcreator.minecraft.DataListLoader;
@@ -81,7 +79,6 @@ public final class MCreatorApplication {
 
 	private WorkspaceSelector workspaceSelector;
 	private DeviceInfo deviceInfo;
-	private GoogleAnalytics analytics;
 
 	private TaskbarIntegration taskbarIntegration;
 
@@ -187,9 +184,6 @@ public final class MCreatorApplication {
 				isInternet = MCreatorApplication.WEB_API.initAPI();
 			}
 
-			analytics = new GoogleAnalytics(deviceInfo);
-			analytics.trackPage(AnalyticsConstants.PAGE_LAUNCH);
-
 			splashScreen.setProgress(100, L10N.t("splash.loading_windows"));
 
 			try {
@@ -234,10 +228,6 @@ public final class MCreatorApplication {
 
 			LOG.debug("Application loader finished");
 		}, "Application-Loader").start();
-	}
-
-	public GoogleAnalytics getAnalytics() {
-		return analytics;
 	}
 
 	public DeviceInfo getDeviceInfo() {
@@ -287,7 +277,6 @@ public final class MCreatorApplication {
 					mcreator.setVisible(true);
 					mcreator.requestFocusInWindow();
 					mcreator.toFront();
-					analytics.trackPage(AnalyticsConstants.PAGE_WORKSPACE_OPEN);
 					openResult.set(mcreator);
 				} else { // already open, just focus it
 					LOG.warn("Trying to open already open workspace, bringing it to the front.");
@@ -370,7 +359,6 @@ public final class MCreatorApplication {
 
 		LOG.debug("Performing exit tasks");
 		PreferencesManager.savePreferences(); // store any potential preferences changes
-		analytics.trackPageSync(AnalyticsConstants.PAGE_CLOSE); // track app close in sync mode
 
 		// we dispose all windows and exit fx platform
 		try {

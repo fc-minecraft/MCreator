@@ -25,8 +25,7 @@ import net.mcreator.blockly.data.BlocklyLoader;
 import net.mcreator.element.ModElementTypeLoader;
 import net.mcreator.generator.Generator;
 import net.mcreator.generator.GeneratorConfiguration;
-import net.mcreator.io.LoggingSystem;
-import net.mcreator.io.net.analytics.GoogleAnalytics;
+import net.mcreator.io.FileIO;
 import net.mcreator.minecraft.DataListLoader;
 import net.mcreator.plugin.PluginLoader;
 import net.mcreator.plugin.modapis.ModAPIManager;
@@ -60,7 +59,8 @@ public class IntegrationTestSetup implements BeforeAllCallback {
 
 	private static final String STORE_KEY = IntegrationTestSetup.class.getName();
 
-	@Override public synchronized void beforeAll(ExtensionContext context) throws Exception {
+	@Override
+	public synchronized void beforeAll(ExtensionContext context) throws Exception {
 		Object value = context.getRoot().getStore(GLOBAL).get(STORE_KEY);
 		if (value == null) {
 			context.getRoot().getStore(GLOBAL).put(STORE_KEY, this);
@@ -69,9 +69,10 @@ public class IntegrationTestSetup implements BeforeAllCallback {
 	}
 
 	public void setup() throws Exception {
-		/* ******************************
+		/*
+		 * ******************************
 		 * START: Launcher.java emulation
-		 * ******************************/
+		 ******************************/
 		LoggingSystem.init();
 
 		TestUtil.enterTestingMode(Assertions::fail);
@@ -98,9 +99,10 @@ public class IntegrationTestSetup implements BeforeAllCallback {
 		// Init JFX Toolkit
 		ThreadUtil.runOnSwingThreadAndWait(JFXPanel::new);
 		WebConsoleListener.registerLogger(LOG);
-		/* ****************************
+		/*
+		 * ****************************
 		 * END: Launcher.java emulation
-		 * ****************************/
+		 ****************************/
 
 		// Increase autosave interval for tests
 		PreferencesManager.PREFERENCES.backups.workspaceAutosaveInterval.set(2000);
@@ -111,15 +113,13 @@ public class IntegrationTestSetup implements BeforeAllCallback {
 		// Disable native file choosers for tests due to threading issues
 		PreferencesManager.PREFERENCES.ui.nativeFileChooser.set(false);
 
-		// Do not track unit tests
-		GoogleAnalytics.ANALYTICS_ENABLED = false;
-
 		// Enable logging of HTML panes (gradle console)
 		ConsolePane.DEBUG_CONTENTS_TO_LOG = true;
 
-		/* *****************************************
+		/*
+		 * *****************************************
 		 * START: MCreatorApplication.java emulation
-		 * *****************************************/
+		 *****************************************/
 		MCreatorApplication.isInternet = MCreatorApplication.WEB_API.initAPI();
 
 		// load plugins
@@ -172,9 +172,10 @@ public class IntegrationTestSetup implements BeforeAllCallback {
 			generator = generator.replace("/generator.yaml", "");
 			Generator.GENERATOR_CACHE.put(generator, new GeneratorConfiguration(generator));
 		}
-		/* ***************************************
+		/*
+		 * ***************************************
 		 * END: MCreatorApplication.java emulation
-		 * ***************************************/
+		 ***************************************/
 	}
 
 }

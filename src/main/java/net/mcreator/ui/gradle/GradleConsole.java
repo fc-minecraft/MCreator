@@ -20,6 +20,7 @@ package net.mcreator.ui.gradle;
 
 import com.sun.management.OperatingSystemMXBean;
 import net.mcreator.Launcher;
+import net.mcreator.io.DeviceInfo;
 import net.mcreator.gradle.*;
 import net.mcreator.io.OutputStreamEventHandler;
 import net.mcreator.java.ClassFinder;

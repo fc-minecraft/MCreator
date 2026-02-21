@@ -20,7 +20,6 @@ package net.mcreator.ui.action.impl.workspace;
 
 import net.mcreator.gradle.GradleResultCode;
 import net.mcreator.io.FileIO;
-import net.mcreator.io.net.analytics.AnalyticsConstants;
 import net.mcreator.ui.MCreatorApplication;
 import net.mcreator.ui.action.ActionRegistry;
 import net.mcreator.ui.action.impl.gradle.GradleAction;
@@ -73,9 +72,6 @@ public class ExportWorkspaceForDistAction extends GradleAction {
 				File exportTargetFile = FileDialogs.getSaveDialog(actionRegistry.getMCreator(), suggestedFileName,
 						new String[] { "." + exportExtension });
 				if (exportTargetFile != null) {
-					actionRegistry.getMCreator().getApplication().getAnalytics()
-							.trackEvent(AnalyticsConstants.EVENT_EXPORT_FOR_DIST, "build");
-
 					FileIO.copyFile(exportFileObject, exportTargetFile);
 				}
 			} else {

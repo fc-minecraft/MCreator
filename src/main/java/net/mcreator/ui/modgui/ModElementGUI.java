@@ -20,7 +20,6 @@ package net.mcreator.ui.modgui;
 
 import net.mcreator.Launcher;
 import net.mcreator.element.GeneratableElement;
-import net.mcreator.io.net.analytics.AnalyticsConstants;
 import net.mcreator.minecraft.MCItem;
 import net.mcreator.plugin.MCREvent;
 import net.mcreator.plugin.events.ui.ModElementGUIEvent;
@@ -71,8 +70,10 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 	private boolean changed, listeningEnabled = false;
 	private final ModElementChangedListener elementUpdateListener;
 
-	@Nonnull protected final ModElement modElement;
-	@Nullable private FolderElement targetFolder;
+	@Nonnull
+	protected final ModElement modElement;
+	@Nullable
+	private FolderElement targetFolder;
 
 	private ModElementCreatedListener<GE> modElementCreatedListener;
 
@@ -88,7 +89,8 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 		this.editingMode = editingMode;
 		this.modElement = modElement;
 
-		this.changed = !editingMode; // new mod elements should always warn about unsaved changes unless they are saved
+		this.changed = !editingMode; // new mod elements should always warn about unsaved changes unless they are
+										// saved
 		this.elementUpdateListener = () -> {
 			if (listeningEnabled)
 				changed = true;
@@ -121,11 +123,13 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 		this.modElementCreatedListener = modElementCreatedListener;
 	}
 
-	@Override public String getViewName() {
+	@Override
+	public String getViewName() {
 		return modElement.getName();
 	}
 
-	@Override public ImageIcon getViewIcon() {
+	@Override
+	public ImageIcon getViewIcon() {
 		if (!editingMode)
 			return modElement.getType().getIcon();
 
@@ -136,7 +140,8 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 		return modElement.getType().getIcon();
 	}
 
-	@Override public ViewBase showView() {
+	@Override
+	public ViewBase showView() {
 		MCREvent.event(new ModElementGUIEvent.BeforeLoading(mcreator, this.tabIn, this));
 
 		this.tabIn = new MCreatorTabs.Tab(this, modElement);
@@ -237,9 +242,9 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 				page.setCursor(new Cursor(Cursor.HAND_CURSOR));
 				ComponentUtils.deriveFont(page, 13);
 
-				page.addChangeListener(e -> page.setForeground(page.isSelected() ?
-						(Theme.current().getInterfaceAccentColor()) :
-						(Theme.current().getForegroundColor())));
+				page.addChangeListener(
+						e -> page.setForeground(page.isSelected() ? (Theme.current().getInterfaceAccentColor())
+								: (Theme.current().getForegroundColor())));
 				pager.add(page);
 				buttonGroup.add(page);
 
@@ -437,7 +442,8 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 		reloadDataLists();
 
 		if (editingMode) {
-			@SuppressWarnings("unchecked") GE generatableElement = (GE) modElement.getGeneratableElement();
+			@SuppressWarnings("unchecked")
+			GE generatableElement = (GE) modElement.getGeneratableElement();
 			openInEditingMode(generatableElement);
 		}
 
@@ -546,7 +552,8 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 			modElement.setParentFolder(
 					Objects.requireNonNullElse(targetFolder, modMaker.getWorkspacePanel().currentFolder));
 
-		// add mod element to the list, it will be only added for the first time, otherwise refreshed
+		// add mod element to the list, it will be only added for the first time,
+		// otherwise refreshed
 		// add it before generating so all references are loaded
 		if (!editingMode) {
 			mcreator.getWorkspace().addModElement(modElement);
@@ -575,7 +582,8 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 		mcreator.getModElementManager().storeModElementPicture(element);
 		modElement.reloadElementIcon(); // force another reload here in case the image changed
 
-		// re-init mod element to pick up the new mod element picture and reload mcitems cache
+		// re-init mod element to pick up the new mod element picture and reload mcitems
+		// cache
 		modElement.reinit(mcreator.getWorkspace());
 
 		afterGeneratableElementGenerated();
@@ -586,17 +594,14 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 			mcreator.getActionRegistry().buildWorkspace.doAction();
 		}
 
-		mcreator.getApplication().getAnalytics().trackEvent(
-				editingMode ? AnalyticsConstants.EVENT_EDIT_MOD_ELEMENT : AnalyticsConstants.EVENT_NEW_MOD_ELEMENT,
-				modElement.getType().getRegistryName());
-
 		changed = false;
 
-		if (!editingMode && modElementCreatedListener
-				!= null) // only call this event if listener is registered and we are not in editing mode
+		if (!editingMode && modElementCreatedListener != null) // only call this event if listener is registered and we
+																// are not in editing mode
 			modElementCreatedListener.modElementCreated(element);
 
-		// at this point, ME is stored so if session was not marked as editingMode before, now it is
+		// at this point, ME is stored so if session was not marked as editingMode
+		// before, now it is
 		editingMode = true;
 
 		// handle tab changes
@@ -632,7 +637,8 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 	public void reloadDataLists() {
 	}
 
-	@Override public JTextComponent getSearchTextField() {
+	@Override
+	public JTextComponent getSearchTextField() {
 		return search;
 	}
 
@@ -665,11 +671,15 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 		void modElementCreated(GE generatableElement);
 	}
 
-	@Override @Nullable public String contextName() {
+	@Override
+	@Nullable
+	public String contextName() {
 		return modElement.getType().getReadableName();
 	}
 
-	@Override @Nullable public IHelpContext withEntry(String entry) {
+	@Override
+	@Nullable
+	public IHelpContext withEntry(String entry) {
 		try {
 			return new ModElementHelpContext<>(this.contextName(), this.contextURL(), entry, this);
 		} catch (URISyntaxException e) {
@@ -677,6 +687,8 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 		}
 	}
 
-	@Override @Nullable public abstract URI contextURL() throws URISyntaxException;
+	@Override
+	@Nullable
+	public abstract URI contextURL() throws URISyntaxException;
 
 }
