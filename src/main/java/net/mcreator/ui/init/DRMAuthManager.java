@@ -8,26 +8,28 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.NetworkInterface;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.stream.Collectors;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 public class DRMAuthManager {
 
     private static final Logger LOG = LogManager.getLogger("DRM");
     // "Fortress" Mode Constants
     // Obfuscated secrets (simple Base64 to prevent easy string discovery)
-    private static final String HMAC_SECRET = new String(
-            java.util.Base64.getDecoder().decode("TUNSRUFUT1JfRFJNX1NFQ1JFVF8yMDI0X0hBUkRFTkVE"),
-            StandardCharsets.UTF_8);
-    private static final byte[] SALT = java.util.Base64.getDecoder().decode("TUNyZWF0b3I=");
+    private static final String HMAC_SECRET = decryptSecret(new byte[] { (byte) 0x93, (byte) 0x9D, (byte) 0x8C,
+            (byte) 0x9B, (byte) 0x9F, (byte) 0x8A, (byte) 0x91, (byte) 0x8C, (byte) 0x81, (byte) 0x90, (byte) 0x86,
+            (byte) 0x91, (byte) 0x81, (byte) 0x8F, (byte) 0x99, (byte) 0x9F, (byte) 0x8C, (byte) 0x99, (byte) 0x80,
+            (byte) 0x8F, (byte) 0x81, (byte) 0x81, (byte) 0xEE, (byte) 0xEC, (byte) 0xEE, (byte) 0xF2, (byte) 0x81,
+            (byte) 0x94, (byte) 0x9D, (byte) 0x8E, (byte) 0x98, (byte) 0x99, (byte) 0x92, (byte) 0x99, (byte) 0x98 });
+    private static final byte[] SALT = decryptSecret(new byte[] { (byte) 0x93, (byte) 0x9D, (byte) 0xAC, (byte) 0xBB,
+            (byte) 0xBF, (byte) 0xAA, (byte) 0xB1, (byte) 0xAC }).getBytes(StandardCharsets.UTF_8);
     private static final File AUTH_FILE = new File(System.getProperty("user.home"), ".mcreator/drm_auth.bin");
     private static final Gson GSON = new GsonBuilder().create();
     private static AuthData currentSession;
@@ -51,14 +53,15 @@ public class DRMAuthManager {
         }
 
         if (currentSession == null) {
+            LOG.info("DRM Validation: No active session found.");
             return false;
         }
 
         // Check expiration
         try {
             // 1. Check if token corrupted/tampered (Format check)
-            if (currentSession.authExpire == null || currentSession.token == null) {
-                LOG.info("Session corrupted: Missing critical fields (token/expire)");
+            if (currentSession.refreshExpire == null || currentSession.token == null) {
+                LOG.info("DRM Validation: Session corrupted (missing token or refreshExpire)");
                 return false;
             }
 
@@ -69,29 +72,47 @@ public class DRMAuthManager {
                 try {
                     Instant lastChecked = Instant.parse(currentSession.lastCheckedTime);
                     if (now.isBefore(lastChecked.minusSeconds(600))) { // 10 mins buffer for sync
-                        LOG.error("System time tampering detected! Current: " + now + ", Last: " + lastChecked);
+                        LOG.error("DRM Validation: System time tampering detected! Current: " + now + ", Last: "
+                                + lastChecked);
                         logout();
                         return false;
                     }
                 } catch (Exception e) {
-                    LOG.info("Last checked time corrupted, resetting...");
+                    LOG.info("DRM Validation: Last checked time corrupted, ignoring...");
                 }
             }
 
-            // Check auth expiration
-            Instant expireTime = Instant.parse(currentSession.authExpire);
-            if (now.isAfter(expireTime)) {
-                LOG.info("DRM Session expired (Limit reached).");
+            // 3. Expiration Check
+            // We use refreshExpire for the hard offline limit (30 days)
+            Instant hardLimit = Instant.parse(currentSession.refreshExpire);
+            if (now.isAfter(hardLimit)) {
+                LOG.info("DRM Validation: 30-day offline limit reached. Re-auth required.");
                 return false;
             }
 
+            // 4. Hard Session Cap (90 days) - Force re-login even if refreshed
+            if (currentSession.sessionStartTime != null) {
+                Instant startTime = Instant.parse(currentSession.sessionStartTime);
+                if (now.isAfter(startTime.plus(90, ChronoUnit.DAYS))) {
+                    LOG.info("DRM Validation: 90-day session cap reached. Full re-login required.");
+                    return false;
+                }
+            } else {
+                // Backward compatibility for existing sessions: set it to now
+                currentSession.sessionStartTime = now.toString();
+                saveSession();
+            }
+
+            // authExpire is a soft limit for server sync, handled in validateOrCrash.
+            // Offline mode ignores authExpire as long as refreshExpire is valid.
+
             // Update rolling timestamp
             currentSession.lastCheckedTime = now.toString();
-            saveSession(); // Re-encrypt with new time
+            saveSession();
 
             return true;
         } catch (Exception e) {
-            LOG.info("Failed to parse expiration date or validate session: {}", e.getMessage());
+            LOG.error("DRM Validation: Unexpected error: " + e.getMessage(), e);
             logout(); // Corrupted data
             return false;
         }
@@ -111,6 +132,7 @@ public class DRMAuthManager {
             data.authExpire = resp.authExpire;
             data.refreshExpire = resp.refreshExpire;
             data.lastCheckedTime = Instant.now().toString(); // Init timestamp
+            data.sessionStartTime = Instant.now().toString(); // Hard cap start
 
             currentSession = data;
             saveSession();
@@ -127,14 +149,38 @@ public class DRMAuthManager {
         }
     }
 
-    /**
-     * Entry-point validation: called at startup.
-     * Shows the login dialog if no valid session is found and blocks until done.
-     */
     private static final java.util.concurrent.atomic.AtomicBoolean dialogShowing = new java.util.concurrent.atomic.AtomicBoolean(
             false);
 
+    private static long lastServerCheck = 0;
+
     public static void validateOrCrash() {
+        // SOFT SERVER CHECK: Try to verify token on server if we have a session
+        if (currentSession == null) {
+            loadSession();
+        }
+
+        // Only check server once every 2 hours to avoid annoying the user/dev
+        long now = System.currentTimeMillis();
+        if (currentSession != null && (now - lastServerCheck > 7200000)) {
+            try {
+                if (!verifyTokenWithServer()) {
+                    // Try to refresh before giving up
+                    LOG.info("DRM: Access token expired. Attempting silent refresh...");
+                    if (refreshToken()) {
+                        LOG.info("DRM: Token refreshed successfully.");
+                    } else {
+                        LOG.warn("DRM: Refresh failed or rejected. Moving to login.");
+                        logout();
+                    }
+                } else {
+                    lastServerCheck = now;
+                }
+            } catch (IOException e) {
+                LOG.info("Server unreachable or error, continuing in offline mode: {}", e.getMessage());
+            }
+        }
+
         if (!validate()) {
             if (dialogShowing.compareAndSet(false, true)) {
                 try {
@@ -248,12 +294,14 @@ public class DRMAuthManager {
     // --- ENCRYPTION & STORAGE (HWID) ---
 
     private static void loadSession() {
-        if (!AUTH_FILE.exists())
+        if (!AUTH_FILE.exists()) {
+            LOG.debug("DRM: Authentication file not found (first run?)");
             return;
+        }
         try {
             byte[] fileData = java.nio.file.Files.readAllBytes(AUTH_FILE.toPath());
             if (fileData.length < 16) {
-                LOG.info("Auth file too small (corrupted)");
+                LOG.info("DRM: Auth file too small (corrupted)");
                 return;
             }
 
@@ -267,10 +315,13 @@ public class DRMAuthManager {
 
             String decryptedJson = decrypt(encryptedData, iv);
             currentSession = GSON.fromJson(decryptedJson, AuthData.class);
+            LOG.debug("DRM: Session loaded successfully for user: {}", currentSession.login);
         } catch (Exception e) {
             // Silence noise from expected decryption failure when session format changes
             if (!(e instanceof javax.crypto.BadPaddingException)) {
-                LOG.debug("Session load failed: {}", e.getMessage());
+                LOG.info("DRM: Session load failed: {}", e.getMessage());
+            } else {
+                LOG.info("DRM: HWID mismatch or session format changed (decryption failed)");
             }
             currentSession = null;
         }
@@ -354,22 +405,8 @@ public class DRMAuthManager {
             LOG.info("Hardware UUID detection failed for OS: " + os);
         }
 
-        try {
-            // Add MAC addresses
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            if (interfaces != null) {
-                for (NetworkInterface ni : Collections.list(interfaces)) {
-                    if (ni.isLoopback() || ni.isVirtual() || !ni.isUp())
-                        continue;
-                    byte[] mac = ni.getHardwareAddress();
-                    if (mac != null) {
-                        for (byte b : mac)
-                            hwidBase.append(String.format("%02X", b));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            /* fallback */ }
+        // Network interfaces are removed from HWID entropy to prevent instability
+        // when toggling Wi-Fi/Airplane mode or using VPNs.
 
         cachedHwid = hwidBase.toString();
         return generateKeyFromHwid(cachedHwid);
@@ -415,12 +452,115 @@ public class DRMAuthManager {
     }
 
     /**
+     * Attempts to verify current token with server and sync time.
+     * Throws IOException on network failure (to allow soft offline fallback).
+     * Returns false ONLY if server explicitly rejects the token (401/403).
+     */
+    private static boolean verifyTokenWithServer() throws IOException {
+        if (currentSession == null || currentSession.token == null)
+            return false;
+
+        // Use the base URL from preferences instead of hardcoded dev URL
+        String authUrl = getApiBaseUrl();
+        String baseUrl = authUrl.endsWith("/auth") ? authUrl.substring(0, authUrl.length() - 5) : authUrl;
+        if (baseUrl.endsWith("/api/"))
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+
+        // We use /api/reward/balance as a 'whoami' check
+        URL url = URI.create(baseUrl + "/reward/balance").toURL();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Authorization", "Bearer " + currentSession.token);
+        conn.setRequestProperty("Accept", "application/json");
+        conn.setConnectTimeout(5000);
+        conn.setReadTimeout(5000);
+
+        int code = conn.getResponseCode();
+
+        // Time Sync Guard: Extract server time from header to prevent clock rollback
+        long serverDate = conn.getDate();
+        if (serverDate > 0) {
+            Instant serverTime = Instant.ofEpochMilli(serverDate);
+            if (currentSession.lastCheckedTime != null) {
+                Instant lastChecked = Instant.parse(currentSession.lastCheckedTime);
+                if (serverTime.isAfter(lastChecked)) {
+                    currentSession.lastCheckedTime = serverTime.toString();
+                    saveSession();
+                }
+            } else {
+                currentSession.lastCheckedTime = serverTime.toString();
+                saveSession();
+            }
+        }
+
+        if (code == 200) {
+            return true;
+        } else if (code == 401 || code == 403) {
+            return false; // Token expired or invalid
+        }
+
+        // 500 or other errors - treat as network instability (allow offline)
+        throw new IOException("Server returned " + code);
+    }
+
+    /**
+     * Silently refreshes the access token using the refresh token.
+     * Returns true if successful.
+     */
+    private static synchronized boolean refreshToken() {
+        if (currentSession == null || currentSession.refresh == null)
+            return false;
+
+        try {
+            // According to Swagger, refresh uses LoginModel schema but typically only needs
+            // tokens.
+            // We pass the existing data to satisfy the schema.
+            AuthData refreshRequest = new AuthData();
+            refreshRequest.token = currentSession.token;
+            refreshRequest.refresh = currentSession.refresh;
+            refreshRequest.login = currentSession.login;
+
+            String jsonBody = GSON.toJson(refreshRequest);
+            String response = sendPostRequest(getApiBaseUrl() + "/refresh", jsonBody);
+
+            if (response != null && response.contains("token")) {
+                AuthResponse resp = GSON.fromJson(response, AuthResponse.class);
+                currentSession.token = resp.token;
+                currentSession.refresh = resp.refresh;
+                currentSession.authExpire = resp.authExpire;
+                currentSession.refreshExpire = resp.refreshExpire;
+                saveSession();
+                return true;
+            }
+        } catch (Exception e) {
+            LOG.info("DRM: Silent refresh failed: {}", e.getMessage());
+        }
+        return false;
+    }
+
+    /**
      * Returns a seed that is non-zero ONLY if the DRM session is valid.
      * Used for poisoning generator outputs if authorization is bypassed.
      */
     public static long getIntegritySeed() {
-        if (validate()) {
-            return (long) currentSession.token.hashCode();
+        if (validate() && currentSession != null && currentSession.token != null) {
+            try {
+                // Use HMAC-SHA256 of the token to create a robust 64-bit seed
+                Mac mac = Mac.getInstance("HmacSHA256");
+                byte[] keyBytes = decryptSecret(new byte[] { (byte) 0x93, (byte) 0x9D, (byte) 0xBC, (byte) 0xB1,
+                        (byte) 0xBF, (byte) 0xAA, (byte) 0xB0, (byte) 0xAD }).getBytes(StandardCharsets.UTF_8);
+                mac.init(new SecretKeySpec(keyBytes, "HmacSHA256"));
+                byte[] hash = mac.doFinal(currentSession.token.getBytes(StandardCharsets.UTF_8));
+
+                // Convert first 8 bytes to long
+                long seed = 0;
+                for (int i = 0; i < 8; i++) {
+                    seed = (seed << 8) | (hash[i] & 0xFF);
+                }
+                return seed == 0 ? 1 : seed; // Ensure non-zero if valid
+            } catch (Exception e) {
+                return (long) currentSession.token.hashCode(); // Fallback
+            }
         }
         return 0; // POISON: Zero seed indicates tampered or expired state
     }
@@ -510,5 +650,15 @@ public class DRMAuthManager {
         String authExpire;
         String refreshExpire;
         String lastCheckedTime; // For Rolling Timestamp
+        String sessionStartTime; // For 90-day hard cap
+    }
+
+    private static String decryptSecret(byte[] data) {
+        byte[] key = { (byte) 0xDE, (byte) 0xAD, (byte) 0xBE, (byte) 0xEF };
+        byte[] out = new byte[data.length];
+        for (int i = 0; i < data.length; i++) {
+            out[i] = (byte) (data[i] ^ key[i % key.length]);
+        }
+        return new String(out, StandardCharsets.UTF_8);
     }
 }

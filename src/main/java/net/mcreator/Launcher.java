@@ -43,6 +43,28 @@ public class Launcher {
 	public static MCreatorVersionNumber version;
 
 	public static void main(String[] args) {
+		// ANTI-INSTRUMENTATION: Detect Java Agents and debuggers before anything else
+		try {
+			java.util.List<String> vmArgs = java.lang.management.ManagementFactory.getRuntimeMXBean()
+					.getInputArguments();
+			for (String arg : vmArgs) {
+				String lArg = arg.toLowerCase();
+				// Check for blocked agents but allow OpenTelemetry (used for Sentry/Dev)
+				if (lArg.contains("-javaagent") && !lArg.contains("opentelemetry")) {
+					System.err.println("Unsupported Java Agent detected. DRM protection triggered.");
+					System.exit(0);
+				}
+
+				if (lArg.contains("-xdebug") || lArg.contains("agentlib:jdwp")
+						|| lArg.contains("bytebuddy") || lArg.contains("frida") || lArg.contains("asmdex")
+						|| lArg.contains("instrumentation")) {
+					System.err.println("Debugger or instrumentation tool detected. DRM protection triggered.");
+					System.exit(0);
+				}
+			}
+		} catch (Exception ignored) {
+		}
+
 		try {
 			Properties conf = new Properties();
 			conf.load(Launcher.class.getResourceAsStream("/mcreator.conf"));

@@ -84,7 +84,7 @@ public class PreferencesDialog extends MCreatorDialog {
 		spne.setLeftComponent(new JScrollPane(sections));
 		spne.setContinuousLayout(true);
 		spne.setContinuousLayout(true);
-		spne.setDividerLocation(150);
+		spne.setDividerLocation(260);
 		add("Center", spne);
 
 		sections.setBackground(Theme.current().getBackgroundColor());

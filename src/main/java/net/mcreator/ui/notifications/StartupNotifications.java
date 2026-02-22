@@ -21,9 +21,7 @@ package net.mcreator.ui.notifications;
 
 import net.mcreator.plugin.PluginLoadFailure;
 import net.mcreator.plugin.PluginLoader;
-import net.mcreator.plugin.PluginUpdateInfo;
 import net.mcreator.preferences.PreferencesManager;
-import net.mcreator.ui.dialogs.UpdatePluginDialog;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.init.UIRES;
 import net.mcreator.util.StringUtils;
@@ -31,8 +29,8 @@ import net.mcreator.util.StringUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException; // Added for exception
 import java.util.Collection;
+import java.lang.reflect.InvocationTargetException;
 import java.util.stream.Collectors;
 
 public class StartupNotifications {
@@ -70,14 +68,7 @@ public class StartupNotifications {
 	}
 
 	private static <T extends Window & INotificationConsumer> void handleUpdatesPlugin(T parent) {
-		if (PreferencesManager.PREFERENCES.notifications.checkAndNotifyForPluginUpdates.get()) {
-			Collection<PluginUpdateInfo> pluginUpdateInfos = PluginLoader.INSTANCE.getPluginUpdates();
-			if (!pluginUpdateInfos.isEmpty()) {
-				parent.addNotification(UIRES.get("18px.info"), L10N.t("notification.plugin_updates.msg"),
-						new NotificationsRenderer.ActionButton(L10N.t("notification.common.more_info"),
-								e -> UpdatePluginDialog.showPluginUpdateDialog(parent, false)));
-			}
-		}
+		// Plugin updates moved to separate UI or disabled
 	}
 
 	private static <T extends Window & INotificationConsumer> void handlePluginLoadFails(T parent) {
