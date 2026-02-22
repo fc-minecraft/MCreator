@@ -4,80 +4,103 @@
     <title>how-make-item - MCreator Wiki</title>
 
 <style>
-    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.8; color: #222; background-color: #fff; max-width: 900px; margin: 0 auto; font-size: 16px; }
-    h1 { color: #111; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.5em; }
-    h2 { color: #0066cc; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 1.8em; }
-    h3 { color: #444; margin-top: 30px; font-size: 1.4em; }
-    p { margin-bottom: 15px; }
-    a { color: #0066cc; text-decoration: none; font-weight: bold; }
-    a:hover { text-decoration: underline; }
-    code { background-color: #f0f0f0; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; font-size: 0.9em; }
-    ul { padding-left: 20px; }
-    li { margin-bottom: 10px; }
-    .tip { background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 30px 0; border-radius: 5px; }
-    .warning { background-color: #fff3cd; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; }
-    .mc-param { font-weight: bold; color: #2c3e50; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-    th { background-color: #f8f9fa; color: #333; }
+    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.6; color: #333; background-color: #fff; max-width: 1000px; margin: 0 auto; font-size: 16px; }
+    h1 { color: #2c3e50; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.8em; }
+    h2 { color: #2980b9; margin-top: 50px; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 2.0em; }
+    h3 { color: #34495e; margin-top: 35px; font-size: 1.5em; border-left: 5px solid #bdc3c7; padding-left: 10px; }
+    h4 { color: #7f8c8d; margin-top: 25px; font-size: 1.2em; font-weight: bold; }
+    p { margin-bottom: 15px; text-align: justify; }
+    a { color: #2980b9; text-decoration: none; font-weight: bold; transition: color 0.3s; }
+    a:hover { color: #c0392b; text-decoration: underline; }
+    code { background-color: #f8f9fa; padding: 2px 6px; border: 1px solid #e1e4e8; border-radius: 4px; font-family: 'Consolas', monospace; color: #e83e8c; font-size: 0.95em; }
+    pre { background-color: #f8f9fa; padding: 15px; border: 1px solid #e1e4e8; border-radius: 5px; overflow-x: auto; font-family: 'Consolas', monospace; }
+    ul, ol { padding-left: 25px; margin-bottom: 20px; }
+    li { margin-bottom: 8px; }
+    .tip { background-color: #d1ecf1; color: #0c5460; padding: 20px; border-left: 5px solid #17a2b8; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .warning { background-color: #fff3cd; color: #856404; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .mc-param { font-weight: bold; color: #2c3e50; background-color: #eef2f5; padding: 2px 5px; border-radius: 3px; }
+    table { width: 100%; border-collapse: collapse; margin: 25px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ddd; padding: 15px; text-align: left; vertical-align: top; }
+    th { background-color: #f8f9fa; color: #333; font-weight: bold; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.5px; }
     tr:nth-child(even) { background-color: #f9f9f9; }
+    tr:hover { background-color: #f1f1f1; }
+    .step-number { display: inline-block; width: 25px; height: 25px; background-color: #2980b9; color: white; border-radius: 50%; text-align: center; line-height: 25px; margin-right: 10px; font-weight: bold; }
+    .nav-box { background-color: #f8f9fa; padding: 20px; border-radius: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .nav-item { background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #eee; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+    .nav-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #2980b9; }
 </style>
 
 </head>
 <body>
 
-    <h1>Как сделать Предмет (Item)</h1>
-    <p>Предмет — это вещь, которую игрок держит в руке или носит в инвентаре. В отличие от блоков, предметы нельзя "поставить" на землю (если это не особый случай). Мечи, зелья, уголь, палки, алмазы — это предметы.</p>
+    <h1>Предмет (Item)</h1>
+    <p>Предметы лежат в инвентаре. Они не ставятся на землю как блоки (если только это не особый случай). Мечи, Еда, Материалы, Пластинки — это предметы.</p>
 
-    <h2>Настройки в MCreator</h2>
+    <h2>🚀 Создание</h2>
+    <ol>
+        <li>Нажми <strong>(+)</strong> -> <strong>Item</strong> (Предмет).</li>
+        <li>Введи имя (например, <code>MagicDust</code>).</li>
+    </ol>
 
-    <h3>1. Визуал</h3>
+    <h2>📋 Вкладка 1: Visual</h2>
     <ul>
-        <li><span class="mc-param">Текстура (Texture):</span> Выбери иконку (обычно 16x16 пикселей).</li>
-        <li><span class="mc-param">Модель предмета:</span> Обычно "Normal". Но можно сделать 3D предмет (как Трезубец или Подзорная труба), загрузив JSON модель.</li>
-        <li><span class="mc-param">Информация (Special information):</span> Текст, который будет написан под названием предмета (Lore). Например: "Магический камень древних".</li>
+        <li><span class="mc-param">Item texture:</span> Выбери иконку (обычно 16x16 пикселей).</li>
+        <li><span class="mc-param">Item model:</span> Normal (плоская картинка) или Block (3D модель).</li>
     </ul>
 
-    <h3>2. Свойства</h3>
-    <ul>
-        <li><span class="mc-param">Имя в игре:</span> Название предмета (например, "Рубин").</li>
-        <li><span class="mc-param">Редкость (Rarity):</span> Меняет цвет названия.
-            <ul>
-                <li><strong>Common:</strong> Белый (обычный).</li>
-                <li><strong>Uncommon:</strong> Желтый (редкий).</li>
-                <li><strong>Rare:</strong> Голубой (очень редкий).</li>
-                <li><strong>Epic:</strong> Фиолетовый (эпический, как Золотое яблоко зачарованное).</li>
-            </ul>
-        </li>
-        <li><span class="mc-param">Вкладка (Creative tab):</span> Где лежит предмет в креативе.</li>
-        <li><span class="mc-param">Макс. размер стака (Max stack size):</span>
-            <ul>
-                <li>64 — для блоков и материалов.</li>
-                <li>16 — для снежков, яиц, ведер.</li>
-                <li>1 — для инструментов, брони, зелий (не стакаются).</li>
-            </ul>
-        </li>
-        <li><span class="mc-param">Зачаровываемость (Enchantability):</span> Шанс получить хорошие чары. Золото (22) чаруется лучше, чем Камень (5).</li>
-        <li><span class="mc-param">Скорость разрушения:</span> Если предмет используется как инструмент. 1.0 — скорость руки.</li>
-        <li><span class="mc-param">Урон по мобам:</span> Если ударить этим предметом. 0 — как рукой.</li>
-        <li><span class="mc-param">Прочность (Durability):</span> Если > 0, у предмета появится полоска здоровья, и он будет ломаться.</li>
-    </ul>
+    <h2>⚙️ Вкладка 2: Properties</h2>
+    <table>
+        <tr>
+            <th>Параметр</th>
+            <th>Описание</th>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Name in GUI</span></td>
+            <td>Название предмета в игре.</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Rarity</span> (Редкость)</td>
+            <td>
+                Цвет названия:<br>
+                Common (Белый), Uncommon (Желтый), Rare (Голубой), Epic (Фиолетовый).
+            </td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Creative tab</span></td>
+            <td>В какой вкладке искать.</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Max stack size</span></td>
+            <td>
+                64 — стандарт (блоки, уголь).<br>
+                16 — снежки, яйца.<br>
+                1 — инструменты, зелья (нельзя сложить вместе).
+            </td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Enchantability</span></td>
+            <td>Шанс хороших чар. Золото = 22, Камень = 5.</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Item damage count</span></td>
+            <td>Прочность. Если 0 — предмет вечный. Если 100 — сломается после 100 использований.</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Damage vs entity</span></td>
+            <td>Урон, если ударить моба этим предметом.</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Is immune to fire</span></td>
+            <td>Если галочка стоит, предмет не сгорит, если упадет в лаву (как Незерит).</td>
+        </tr>
+    </table>
 
-    <h3>3. Продвинутые настройки</h3>
+    <h2>🍔 Вкладка 3: Food Properties (Еда)</h2>
+    <p>Заполни это, если предмет можно съесть.</p>
     <ul>
-        <li><span class="mc-param">Имеет сияние (Is immune to fire):</span> Будет ли предмет переливаться, как зачарованный (эффект "Glint").</li>
-        <li><span class="mc-param">Не сгорает в огне:</span> Как Незерит. Если бросить в лаву, он не исчезнет.</li>
-        <li><span class="mc-param">Остается при крафте:</span> Как ведро с молоком при крафте торта (ведро остается).</li>
-    </ul>
-
-    <h3>4. Еда (Food Properties)</h3>
-    <p>Если это съедобный предмет.</p>
-    <ul>
-        <li><span class="mc-param">Питательность (Nutritional value):</span> Сколько "окорочков" восстановит. (4 = 2 полных окорочка).</li>
-        <li><span class="mc-param">Насыщение (Saturation):</span> Скрытый параметр. Чем он выше, тем дольше игрок не проголодается. (Стейк = высоко, Арбуз = низко).</li>
-        <li><span class="mc-param">Результат поедания:</span> Что получит игрок? (Например, Грибной суп -> Миска).</li>
-        <li><span class="mc-param">Еда для собак:</span> Можно ли кормить волков.</li>
-        <li><span class="mc-param">Всегда съедобно:</span> Можно есть, даже если сыт (как Золотое яблоко или Паучий глаз).</li>
+        <li><span class="mc-param">Nutritional value:</span> Сколько голода восстановит (4 = 2 окорочка).</li>
+        <li><span class="mc-param">Saturation:</span> Насыщение (скрытый сытость). Чем выше, тем дольше не хочется есть.</li>
+        <li><span class="mc-param">Eating speed:</span> Как долго жевать (32 = стандарт).</li>
     </ul>
 
     <br><hr>

@@ -4,86 +4,141 @@
     <title>how-make-entity - MCreator Wiki</title>
 
 <style>
-    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.8; color: #222; background-color: #fff; max-width: 900px; margin: 0 auto; font-size: 16px; }
-    h1 { color: #111; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.5em; }
-    h2 { color: #0066cc; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 1.8em; }
-    h3 { color: #444; margin-top: 30px; font-size: 1.4em; }
-    p { margin-bottom: 15px; }
-    a { color: #0066cc; text-decoration: none; font-weight: bold; }
-    a:hover { text-decoration: underline; }
-    code { background-color: #f0f0f0; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; font-size: 0.9em; }
-    ul { padding-left: 20px; }
-    li { margin-bottom: 10px; }
-    .tip { background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 30px 0; border-radius: 5px; }
-    .warning { background-color: #fff3cd; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; }
-    .mc-param { font-weight: bold; color: #2c3e50; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-    th { background-color: #f8f9fa; color: #333; }
+    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.6; color: #333; background-color: #fff; max-width: 1000px; margin: 0 auto; font-size: 16px; }
+    h1 { color: #2c3e50; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.8em; }
+    h2 { color: #2980b9; margin-top: 50px; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 2.0em; }
+    h3 { color: #34495e; margin-top: 35px; font-size: 1.5em; border-left: 5px solid #bdc3c7; padding-left: 10px; }
+    h4 { color: #7f8c8d; margin-top: 25px; font-size: 1.2em; font-weight: bold; }
+    p { margin-bottom: 15px; text-align: justify; }
+    a { color: #2980b9; text-decoration: none; font-weight: bold; transition: color 0.3s; }
+    a:hover { color: #c0392b; text-decoration: underline; }
+    code { background-color: #f8f9fa; padding: 2px 6px; border: 1px solid #e1e4e8; border-radius: 4px; font-family: 'Consolas', monospace; color: #e83e8c; font-size: 0.95em; }
+    pre { background-color: #f8f9fa; padding: 15px; border: 1px solid #e1e4e8; border-radius: 5px; overflow-x: auto; font-family: 'Consolas', monospace; }
+    ul, ol { padding-left: 25px; margin-bottom: 20px; }
+    li { margin-bottom: 8px; }
+    .tip { background-color: #d1ecf1; color: #0c5460; padding: 20px; border-left: 5px solid #17a2b8; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .warning { background-color: #fff3cd; color: #856404; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .mc-param { font-weight: bold; color: #2c3e50; background-color: #eef2f5; padding: 2px 5px; border-radius: 3px; }
+    table { width: 100%; border-collapse: collapse; margin: 25px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ddd; padding: 15px; text-align: left; vertical-align: top; }
+    th { background-color: #f8f9fa; color: #333; font-weight: bold; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.5px; }
     tr:nth-child(even) { background-color: #f9f9f9; }
+    tr:hover { background-color: #f1f1f1; }
+    .step-number { display: inline-block; width: 25px; height: 25px; background-color: #2980b9; color: white; border-radius: 50%; text-align: center; line-height: 25px; margin-right: 10px; font-weight: bold; }
+    .nav-box { background-color: #f8f9fa; padding: 20px; border-radius: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .nav-item { background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #eee; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+    .nav-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #2980b9; }
 </style>
 
 </head>
 <body>
 
-    <h1>Как сделать Сущность (Entity/Mob)</h1>
-    <p>Сущности — это всё, что движется. Коровы, Зомби, Жители, даже падающий песок и лодка. Но чаще всего под "Сущностью" мы имеем в виду Мобов.</p>
+    <h1>Сущность (Entity / Mob)</h1>
+    <p>Самый сложный и интересный элемент! Создай своего монстра, друга или животное.</p>
 
-    <h2>1. Визуал и Звук</h2>
+    <h2>🚀 Создание</h2>
+    <ol>
+        <li>Нажми <strong>(+)</strong> -> <strong>Living Entity</strong>.</li>
+        <li>Введи имя (например, <code>FireZombie</code>).</li>
+    </ol>
+
+    <h2>📋 Вкладка 1: Visual</h2>
     <ul>
-        <li><span class="mc-param">Модель:</span>
+        <li><span class="mc-param">Entity model:</span>
             <ul>
-                <li><strong>Biped:</strong> Человекоподобный (как Зомби или Игрок).</li>
-                <li><strong>Quadruped:</strong> Четвероногий (как Корова или Свинья).</li>
-                <li><strong>Java Model:</strong> Своя уникальная модель, сделанная в Blockbench (нужно импортировать файл .java).</li>
+                <li><strong>Biped:</strong> Как человек/зомби.</li>
+                <li><strong>Quadruped:</strong> На четырех ногах (корова).</li>
+                <li><strong>Chicken/Spider/etc:</strong> Стандартные модели.</li>
+                <li><strong>Java Model:</strong> Своя 3D модель из Blockbench.</li>
             </ul>
         </li>
-        <li><span class="mc-param">Текстура:</span> "Шкурка" моба. Должна подходить к модели.</li>
-        <li><span class="mc-param">Свечение (Glow texture):</span> Текстура, которая светится в темноте (как глаза Паука или Эндермена).</li>
-        <li><span class="mc-param">Звуки:</span>
+        <li><span class="mc-param">Texture:</span> Картинка (скин) моба.</li>
+        <li><span class="mc-param">Glow texture:</span> То, что светится в темноте (глаза).</li>
+        <li><span class="mc-param">Entity shadow size:</span> Размер тени под ногами.</li>
+    </ul>
+
+    <h2>⚙️ Вкладка 2: Properties</h2>
+    <table>
+        <tr>
+            <th>Параметр</th>
+            <th>Описание</th>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Mob label</span></td>
+            <td>Имя над головой (если пусто, то нет).</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Creature attribute</span></td>
+            <td>
+                Тип:<br>
+                Undefined (Обычный)<br>
+                Undead (Нежить: горит на солнце, лечится уроном)<br>
+                Arthropod (Пауки)<br>
+                Water (Водные)
+            </td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Health</span></td>
+            <td>Здоровье. 20 = 10 сердец (как у игрока). Зомби = 20.</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Experience amount</span></td>
+            <td>Сколько опыта выпадет при смерти.</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Movement speed</span></td>
+            <td>Скорость бега. 0.3 — нормально. 0.2 — медленно.</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Attack strength</span></td>
+            <td>Урон в ближнем бою.</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Armor protection</span></td>
+            <td>Встроенная защита (как будто он в броне).</td>
+        </tr>
+        <tr>
+            <td><span class="mc-param">Equipment</span></td>
+            <td>Что он держит в руках и носит при спавне?</td>
+        </tr>
+    </table>
+
+    <h2>🧠 Вкладка 3: AI and Goals (Интеллект)</h2>
+    <p>Здесь ты программируешь мозг моба. Список задач выполняется сверху вниз. Чем выше задача, тем она важнее.</p>
+
+    <div class="tip">
+        <strong>Пример для агрессивного монстра:</strong><br>
+        1. Swim (Плавать, чтобы не утонуть).<br>
+        2. Melee attack (Бить врага).<br>
+        3. Wander (Бродить).<br>
+        4. Look around (Смотреть по сторонам).<br>
+        <br>
+        <strong>Target Tasks (Кого бить):</strong><br>
+        1. Hurt by target (Того, кто ударил меня).<br>
+        2. Attack Player (Игрока).
+    </div>
+
+    <ul>
+        <li><span class="mc-param">Wander:</span> Просто ходить.</li>
+        <li><span class="mc-param">Look at player:</span> Поворачивать голову на игрока.</li>
+        <li><span class="mc-param">Leap at target:</span> Прыгать на врага (как паук).</li>
+        <li><span class="mc-param">Panic:</span> Убегать при уроне.</li>
+        <li><span class="mc-param">Avoid entity:</span> Убегать от кого-то (например, от кошек).</li>
+        <li><span class="mc-param">Breed:</span> Размножаться.</li>
+    </ul>
+
+    <h2>🥚 Вкладка 4: Spawning (Появление)</h2>
+    <ul>
+        <li><span class="mc-param">Spawn probability (Weight):</span> Шанс спавна. 100 = часто (Зомби). 10 = редко (Эндермен).</li>
+        <li><span class="mc-param">Min/Max group size:</span> По одному или стаями? (Волки ходят по 4).</li>
+        <li><span class="mc-param">Creature type:</span>
             <ul>
-                <li><strong>Living sound:</strong> Что бормочет, когда просто гуляет.</li>
-                <li><strong>Hurt sound:</strong> Когда его бьют ("Ай!").</li>
-                <li><strong>Death sound:</strong> Когда умирает.</li>
+                <li>Monster: Спавнится в темноте.</li>
+                <li>Creature: Спавнится на траве при свете (животные).</li>
+                <li>Ambient: Летучие мыши.</li>
+                <li>WaterCreature: Рыбы.</li>
             </ul>
         </li>
-    </ul>
-
-    <h2>2. Поведение (Behavior)</h2>
-    <ul>
-        <li><span class="mc-param">Тип существа (Creature attribute):</span>
-            <ul>
-                <li><strong>Undefined:</strong> Обычный.</li>
-                <li><strong>Undead:</strong> Нежить (Зомби, Скелет). Горит на солнце, лечится уроном, получает урон от зелья лечения.</li>
-                <li><strong>Arthropod:</strong> Членистоногое (Паук). Получает доп. урон от чар "Бич членистоногих".</li>
-                <li><strong>Water:</strong> Водный (Рыба). Получает доп. урон от "Пронзателя".</li>
-            </ul>
-        </li>
-        <li><span class="mc-param">Здоровье (Health):</span> 20 = 10 сердечек (как у игрока).</li>
-        <li><span class="mc-param">Скорость (Movement speed):</span> 0.3 — средняя. Зомби медленнее, Оцелот быстрее.</li>
-        <li><span class="mc-param">Броня (Armor):</span> Встроенная защита.</li>
-        <li><span class="mc-param">Атака (Attack strength):</span> Урон в ближнем бою.</li>
-    </ul>
-
-    <h2>3. Искусственный интеллект (AI)</h2>
-    <p>Это "мозг" моба. Здесь мы собираем список задач по приоритету (сверху вниз).</p>
-    <p><strong>Примеры задач:</strong></p>
-    <ul>
-        <li><span class="mc-param">Melee attack:</span> Атаковать цель в ближнем бою.</li>
-        <li><span class="mc-param">Wander:</span> Просто бродить вокруг.</li>
-        <li><span class="mc-param">Look around:</span> Стоять и крутить головой.</li>
-        <li><span class="mc-param">Swim:</span> Не тонуть в воде.</li>
-        <li><span class="mc-param">Attack targets (Цели):</span> На кого агриться? (Например, на Игрока или на Жителей).</li>
-        <li><span class="mc-param">Panic:</span> Убегать, если ударили (для мирных мобов).</li>
-        <li><span class="mc-param">Avoid entity:</span> Убегать от кошек (как Крипер) или от волков.</li>
-    </ul>
-
-    <h2>4. Спавн (Spawning)</h2>
-    <ul>
-        <li><span class="mc-param">Вес спавна (Weight):</span> Шанс появления. 10 — редко (как Эндермен), 100 — часто (как Зомби).</li>
-        <li><span class="mc-param">Тип группы:</span> Monster (ночью), Creature (днем на траве), WaterCreature (в воде).</li>
-        <li><span class="mc-param">Биомы:</span> Где именно он живет?</li>
-        <li><span class="mc-param">Мин/Макс группа:</span> По одному или стаями?</li>
     </ul>
 
     <br><hr>

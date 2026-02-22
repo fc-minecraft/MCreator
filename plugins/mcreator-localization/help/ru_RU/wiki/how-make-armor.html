@@ -4,47 +4,57 @@
     <title>how-make-armor - MCreator Wiki</title>
 
 <style>
-    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.8; color: #222; background-color: #fff; max-width: 900px; margin: 0 auto; font-size: 16px; }
-    h1 { color: #111; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.5em; }
-    h2 { color: #0066cc; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 1.8em; }
-    h3 { color: #444; margin-top: 30px; font-size: 1.4em; }
-    p { margin-bottom: 15px; }
-    a { color: #0066cc; text-decoration: none; font-weight: bold; }
-    a:hover { text-decoration: underline; }
-    code { background-color: #f0f0f0; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; font-size: 0.9em; }
-    ul { padding-left: 20px; }
-    li { margin-bottom: 10px; }
-    .tip { background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 30px 0; border-radius: 5px; }
-    .warning { background-color: #fff3cd; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; }
-    .mc-param { font-weight: bold; color: #2c3e50; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-    th { background-color: #f8f9fa; color: #333; }
+    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.6; color: #333; background-color: #fff; max-width: 1000px; margin: 0 auto; font-size: 16px; }
+    h1 { color: #2c3e50; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.8em; }
+    h2 { color: #2980b9; margin-top: 50px; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 2.0em; }
+    h3 { color: #34495e; margin-top: 35px; font-size: 1.5em; border-left: 5px solid #bdc3c7; padding-left: 10px; }
+    h4 { color: #7f8c8d; margin-top: 25px; font-size: 1.2em; font-weight: bold; }
+    p { margin-bottom: 15px; text-align: justify; }
+    a { color: #2980b9; text-decoration: none; font-weight: bold; transition: color 0.3s; }
+    a:hover { color: #c0392b; text-decoration: underline; }
+    code { background-color: #f8f9fa; padding: 2px 6px; border: 1px solid #e1e4e8; border-radius: 4px; font-family: 'Consolas', monospace; color: #e83e8c; font-size: 0.95em; }
+    pre { background-color: #f8f9fa; padding: 15px; border: 1px solid #e1e4e8; border-radius: 5px; overflow-x: auto; font-family: 'Consolas', monospace; }
+    ul, ol { padding-left: 25px; margin-bottom: 20px; }
+    li { margin-bottom: 8px; }
+    .tip { background-color: #d1ecf1; color: #0c5460; padding: 20px; border-left: 5px solid #17a2b8; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .warning { background-color: #fff3cd; color: #856404; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .mc-param { font-weight: bold; color: #2c3e50; background-color: #eef2f5; padding: 2px 5px; border-radius: 3px; }
+    table { width: 100%; border-collapse: collapse; margin: 25px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ddd; padding: 15px; text-align: left; vertical-align: top; }
+    th { background-color: #f8f9fa; color: #333; font-weight: bold; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.5px; }
     tr:nth-child(even) { background-color: #f9f9f9; }
+    tr:hover { background-color: #f1f1f1; }
+    .step-number { display: inline-block; width: 25px; height: 25px; background-color: #2980b9; color: white; border-radius: 50%; text-align: center; line-height: 25px; margin-right: 10px; font-weight: bold; }
+    .nav-box { background-color: #f8f9fa; padding: 20px; border-radius: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .nav-item { background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #eee; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+    .nav-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #2980b9; }
 </style>
 
 </head>
 <body>
 
-    <h1>Как сделать Броню (Armor)</h1>
-    <p>Одежда, которая спасает жизнь.</p>
+    <h1>Броня (Armor)</h1>
 
-    <h2>Внешний вид</h2>
-    <p>Нужны две текстуры развертки (Armor Layer 1 и 2). Обычно Layer 1 — это шлем, нагрудник и ботинки, а Layer 2 — штаны. Это историческая особенность Minecraft.</p>
+    <h2>👔 Текстуры</h2>
+    <p>Для брони нужно две специальные текстуры развертки:</p>
+    <ol>
+        <li><strong>Layer 1:</strong> Рисуются Шлем, Нагрудник и Ботинки.</li>
+        <li><strong>Layer 2:</strong> Рисуются Штаны (Leggings).</li>
+    </ol>
+    <div class="tip">Используй встроенный редактор текстур MCreator (Tools -> Create armor texture), чтобы нарисовать их правильно.</div>
 
-    <h2>Параметры защиты</h2>
-    <p>Все параметры задаются для каждого элемента отдельно (Helmet, Chestplate, Leggings, Boots).</p>
+    <h2>🛡️ Параметры защиты</h2>
+    <p>Настраиваются отдельно для каждого элемента (Helmet, Body, Leggings, Boots).</p>
     <ul>
-        <li><span class="mc-param">Защита (Defense value):</span> Сколько половинок брони (щитков) добавляет над здоровьем.
+        <li><span class="mc-param">Defense Value:</span> Количество "щитков" брони.
             <ul>
-                <li>Кожаная куртка: 3</li>
-                <li>Железный нагрудник: 6</li>
-                <li>Алмазный нагрудник: 8</li>
+                <li>Кожа: 1-2</li>
+                <li>Железо: 2-6</li>
+                <li>Алмаз: 3-8</li>
             </ul>
         </li>
-        <li><span class="mc-param">Твердость (Toughness):</span> Скрытый параметр, защищает от сильных ударов. У алмазной брони он 2.0, у незеритовой 3.0. У железа 0.</li>
-        <li><span class="mc-param">Отбрасывание (Knockback resistance):</span> Сопротивление отталкиванию. У незерита есть немного.</li>
-        <li><span class="mc-param">Прочность (Durability):</span> Сколько ударов выдержит.</li>
+        <li><span class="mc-param">Toughness:</span> Твердость брони. Защищает от сильных ударов. У алмаза 2.0.</li>
+        <li><span class="mc-param">Knockback resistance:</span> Сопротивление отбрасыванию (как у Незерита).</li>
     </ul>
 
     <br><hr>

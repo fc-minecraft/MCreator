@@ -4,56 +4,60 @@
     <title>how-make-biome - MCreator Wiki</title>
 
 <style>
-    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.8; color: #222; background-color: #fff; max-width: 900px; margin: 0 auto; font-size: 16px; }
-    h1 { color: #111; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.5em; }
-    h2 { color: #0066cc; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 1.8em; }
-    h3 { color: #444; margin-top: 30px; font-size: 1.4em; }
-    p { margin-bottom: 15px; }
-    a { color: #0066cc; text-decoration: none; font-weight: bold; }
-    a:hover { text-decoration: underline; }
-    code { background-color: #f0f0f0; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; font-size: 0.9em; }
-    ul { padding-left: 20px; }
-    li { margin-bottom: 10px; }
-    .tip { background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 30px 0; border-radius: 5px; }
-    .warning { background-color: #fff3cd; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; }
-    .mc-param { font-weight: bold; color: #2c3e50; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-    th { background-color: #f8f9fa; color: #333; }
+    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.6; color: #333; background-color: #fff; max-width: 1000px; margin: 0 auto; font-size: 16px; }
+    h1 { color: #2c3e50; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.8em; }
+    h2 { color: #2980b9; margin-top: 50px; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 2.0em; }
+    h3 { color: #34495e; margin-top: 35px; font-size: 1.5em; border-left: 5px solid #bdc3c7; padding-left: 10px; }
+    h4 { color: #7f8c8d; margin-top: 25px; font-size: 1.2em; font-weight: bold; }
+    p { margin-bottom: 15px; text-align: justify; }
+    a { color: #2980b9; text-decoration: none; font-weight: bold; transition: color 0.3s; }
+    a:hover { color: #c0392b; text-decoration: underline; }
+    code { background-color: #f8f9fa; padding: 2px 6px; border: 1px solid #e1e4e8; border-radius: 4px; font-family: 'Consolas', monospace; color: #e83e8c; font-size: 0.95em; }
+    pre { background-color: #f8f9fa; padding: 15px; border: 1px solid #e1e4e8; border-radius: 5px; overflow-x: auto; font-family: 'Consolas', monospace; }
+    ul, ol { padding-left: 25px; margin-bottom: 20px; }
+    li { margin-bottom: 8px; }
+    .tip { background-color: #d1ecf1; color: #0c5460; padding: 20px; border-left: 5px solid #17a2b8; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .warning { background-color: #fff3cd; color: #856404; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .mc-param { font-weight: bold; color: #2c3e50; background-color: #eef2f5; padding: 2px 5px; border-radius: 3px; }
+    table { width: 100%; border-collapse: collapse; margin: 25px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ddd; padding: 15px; text-align: left; vertical-align: top; }
+    th { background-color: #f8f9fa; color: #333; font-weight: bold; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.5px; }
     tr:nth-child(even) { background-color: #f9f9f9; }
+    tr:hover { background-color: #f1f1f1; }
+    .step-number { display: inline-block; width: 25px; height: 25px; background-color: #2980b9; color: white; border-radius: 50%; text-align: center; line-height: 25px; margin-right: 10px; font-weight: bold; }
+    .nav-box { background-color: #f8f9fa; padding: 20px; border-radius: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .nav-item { background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #eee; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+    .nav-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #2980b9; }
 </style>
 
 </head>
 <body>
 
-    <h1>Как сделать Биом (Biome)</h1>
-    <p>Биом — это регион мира со своим климатом, блоками и обитателями. Хочешь сделать радиоактивную пустошь или конфетную страну? Тебе сюда!</p>
+    <h1>Биом (Biome)</h1>
+    <p>Создай свою природную зону.</p>
 
-    <h2>Настройки</h2>
+    <h2>📋 Настройки</h2>
     <ul>
-        <li><span class="mc-param">Название:</span> Имя биома.</li>
-        <li><span class="mc-param">Блок поверхности (Ground block):</span> Верхний слой (обычно Трава).</li>
-        <li><span class="mc-param">Подземный блок (Underground block):</span> Что под травой (обычно Земля 3-4 блока).</li>
-        <li><span class="mc-param">Категория:</span> Влияет на поведение игры (Forest, Desert, Icy...). Например, в Icy вода замерзает.</li>
+        <li><span class="mc-param">Ground block:</span> Верхний блок (обычно Трава).</li>
+        <li><span class="mc-param">Underground block:</span> Блок под верхом (обычно Земля, 3-5 слоев).</li>
+        <li><span class="mc-param">Biome category:</span> Тип (Forest, Desert, Icy, Ocean). Влияет на поведение игры (например, в Icy замерзает вода).</li>
     </ul>
 
-    <h2>Атмосфера (Atmosphere)</h2>
+    <h2>🎨 Атмосфера</h2>
+    <p>Перекрась мир!</p>
     <ul>
-        <li><span class="mc-param">Цвет неба (Sky color):</span> Какого цвета небо? (Красное для Ада, Зеленое для токсичного биома).</li>
-        <li><span class="mc-param">Цвет травы и листвы:</span> Можно перекрасить всю растительность в этом биоме.</li>
-        <li><span class="mc-param">Цвет воды и тумана:</span> Очень важно для настроения. Густой черный туман? Или прозрачная голубая вода?</li>
+        <li><span class="mc-param">Sky color:</span> Цвет неба.</li>
+        <li><span class="mc-param">Grass color:</span> Цвет травы в этом биоме.</li>
+        <li><span class="mc-param">Water color:</span> Цвет воды (можно сделать зеленую кислоту).</li>
+        <li><span class="mc-param">Fog color:</span> Цвет тумана на горизонте.</li>
     </ul>
 
-    <h2>Генерация (Generation)</h2>
+    <h2>🌳 Генерация</h2>
     <ul>
-        <li><span class="mc-param">Температура:</span> > 0.15 — дождь, < 0.15 — снег. > 1.0 — пустыня (нет осадков).</li>
-        <li><span class="mc-param">Влажность (Rainfall):</span> Влияет на цвет травы в ванильной системе.</li>
-        <li><span class="mc-param">Деревья на чанк:</span> Сколько деревьев? 0 — равнина, 10 — лес, 50 — джунгли. Можно выбрать ванильные деревья или свои.</li>
-        <li><span class="mc-param">Трава на чанк:</span> Количество цветов и высокой травы.</li>
+        <li><span class="mc-param">Temperature:</span> Температура. > 1.0 = сухо (пустыня). < 0.15 = снег.</li>
+        <li><span class="mc-param">Rainfall:</span> Влажность.</li>
+        <li><span class="mc-param">Trees per chunk:</span> Плотность леса. 0 = поле, 10 = лес, 50 = джунгли.</li>
     </ul>
-
-    <h2>Спавн мобов</h2>
-    <p>Добавь в список тех, кто тут живет. Не забудь про зомби и скелетов, если хочешь, чтобы биом был опасным ночью!</p>
 
     <br><hr>
     <p><small><a href="index.html">⬅️ Вернуться к оглавлению</a></small></p>

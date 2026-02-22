@@ -4,82 +4,103 @@
     <title>index - MCreator Wiki</title>
 
 <style>
-    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.8; color: #222; background-color: #fff; max-width: 900px; margin: 0 auto; font-size: 16px; }
-    h1 { color: #111; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.5em; }
-    h2 { color: #0066cc; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 1.8em; }
-    h3 { color: #444; margin-top: 30px; font-size: 1.4em; }
-    p { margin-bottom: 15px; }
-    a { color: #0066cc; text-decoration: none; font-weight: bold; }
-    a:hover { text-decoration: underline; }
-    code { background-color: #f0f0f0; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; font-size: 0.9em; }
-    ul { padding-left: 20px; }
-    li { margin-bottom: 10px; }
-    .tip { background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 30px 0; border-radius: 5px; }
-    .warning { background-color: #fff3cd; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; }
-    .mc-param { font-weight: bold; color: #2c3e50; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-    th { background-color: #f8f9fa; color: #333; }
+    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.6; color: #333; background-color: #fff; max-width: 1000px; margin: 0 auto; font-size: 16px; }
+    h1 { color: #2c3e50; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.8em; }
+    h2 { color: #2980b9; margin-top: 50px; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 2.0em; }
+    h3 { color: #34495e; margin-top: 35px; font-size: 1.5em; border-left: 5px solid #bdc3c7; padding-left: 10px; }
+    h4 { color: #7f8c8d; margin-top: 25px; font-size: 1.2em; font-weight: bold; }
+    p { margin-bottom: 15px; text-align: justify; }
+    a { color: #2980b9; text-decoration: none; font-weight: bold; transition: color 0.3s; }
+    a:hover { color: #c0392b; text-decoration: underline; }
+    code { background-color: #f8f9fa; padding: 2px 6px; border: 1px solid #e1e4e8; border-radius: 4px; font-family: 'Consolas', monospace; color: #e83e8c; font-size: 0.95em; }
+    pre { background-color: #f8f9fa; padding: 15px; border: 1px solid #e1e4e8; border-radius: 5px; overflow-x: auto; font-family: 'Consolas', monospace; }
+    ul, ol { padding-left: 25px; margin-bottom: 20px; }
+    li { margin-bottom: 8px; }
+    .tip { background-color: #d1ecf1; color: #0c5460; padding: 20px; border-left: 5px solid #17a2b8; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .warning { background-color: #fff3cd; color: #856404; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .mc-param { font-weight: bold; color: #2c3e50; background-color: #eef2f5; padding: 2px 5px; border-radius: 3px; }
+    table { width: 100%; border-collapse: collapse; margin: 25px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ddd; padding: 15px; text-align: left; vertical-align: top; }
+    th { background-color: #f8f9fa; color: #333; font-weight: bold; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.5px; }
     tr:nth-child(even) { background-color: #f9f9f9; }
+    tr:hover { background-color: #f1f1f1; }
+    .step-number { display: inline-block; width: 25px; height: 25px; background-color: #2980b9; color: white; border-radius: 50%; text-align: center; line-height: 25px; margin-right: 10px; font-weight: bold; }
+    .nav-box { background-color: #f8f9fa; padding: 20px; border-radius: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .nav-item { background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #eee; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+    .nav-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #2980b9; }
 </style>
 
 </head>
 <body>
 
     <h1>Энциклопедия MCreator</h1>
-    <p>Привет, будущий создатель модов! 👋</p>
-    <p>Ты держишь в руках самый мощный инструмент для изменения Minecraft. Здесь ты не просто игрок, ты — создатель! Хочешь добавить новый меч, который бьет молниями? Или целое измерение из сыра? А может быть, моба, который торгует алмазами за землю?</p>
-    <p>В этой энциклопедии мы подробно разберем каждую кнопочку, каждый параметр и каждый секрет создания модов. Читай внимательно, экспериментируй, и у тебя всё получится!</p>
+    <p>Добро пожаловать в полное, пошаговое руководство по созданию модов для Minecraft! 🚀</p>
+    <p>Здесь ты найдешь подробнейшие инструкции о каждом элементе интерфейса MCreator. Мы разберем каждую кнопку, каждое поле ввода и каждый секрет, чтобы ты мог создать мод своей мечты.</p>
 
-    <h2>🏗️ Строительные блоки мира</h2>
-    <ul>
-        <li><a href="how-make-block.html">Блок (Block)</a> — Основа всего. Земля, камень, дерево — это блоки. Узнай, как сделать свой!</li>
-        <li><a href="how-make-item.html">Предмет (Item)</a> — То, что лежит в инвентаре, но не ставится на землю.</li>
-        <li><a href="how-make-fluid.html">Жидкость (Fluid)</a> — Вода, лава, нефть или волшебный эликсир.</li>
-        <li><a href="how-make-plant.html">Растение (Plant)</a> — Цветы, кусты и все, что растет.</li>
-    </ul>
+    <div class="tip">
+        <strong>Совет:</strong> Если ты не знаешь, что делает какая-то кнопка в программе, просто нажми на маленький знак вопроса рядом с ней, и MCreator (с нашей помощью) откроет нужную страницу!
+    </div>
 
-    <h2>⚔️ Снаряжение и Инструменты</h2>
-    <ul>
-        <li><a href="how-make-tool.html">Инструмент (Tool)</a> — Кирки, топоры, лопаты. Копай быстрее!</li>
-        <li><a href="how-make-armor.html">Броня (Armor)</a> — Защита от криперов и лавы. Шлемы, нагрудники и не только.</li>
-        <li><a href="how-make-food.html">Еда (Food)</a> — Вкусняшки для восстановления голода и получения эффектов.</li>
-        <li><a href="how-make-ranged-item.html">Дальний бой (Ranged Item)</a> — Луки, пистолеты, бластеры.</li>
-    </ul>
+    <h2>📚 Содержание</h2>
 
-    <h2>🌍 Мир и Природа</h2>
-    <ul>
-        <li><a href="how-make-biome.html">Биом (Biome)</a> — Природные зоны: леса, пустыни, болота.</li>
-        <li><a href="how-make-dimension.html">Измерение (Dimension)</a> — Твой собственный мир со своими правилами.</li>
-        <li><a href="how-make-structure.html">Структура (Structure)</a> — Данжи, домики и руины, которые сами появляются в мире.</li>
-        <li><a href="how-make-feature.html">Особенности (Feature)</a> — Генерация руд, деревьев и мелких деталей.</li>
-    </ul>
-
-    <h2>🧟 Живые существа</h2>
-    <ul>
-        <li><a href="how-make-entity.html">Сущность (Living Entity)</a> — Мобы! Животные, монстры, NPC.</li>
-        <li><a href="how-make-villager-profession.html">Профессия жителя</a> — Новые работы для деревенских носатиков.</li>
-        <li><a href="how-make-villager-trades.html">Торговля жителей</a> — Что они продают и покупают.</li>
-    </ul>
-
-    <h2>✨ Магия и Логика</h2>
-    <ul>
-        <li><a href="how-make-procedure.html">Процедуры (Procedures)</a> — <strong>Самое важное!</strong> Программирование поведения мода.</li>
-        <li><a href="how-make-potion.html">Зелье (Potion)</a> — Магические эффекты.</li>
-        <li><a href="how-make-enchantment.html">Зачарование (Enchantment)</a> — Магия для предметов.</li>
-        <li><a href="how-make-particle.html">Частица (Particle)</a> — Визуальные эффекты (дым, искры).</li>
-        <li><a href="how-make-recipe.html">Рецепт (Recipe)</a> — Крафты для верстака и печки.</li>
-    </ul>
-
-    <h2>💻 Интерфейс и Система</h2>
-    <ul>
-        <li><a href="gui-editor.html">Интерфейс (GUI)</a> — Свои окна, сундуки и меню.</li>
-        <li><a href="how-make-overlay.html">Оверлей (Overlay)</a> — Картинки на экране (полоски маны, прицелы).</li>
-        <li><a href="how-make-key-binding.html">Клавиши (Key Binding)</a> — Действия по кнопкам клавиатуры.</li>
-        <li><a href="how-make-command.html">Команды (Command)</a> — Свои чит-коды (/mycommand).</li>
-        <li><a href="how-make-tag.html">Теги (Tag)</a> — Группировка предметов (например, "все бревна").</li>
-        <li><a href="how-make-loot-table.html">Таблицы лута (Loot Table)</a> — Что выпадает из мобов и блоков.</li>
-    </ul>
+    <div class="nav-box">
+        <div class="nav-item">
+            <a href="how-make-block.html">🧱 Блок (Block)</a><br>
+            <small>Основа мира</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-item.html">💎 Предмет (Item)</a><br>
+            <small>Вещи в инвентаре</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-tool.html">⛏️ Инструмент (Tool)</a><br>
+            <small>Кирки, Мечи, Топоры</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-armor.html">🛡️ Броня (Armor)</a><br>
+            <small>Защита и стиль</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-entity.html">🧟 Сущность (Entity)</a><br>
+            <small>Мобы и Животные</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-biome.html">🌵 Биом (Biome)</a><br>
+            <small>Природные зоны</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-dimension.html">🌌 Измерение (Dimension)</a><br>
+            <small>Новые миры</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-procedure.html">⚡ Процедуры</a><br>
+            <small>Логика и Скрипты</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-recipe.html">📜 Рецепты (Recipe)</a><br>
+            <small>Крафты</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-food.html">🍎 Еда (Food)</a><br>
+            <small>Вкусняшки</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-plant.html">🌻 Растение (Plant)</a><br>
+            <small>Флора</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-fluid.html">💧 Жидкость (Fluid)</a><br>
+            <small>Вода, Лава, Нефть</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-creative-inventory-tab.html">📂 Вкладка</a><br>
+            <small>Группа в креативе</small>
+        </div>
+        <div class="nav-item">
+            <a href="how-make-structure.html">🏰 Структура</a><br>
+            <small>Данжи и Руины</small>
+        </div>
+    </div>
 
     <br><hr>
     <p><small><a href="index.html">⬅️ Вернуться к оглавлению</a></small></p>
