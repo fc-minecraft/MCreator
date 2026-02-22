@@ -16,7 +16,7 @@ SetCompressor "lzma" ; to improve installer open performance and its size
 !searchreplace MCREATOR_VERSION_SHORT ${MCREATOR_VERSION} "." ""
 
 Name "MCreator ${MCREATOR_VERSION}"
-BrandingText "MCreator ${MCREATOR_VERSION}.${BUILD} - Developed by Pylo"
+BrandingText "MCreator ${MCREATOR_VERSION}.${BUILD} - FunCode версия"
 
 !define MUI_PRODUCT "MCreator"
 !define MUI_ICON "..\..\platform\windows\installer\installer.ico"
@@ -24,12 +24,12 @@ BrandingText "MCreator ${MCREATOR_VERSION}.${BUILD} - Developed by Pylo"
 
 RequestExecutionLevel admin
 
-VIAddVersionKey ProductName      "MCreator ${MCREATOR_VERSION} Installer"
-VIAddVersionKey Comments         "Installer for MCreator ${MCREATOR_VERSION}"
+VIAddVersionKey ProductName      "Установщик MCreator ${MCREATOR_VERSION}"
+VIAddVersionKey Comments         "Программа установки MCreator ${MCREATOR_VERSION}"
 VIAddVersionKey CompanyName      "Pylo"
 VIAddVersionKey FileVersion      "${MCREATOR_VERSION}.${BUILD}"
 VIAddVersionKey LegalCopyright   "Copyright %year% (C) Pylo"
-VIAddVersionKey FileDescription  "Installer for MCreator ${MCREATOR_VERSION}.${BUILD}"
+VIAddVersionKey FileDescription  "Установщик MCreator ${MCREATOR_VERSION}.${BUILD}"
 VIProductVersion                 "${MCREATOR_VERSION}.${BUILD}.0"
 
 OutFile "MCreator ${MCREATOR_VERSION} Windows ${BITS}bit.exe"
@@ -42,13 +42,11 @@ InstallDir "$PROGRAMFILES${BITS}\Pylo\MCreator"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "..\..\platform\windows\installer\installer_side.bmp"
 !define MUI_UNWELCOMEFINISHPAGE_BITMAP "..\..\platform\windows\installer\installer_side.bmp"
 
-!define MUI_LICENSEPAGE_TEXT_TOP "Read the license agreement below."
+!define MUI_LICENSEPAGE_TEXT_TOP "Ознакомьтесь с лицензионным соглашением ниже."
 
-!define MUI_FINISHPAGE_RUN_TEXT "Start MCreator after finish"
+!define MUI_FINISHPAGE_RUN_TEXT "Запустить MCreator после установки"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\mcreator.exe"
 
-!define MUI_FINISHPAGE_LINK "Donate and support MCreator project"
-!define MUI_FINISHPAGE_LINK_LOCATION "http://mcreator.net/donate"
 
 !define MUI_ABORTWARNING
 
@@ -63,7 +61,7 @@ UninstPage Custom un.LockedListShow un.LockedListLeave
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_UNPAGE_FINISH
 
-!insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "Russian"
 
 Function .onInit
 ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" "UninstallString"
@@ -107,10 +105,10 @@ Section "MCreator ${MCREATOR_VERSION}" Installation
 
   ;add .mcreator file association
   WriteRegStr HKCR ".mcreator" "" "MCreatorWorkspaceFile"
-  WriteRegStr HKCR "MCreatorWorkspaceFile" "" "MCreator workspace file"
+  WriteRegStr HKCR "MCreatorWorkspaceFile" "" "Файл воркспейса MCreator"
   WriteRegStr HKCR "MCreatorWorkspaceFile\shell" "" "open"
   WriteRegStr HKCR "MCreatorWorkspaceFile\DefaultIcon" "" "$INSTDIR\mcreator.exe,0"
-  WriteRegStr HKCR "MCreatorWorkspaceFile\shell\edit" "" "Edit this MCreator workspace"
+  WriteRegStr HKCR "MCreatorWorkspaceFile\shell\edit" "" "Редактировать воркспейс MCreator"
   WriteRegStr HKCR "MCreatorWorkspaceFile\shell\edit\command" "" "$\"$INSTDIR\mcreator.exe$\" $\"%1$\""
   WriteRegStr HKCR "MCreatorWorkspaceFile\shell\open\command" "" "$\"$INSTDIR\mcreator.exe$\" $\"%1$\""
 
@@ -126,7 +124,7 @@ Function un.onInit
 FunctionEnd
 
 Function un.ModifyUnConfirm
-    ${NSD_CreateCheckbox} 120u -25u 70% 20u "Keep settings, recent workspaces list, and caches"
+    ${NSD_CreateCheckbox} 120u -25u 70% 20u "Сохранить настройки, список недавних воркспейсов и кэш"
     Pop $keepUserData
     SetCtlColors $keepUserData "" ${MUI_BGCOLOR}
 
@@ -181,7 +179,7 @@ Function UninstallPrevious
     ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" "UninstallString"
 
     ${If} $0 != ""
-        DetailPrint "Removing previous installation"
+        DetailPrint "Удаление предыдущей версии"
 
         Push $0
         Call GetParent
@@ -198,7 +196,7 @@ Function UninstallPrevious
 FunctionEnd
 
 Function un.LockedListShow
-  !insertmacro MUI_HEADER_TEXT 'Scanning for locked files' 'Clicking next will auto-close the programs listed below'
+  !insertmacro MUI_HEADER_TEXT 'Поиск заблокированных файлов' 'При нажатии «Далее» программы из списка ниже будут автоматически закрыты'
   LockedList::AddFile "$INSTDIR\jdk\bin\java.exe"
   LockedList::AddFile "$INSTDIR\jdk\bin\javaw.exe"
   LockedList::AddFolder "$INSTDIR\plugins"
