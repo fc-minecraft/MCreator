@@ -395,19 +395,13 @@ public final class MCreatorApplication {
 	}
 
 	void showWorkspaceSelector() {
+		// Perform DRM Check BEFORE showing the window to prevent bypass window
+		net.mcreator.ui.init.DRMAuthManager.validateOrCrash();
+
 		workspaceSelector.setVisible(true);
+		workspaceSelector.refreshDRMStatus();
 
 		StartupNotifications.handleStartupNotifications(workspaceSelector);
-
-		// Perform DRM Check AFTER showing the window
-		if (!net.mcreator.ui.init.DRMAuthManager.validate()) {
-			net.mcreator.ui.dialogs.DRMLoginDialog dialog = new net.mcreator.ui.dialogs.DRMLoginDialog(
-					workspaceSelector);
-			dialog.setVisible(true); // Modal, blocks until closed
-
-			// Refresh status after login
-			workspaceSelector.refreshDRMStatus();
-		}
 	}
 
 	List<RecentWorkspaceEntry> getRecentWorkspaces() {

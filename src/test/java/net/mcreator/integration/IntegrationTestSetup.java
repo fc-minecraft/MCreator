@@ -25,7 +25,7 @@ import net.mcreator.blockly.data.BlocklyLoader;
 import net.mcreator.element.ModElementTypeLoader;
 import net.mcreator.generator.Generator;
 import net.mcreator.generator.GeneratorConfiguration;
-import net.mcreator.io.FileIO;
+import net.mcreator.io.LoggingSystem;
 import net.mcreator.minecraft.DataListLoader;
 import net.mcreator.plugin.PluginLoader;
 import net.mcreator.plugin.modapis.ModAPIManager;

@@ -58,7 +58,7 @@ public class UISection extends PreferencesSection {
 		expandSectionsByDefault = addEntry(new BooleanEntry("expandSectionsByDefault", false));
 		autoReloadTabs = addEntry(new BooleanEntry("autoReloadTabs", true));
 		autoPurgeProjects = addEntry(new BooleanEntry("autoPurgeProjects", true));
-		autoPurgeProjectsTime = addEntry(new IntegerEntry("autoPurgeProjectsTime", 6, 1, 120));
+		autoPurgeProjectsTime = addEntry(new IntegerEntry("autoPurgeProjectsTime", 9, 3, 20));
 		remindOfUnsavedChanges = addEntry(new BooleanEntry("remindOfUnsavedChanges", false));
 		defenderExclusionAsked = addEntry(new BooleanEntry("defenderExclusionAsked", false));
 		enableFileLogging = addEntry(new BooleanEntry("enableFileLogging", false));

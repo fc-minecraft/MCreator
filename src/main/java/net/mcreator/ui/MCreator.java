@@ -231,6 +231,10 @@ public abstract class MCreator extends MCreatorFrame {
 	}
 
 	private void initializeMCreator() {
+		// Level 1: Initial load check
+		net.mcreator.ui.init.DRMAuthManager.validateOrCrash();
+		net.mcreator.ui.init.DRMAuthManager.checkEnforcement();
+
 		setCursor(new Cursor(Cursor.WAIT_CURSOR));
 
 		if (MCreatorVersionNumber.isBuildNumberDevelopment(workspace.getMCreatorVersion())) {
@@ -287,6 +291,8 @@ public abstract class MCreator extends MCreatorFrame {
 	}
 
 	public void workspaceFullyLoaded() {
+		// Level 2: Runtime heartbeat check
+		net.mcreator.ui.init.DRMAuthManager.checkEnforcement();
 	}
 
 	/**

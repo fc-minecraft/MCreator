@@ -31,7 +31,10 @@ public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler 
 	@Override
 	public void uncaughtException(Thread thread, Throwable throwable) {
 		LOG.error("Uncaught exception in {}", thread.getName(), throwable);
-		Sentry.captureException(throwable);
+		if (!(throwable instanceof net.mcreator.ui.init.DRMAuthException)
+				&& !(throwable.getCause() instanceof net.mcreator.ui.init.DRMAuthException)) {
+			Sentry.captureException(throwable);
+		}
 	}
 
 }

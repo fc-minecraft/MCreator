@@ -67,15 +67,20 @@ public class LoggingSystem {
 			System.setProperty("log_disable_ansi", "false");
 		}
 
-		// noinspection resource
-		System.setErr(new PrintStream(
+		@SuppressWarnings("resource")
+		PrintStream errStream = new PrintStream(
 				new LoggingOutputStream(LogManager.getLogger("STDERR"), Level.ERROR).withCustomLogAction(log -> {
 					// Fail tests if anything but JavaFX configuration error is logged to STDERR
 					if (TestUtil.isTestingEnvironment() && !log.contains("Unsupported JavaFX configuration")) {
 						TestUtil.failIfTestingEnvironment();
 					}
-				}), true));
-		System.setOut(new PrintStream(new LoggingOutputStream(LogManager.getLogger("STDOUT"), Level.INFO), true));
+				}), true);
+		System.setErr(errStream);
+
+		@SuppressWarnings("resource")
+		PrintStream outStream = new PrintStream(new LoggingOutputStream(LogManager.getLogger("STDOUT"), Level.INFO),
+				true);
+		System.setOut(outStream);
 
 		Sentry.init(options -> {
 			options.setDsn(
@@ -94,30 +99,34 @@ public class LoggingSystem {
 			}
 
 			options.setBeforeSend((event, hint) -> {
-				if (event.getMessage() != null && event.getMessage().getFormatted() != null) {
-					String msg = event.getMessage().getFormatted();
-					// Ignore JavaFX startup warnings and other common "noisy" logs
-					if (msg.contains("Unsupported JavaFX configuration") || msg.contains(
-							"com.sun.javafx.application.PlatformImpl startup")
-							|| msg.contains(
-									"SLF4J: Defaulting to no-operation (NOP) logger implementation"))
-						return null;
+				// 1. Filter by Exception Type
+				Throwable throwable = event.getThrowable();
+				if (throwable != null) {
+					Throwable rootCause = throwable;
+					while (rootCause.getCause() != null) {
+						rootCause = rootCause.getCause();
+					}
 
-					// Ignore common non-critical network errors
-					if (msg.contains("java.net.ConnectException") || msg.contains("java.net.UnknownHostException")
-							|| msg.contains("java.net.SocketException"))
+					if (rootCause instanceof net.mcreator.ui.init.DRMAuthException) {
+						return null;
+					}
+
+					// Ignore common network/startup errors via exception class
+					String type = rootCause.getClass().getName();
+					if (type.contains("ConnectException") || type.contains("UnknownHostException")
+							|| type.contains("SocketException"))
 						return null;
 				}
 
-				if (event.getExceptions() != null) {
-					for (io.sentry.protocol.SentryException ex : event.getExceptions()) {
-						if (ex.getType() != null && (ex.getType().contains("ConnectException") || ex.getType().contains(
-								"UnknownHostException") || ex.getType().contains("SocketException")))
-							return null;
-						if (ex.getValue() != null && (ex.getValue().contains("Unsupported JavaFX configuration")
-								|| ex.getValue().contains("com.sun.javafx.application.PlatformImpl startup")))
-							return null;
-					}
+				// 2. Filter by Message Content (for logs without exceptions)
+				if (event.getMessage() != null && event.getMessage().getFormatted() != null) {
+					String msg = event.getMessage().getFormatted();
+					if (msg.contains("Unsupported JavaFX configuration") || msg.contains(
+							"com.sun.javafx.application.PlatformImpl startup")
+							|| msg.contains(
+									"SLF4J: Defaulting to no-operation")
+							|| msg.contains("Неверный логин или пароль"))
+						return null;
 				}
 
 				return event;

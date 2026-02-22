@@ -62,6 +62,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,6 +97,7 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 			long days = net.mcreator.ui.init.DRMAuthManager.getDaysRemaining();
 			drmStatusLabel.setText("Лицензия: " + days + " дн.");
 		}
+		reloadRecents(); // Refresh project list too
 	}
 
 	public WorkspaceSelector(@Nullable MCreatorApplication application, WorkspaceOpenListener workspaceOpenListener) {
@@ -515,19 +517,42 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 
 	private static final Gson gson = new GsonBuilder().setPrettyPrinting().setStrictness(Strictness.LENIENT).create();
 
+	private File getRecentWorkspacesFile() {
+		String login = net.mcreator.ui.init.DRMAuthManager.getCurrentLogin();
+		if (login == null || login.equals("Неизвестно")) {
+			return UserFolderManager.getFileFromUserFolder("recentworkspaces");
+		}
+		// Sanitize login for filename
+		String safeLogin = login.replaceAll("[^a-zA-Z0-9.-]", "_");
+		return UserFolderManager.getFileFromUserFolder("recentworkspaces_" + safeLogin);
+	}
+
 	private void saveRecentWorkspaces() {
 		String serialized = gson.toJson(recentWorkspaces);
 		if (serialized != null && !serialized.isEmpty()) {
-			FileIO.writeStringToFile(serialized, UserFolderManager.getFileFromUserFolder("recentworkspaces"));
+			FileIO.writeStringToFile(serialized, getRecentWorkspacesFile());
 		}
 	}
 
 	private synchronized void reloadRecents() {
-		if (UserFolderManager.getFileFromUserFolder("recentworkspaces").isFile()) {
+		File recentsFile = getRecentWorkspacesFile();
+
+		// Migration: ONLY if not logged in (global account) and file doesn't exist
+		String login = net.mcreator.ui.init.DRMAuthManager.getCurrentLogin();
+		if (login == null || login.equals("Неизвестно")) {
+			if (!recentsFile.exists() && UserFolderManager.getFileFromUserFolder("recentworkspaces").exists()) {
+				try {
+					java.nio.file.Files.copy(UserFolderManager.getFileFromUserFolder("recentworkspaces").toPath(),
+							recentsFile.toPath());
+				} catch (IOException e) {
+					LOG.warn("Failed to migrate global recents to user-specific file", e);
+				}
+			}
+		}
+
+		if (recentsFile.isFile()) {
 			try {
-				recentWorkspaces = gson.fromJson(
-						FileIO.readFileToString(UserFolderManager.getFileFromUserFolder("recentworkspaces")),
-						RecentWorkspaces.class);
+				recentWorkspaces = gson.fromJson(FileIO.readFileToString(recentsFile), RecentWorkspaces.class);
 				if (recentWorkspaces != null) {
 					List<RecentWorkspaceEntry> recentWorkspacesFiltered = new ArrayList<>();
 					for (RecentWorkspaceEntry recentWorkspaceEntry : recentWorkspaces.getList())
@@ -541,8 +566,9 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 			}
 		}
 
+		defaultListModel.removeAllElements();
+
 		if (recentWorkspaces != null && !recentWorkspaces.getList().isEmpty()) {
-			defaultListModel.removeAllElements();
 			recentWorkspaces.getList().forEach(defaultListModel::addElement);
 			recentPanes.show(recentPanel, "recents");
 		} else if (recentWorkspaces == null) {
@@ -616,26 +642,61 @@ public final class WorkspaceSelector extends JFrame implements DropTargetListene
 	}
 
 	private void runAutoPurge() {
-		if (PreferencesManager.PREFERENCES.ui.autoPurgeProjects.get()) {
-			int months = PreferencesManager.PREFERENCES.ui.autoPurgeProjectsTime.get();
+		if (true) {
+			int months = Math.max(3, Math.min(20, PreferencesManager.PREFERENCES.ui.autoPurgeProjectsTime.get()));
 			long threshold = System.currentTimeMillis() - (long) months * 30 * 24 * 60 * 60 * 1000L;
-			boolean changed = false;
+			boolean currentUserListChanged = false;
 
-			List<RecentWorkspaceEntry> currentList = new ArrayList<>(recentWorkspaces.getList());
-			for (RecentWorkspaceEntry entry : currentList) {
-				if (entry.getPath().exists()) {
-					long lastModified = entry.getPath().lastModified();
-					if (lastModified < threshold) {
-						if (FileIO.moveToTrash(entry.getPath().getParentFile())) {
-							recentWorkspaces.getList().remove(entry);
-							changed = true;
-							LOG.info("Auto-purged project: " + entry.getName());
+			File userFolder = UserFolderManager.getFileFromUserFolder("");
+			File[] recentsFiles = userFolder.listFiles((dir, name) -> name.startsWith("recentworkspaces"));
+
+			if (recentsFiles != null) {
+				for (File recentsFile : recentsFiles) {
+					try {
+						RecentWorkspaces workspaces;
+						boolean fileChanged = false;
+
+						// If it's the current user's active list, use the in-memory object
+						if (recentsFile.equals(getRecentWorkspacesFile())) {
+							workspaces = recentWorkspaces;
+						} else {
+							workspaces = gson.fromJson(FileIO.readFileToString(recentsFile), RecentWorkspaces.class);
 						}
+
+						if (workspaces != null && workspaces.getList() != null) {
+							List<RecentWorkspaceEntry> list = workspaces.getList();
+							List<RecentWorkspaceEntry> toRemove = new ArrayList<>();
+							for (RecentWorkspaceEntry entry : list) {
+								if (entry.getPath().exists()) {
+									long lastModified = entry.getPath().lastModified();
+									if (lastModified < threshold) {
+										if (FileIO.moveToTrash(entry.getPath().getParentFile())) {
+											toRemove.add(entry);
+											fileChanged = true;
+											LOG.info("Auto-purged project from [" + recentsFile.getName() + "]: "
+													+ entry.getName());
+										}
+									}
+								}
+							}
+							list.removeAll(toRemove);
+						}
+
+						if (fileChanged) {
+							if (recentsFile.equals(getRecentWorkspacesFile())) {
+								currentUserListChanged = true;
+							} else {
+								// Save other users' lists directly back to disk
+								FileIO.writeStringToFile(gson.toJson(workspaces), recentsFile);
+							}
+						}
+					} catch (Exception e) {
+						LOG.warn("Failed to auto-purge file: " + recentsFile.getName(), e);
 					}
 				}
 			}
 
-			if (changed) {
+			if (currentUserListChanged) {
 				saveRecentWorkspaces();
 				reloadRecents();
 			}

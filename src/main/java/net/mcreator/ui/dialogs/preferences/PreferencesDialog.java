@@ -239,10 +239,17 @@ public class PreferencesDialog extends MCreatorDialog {
 
 		JComponent label = L10N.label("dialog.preferences.entry_description", name, description);
 		JComponent component = entry.getComponent(parent, e -> markChanged());
-		if (component != null)
+		if (component != null) {
+			if ("autoPurgeProjects".equals(entry.getID())) {
+				component.setEnabled(false);
+				if (component instanceof JCheckBox) {
+					((JCheckBox) component).setSelected(true);
+				}
+			}
+
 			placeInside.add(PanelUtils.westAndEastElement(label, PanelUtils.pullElementUp(component)),
 					getConstraints());
-		else
+		} else
 			placeInside.add(L10N.label("dialog.preferences.unknown_property_type", name), getConstraints());
 		return component;
 	}

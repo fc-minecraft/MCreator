@@ -23,7 +23,7 @@
         </RollingFile>
         <Sentry name="Sentry" 
                 minimumBreadcrumbLevel="DEBUG" 
-                minimumEventLevel="WARN">
+                minimumEventLevel="ERROR">
             <Filters>
                 <RegexFilter regex="(?s).*(?i)(Unsupported JavaFX configuration|PlatformImpl startup|SLF4J: Defaulting to no-operation).*" onMatch="DENY" onMismatch="NEUTRAL"/>
                 <RegexFilter regex=".*(?i)(java\.net\.ConnectException|java\.net\.UnknownHostException).*" onMatch="DENY" onMismatch="NEUTRAL"/>

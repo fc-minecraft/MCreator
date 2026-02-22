@@ -43,21 +43,30 @@ public class IntegerEntry extends PreferencesEntry<Integer> {
 		this.max = max;
 	}
 
-	@Override public JSpinner getComponent(Window parent, Consumer<EventObject> fct) {
+	@Override
+	public JSpinner getComponent(Window parent, Consumer<EventObject> fct) {
 		JSpinner spinner = new JSpinner(new SpinnerNumberModel(get().intValue(), min, max, 1));
+		if (spinner.getEditor() instanceof JSpinner.DefaultEditor) {
+			((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setEditable(false);
+		}
 		spinner.addChangeListener(fct::accept);
 		return spinner;
 	}
 
-	@Override public void setValueFromComponent(JComponent component) {
-		this.value = (Integer) ((JSpinner) component).getValue();
+	@Override
+	public void setValueFromComponent(JComponent component) {
+		int val = (Integer) ((JSpinner) component).getValue();
+		this.value = Math.max(min, Math.min(max, val));
 	}
 
-	@Override public void setValueFromJsonElement(JsonElement object) {
-		this.value = object.getAsInt();
+	@Override
+	public void setValueFromJsonElement(JsonElement object) {
+		int val = object.getAsInt();
+		this.value = Math.max(min, Math.min(max, val));
 	}
 
-	@Override public JsonElement getSerializedValue() {
+	@Override
+	public JsonElement getSerializedValue() {
 		return new JsonPrimitive(value);
 	}
 

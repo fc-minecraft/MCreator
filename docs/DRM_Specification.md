@@ -1,84 +1,120 @@
-# DRM Auth System Specification
+# DRM & Security Specification (Hardened v2.0)
 
-## 1. System Overview
-The DRM Auth System serves as a mandatory gatekeeper for the MCreator application, ensuring that only authenticated users with a valid session can access the software. It integrates with the `api.itmind.kz` backend for credential validation and session management.
+This document provides a comprehensive technical overview of the DRM (Digital Rights Management) and Security system, following the 2024 hardening initiative.
 
-## 2. Authentication Flow
+---
 
-### 2.1 Startup Sequence
-1.  **Initialization**: `Launcher.main()` executes before the JavaFX/Swing application starts.
-2.  **Session Validation**: `DRMAuthManager.validate()` checks for a locally stored session token.
-    *   **Valid Session**: Application launch proceeds.
-    *   **Invalid/Expired Session**: `DRMLoginDialog` is displayed (blocking the UI thread).
-    *   **Exit**: If the user closes the login dialog without authenticating, `System.exit(0)` is called.
+## 1. System Architecture
+The security system is distributed across the codebase to prevent localized bypasses. It operates on an "Echelon Defense" principle:
 
-### 2.2 Token Management
-*   **Storage Location**: `~/.mcreator/drm_auth.json` (OS-dependent user home directory).
-*   **Storage Format**: HMAC-SHA256 Signed JSON.
-    ```json
-    {
-      "data": {
-        "token": "...",
-        "refresh": "...",
-        "login": "...",
-        "authExpire": "...",
-        "refreshExpire": "..."
-      },
-      "signature": "hmac_sha256_hash_of_data_json_string"
-    }
-    ```
-*   **Security**: Signature is verified on load. Mismatch results in session invalidation.
-
-### 2.3 API
-### 1. Endpoint
-**Base URL**: `https://api.funcode.school/api/auth` (Configurable via `userpreferences.json` -> `hidden.drmApiUrl`)
-
-### 2. Authentication Flow
-1.  **Client** sends `POST /login` with `{ "login": "user", "password": "password", "role": "student" }`.
-Authenticates a user and retrieves session tokens.
-
-**Request:**
-```json
-{
-  "login": "username",
-  "password": "password"
-}
+```mermaid
+graph TD
+    A[Launcher] -->|Integrity Check| B(DRMIntegrityGuard)
+    B -->|Exit on Patch| X[DEAD/BEEF Exit]
+    A -->|Init| C(DRMAuthManager)
+    C -->|Bind| D[Hardware ID Fallback Chain]
+    C -->|Storage| E[AES-256-CBC Encrypted Blob]
+    F[Workspace Selector] -->|Status Display| C
+    G[Generator] -->|Integrity Seed| C
+    H[TemplateHelper] -->|Indeterminism| G
 ```
 
-**Response (200 OK):**
-```json
-{
-  "refresh": "refresh_token_string",
-  "refreshExpire": "2026-02-19T11:55:34.307Z", // ISO 8601
-  "token": "access_token_string",
-  "authExpire": "2026-02-19T11:55:34.307Z"    // ISO 8601
-}
-```
+---
 
-## 3. User Interface Specifications
+## 2. Cryptographic Foundation
 
-### 3.1 Login Dialog (`DRMLoginDialog`)
-*   **Type**: Modal Swing `JDialog`.
-*   **Dimensions**: 500x450 pixels.
-*   **Styling**:
-    *   **Background**: Dark Blue (`#1E2A3C`).
-    *   **Text**: White, Roboto/San-Serif.
-    *   **Header**: "ВОЙДИ НА УЧЕБНУЮ ПЛАТФОРМУ, ЧТОБЫ ПРОДОЛЖИТЬ" (Bold, 18pt).
-    *   **Inputs**: Large (40px height), padded.
-    *   **Button**: Cyan (`#53DDFF`) background, Black text, 200x45px.
+### 2.1 Encryption Standard
+- **Algorithm**: `AES/CBC/PKCS5Padding`
+- **Key Length**: 256-bit
+- **Implementation Vector (IV)**: Random 16-byte IV generated per-save, stored as a prefix in the binary data.
+- **Key Derivation (KDF)**: `PBKDF2WithHmacSHA256`
+    - **Iterations**: 65,536
+    - **Salt**: `Base64("TUNyZWF0b3I=")`
+    - **Entropy**: Combined HWID + Obfuscated Static HMAC Secret.
 
-### 3.2 Main Menu Integration (`MainMenuBar`)
-*   **Component**: `JButton` added to the top-level menu bar.
-*   **Position**: Right-aligned (`Box.createHorizontalGlue()`).
-*   **Label Format**: "Выйти ({days_remaining} дн.)".
-*   **Functionality**:
-    *   Clears local `drm_auth.json`.
-    *   Invalidates in-memory session.
-    *   Restarts application or prompts for immediate re-login.
+### 2.2 Storage Specification
+- **File**: `~/.mcreator/drm_auth.bin`
+- **Format**: `[IV (16 bytes)] + [Encrypted Payload (Ciphertext)]`
+- **Payload Schema**:
+  ```json
+  {
+    "token": "...",
+    "refresh": "...",
+    "login": "...",
+    "authExpire": "ISO-8601",
+    "refreshExpire": "ISO-8601",
+    "lastCheckedTime": "ISO-8601"
+  }
+  ```
 
-## 4. Security & Error Handling
-*   **Thread Safety**: `DRMAuthManager` methods are synchronized to prevent race conditions during token reads/writes.
-*   **Network Timeouts**: Connection timeout set to 5000ms.
-*   **Exception Handling**:
-    *   Network failures gracefull fail to "Offline" check if session exists.
-    *   JSON parsing errors trigger re-authentication.
+---
+
+## 3. Hardware Identification (HWID)
+To ensure reliable cross-platform binding that survives OS updates and custom builds:
+
+### 3.1 OS-Specific Identification
+| Platform | Primary Command/Source | Fallback Logic |
+| :--- | :--- | :--- |
+| **Windows** | `wmic csproduct get uuid` | Registry `MachineGuid` → `vol c:` (Volume Serial) |
+| **macOS** | `ioreg -rd1 -c IOPlatformExpertDevice` | Parses `"IOPlatformUUID"` attribute |
+| **Linux** | `/etc/machine-id` | `dbus-uuidgen --get` |
+
+### 3.2 Global Components
+All platforms contribute the following to the HWID entropy pool:
+- **Processor Architecture** (`os.arch`)
+- **Logical CPU cores** (`availableProcessors`)
+- **Active MAC Addresses**: Aggregated from all non-virtual, non-loopback, active UP network interfaces.
+
+---
+
+## 4. Integrity & Anti-Tamper Measures
+
+### 4.1 Bytecode Integrity Guard (`DRMIntegrityGuard`)
+Running at the very beginning of `MCreatorApplication`, it performs three checks:
+1.  **Reflection Check**: Verifies method names, access modifiers (`public static synchronized`), and class existence.
+2.  **Binary Checksum**: Calculates **CRC32** of the `DRMAuthManager.class` bytecode using `getResourceAsStream`.
+    > [!IMPORTANT]
+    > **Environment Awareness**: The binary checksum is automatically skipped when running in an IDE (`file://` protocol) to prevent blocking development.
+3.  **Integrity Seed Check**: Ensures the seed isn't zeroed out by a patcher.
+
+### 4.2 Generator Anti-Excision
+The `TemplateHelper` uses a DRM-derived `integritySeed` to influence its `random()` methods.
+- **Seed Source**: If DRM is valid, seed = hash(token). If invalid, seed = constant/null.
+- **Result**: Code generated in "cracked" versions will have mismatched internal variable names, IDs, and deterministic formatting, leading to build errors and 프로젝트 corruption.
+
+---
+
+## 5. Network Security & API
+
+### 5.1 Protocol
+- **Endpoint**: `https://api.funcode.school/api/auth`
+- **Network Stack**: `HttpsURLConnection` with system-level CA validation.
+- **Anti-Sniffing**: Sensitive payloads (credentials) are transmitted via POST over TLS 1.2+.
+
+### 5.2 API Schema
+#### `POST /login`
+**Request**: `{ "login": "...", "password": "...", "role": "student" }`
+**Success (200)**: returns JWT token, refresh token, and ISO durations.
+
+---
+
+## 6. Deep Root Enforcement (Multilayered Chain)
+- **Synchronous Hard Gate**: The application initialization is blocked at the `Launcher` level. No UI or background services start until `DRMAuthManager.validateOrCrash()` succeeds.
+- **Fail-Closed "Poison Seed"**: The `DRMAuthManager.getIntegritySeed()` returns a value derived from the active session token. This seed is injected into critical logic (e.g., `TemplateHelper.random`).
+    - If the login is bypassed, the seed is `0`.
+    - `0` seed causes deterministic corruption of all generated code logic, rendering the software useless for actual development even if the UI is bypassed.
+- **Runtime Integrity Guard**: Reflexive checks verify that DRM methods haven't been removed or modified via bytecode manipulation.
+
+---
+
+## 7. Security & Robustness
+- **Input Sanitization**: Login fields use `DocumentFilter` to prevent spaces, restrict characters (alphanumeric for login), and enforce strict length limits (64 for login, 128 for password) to prevent buffer overflow or injection attempts.
+- **HWID Binding**: Encryption keys are local to the machine, preventing session file portability.
+
+---
+
+## 8. Troubleshooting
+- **Error 0xDEAD**: Critical DRM method missing or renamed (Reflection failure).
+- **Error 0xBEEF**: Bytecode checksum mismatch or general security violation.
+- **Log Noise**: `javax.crypto.BadPaddingException` is handled silently when it originates from a HWID mismatch (expected after hardware changes).
+

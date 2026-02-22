@@ -1,6 +1,7 @@
 package net.mcreator.ui.dialogs;
 
 import net.mcreator.ui.init.DRMAuthManager;
+import net.mcreator.ui.init.DRMAuthException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -8,8 +9,12 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 
-public class DRMLoginDialog extends JDialog {
+public class DRMLoginDialog extends JFrame {
 
     private final JTextField loginField;
     private final JPasswordField passwordField;
@@ -25,12 +30,18 @@ public class DRMLoginDialog extends JDialog {
     private static final Color BUTTON_TEXT_COLOR = Color.BLACK;
 
     public DRMLoginDialog() {
-        this((Frame) null);
-    }
-
-    public DRMLoginDialog(Frame parent) {
-        super(parent, "Авторизация", true);
+        super("Авторизация (DRM)");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+        // Ensure taskbar visibility: JFrame automatically gets a taskbar entry
+        try {
+            java.util.List<Image> icons = new java.util.ArrayList<>();
+            icons.add(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/net/mcreator/ui/res/logo32.png")));
+            icons.add(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/net/mcreator/ui/res/logo64.png")));
+            setIconImages(icons);
+        } catch (Exception e) {
+            // Fallback if icons not found
+        }
 
         // Block closing without auth (or exit app)
         addWindowListener(new WindowAdapter() {
@@ -101,6 +112,21 @@ public class DRMLoginDialog extends JDialog {
         loginWrapper.setBorder(BorderFactory.createLineBorder(new Color(0x405060), 1));
 
         loginField = new JTextField();
+        ((AbstractDocument) loginField.getDocument()).setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+                    throws BadLocationException {
+                if (text != null) {
+                    text = text.replace(" ", "");
+                    // Sanitization: Allow only safe characters and limit length
+                    if (!text.matches("[a-zA-Z0-9@._-]+"))
+                        return;
+                    if (fb.getDocument().getLength() - length + text.length() > 64)
+                        return;
+                }
+                super.replace(fb, offset, length, text, attrs);
+            }
+        });
         loginField.setPreferredSize(new Dimension(220, 40));
         loginField.setFont(new Font("Segoe UI", Font.PLAIN, 15)); // Regular font
         loginField.setForeground(Color.WHITE);
@@ -143,6 +169,19 @@ public class DRMLoginDialog extends JDialog {
         fieldWrapper.setBorder(BorderFactory.createLineBorder(new Color(0x405060), 1));
 
         passwordField = new JPasswordField();
+        ((AbstractDocument) passwordField.getDocument()).setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+                    throws BadLocationException {
+                if (text != null) {
+                    text = text.replace(" ", "");
+                    // Sanitization: Limit length
+                    if (fb.getDocument().getLength() - length + text.length() > 128)
+                        return;
+                }
+                super.replace(fb, offset, length, text, attrs);
+            }
+        });
         passwordField.setPreferredSize(new Dimension(220, 40));
         passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         passwordField.setForeground(Color.WHITE);
@@ -349,8 +388,9 @@ public class DRMLoginDialog extends JDialog {
             protected String doInBackground() {
                 try {
                     return DRMAuthManager.login(login, pass);
+                } catch (DRMAuthException e) {
+                    return e.getMessage();
                 } catch (java.net.UnknownHostException e) {
-                    e.printStackTrace();
                     return "Сервер не найден (DNS)";
                 } catch (IOException e) {
                     e.printStackTrace();

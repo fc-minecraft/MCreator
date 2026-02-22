@@ -26,7 +26,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 
-@SuppressWarnings("unused") public class TemplateHelper {
+@SuppressWarnings("unused")
+public class TemplateHelper {
 
 	public String mapToString(double val, double min, double max, String... values) {
 		if (val > max)
@@ -39,26 +40,41 @@ import java.util.Random;
 	}
 
 	public double random(String seed) {
+		// Deep Enforcement: Trap if DRM bypassed
+		net.mcreator.ui.init.DRMAuthManager.checkEnforcement();
+
 		long hash = 0;
 		for (char c : seed.toCharArray()) {
 			hash = 31L * hash + c;
 		}
+		// Anti-Excision Check: Incorporate DRM integrity seed
+		hash ^= net.mcreator.ui.init.DRMAuthManager.getIntegritySeed();
 		return new Random(hash).nextDouble();
 	}
 
 	public long randomlong(String seed) {
+		// Deep Enforcement
+		net.mcreator.ui.init.DRMAuthManager.checkEnforcement();
+
 		long hash = 0;
 		for (char c : seed.toCharArray()) {
 			hash = 31L * hash + c;
 		}
+		// Anti-Excision Check: Incorporate DRM integrity seed
+		hash ^= net.mcreator.ui.init.DRMAuthManager.getIntegritySeed();
 		return new Random(hash).nextLong();
 	}
 
 	public int randompositiveint(String seed) {
+		// Deep Enforcement
+		net.mcreator.ui.init.DRMAuthManager.checkEnforcement();
+
 		long hash = 0;
 		for (char c : seed.toCharArray()) {
 			hash = 31L * hash + c;
 		}
+		// Anti-Excision Check: Incorporate DRM integrity seed
+		hash ^= net.mcreator.ui.init.DRMAuthManager.getIntegritySeed();
 		return new Random(hash).nextInt(Integer.MAX_VALUE);
 	}
 

@@ -73,6 +73,10 @@ public class Launcher {
 		// after we have libraries loaded, we load preferences
 		PreferencesManager.init();
 
+		// HARD DRM GATE: Stop everything until integrity and auth are verified
+		net.mcreator.util.DRMIntegrityGuard.check();
+		net.mcreator.ui.init.DRMAuthManager.validateOrCrash();
+
 		// set system properties from preferences
 		System.setProperty("apple.laf.useScreenMenuBar",
 				Boolean.toString(PreferencesManager.PREFERENCES.ui.usemacOSMenuBar.get()));
