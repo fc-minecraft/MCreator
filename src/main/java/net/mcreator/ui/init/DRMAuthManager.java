@@ -58,7 +58,7 @@ public class DRMAuthManager {
         try {
             // 1. Check if token corrupted/tampered (Format check)
             if (currentSession.authExpire == null || currentSession.token == null) {
-                LOG.error("Session corrupted: Missing critical fields (token/expire)");
+                LOG.info("Session corrupted: Missing critical fields (token/expire)");
                 return false;
             }
 
@@ -74,7 +74,7 @@ public class DRMAuthManager {
                         return false;
                     }
                 } catch (Exception e) {
-                    LOG.warn("Last checked time corrupted, resetting...");
+                    LOG.info("Last checked time corrupted, resetting...");
                 }
             }
 
@@ -91,7 +91,7 @@ public class DRMAuthManager {
 
             return true;
         } catch (Exception e) {
-            LOG.error("Failed to parse expiration date or validate session", e);
+            LOG.info("Failed to parse expiration date or validate session: {}", e.getMessage());
             logout(); // Corrupted data
             return false;
         }
@@ -176,7 +176,7 @@ public class DRMAuthManager {
                     // Check every 30 minutes
                     Thread.sleep(1800000);
                     if (!validate()) {
-                        LOG.warn("DRM Background check failed. Prompting for re-auth.");
+                        LOG.info("DRM Background check failed. Prompting for re-auth.");
                         validateOrCrash();
                     }
                 } catch (InterruptedException e) {
@@ -253,7 +253,7 @@ public class DRMAuthManager {
         try {
             byte[] fileData = java.nio.file.Files.readAllBytes(AUTH_FILE.toPath());
             if (fileData.length < 16) {
-                LOG.error("Auth file too small (corrupted)");
+                LOG.info("Auth file too small (corrupted)");
                 return;
             }
 
@@ -351,7 +351,7 @@ public class DRMAuthManager {
                 }
             }
         } catch (Exception e) {
-            LOG.warn("Hardware UUID detection failed for OS: " + os);
+            LOG.info("Hardware UUID detection failed for OS: " + os);
         }
 
         try {
