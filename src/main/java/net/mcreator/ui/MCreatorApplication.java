@@ -39,12 +39,14 @@ import net.mcreator.ui.action.impl.AboutAction;
 
 import net.mcreator.ui.component.util.ThreadUtil;
 import net.mcreator.ui.dialogs.preferences.PreferencesDialog;
+import net.mcreator.ui.help.HelpBrowser;
 import net.mcreator.ui.help.HelpLoader;
 import net.mcreator.ui.init.*;
 import net.mcreator.ui.laf.themes.ThemeManager;
 import net.mcreator.ui.notifications.StartupNotifications;
 import net.mcreator.ui.workspace.selector.RecentWorkspaceEntry;
 import net.mcreator.ui.workspace.selector.WorkspaceSelector;
+import net.mcreator.util.DesktopUtils;
 import net.mcreator.util.MCreatorVersionNumber;
 import net.mcreator.workspace.CorruptedWorkspaceFileException;
 import net.mcreator.workspace.MissingGeneratorFeaturesException;
@@ -84,6 +86,9 @@ public final class MCreatorApplication {
 
 	private MCreatorApplication(List<String> launchArguments) {
 		final SplashScreen splashScreen = new SplashScreen();
+
+		// Register local wiki handler
+		DesktopUtils.wikiRedirectHandler = HelpBrowser::open;
 
 		new Thread(() -> {
 			splashScreen.setProgress(5, L10N.t("splash.loading_plugins"));

@@ -1,0 +1,90 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>how-make-procedure - MCreator Wiki</title>
+
+<style>
+    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.8; color: #222; background-color: #fff; max-width: 900px; margin: 0 auto; font-size: 16px; }
+    h1 { color: #111; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.5em; }
+    h2 { color: #0066cc; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 1.8em; }
+    h3 { color: #444; margin-top: 30px; font-size: 1.4em; }
+    p { margin-bottom: 15px; }
+    a { color: #0066cc; text-decoration: none; font-weight: bold; }
+    a:hover { text-decoration: underline; }
+    code { background-color: #f0f0f0; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; font-size: 0.9em; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 10px; }
+    .tip { background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 30px 0; border-radius: 5px; }
+    .warning { background-color: #fff3cd; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; }
+    .mc-param { font-weight: bold; color: #2c3e50; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #f8f9fa; color: #333; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+</style>
+
+</head>
+<body>
+
+    <h1>Процедуры (Procedures)</h1>
+    <p>Процедуры — это магия MCreator. С их помощью ты можешь заставить игру делать что угодно! Это визуальное программирование: ты собираешь логику из блоков, как пазл.</p>
+
+    <h2>Как это работает?</h2>
+    <p>Процедура всегда привязана к какому-то <strong>Событию (Trigger)</strong>. Она не работает сама по себе.</p>
+    <p>Примеры триггеров:</p>
+    <ul>
+        <li>Игрок нажал ПКМ по блоку.</li>
+        <li>Моб умер.</li>
+        <li>Игрок зашел в биом.</li>
+        <li>Прошел 1 тик (время в игре).</li>
+        <li>Игрок скрафтил предмет.</li>
+    </ul>
+
+    <h2>Типы блоков кода</h2>
+
+    <h3>1. Действия (Синие/Зеленые)</h3>
+    <p>Они что-то <em>делают</em>.</p>
+    <ul>
+        <li><strong>Strike lightning:</strong> Ударить молнией.</li>
+        <li><strong>Explode:</strong> Взорвать.</li>
+        <li><strong>Add potion effect:</strong> Наложить эффект (яда, скорости).</li>
+        <li><strong>Deal damage:</strong> Нанести урон.</li>
+        <li><strong>Send chat message:</strong> Написать в чат.</li>
+        <li><strong>Place block:</strong> Поставить блок.</li>
+    </ul>
+
+    <h3>2. Условия (Logic - Синие)</h3>
+    <p>Они проверяют, правда ли что-то.</p>
+    <ul>
+        <li><strong>If [Условие] Do [Действие]:</strong> Если (на улице дождь) То (ударить молнией).</li>
+        <li><strong>Is block at:</strong> Проверить, какой блок стоит в координатах.</li>
+        <li><strong>Has item in hand:</strong> Проверить, что держит игрок.</li>
+        <li><strong>Random [0..1] < 0.5:</strong> Шанс 50%.</li>
+    </ul>
+
+    <h3>3. Переменные (Variables)</h3>
+    <p>Они хранят информацию.</p>
+    <ul>
+        <li><strong>Global Variables:</strong> Помнят значения всегда (например, "Сколько всего зомби убил игрок за всю игру").</li>
+        <li><strong>Local Variables:</strong> Нужны только внутри одной процедуры для расчетов.</li>
+    </ul>
+
+    <div class="warning">
+        <strong>Важно:</strong> Всегда следи за <strong>Зависимостями (Dependencies)</strong>. Если процедура требует "Entity" (Сущность), ты не сможешь запустить её там, где сущности нет (например, при загрузке мира). MCreator подсветит красным, если что-то не так.
+    </div>
+
+    <h2>Пример: Взрывающийся меч</h2>
+    <ol>
+        <li>Создай инструмент (Меч).</li>
+        <li>Зайди в "Triggers".</li>
+        <li>Найди "When entity hit with tool" (Когда моба ударили инструментом).</li>
+        <li>Создай новую процедуру.</li>
+        <li>Добавь блок: <strong>Explode at x: x y: y z: z power: 2</strong>.</li>
+        <li>Сохрани.</li>
+        <li>Теперь каждый удар этим мечом будет вызывать взрыв!</li>
+    </ol>
+
+    <br><hr>
+    <p><small><a href="index.html">⬅️ Вернуться к оглавлению</a></small></p>
+</body>
+</html>

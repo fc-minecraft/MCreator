@@ -29,10 +29,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 public class DesktopUtils {
 
 	private static final Logger LOG = LogManager.getLogger(DesktopUtils.class);
+
+	public static Consumer<String> wikiRedirectHandler = null;
 
 	public static void browseSafe(String uri) {
 		try {
@@ -63,6 +66,11 @@ public class DesktopUtils {
 	}
 
 	public static boolean browse(URI uri) {
+		if (wikiRedirectHandler != null && uri.toString().contains("mcreator.net/wiki")) {
+			wikiRedirectHandler.accept(uri.toString());
+			return true;
+		}
+
 		if (browseDESKTOP(uri)) {
 			return true;
 		}

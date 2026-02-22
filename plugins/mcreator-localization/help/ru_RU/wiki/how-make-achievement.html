@@ -1,0 +1,61 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>how-make-achievement - MCreator Wiki</title>
+
+<style>
+    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.8; color: #222; background-color: #fff; max-width: 900px; margin: 0 auto; font-size: 16px; }
+    h1 { color: #111; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.5em; }
+    h2 { color: #0066cc; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 1.8em; }
+    h3 { color: #444; margin-top: 30px; font-size: 1.4em; }
+    p { margin-bottom: 15px; }
+    a { color: #0066cc; text-decoration: none; font-weight: bold; }
+    a:hover { text-decoration: underline; }
+    code { background-color: #f0f0f0; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; font-size: 0.9em; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 10px; }
+    .tip { background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 30px 0; border-radius: 5px; }
+    .warning { background-color: #fff3cd; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; }
+    .mc-param { font-weight: bold; color: #2c3e50; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #f8f9fa; color: #333; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+</style>
+
+</head>
+<body>
+
+    <h1>Как сделать Достижение (Advancement)</h1>
+    <p>Достижения (ачивки) подсказывают игроку, что делать, и награждают за успехи.</p>
+
+    <h2>Вид</h2>
+    <ul>
+        <li><span class="mc-param">Иконка:</span> Что нарисовано в меню достижений.</li>
+        <li><span class="mc-param">Фон:</span> Картинка фона (обычно камень или доски).</li>
+        <li><span class="mc-param">Рамка (Frame):</span>
+            <ul>
+                <li><strong>Task:</strong> Обычная (квадратная).</li>
+                <li><strong>Goal:</strong> Цель (закругленная).</li>
+                <li><strong>Challenge:</strong> Испытание (шипастая, со звуком фанфар!).</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Логика</h2>
+    <ul>
+        <li><span class="mc-param">Родитель (Parent):</span> Достижение, после которого открывается это. Если выбрать "No parent", это будет корневое достижение новой вкладки.</li>
+        <li><span class="mc-param">Триггер (Trigger):</span> Что нужно сделать?
+            <ul>
+                <li><strong>Crafted item:</strong> Скрафтил предмет.</li>
+                <li><strong>Smelted item:</strong> Переплавил.</li>
+                <li><strong>Killed entity:</strong> Убил моба.</li>
+                <li><strong>Changed dimension:</strong> Попал в измерение.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <br><hr>
+    <p><small><a href="index.html">⬅️ Вернуться к оглавлению</a></small></p>
+</body>
+</html>

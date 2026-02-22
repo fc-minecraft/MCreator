@@ -1,0 +1,147 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>how-make-block - MCreator Wiki</title>
+
+<style>
+    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.8; color: #222; background-color: #fff; max-width: 900px; margin: 0 auto; font-size: 16px; }
+    h1 { color: #111; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.5em; }
+    h2 { color: #0066cc; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 1.8em; }
+    h3 { color: #444; margin-top: 30px; font-size: 1.4em; }
+    p { margin-bottom: 15px; }
+    a { color: #0066cc; text-decoration: none; font-weight: bold; }
+    a:hover { text-decoration: underline; }
+    code { background-color: #f0f0f0; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; font-size: 0.9em; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 10px; }
+    .tip { background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 30px 0; border-radius: 5px; }
+    .warning { background-color: #fff3cd; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; }
+    .mc-param { font-weight: bold; color: #2c3e50; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #f8f9fa; color: #333; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+</style>
+
+</head>
+<body>
+
+    <h1>Как сделать Блок (Block)</h1>
+    <p>Блоки — это "атомы" мира Minecraft. Из них состоит всё: земля под ногами, деревья, горы и постройки. Создание своего блока — это первый шаг каждого мододела!</p>
+
+    <h2>Что такое блок в игре?</h2>
+    <p>В Minecraft блок — это куб размером 1x1x1 метр, который стоит в сетке координат мира. У блока есть:</p>
+    <ul>
+        <li><strong>Внешний вид:</strong> Текстура или модель.</li>
+        <li><strong>Физика:</strong> Твердый ли он? Прозрачный? Можно ли пройти сквозь него?</li>
+        <li><strong>Свойства:</strong> Как долго его ломать, взрывается ли он, светится ли.</li>
+        <li><strong>Дроп:</strong> Что выпадает, если его сломать.</li>
+    </ul>
+
+    <hr>
+
+    <h2>Настройки в MCreator</h2>
+
+    <h3>1. Визуальные эффекты (Visual)</h3>
+    <p>Здесь мы "красим" наш блок.</p>
+    <ul>
+        <li><span class="mc-param">Текстура блока (Block texture):</span> Самое главное! Нажми на пустые квадраты, чтобы выбрать картинку.
+            <ul>
+                <li>Если выберешь одну картинку в центре ("Bottom/Main"), она натянется на все 6 сторон куба (как Земля или Булыжник).</li>
+                <li>Если хочешь разные стороны (как у Травы или Бревна), нажимай на каждый квадрат отдельно (Верх, Низ, Север, Юг, Запад, Восток).</li>
+            </ul>
+        </li>
+        <li><span class="mc-param">Прозрачность (Transparency):</span>
+            <ul>
+                <li><strong>Solid:</strong> Обычный блок (Камень). Света не пропускает, ничего за ним не видно.</li>
+                <li><strong>Cutout:</strong> Есть полностью прозрачные дырки (Стекло, Листва).</li>
+                <li><strong>Translucent:</strong> Полупрозрачный (Лед, Цветное стекло). Самый сложный для компьютера.</li>
+            </ul>
+        </li>
+        <li><span class="mc-param">Модель блока (Block model):</span>
+            <ul>
+                <li><strong>Normal:</strong> Обычный куб.</li>
+                <li><strong>Cross model:</strong> Крест-накрест (как Цветок или Саженец).</li>
+                <li><strong>Crop model:</strong> Как пшеница (решетка).</li>
+                <li><strong>Single texture:</strong> Куб, но текстура на всех сторонах одинаковая.</li>
+            </ul>
+        </li>
+        <li><span class="mc-param">Вращение (Rotation):</span> Будет ли блок вращаться при установке? (Как Печка или Бревно).</li>
+    </ul>
+
+    <h3>2. Свойства (Properties)</h3>
+    <p>Характер твоего блока.</p>
+    <ul>
+        <li><span class="mc-param">Имя в игре (In-game name):</span> Как он называется в инвентаре.</li>
+        <li><span class="mc-param">Материал (Material):</span> Из чего он сделан?
+            <ul>
+                <li><strong>Rock:</strong> Камень (нужна кирка).</li>
+                <li><strong>Wood:</strong> Дерево (нужен топор, горит).</li>
+                <li><strong>Earth:</strong> Земля (нужна лопата).</li>
+                <li><strong>Iron:</strong> Металл (звонкий звук).</li>
+                <li><strong>Leaves:</strong> Листья (пропускают свет, ломаются ножницами).</li>
+            </ul>
+        </li>
+        <li><span class="mc-param">Творческая вкладка (Creative inventory tab):</span> Где его искать в креативе.</li>
+        <li><span class="mc-param">Твердость (Hardness):</span> Как долго ломать блок рукой.
+            <ul>
+                <li>0.5 — Песок, Земля.</li>
+                <li>1.5 — Камень.</li>
+                <li>5.0 — Железный блок.</li>
+                <li>50.0 — Обсидиан.</li>
+                <li>-1 — Коренная порода (Бедрок), сломать нельзя.</li>
+            </ul>
+        </li>
+        <li><span class="mc-param">Взрывоустойчивость (Resistance):</span> Защита от ТНТ и Криперов.
+            <ul>
+                <li>Камень ~6.</li>
+                <li>Обсидиан — 1200 (непробиваемый).</li>
+            </ul>
+        </li>
+        <li><span class="mc-param">Скольжение (Slipperiness):</span> 0.6 — обычно. 0.98 — как Лед (очень скользко!).</li>
+        <li><span class="mc-param">Гравитация (Has gravity):</span> Если включить, блок будет падать, как Песок или Гравий.</li>
+        <li><span class="mc-param">Свечение (Luminance):</span> Насколько ярко светится. 0 — не светится. 1 — как Факел.</li>
+        <li><span class="mc-param">Можно пройти сквозь (Can walk through):</span> Если включить, блок станет призрачным (как воздух или открытая дверь).</li>
+    </ul>
+
+    <h3>3. Свойства выпадания (Dropping Properties)</h3>
+    <ul>
+        <li><span class="mc-param">Свой дроп (Custom Drop):</span> Если пусто — выпадает сам блок. Если выбрать алмаз — выпадет алмаз (как из руды).</li>
+        <li><span class="mc-param">Количество (Drop amount):</span> Сколько предметов выпадет.</li>
+        <li><span class="mc-param">Инструмент для разрушения (Tool to destroy):</span> Чем нужно ломать, чтобы выпал дроп? (Кирка, Топор, Лопата).</li>
+        <li><span class="mc-param">Уровень добычи (Harvest level):</span> Какая кирка нужна?
+            <ul>
+                <li>0 — Деревянная/Золотая.</li>
+                <li>1 — Каменная.</li>
+                <li>2 — Железная.</li>
+                <li>3 — Алмазная.</li>
+                <li>4 — Незеритовая.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <div class="tip">
+        <strong>Пример:</strong> Чтобы сделать <strong>Рубиновую руду</strong>:
+        <ul>
+            <li>Материал: Rock.</li>
+            <li>Твердость: 3.0 (как у алмазной руды).</li>
+            <li>Инструмент: Кирка.</li>
+            <li>Уровень добычи: 2 (Железная кирка).</li>
+            <li>Дроп: Рубин (предмет).</li>
+        </ul>
+    </div>
+
+    <h3>4. Генерация (Generation)</h3>
+    <p>Хочешь, чтобы твой блок сам появлялся в мире (как руда)?</p>
+    <ul>
+        <li><span class="mc-param">Измерения (Dimensions):</span> Где спавнить? (Surface = Обычный мир, Nether = Ад).</li>
+        <li><span class="mc-param">Блок для замены (Block to replace):</span> Вместо чего появляться? Обычно руды заменяют Камень (Stone). В аду — Незерак.</li>
+        <li><span class="mc-param">Количество в группе:</span> Размер жилы.</li>
+        <li><span class="mc-param">Групп на чанк:</span> Как часто встречается.</li>
+        <li><span class="mc-param">Высота (Min/Max height):</span> На какой глубине искать. Алмазы — внизу, Уголь — везде.</li>
+    </ul>
+
+    <br><hr>
+    <p><small><a href="index.html">⬅️ Вернуться к оглавлению</a></small></p>
+</body>
+</html>

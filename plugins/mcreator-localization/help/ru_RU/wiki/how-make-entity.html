@@ -1,0 +1,92 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>how-make-entity - MCreator Wiki</title>
+
+<style>
+    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.8; color: #222; background-color: #fff; max-width: 900px; margin: 0 auto; font-size: 16px; }
+    h1 { color: #111; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.5em; }
+    h2 { color: #0066cc; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 1.8em; }
+    h3 { color: #444; margin-top: 30px; font-size: 1.4em; }
+    p { margin-bottom: 15px; }
+    a { color: #0066cc; text-decoration: none; font-weight: bold; }
+    a:hover { text-decoration: underline; }
+    code { background-color: #f0f0f0; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; color: #d63384; font-size: 0.9em; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 10px; }
+    .tip { background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 30px 0; border-radius: 5px; }
+    .warning { background-color: #fff3cd; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; }
+    .mc-param { font-weight: bold; color: #2c3e50; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #f8f9fa; color: #333; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+</style>
+
+</head>
+<body>
+
+    <h1>Как сделать Сущность (Entity/Mob)</h1>
+    <p>Сущности — это всё, что движется. Коровы, Зомби, Жители, даже падающий песок и лодка. Но чаще всего под "Сущностью" мы имеем в виду Мобов.</p>
+
+    <h2>1. Визуал и Звук</h2>
+    <ul>
+        <li><span class="mc-param">Модель:</span>
+            <ul>
+                <li><strong>Biped:</strong> Человекоподобный (как Зомби или Игрок).</li>
+                <li><strong>Quadruped:</strong> Четвероногий (как Корова или Свинья).</li>
+                <li><strong>Java Model:</strong> Своя уникальная модель, сделанная в Blockbench (нужно импортировать файл .java).</li>
+            </ul>
+        </li>
+        <li><span class="mc-param">Текстура:</span> "Шкурка" моба. Должна подходить к модели.</li>
+        <li><span class="mc-param">Свечение (Glow texture):</span> Текстура, которая светится в темноте (как глаза Паука или Эндермена).</li>
+        <li><span class="mc-param">Звуки:</span>
+            <ul>
+                <li><strong>Living sound:</strong> Что бормочет, когда просто гуляет.</li>
+                <li><strong>Hurt sound:</strong> Когда его бьют ("Ай!").</li>
+                <li><strong>Death sound:</strong> Когда умирает.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>2. Поведение (Behavior)</h2>
+    <ul>
+        <li><span class="mc-param">Тип существа (Creature attribute):</span>
+            <ul>
+                <li><strong>Undefined:</strong> Обычный.</li>
+                <li><strong>Undead:</strong> Нежить (Зомби, Скелет). Горит на солнце, лечится уроном, получает урон от зелья лечения.</li>
+                <li><strong>Arthropod:</strong> Членистоногое (Паук). Получает доп. урон от чар "Бич членистоногих".</li>
+                <li><strong>Water:</strong> Водный (Рыба). Получает доп. урон от "Пронзателя".</li>
+            </ul>
+        </li>
+        <li><span class="mc-param">Здоровье (Health):</span> 20 = 10 сердечек (как у игрока).</li>
+        <li><span class="mc-param">Скорость (Movement speed):</span> 0.3 — средняя. Зомби медленнее, Оцелот быстрее.</li>
+        <li><span class="mc-param">Броня (Armor):</span> Встроенная защита.</li>
+        <li><span class="mc-param">Атака (Attack strength):</span> Урон в ближнем бою.</li>
+    </ul>
+
+    <h2>3. Искусственный интеллект (AI)</h2>
+    <p>Это "мозг" моба. Здесь мы собираем список задач по приоритету (сверху вниз).</p>
+    <p><strong>Примеры задач:</strong></p>
+    <ul>
+        <li><span class="mc-param">Melee attack:</span> Атаковать цель в ближнем бою.</li>
+        <li><span class="mc-param">Wander:</span> Просто бродить вокруг.</li>
+        <li><span class="mc-param">Look around:</span> Стоять и крутить головой.</li>
+        <li><span class="mc-param">Swim:</span> Не тонуть в воде.</li>
+        <li><span class="mc-param">Attack targets (Цели):</span> На кого агриться? (Например, на Игрока или на Жителей).</li>
+        <li><span class="mc-param">Panic:</span> Убегать, если ударили (для мирных мобов).</li>
+        <li><span class="mc-param">Avoid entity:</span> Убегать от кошек (как Крипер) или от волков.</li>
+    </ul>
+
+    <h2>4. Спавн (Spawning)</h2>
+    <ul>
+        <li><span class="mc-param">Вес спавна (Weight):</span> Шанс появления. 10 — редко (как Эндермен), 100 — часто (как Зомби).</li>
+        <li><span class="mc-param">Тип группы:</span> Monster (ночью), Creature (днем на траве), WaterCreature (в воде).</li>
+        <li><span class="mc-param">Биомы:</span> Где именно он живет?</li>
+        <li><span class="mc-param">Мин/Макс группа:</span> По одному или стаями?</li>
+    </ul>
+
+    <br><hr>
+    <p><small><a href="index.html">⬅️ Вернуться к оглавлению</a></small></p>
+</body>
+</html>
