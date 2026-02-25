@@ -2,146 +2,65 @@
 <head>
     <meta charset="utf-8">
     <title>how-make-entity - MCreator Wiki</title>
-
-<style>
-    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.6; color: #333; background-color: #fff; max-width: 1000px; margin: 0 auto; font-size: 16px; }
-    h1 { color: #2c3e50; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.8em; }
-    h2 { color: #2980b9; margin-top: 50px; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 2.0em; }
-    h3 { color: #34495e; margin-top: 35px; font-size: 1.5em; border-left: 5px solid #bdc3c7; padding-left: 10px; }
-    h4 { color: #7f8c8d; margin-top: 25px; font-size: 1.2em; font-weight: bold; }
-    p { margin-bottom: 15px; text-align: justify; }
-    a { color: #2980b9; text-decoration: none; font-weight: bold; transition: color 0.3s; }
-    a:hover { color: #c0392b; text-decoration: underline; }
-    code { background-color: #f8f9fa; padding: 2px 6px; border: 1px solid #e1e4e8; border-radius: 4px; font-family: 'Consolas', monospace; color: #e83e8c; font-size: 0.95em; }
-    pre { background-color: #f8f9fa; padding: 15px; border: 1px solid #e1e4e8; border-radius: 5px; overflow-x: auto; font-family: 'Consolas', monospace; }
-    ul, ol { padding-left: 25px; margin-bottom: 20px; }
-    li { margin-bottom: 8px; }
-    .tip { background-color: #d1ecf1; color: #0c5460; padding: 20px; border-left: 5px solid #17a2b8; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .warning { background-color: #fff3cd; color: #856404; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .mc-param { font-weight: bold; color: #2c3e50; background-color: #eef2f5; padding: 2px 5px; border-radius: 3px; }
-    table { width: 100%; border-collapse: collapse; margin: 25px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    th, td { border: 1px solid #ddd; padding: 15px; text-align: left; vertical-align: top; }
-    th { background-color: #f8f9fa; color: #333; font-weight: bold; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.5px; }
-    tr:nth-child(even) { background-color: #f9f9f9; }
-    tr:hover { background-color: #f1f1f1; }
-    .step-number { display: inline-block; width: 25px; height: 25px; background-color: #2980b9; color: white; border-radius: 50%; text-align: center; line-height: 25px; margin-right: 10px; font-weight: bold; }
-    .nav-box { background-color: #f8f9fa; padding: 20px; border-radius: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-    .nav-item { background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #eee; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
-    .nav-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #2980b9; }
-</style>
-
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Сущность (Entity / Mob)</h1>
-    <p>Самый сложный и интересный элемент! Создай своего монстра, друга или животное.</p>
+    <h1>Как создать Сущность (Entity / Mob) 🧟</h1>
+    <p>Создай своего моба! Это может быть монстр, животное или NPC.</p>
 
-    <h2>🚀 Создание</h2>
+    <h2>1. Визуал и Модель</h2>
+    <p>Тебе нужна текстура и модель. Встроенные модели:</p>
+    <ul>
+        <li><strong>Biped:</strong> Человекоподобный (Зомби, Скелет).</li>
+        <li><strong>Quadruped:</strong> Четвероногий (Корова, Свинья).</li>
+    </ul>
+    <div class="tip">Если хочешь сложную модель (дракон, машина), используй программу <strong>Blockbench</strong>, сохрани как Java Model и импортируй в MCreator (Resources -> Import Java Model).</div>
+
+    <h2>2. Характеристики (Stats)</h2>
+    <ul>
+        <li><span class="mc-param">Health (Здоровье)</span>: 20 = 10 сердец (как у игрока).</li>
+        <li><span class="mc-param">Experience (Опыт)</span>: Сколько сфер выпадет.</li>
+        <li><span class="mc-param">Movement speed (Скорость)</span>: 0.3 = стандарт. 0.2 = медленно.</li>
+        <li><span class="mc-param">Armor (Броня)</span>: Врожденная защита.</li>
+        <li><span class="mc-param">Attack strength (Сила)</span>: Урон при ударе (для монстров).</li>
+    </ul>
+
+    <h2>3. Интеллект (AI) 🧠</h2>
+    <p>Задачи выполняются по приоритету (сверху вниз). Чем выше, тем важнее.</p>
+    <h3>Пример мирного животного:</h3>
     <ol>
-        <li>Нажми <strong>(+)</strong> -> <strong>Living Entity</strong>.</li>
-        <li>Введи имя (например, <code>FireZombie</code>).</li>
+        <li><strong>Swim:</strong> Плавать (чтобы не утонуть).</li>
+        <li><strong>Panic when attacked:</strong> Убегать, если ударили.</li>
+        <li><strong>Breed:</strong> Размножаться.</li>
+        <li><strong>Tempt:</strong> Идти за едой (пшеницей).</li>
+        <li><strong>Wander:</strong> Просто бродить.</li>
+        <li><strong>Look around:</strong> Смотреть по сторонам.</li>
     </ol>
 
-    <h2>📋 Вкладка 1: Visual</h2>
+    <h3>Пример монстра:</h3>
+    <ol>
+        <li><strong>Swim:</strong> Плавать.</li>
+        <li><strong>Melee attack:</strong> Атаковать вблизи.</li>
+        <li><strong>Wander:</strong> Бродить.</li>
+        <li><strong>Target: Hurt by target:</strong> Атаковать того, кто ударил.</li>
+        <li><strong>Target: Nearest player:</strong> Атаковать игрока, если видит.</li>
+    </ol>
+
+    <h2>4. Спавн (Spawning) 🥚</h2>
     <ul>
-        <li><span class="mc-param">Entity model:</span>
+        <li><span class="mc-param">Weight (Вес)</span>: Шанс появления. 100 = часто (Зомби). 5 = редко (Ведьма).</li>
+        <li><span class="mc-param">Group size</span>: Мин/Макс количество в стае. Волки ходят по 4, Зомби по 1-4.</li>
+        <li><span class="mc-param">Type (Тип)</span>:
             <ul>
-                <li><strong>Biped:</strong> Как человек/зомби.</li>
-                <li><strong>Quadruped:</strong> На четырех ногах (корова).</li>
-                <li><strong>Chicken/Spider/etc:</strong> Стандартные модели.</li>
-                <li><strong>Java Model:</strong> Своя 3D модель из Blockbench.</li>
-            </ul>
-        </li>
-        <li><span class="mc-param">Texture:</span> Картинка (скин) моба.</li>
-        <li><span class="mc-param">Glow texture:</span> То, что светится в темноте (глаза).</li>
-        <li><span class="mc-param">Entity shadow size:</span> Размер тени под ногами.</li>
-    </ul>
-
-    <h2>⚙️ Вкладка 2: Properties</h2>
-    <table>
-        <tr>
-            <th>Параметр</th>
-            <th>Описание</th>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Mob label</span></td>
-            <td>Имя над головой (если пусто, то нет).</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Creature attribute</span></td>
-            <td>
-                Тип:<br>
-                Undefined (Обычный)<br>
-                Undead (Нежить: горит на солнце, лечится уроном)<br>
-                Arthropod (Пауки)<br>
-                Water (Водные)
-            </td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Health</span></td>
-            <td>Здоровье. 20 = 10 сердец (как у игрока). Зомби = 20.</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Experience amount</span></td>
-            <td>Сколько опыта выпадет при смерти.</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Movement speed</span></td>
-            <td>Скорость бега. 0.3 — нормально. 0.2 — медленно.</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Attack strength</span></td>
-            <td>Урон в ближнем бою.</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Armor protection</span></td>
-            <td>Встроенная защита (как будто он в броне).</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Equipment</span></td>
-            <td>Что он держит в руках и носит при спавне?</td>
-        </tr>
-    </table>
-
-    <h2>🧠 Вкладка 3: AI and Goals (Интеллект)</h2>
-    <p>Здесь ты программируешь мозг моба. Список задач выполняется сверху вниз. Чем выше задача, тем она важнее.</p>
-
-    <div class="tip">
-        <strong>Пример для агрессивного монстра:</strong><br>
-        1. Swim (Плавать, чтобы не утонуть).<br>
-        2. Melee attack (Бить врага).<br>
-        3. Wander (Бродить).<br>
-        4. Look around (Смотреть по сторонам).<br>
-        <br>
-        <strong>Target Tasks (Кого бить):</strong><br>
-        1. Hurt by target (Того, кто ударил меня).<br>
-        2. Attack Player (Игрока).
-    </div>
-
-    <ul>
-        <li><span class="mc-param">Wander:</span> Просто ходить.</li>
-        <li><span class="mc-param">Look at player:</span> Поворачивать голову на игрока.</li>
-        <li><span class="mc-param">Leap at target:</span> Прыгать на врага (как паук).</li>
-        <li><span class="mc-param">Panic:</span> Убегать при уроне.</li>
-        <li><span class="mc-param">Avoid entity:</span> Убегать от кого-то (например, от кошек).</li>
-        <li><span class="mc-param">Breed:</span> Размножаться.</li>
-    </ul>
-
-    <h2>🥚 Вкладка 4: Spawning (Появление)</h2>
-    <ul>
-        <li><span class="mc-param">Spawn probability (Weight):</span> Шанс спавна. 100 = часто (Зомби). 10 = редко (Эндермен).</li>
-        <li><span class="mc-param">Min/Max group size:</span> По одному или стаями? (Волки ходят по 4).</li>
-        <li><span class="mc-param">Creature type:</span>
-            <ul>
-                <li>Monster: Спавнится в темноте.</li>
-                <li>Creature: Спавнится на траве при свете (животные).</li>
-                <li>Ambient: Летучие мыши.</li>
-                <li>WaterCreature: Рыбы.</li>
+                <li><strong>Monster:</strong> Спавнится только в темноте.</li>
+                <li><strong>Creature:</strong> Спавнится на траве при свете (свиньи).</li>
+                <li><strong>WaterCreature:</strong> В воде.</li>
             </ul>
         </li>
     </ul>
 
     <br><hr>
-    <p><small><a href="index.html">⬅️ Вернуться к оглавлению</a></small></p>
+    <p style="text-align: center;"><small><a href="index.html">🏠 Вернуться на главную</a></small></p>
 </body>
 </html>

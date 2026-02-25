@@ -18,12 +18,14 @@
 
 package net.mcreator.ui.help;
 
+import net.mcreator.ui.init.L10N;
 import net.mcreator.util.DesktopUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.Locale;
 
 public class HelpBrowser {
 
@@ -31,12 +33,15 @@ public class HelpBrowser {
 
 	public static void open(String url) {
 		String slug = extractSlug(url);
-		File localFile = new File("plugins/mcreator-localization/help/ru_RU/wiki/" + slug + ".html");
+		Locale locale = L10N.getLocale();
+		String lang = locale.getLanguage() + "_" + locale.getCountry();
+
+		File localFile = new File("plugins/mcreator-localization/help/" + lang + "/wiki/" + slug + ".html");
 
 		if (!localFile.exists()) {
 			// Try fallback to index if exact slug not found (e.g. root wiki url)
 			if (slug.isEmpty() || slug.equals("index")) {
-				localFile = new File("plugins/mcreator-localization/help/ru_RU/wiki/index.html");
+				localFile = new File("plugins/mcreator-localization/help/" + lang + "/wiki/index.html");
 			}
 		}
 
@@ -48,12 +53,13 @@ public class HelpBrowser {
 			// Fallback: Open the index page so the user can search, or try online if preferred?
 			// Since we want offline, let's open index with a potential warning logic if we had a UI,
 			// but here just opening index is safer than failing silently.
-			File indexFile = new File("plugins/mcreator-localization/help/ru_RU/wiki/index.html");
+			File indexFile = new File("plugins/mcreator-localization/help/" + lang + "/wiki/index.html");
 			if (indexFile.exists()) {
 				DesktopUtils.openSafe(indexFile);
 			} else {
 				// Last resort: Open the online URL if local index is also missing
-				DesktopUtils.browseSafe(url);
+				// Use "false" for useHandler to bypass the interceptor and avoid infinite loops
+				DesktopUtils.browseSafe(url, false);
 			}
 		}
 	}

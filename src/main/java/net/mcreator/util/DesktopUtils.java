@@ -38,10 +38,14 @@ public class DesktopUtils {
 	public static Consumer<String> wikiRedirectHandler = null;
 
 	public static void browseSafe(String uri) {
+		browseSafe(uri, true);
+	}
+
+	public static void browseSafe(String uri, boolean useHandler) {
 		try {
 			new Thread(() -> {
 				try {
-					browse(new URI(uri));
+					browse(new URI(uri), useHandler);
 				} catch (Exception ignored) {
 				}
 			}, "DesktopUtils").start();
@@ -67,6 +71,15 @@ public class DesktopUtils {
 
 	public static boolean browse(URI uri) {
 		if (wikiRedirectHandler != null && uri.toString().contains("mcreator.net/wiki")) {
+			wikiRedirectHandler.accept(uri.toString());
+			return true;
+		}
+
+		return browse(uri, true);
+	}
+
+	public static boolean browse(URI uri, boolean useHandler) {
+		if (useHandler && wikiRedirectHandler != null && uri.toString().contains("mcreator.net/wiki")) {
 			wikiRedirectHandler.accept(uri.toString());
 			return true;
 		}

@@ -2,68 +2,129 @@
 <head>
     <meta charset="utf-8">
     <title>how-make-procedure - MCreator Wiki</title>
-
-<style>
-    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.6; color: #333; background-color: #fff; max-width: 1000px; margin: 0 auto; font-size: 16px; }
-    h1 { color: #2c3e50; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.8em; }
-    h2 { color: #2980b9; margin-top: 50px; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 2.0em; }
-    h3 { color: #34495e; margin-top: 35px; font-size: 1.5em; border-left: 5px solid #bdc3c7; padding-left: 10px; }
-    h4 { color: #7f8c8d; margin-top: 25px; font-size: 1.2em; font-weight: bold; }
-    p { margin-bottom: 15px; text-align: justify; }
-    a { color: #2980b9; text-decoration: none; font-weight: bold; transition: color 0.3s; }
-    a:hover { color: #c0392b; text-decoration: underline; }
-    code { background-color: #f8f9fa; padding: 2px 6px; border: 1px solid #e1e4e8; border-radius: 4px; font-family: 'Consolas', monospace; color: #e83e8c; font-size: 0.95em; }
-    pre { background-color: #f8f9fa; padding: 15px; border: 1px solid #e1e4e8; border-radius: 5px; overflow-x: auto; font-family: 'Consolas', monospace; }
-    ul, ol { padding-left: 25px; margin-bottom: 20px; }
-    li { margin-bottom: 8px; }
-    .tip { background-color: #d1ecf1; color: #0c5460; padding: 20px; border-left: 5px solid #17a2b8; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .warning { background-color: #fff3cd; color: #856404; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .mc-param { font-weight: bold; color: #2c3e50; background-color: #eef2f5; padding: 2px 5px; border-radius: 3px; }
-    table { width: 100%; border-collapse: collapse; margin: 25px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    th, td { border: 1px solid #ddd; padding: 15px; text-align: left; vertical-align: top; }
-    th { background-color: #f8f9fa; color: #333; font-weight: bold; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.5px; }
-    tr:nth-child(even) { background-color: #f9f9f9; }
-    tr:hover { background-color: #f1f1f1; }
-    .step-number { display: inline-block; width: 25px; height: 25px; background-color: #2980b9; color: white; border-radius: 50%; text-align: center; line-height: 25px; margin-right: 10px; font-weight: bold; }
-    .nav-box { background-color: #f8f9fa; padding: 20px; border-radius: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-    .nav-item { background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #eee; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
-    .nav-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #2980b9; }
-</style>
-
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Процедуры (Procedures)</h1>
-    <p>Это сердце твоего мода. Скрипты, которые управляют логикой.</p>
+    <h1>Процедуры (Procedures) ⚡</h1>
+    <p>Процедуры — это мозг твоего мода. Это визуальный код (как Scratch), который позволяет делать магию.</p>
 
-    <h2>🧩 Как собрать процедуру</h2>
-    <p>Интерфейс похож на Scratch. Ты перетаскиваешь блоки из списка справа в рабочую область.</p>
-
-    <h3>Основные категории блоков:</h3>
-    <ul>
-        <li><strong>Event Management:</strong> Работа с отменой событий (Cancel Event).</li>
-        <li><strong>Flow Control:</strong> Условия (If/Else), Циклы (Repeat), Ожидание (Wait).</li>
-        <li><strong>Entity Procedures:</strong> Убить моба, вылечить, дать эффект, телепортировать.</li>
-        <li><strong>Block Procedures:</strong> Сломать блок, поставить блок, проверить блок.</li>
-        <li><strong>Item Procedures:</strong> Дать предмет, удалить предмет, зачаровать.</li>
-        <li><strong>World Procedures:</strong> Время, погода, взрывы, молнии.</li>
-    </ul>
-
-    <h2>🎯 Глобальные Триггеры (Global Triggers)</h2>
-    <p>Можно создать процедуру, которая срабатывает не от блока, а от глобального события игры. Для этого создай элемент "Procedure" и выбери триггер:</p>
-    <ul>
-        <li><span class="mc-param">Player joins the world:</span> Игрок зашел.</li>
-        <li><span class="mc-param">Player wakes up:</span> Игрок поспал.</li>
-        <li><span class="mc-param">Entity dies:</span> Кто-то умер.</li>
-        <li><span class="mc-param">Command executed:</span> Введена команда.</li>
-    </ul>
+    <h2>Как это работает?</h2>
+    <p>Слева у тебя есть категории блоков (Logic, Math, Entity...). Ты перетаскиваешь их в рабочую область и соединяешь как пазл.</p>
 
     <div class="warning">
-        <strong>Зависимости (Dependencies):</strong><br>
-        Не все блоки кода доступны во всех триггерах. Например, блок "Source Entity" (кто ударил) доступен только в триггере "Entity attacked", но недоступен в "Update Tick". MCreator подсветит ошибки красным.
+        <strong>Важно: Зависимости (Dependencies)</strong><br>
+        Не все блоки работают везде! Например, блок "Дать предмет игроку" требует, чтобы процедура знала, <strong>кто такой игрок</strong>.
+        Если ты вызовешь эту процедуру в событии "Update Tick" (обновление блока), игры вылетит или блок не сработает, потому что блок обновляется сам по себе, там нет игрока!
+        <br><br>
+        MCreator подсвечивает красным несовместимые блоки. Внимательно смотри на требования!
     </div>
 
+    <hr>
+
+    <h2>📚 Справочник блоков (Cookbook)</h2>
+
+    <h3>1. Логика (Logic & Loops) 🧠</h3>
+    <p>Управление потоком выполнения.</p>
+
+    <div class="proc-block">Если (If) ... Выполнить (Do) ... Иначе (Else)</div>
+    <p>Самый главный блок. "Если здоровье < 5, то вылечить, иначе убить". Нажми на синюю шестеренку на блоке, чтобы добавить ветку "Else If" или "Else".</p>
+
+    <div class="proc-block">Повторить (Repeat) X раз</div>
+    <p>Делает одно и то же несколько раз. Например, "Спавнить 10 зомби".</p>
+
+    <div class="proc-block">Ждать (Wait) X тиков</div>
+    <p>Пауза. 20 тиков = 1 секунда. "Ударить -> Ждать 20 тиков -> Ударить снова". Работает только в процедурах, запущенных сущностью!</p>
+
+    <div class="proc-block">Вернуть (Return)</div>
+    <p>Останавливает выполнение процедуры прямо сейчас. Полезно для условий: "Если у игрока нет меча -> Вернуть (стоп)".</p>
+
+    <hr>
+
+    <h3>2. Сущности (Entity Management) 🧟</h3>
+    <p>Все, что касается мобов и игрока.</p>
+
+    <div class="proc-block">Текущее здоровье (Current health)</div>
+    <p>Возвращает число жизней. Используй в "If": <code>If (Current health < 5)</code>.</p>
+
+    <div class="proc-block">Назначить здоровье (Set health)</div>
+    <p>Лечит или калечит. <code>Set health to (Current health + 2)</code> — это лечение на 1 сердце.</p>
+
+    <div class="proc-block">Добавить эффект зелья (Add potion effect)</div>
+    <p>Накладывает эффекты. Speed, Strength, Poison. Level 0 = I уровень, Level 1 = II уровень.</p>
+
+    <div class="proc-block">Телепортировать (Teleport)</div>
+    <p>Перемещает сущность в координаты X, Y, Z. Можно телепортировать на 5 блоков вверх: <code>Set Y to (Y + 5)</code>.</p>
+
+    <div class="proc-block">Проверить тип сущности (Is entity subtype of)</div>
+    <p>Проверка: "Это зомби? Это игрок?". <code>If (Is entity subtype of Player) Do...</code></p>
+
+    <hr>
+
+    <h3>3. Мир и Блоки (World & Blocks) 🌍</h3>
+
+    <div class="proc-block">Удалить блок (Remove block)</div>
+    <p>Ломает блок в координатах X, Y, Z. Полезно для "исчезающих" мостов.</p>
+
+    <div class="proc-block">Поставить блок (Place block)</div>
+    <p>Ставит блок. Можно заменить воздух на алмазную руду.</p>
+
+    <div class="proc-block">Спавн сущности (Spawn entity)</div>
+    <p>Призывает моба. "Призвать Молнию" тоже здесь.</p>
+
+    <div class="proc-block">Взрыв (Explode)</div>
+    <p>Ба-бах! Power 4 = как ТНТ. Тип BREAK (ломает), NONE (только урон), DESTROY (в пыль).</p>
+
+    <div class="proc-block">Время суток (Time of day)</div>
+    <p>Можно проверить, день сейчас или ночь.</p>
+
+    <hr>
+
+    <h3>4. Предметы (Items) 🎒</h3>
+
+    <div class="proc-block">Дать предмет (Add item to inventory)</div>
+    <p>Кидает предмет в инвентарь. Если места нет, предмет выпадет под ноги.</p>
+
+    <div class="proc-block">Удалить предмет (Remove item)</div>
+    <p>Забирает предмет. Полезно для торговцев или квестов.</p>
+
+    <div class="proc-block">Предмет в руке (Item in main/off hand)</div>
+    <p>Что держит игрок? "Если в руке Палка, то пустить молнию".</p>
+
+    <hr>
+
+    <h3>5. Чат и Сообщения 💬</h3>
+
+    <div class="proc-block">Отправить сообщение (Send chat message)</div>
+    <p>Пишет в чат всем или конкретному игроку. Можно использовать цвета §c (красный), §a (зеленый).</p>
+
+    <div class="proc-block">Вывести название (Action bar title)</div>
+    <p>Надпись над хотбаром (как "Press Shift").</p>
+
+    <hr>
+
+    <h2>Примеры рецептов (Code snippets)</h2>
+
+    <h3>🔥 Огненный меч</h3>
+    <p><strong>Триггер:</strong> When entity hit with tool (Когда бьют инструментом)<br>
+    <strong>Блоки:</strong><br>
+    Set entity on fire (Target entity) for 5 seconds.</p>
+
+    <h3>🚀 Прыжок в небо при клике</h3>
+    <p><strong>Триггер:</strong> On right click with item (ПКМ предметом)<br>
+    <strong>Блоки:</strong><br>
+    Set velocity of (Source entity) to: X:0, Y:2, Z:0.<br>
+    (Это подбросит игрока вверх).</p>
+
+    <h3>💎 Блок удачи (Lucky Block)</h3>
+    <p><strong>Триггер:</strong> On block destroyed (При разрушении)<br>
+    <strong>Блоки:</strong><br>
+    If (Random [0,1] < 0.5):<br>
+    -- Spawn Gem<br>
+    Else:<br>
+    -- Explode at X, Y, Z Power 3</p>
+
     <br><hr>
-    <p><small><a href="index.html">⬅️ Вернуться к оглавлению</a></small></p>
+    <p style="text-align: center;"><small><a href="index.html">🏠 Вернуться на главную</a></small></p>
 </body>
 </html>

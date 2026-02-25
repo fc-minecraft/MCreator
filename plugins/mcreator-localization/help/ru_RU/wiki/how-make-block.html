@@ -2,228 +2,68 @@
 <head>
     <meta charset="utf-8">
     <title>how-make-block - MCreator Wiki</title>
-
-<style>
-    body { font-family: 'Noto Sans', sans-serif; padding: 40px; line-height: 1.6; color: #333; background-color: #fff; max-width: 1000px; margin: 0 auto; font-size: 16px; }
-    h1 { color: #2c3e50; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-top: 0; font-size: 2.8em; }
-    h2 { color: #2980b9; margin-top: 50px; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 2.0em; }
-    h3 { color: #34495e; margin-top: 35px; font-size: 1.5em; border-left: 5px solid #bdc3c7; padding-left: 10px; }
-    h4 { color: #7f8c8d; margin-top: 25px; font-size: 1.2em; font-weight: bold; }
-    p { margin-bottom: 15px; text-align: justify; }
-    a { color: #2980b9; text-decoration: none; font-weight: bold; transition: color 0.3s; }
-    a:hover { color: #c0392b; text-decoration: underline; }
-    code { background-color: #f8f9fa; padding: 2px 6px; border: 1px solid #e1e4e8; border-radius: 4px; font-family: 'Consolas', monospace; color: #e83e8c; font-size: 0.95em; }
-    pre { background-color: #f8f9fa; padding: 15px; border: 1px solid #e1e4e8; border-radius: 5px; overflow-x: auto; font-family: 'Consolas', monospace; }
-    ul, ol { padding-left: 25px; margin-bottom: 20px; }
-    li { margin-bottom: 8px; }
-    .tip { background-color: #d1ecf1; color: #0c5460; padding: 20px; border-left: 5px solid #17a2b8; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .warning { background-color: #fff3cd; color: #856404; padding: 20px; border-left: 5px solid #ffc107; margin: 30px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .mc-param { font-weight: bold; color: #2c3e50; background-color: #eef2f5; padding: 2px 5px; border-radius: 3px; }
-    table { width: 100%; border-collapse: collapse; margin: 25px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    th, td { border: 1px solid #ddd; padding: 15px; text-align: left; vertical-align: top; }
-    th { background-color: #f8f9fa; color: #333; font-weight: bold; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.5px; }
-    tr:nth-child(even) { background-color: #f9f9f9; }
-    tr:hover { background-color: #f1f1f1; }
-    .step-number { display: inline-block; width: 25px; height: 25px; background-color: #2980b9; color: white; border-radius: 50%; text-align: center; line-height: 25px; margin-right: 10px; font-weight: bold; }
-    .nav-box { background-color: #f8f9fa; padding: 20px; border-radius: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-    .nav-item { background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #eee; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
-    .nav-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #2980b9; }
-</style>
-
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Блок (Block)</h1>
-    <p>Блок — это фундаментальная единица мира Minecraft. Все, что ты видишь в мире и что стоит на месте — это блоки. Земля, Камень, Верстак, Сундук, Печка, Листва — всё это блоки.</p>
+    <h1>Как создать Блок (Block) 🧱</h1>
+    <p>Блок — это основа Minecraft. Всё, что стоит на земле неподвижно — это блоки.</p>
 
-    <h2>🚀 Как создать блок: Пошагово</h2>
-    <ol>
-        <li>Нажми на большую зеленую кнопку <strong>(+)</strong> в левом верхнем углу интерфейса (или нажми <code>B</code>).</li>
-        <li>В появившемся списке выбери <strong>Block (Блок)</strong>.</li>
-        <li>Введи <strong>название</strong> (на английском, без пробелов). Например: <code>SuperStone</code>.</li>
-        <li>Нажми <strong>Create new block</strong>.</li>
-    </ol>
-
-    <hr>
-
-    <h2>📋 Вкладка 1: Visual (Визуализация)</h2>
-    <p>Здесь настраивается внешний вид блока.</p>
-
-    <table>
-        <tr>
-            <th>Параметр</th>
-            <th>Описание</th>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Block texture</span><br>(Текстура)</td>
-            <td>
-                Нажми на квадраты, чтобы выбрать картинку.<br>
-                <ul>
-                    <li><strong>Main/Bottom:</strong> Если нажать на центральный квадрат, эта текстура применится ко всем сторонам (как у Земли).</li>
-                    <li><strong>Top/Bottom/Side:</strong> Если хочешь разные текстуры (как у Бревна или Травы), нажимай на каждый квадрат отдельно (Left, Right, Front, Back, Top, Bottom).</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Block model</span><br>(Модель)</td>
-            <td>
-                Форма блока:<br>
-                <ul>
-                    <li><strong>Normal:</strong> Обычный куб (Камень).</li>
-                    <li><strong>Cross model:</strong> Крест-накрест (Цветок, Саженец).</li>
-                    <li><strong>Crop model:</strong> Решетка (Пшеница).</li>
-                    <li><strong>Single texture:</strong> Куб с одинаковой текстурой со всех сторон.</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Transparency</span><br>(Прозрачность)</td>
-            <td>
-                Как блок пропускает свет:<br>
-                <ul>
-                    <li><strong>Solid:</strong> Непрозрачный (Камень). Самый быстрый для игры.</li>
-                    <li><strong>Cutout:</strong> Есть дырки, но нет полупрозрачности (Стекло, Листва).</li>
-                    <li><strong>Translucent:</strong> Полупрозрачный (Лед, Вода). Самый требовательный к ресурсам.</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Check this if the block has a tint</span></td>
-            <td>Включи, если хочешь, чтобы блок менял цвет в зависимости от биома (как Трава или Листва).</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Block rotation mode</span></td>
-            <td>
-                Будет ли блок вращаться при установке?<br>
-                <ul>
-                    <li><strong>None:</strong> Не вращается (Земля).</li>
-                    <li><strong>Y axis:</strong> Вращается влево-вправо (Печка, Сундук).</li>
-                    <li><strong>Log rotation:</strong> Вращается как бревно (вверх, на бок).</li>
-                </ul>
-            </td>
-        </tr>
-    </table>
-
-    <h2>📦 Вкладка 2: Bounding Box (Границы)</h2>
-    <p>Здесь можно настроить физические границы блока (хитбокс). По умолчанию это полный куб (от 0 до 16).</p>
-    <div class="tip">
-        Координаты считаются в пикселях (от 0 до 16).<br>
-        Например, полублок (Slab) имеет высоту от 0 до 8 по оси Y.
-    </div>
-
-    <h2>⚙️ Вкладка 3: Properties (Свойства)</h2>
-    <p>Самая важная вкладка! Здесь задается характер блока.</p>
-
-    <table>
-        <tr>
-            <th>Параметр</th>
-            <th>Значение и примеры</th>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Name in GUI</span></td>
-            <td>Имя, которое видит игрок в инвентаре (можно на русском!).</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Material</span></td>
-            <td>
-                Из чего сделан блок (влияет на звук и инструмент):<br>
-                Rock (Камень), Wood (Дерево), Earth (Земля), Iron (Металл), Glass (Стекло).
-            </td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Creative inventory tab</span></td>
-            <td>В какой вкладке креатива искать блок.</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Hardness</span><br>(Твердость)</td>
-            <td>
-                Сколько времени ломать блок рукой:<br>
-                0.5 = Песок<br>
-                1.5 = Камень<br>
-                5.0 = Железный блок<br>
-                50.0 = Обсидиан
-            </td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Resistance</span><br>(Взрывоустойчивость)</td>
-            <td>
-                Защита от взрывов:<br>
-                6 = Камень (ломается от ТНТ)<br>
-                1200 = Обсидиан (не ломается)
-            </td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Slipperiness</span><br>(Скольжение)</td>
-            <td>
-                0.6 = Обычно (Земля)<br>
-                0.8 = Слизь<br>
-                0.98 = Лед (очень скользко)
-            </td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Luminance</span><br>(Свечение)</td>
-            <td>0 = Не светится. 15 = Максимум (как Лампа).</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Has gravity</span></td>
-            <td>Если галочка стоит, блок падает вниз, если под ним пусто (как Песок).</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Can walk through</span></td>
-            <td>Если галочка стоит, сквозь блок можно пройти (как сквозь высокую траву или открытую дверь).</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Custom Drop</span></td>
-            <td>
-                Что выпадает при разрушении?<br>
-                Если пусто — выпадает сам блок.<br>
-                Если выбрать предмет (например, Рубин) — выпадет он (для руд).
-            </td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Tool to destroy</span></td>
-            <td>Чем ломать? (Pickaxe/Axe/Shovel).</td>
-        </tr>
-        <tr>
-            <td><span class="mc-param">Harvest level</span></td>
-            <td>
-                Уровень инструмента:<br>
-                0 = Дерево/Золото<br>
-                1 = Камень<br>
-                2 = Железо<br>
-                3 = Алмаз
-            </td>
-        </tr>
-    </table>
-
-    <h2>🔧 Вкладка 4: Advanced Properties (Дополнительно)</h2>
+    <h2>1. Визуализация (Visual) 🎨</h2>
+    <p>Первым делом мы выбираем, как блок выглядит.</p>
     <ul>
-        <li><span class="mc-param">Tick rate:</span> Как часто обновляется блок. 10 = каждые полсекунды. Нужно для процедур "Update Tick".</li>
-        <li><span class="mc-param">Flammability:</span> Насколько легко загорается (0 = не горит).</li>
-        <li><span class="mc-param">Enchantment power bonus:</span> Если поставить вокруг стола зачарований, сколько "книжных полок" он заменит?</li>
-        <li><span class="mc-param">Color on map:</span> Каким цветом точка на карте.</li>
+        <li><span class="mc-param">Block texture (Текстура)</span>: Нажми на пустые квадраты.
+            <ul>
+                <li><strong>Main:</strong> Если нажать на центр, текстура заполнит все стороны.</li>
+                <li><strong>Top/Bottom/Side:</strong> Можно сделать как у "Бревна" (сверху кольца, сбоку кора) или "Травы".</li>
+            </ul>
+        </li>
+        <li><span class="mc-param">Transparency (Прозрачность)</span>:
+            <ul>
+                <li><strong>Solid:</strong> Обычный камень, земля. Свет не проходит.</li>
+                <li><strong>Cutout:</strong> Стекло, решетка, листва. Есть прозрачные дырки.</li>
+                <li><strong>Translucent:</strong> Вода, лед, цветное стекло. Полупрозрачность.</li>
+            </ul>
+        </li>
+        <li><span class="mc-param">Block model (Модель)</span>:
+            <ul>
+                <li><strong>Normal:</strong> Куб.</li>
+                <li><strong>Cross model:</strong> Как цветок или саженец (крестик).</li>
+                <li><strong>Crop model:</strong> Как пшеница (решетка #).</li>
+            </ul>
+        </li>
     </ul>
 
-    <h2>⚡ Вкладка 5: Triggers (Триггеры)</h2>
-    <p>Здесь ты можешь привязать <strong>Процедуры</strong> к событиям.</p>
+    <h2>2. Свойства (Properties) ⚙️</h2>
+    <p>Здесь мы настраиваем поведение блока.</p>
+    <table>
+        <tr><th>Параметр</th><th>Описание</th></tr>
+        <tr><td><span class="mc-param">Material (Материал)</span></td><td>Из чего сделан? (Rock - камень, Wood - дерево, Iron - металл). Влияет на звук шагов и инструмент.</td></tr>
+        <tr><td><span class="mc-param">Hardness (Твердость)</span></td><td>Как долго ломать рукой? Песок = 0.5, Камень = 1.5, Обсидиан = 50.</td></tr>
+        <tr><td><span class="mc-param">Resistance (Взрывоустойчивость)</span></td><td>Защита от криперов. 6 = ломается, 6000 = бессмертный.</td></tr>
+        <tr><td><span class="mc-param">Slipperiness (Скольжение)</span></td><td>0.6 = обычно. 0.98 = лед (очень скользко). 1.1 = "липкий" блок.</td></tr>
+        <tr><td><span class="mc-param">Luminance (Свечение)</span></td><td>Светится ли в темноте? 0 = нет. 15 = как лампа.</td></tr>
+        <tr><td><span class="mc-param">Has gravity (Гравитация)</span></td><td>Падает ли вниз как песок?</td></tr>
+        <tr><td><span class="mc-param">Can walk through (Проходимость)</span></td><td>Можно ли пройти сквозь него? (Как через высокую траву).</td></tr>
+        <tr><td><span class="mc-param">Custom Drop (Свой дроп)</span></td><td>Что выпадает? Если пусто — выпадает сам блок. Можно настроить выпадение алмазов из земли!</td></tr>
+    </table>
+
+    <h2>3. Дополнительно (Advanced) 🔧</h2>
     <ul>
-        <li><strong>On block right clicked:</strong> Когда игрок кликает ПКМ (например, открыть GUI или поменять текстуру).</li>
-        <li><strong>On block added:</strong> Когда блок поставили.</li>
-        <li><strong>On neighbour block changes:</strong> Когда соседний блок изменился (нужно для механизмов).</li>
-        <li><strong>On tick update:</strong> Срабатывает регулярно (например, для роста растений или спавна частиц).</li>
-        <li><strong>On entity walks on the block:</strong> Когда кто-то наступил (как Магма блок наносит урон).</li>
+        <li><span class="mc-param">Tick rate (Скорость тиков)</span>: Как часто блок "думает". 0 = никогда. 10 = 2 раза в секунду. Нужно для процедур "Update Tick".</li>
+        <li><span class="mc-param">Flammability (Горение)</span>: Насколько быстро сгорит в огне.</li>
     </ul>
 
-    <h2>🌍 Вкладка 6: Generation (Генерация)</h2>
-    <p>Настрой, если хочешь, чтобы блок сам появлялся в мире (как руда).</p>
+    <h2>4. Триггеры (Triggers) ⚡</h2>
+    <p>Самое интересное! Привяжи процедуры к событиям:</p>
     <ul>
-        <li><span class="mc-param">Dimensions to generate:</span> В каких мирах? (Surface = Обычный, Nether = Ад).</li>
-        <li><span class="mc-param">Block to replace:</span> Вместо чего появляться? Обычно Stone (Камень).</li>
-        <li><span class="mc-param">Frequency on chunks:</span> Сколько раз пытаться заспавнить в одном чанке.</li>
-        <li><span class="mc-param">Average amount of ore groups:</span> Размер одной жилы.</li>
+        <li><strong>On block right clicked (При клике ПКМ):</strong> Открыть сундук, поменять цвет, вывести сообщение.</li>
+        <li><strong>On block added (При установке):</strong> Взорваться, выдать достижение.</li>
+        <li><strong>On neighbour block changes (Сосед изменился):</strong> Если сломали блок снизу — упасть.</li>
+        <li><strong>On entity walks on (Кто-то наступил):</strong> Нанести урон (как магма), дать эффект скорости.</li>
     </ul>
 
     <br><hr>
-    <p><small><a href="index.html">⬅️ Вернуться к оглавлению</a></small></p>
+    <p style="text-align: center;"><small><a href="index.html">🏠 Вернуться на главную</a></small></p>
 </body>
 </html>
