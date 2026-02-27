@@ -224,7 +224,8 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 			sideTriggerLabel.setIcon(null);
 
 			if (finalHasNewDependenciesAdded) {
-				depsWarningLabel.setText("<html>" + L10N.t("elementgui.procedure.dependencies_added") + "</html>");
+				depsWarningLabel.setText("<html><div style='padding: 5px;'>"
+						+ L10N.t("elementgui.procedure.dependencies_added") + "</div></html>");
 			}
 
 			if (blocklyToJava.getReturnType() != null) {
@@ -252,8 +253,10 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 						}
 					}
 					if (warn) {
-						depsWarningLabel.setText("<html>" + L10N.t("elementgui.procedure.dependencies_not_provided",
-								missingdeps.toString().trim()) + "</html>");
+						depsWarningLabel.setText("<html><div style='padding: 5px;'>"
+								+ L10N.t("elementgui.procedure.dependencies_not_provided",
+										missingdeps.toString().trim())
+								+ "</div></html>");
 						hasDependencyErrors = true;
 					}
 					extDepsLab.setText("<html><font style='font-size: 10px;'>" + trigger.getName());
@@ -518,7 +521,7 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		varHeader.add(PanelUtils.northAndCenterElement(ComponentUtils.deriveFont(lab, 13), bar));
 		localVarsPan.add("North", varHeader);
 		localVarsPan.setOpaque(false);
-		localVarsPan.setPreferredSize(new Dimension(240, 0));
+		localVarsPan.setPreferredSize(new Dimension(250, 0));
 
 		JPanel depsPan = new JPanel(new BorderLayout());
 		depsPan.setOpaque(false);
@@ -546,7 +549,7 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		scrollPaneDeps.getHorizontalScrollBar().setUnitIncrement(11);
 		scrollPaneDeps.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 		depsPan.add("Center", scrollPaneDeps);
-		depsPan.setPreferredSize(new Dimension(240, 0));
+		depsPan.setPreferredSize(new Dimension(250, 0));
 
 		JToolBar bar3 = new JToolBar();
 		bar3.setBorder(BorderFactory.createEmptyBorder(2, 2, 5, 0));
@@ -575,17 +578,23 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 						ComponentUtils.deriveFont(L10N.label("elementgui.procedure.provided_dependencies"), 13),
 						scrollPaneExtDeps, 0, 1),
 				0, 4));
-		triggerDepsPan.setPreferredSize(new Dimension(240, 0));
+		triggerDepsPan.setPreferredSize(new Dimension(250, 0));
 		triggerDepsPan.setVisible(false);
 
 		JPanel eastPan = new JPanel();
 		eastPan.setLayout(new BoxLayout(eastPan, BoxLayout.PAGE_AXIS));
 		eastPan.setBackground(Theme.current().getBackgroundColor());
-		eastPan.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.current().getBackgroundColor()));
+		eastPan.setBorder(null);
 
-		eastPan.add(localVarsPan);
-		eastPan.add(depsPan);
-		eastPan.add(triggerDepsPan);
+		CollapsiblePanel localVarsCollapsible = new CollapsiblePanel(lab.getText(), localVarsPan);
+		CollapsiblePanel depsCollapsible = new CollapsiblePanel(L10N.t("elementgui.procedure.required_dependencies"),
+				depsPan);
+		CollapsiblePanel triggerDepsCollapsible = new CollapsiblePanel(
+				L10N.t("elementgui.procedure.provided_dependencies"), triggerDepsPan);
+
+		eastPan.add(localVarsCollapsible);
+		eastPan.add(depsCollapsible);
+		eastPan.add(triggerDepsCollapsible);
 
 		pane5.add("East", PanelUtils.centerAndSouthElement(eastPan, returnType));
 
@@ -609,9 +618,17 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 			}
 		});
 
-		skipDependencyNullCheck.addActionListener(e -> regenerateBlockAssemblies(false));
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, blocklyPanel,
+				PanelUtils.centerAndSouthElement(eastPan, returnType));
+		splitPane.setResizeWeight(1);
+		splitPane.setDividerSize(5);
+		splitPane.setOneTouchExpandable(true);
+		splitPane.setOpaque(false);
+		splitPane.setBorder(null);
 
-		pane5.add("Center", blocklyPanel);
+		pane5.add("Center", splitPane);
+
+		skipDependencyNullCheck.addActionListener(e -> regenerateBlockAssemblies(false));
 
 		pane5.add("South", compileNotesPanel);
 

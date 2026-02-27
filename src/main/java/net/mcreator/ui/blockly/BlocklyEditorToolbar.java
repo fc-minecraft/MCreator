@@ -49,6 +49,8 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -162,25 +164,39 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 		search.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				search.grabFocus();
-				
-
-			}
-			
-			@Override public void mouseClicked(MouseEvent e) {
-				search.grabFocus();
+				search.requestFocus();
 				search.requestFocusInWindow();
 			}
 		});
 
+		search.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+					search.setText("");
+					results.setVisible(false);
+					blocklyPanel.requestFocusInWindow();
+				}
+			}
+		});
+
 		if (hasSearchBar) {
-			search.put
-				arh.addFocusListener(new FocusAdapter() {
+			search.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+			search.setFocusTraversalKeysEnabled(false);
+			search.addFocusListener(new FocusAdapter() {
 				@Override
-					// 
-					// 
 				public void focusLost(FocusEvent e) {
-					// We don't clear text here anymore to avoid losing query during JCEF focus shifts
+					// Only take focus back if it was stolen by the CefBrowser (native component)
+					Component opposite = e.getOppositeComponent();
+					boolean isBrowser = opposite != null && opposite.getClass().getName().contains("CefBrowser");
+
+					if (isBrowser && !search.getText().isEmpty()) {
+						SwingUtilities.invokeLater(() -> {
+							if (search.isShowing() && !search.getText
+
+							}
+						});
+					}
 				}
 			});
 			search.setPreferredSize(new Dimension(340, 22));
@@ -338,35 +354,36 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 					return; // Check if search text changed while filtering
 
 				if (!finalFiltered.isEmpty()) {
-					results.setVisible(false);
+					boolean wasVisible = results.isVisible();
 					results.removeAll();
 					results.setBackground(Theme.current().getBackgroundColor());
 					results.setFocusable(false);
 					results.setRequestFocusEnabled(false);
 					results.setBorder(BorderFactory.createEmptyBorder());
 					results.putClientProperty(FlatClientProperties.POPUP_BORDER_CORNER_RADIUS, 0);
-					results.setMaximumVisibleRows(16);
-
 					for (ToolboxBlock block : finalFiltered) {
-						JMenuItem menuItem = new JMenuItem(getHTMLForBlock(block));
-						menuItem.setFocusable(false);
-						menuItem.addActionListener(ev -> {
+						JMenuItem item = new JMenuItem(getHTMLForBlock(block));
+						item.setFocusable(false);
+						item.addActionListener(ev -> {
+							String xml = block.getToolboxXML();
+							if (!xml.startsWith("<xml")) {
+								xml = "<xml>" + xml + "</xml>";
+							}
+							blocklyPanel.addBlocksFromXML(xml);
+							search.setText("");
 							results.setVisible(false);
-							new Thread(() -> {
-								if (block.getToolboxXML() != null) {
-									blocklyPanel.addBlocksFromXML("<xml>" + block.getToolboxXML() + "</xml>");
-								} else {
-									blocklyPanel.addBlocksFromXML(
-											"<xml><block type=\"" + block.getMachineName() + "\"></block></xml>");
-								}
-							}, "Blockly-Blocks-Adder").start();
 						});
-						results.add(menuItem);
+						results.add(item);
 					}
 
 					if (search.isFocusOwner()) {
-						results.show(search, 0, search.getHeight() + 2);
-						search.requestFocusInWindow(); // Ensure focus stays on search field
+						if (!wasVisible) {
+							results.show(search, 0, search.getHeight() + 2);
+						} else {
+							results.revalidate();
+							results.repaint();
+						}
+						SwingUtilities.invokeLater(search::requestFocusInWindow);
 					}
 				} else {
 					results.setVisible(false);
