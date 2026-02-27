@@ -114,11 +114,13 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		super.finalizeGUI();
 	}
 
-	@Override public void addBlocklyChangedListener(BlocklyChangedListener listener) {
+	@Override
+	public void addBlocklyChangedListener(BlocklyChangedListener listener) {
 		blocklyChangedListeners.add(listener);
 	}
 
-	@Override public synchronized List<BlocklyCompileNote> regenerateBlockAssemblies(boolean jsEventTriggeredChange) {
+	@Override
+	public synchronized List<BlocklyCompileNote> regenerateBlockAssemblies(boolean jsEventTriggeredChange) {
 		BlocklyBlockCodeGenerator blocklyBlockCodeGenerator = new BlocklyBlockCodeGenerator(externalBlocks,
 				mcreator.getGeneratorStats().getBlocklyBlocks(BlocklyEditorType.PROCEDURE));
 		BlocklyToProcedure blocklyToJava;
@@ -222,7 +224,7 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 			sideTriggerLabel.setIcon(null);
 
 			if (finalHasNewDependenciesAdded) {
-				depsWarningLabel.setText(L10N.t("elementgui.procedure.dependencies_added"));
+				depsWarningLabel.setText("<html>" + L10N.t("elementgui.procedure.dependencies_added") + "</html>");
 			}
 
 			if (blocklyToJava.getReturnType() != null) {
@@ -250,7 +252,8 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 						}
 					}
 					if (warn) {
-						depsWarningLabel.setText(L10N.t("elementgui.procedure.dependencies_not_provided", missingdeps));
+						depsWarningLabel.setText("<html>" + L10N.t("elementgui.procedure.dependencies_not_provided",
+								missingdeps.toString().trim()) + "</html>");
 						hasDependencyErrors = true;
 					}
 					extDepsLab.setText("<html><font style='font-size: 10px;'>" + trigger.getName());
@@ -324,7 +327,8 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		}
 	}
 
-	@Override protected void initGUI() {
+	@Override
+	protected void initGUI() {
 		skipDependencyNullCheck.setOpaque(false);
 
 		JPanel skipDependencyWrapper = new JPanel(new GridLayout(1, 2, 0, 2));
@@ -423,7 +427,8 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		addvar.addActionListener(e -> {
 			VariableElement element = NewVariableDialog.showNewVariableDialog(mcreator, false,
 					new OptionPaneValidator() {
-						@Override public ValidationResult validate(JComponent component) {
+						@Override
+						public ValidationResult validate(JComponent component) {
 							Validator validator = new JavaMemberNameValidator((VTextField) component, false, false);
 							String variableName = ((VTextField) component).getText();
 							for (int i = 0; i < localVars.getSize(); i++) {
@@ -462,7 +467,8 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		});
 
 		localVarsList.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (localVars.getSize() > 0 && e.getClickCount() == 2) {
 					VariableElement selectedVar = localVarsList.getSelectedValue();
 					if (selectedVar != null) {
@@ -477,7 +483,8 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		});
 
 		dependenciesList.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (dependencies.getSize() > 0 && e.getClickCount() == 2) {
 					Dependency selectedDep = dependenciesList.getSelectedValue();
 					if (selectedDep != null) {
@@ -490,7 +497,8 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		});
 
 		dependenciesExtTrigList.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				if (dependenciesExtTrigger.getSize() > 0 && e.getClickCount() == 2) {
 					Dependency selectedDep = dependenciesExtTrigList.getSelectedValue();
 					if (selectedDep != null) {
@@ -510,7 +518,7 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		varHeader.add(PanelUtils.northAndCenterElement(ComponentUtils.deriveFont(lab, 13), bar));
 		localVarsPan.add("North", varHeader);
 		localVarsPan.setOpaque(false);
-		localVarsPan.setPreferredSize(new Dimension(150, 0));
+		localVarsPan.setPreferredSize(new Dimension(240, 0));
 
 		JPanel depsPan = new JPanel(new BorderLayout());
 		depsPan.setOpaque(false);
@@ -538,7 +546,7 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		scrollPaneDeps.getHorizontalScrollBar().setUnitIncrement(11);
 		scrollPaneDeps.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 		depsPan.add("Center", scrollPaneDeps);
-		depsPan.setPreferredSize(new Dimension(150, 0));
+		depsPan.setPreferredSize(new Dimension(240, 0));
 
 		JToolBar bar3 = new JToolBar();
 		bar3.setBorder(BorderFactory.createEmptyBorder(2, 2, 5, 0));
@@ -565,8 +573,9 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		triggerDepsPan.add("Center", PanelUtils.northAndCenterElement(triggerInfoPanel,
 				PanelUtils.northAndCenterElement(
 						ComponentUtils.deriveFont(L10N.label("elementgui.procedure.provided_dependencies"), 13),
-						scrollPaneExtDeps, 0, 1), 0, 4));
-		triggerDepsPan.setPreferredSize(new Dimension(150, 0));
+						scrollPaneExtDeps, 0, 1),
+				0, 4));
+		triggerDepsPan.setPreferredSize(new Dimension(240, 0));
 		triggerDepsPan.setVisible(false);
 
 		JPanel eastPan = new JPanel();
@@ -614,15 +623,16 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 
 		addPage(PanelUtils.gridElements(1, 1, PanelUtils.centerAndSouthElement(pane5, procedureSettings)),
 				false).lazyValidate(() -> {
-			if (hasDependencyErrors)
-				return new AggregatedValidationResult.FAIL(
-						L10N.t("elementgui.procedure.external_trigger_does_not_provide_all_dependencies"));
-			else
-				return new AggregatedValidationResult.PASS();
-		}).lazyValidate(BlocklyAggregatedValidationResult.blocklyValidator(this));
+					if (hasDependencyErrors)
+						return new AggregatedValidationResult.FAIL(
+								L10N.t("elementgui.procedure.external_trigger_does_not_provide_all_dependencies"));
+					else
+						return new AggregatedValidationResult.PASS();
+				}).lazyValidate(BlocklyAggregatedValidationResult.blocklyValidator(this));
 	}
 
-	@Override protected void afterGeneratableElementGenerated() {
+	@Override
+	protected void afterGeneratableElementGenerated() {
 		super.afterGeneratableElementGenerated();
 
 		// check if dependency list has changed
@@ -637,16 +647,21 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 	}
 
 	private void regenerateProcedureCallers(ModElement procedure, Stack<ModElement> recursionLock) {
-		// if there are at least two more procedures referencing each other, with one of them and the current one
-		// calling each other as well, regenerating current procedure would result into circular regeneration
+		// if there are at least two more procedures referencing each other, with one of
+		// them and the current one
+		// calling each other as well, regenerating current procedure would result into
+		// circular regeneration
 		// of the other two procedures because neither of them triggered the action
-		// we avoid that by stacking all the elements checked before so that current procedure doesn't regenerate twice
+		// we avoid that by stacking all the elements checked before so that current
+		// procedure doesn't regenerate twice
 		if (recursionLock.contains(procedure))
 			return; // skip the procedure if it was handled earlier
 		recursionLock.push(procedure); // otherwise, add it to the list of checked elements
 		for (ModElement element : ReferencesFinder.searchModElementUsages(mcreator.getWorkspace(), procedure)) {
-			// if this mod element is not locked and has procedures, we try to update dependencies
-			// in this case, we (re)generate mod element code so dependencies get updated in the trigger code
+			// if this mod element is not locked and has procedures, we try to update
+			// dependencies
+			// in this case, we (re)generate mod element code so dependencies get updated in
+			// the trigger code
 			if (!element.isCodeLocked() && element.getGeneratableElement() != null) {
 				LOG.info("Regenerating {} ({}) because it triggers procedure {}", element.getName(), element.getType(),
 						procedure.getName());
@@ -661,7 +676,8 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		recursionLock.pop(); // remove the element after checking all referencing procedures
 	}
 
-	@Override public void openInEditingMode(net.mcreator.element.types.Procedure procedure) {
+	@Override
+	public void openInEditingMode(net.mcreator.element.types.Procedure procedure) {
 		skipDependencyNullCheck.setSelected(procedure.skipDependencyNullCheck);
 		blocklyPanel.addTaskToRunAfterLoaded(() -> {
 			blocklyPanel.setXML(procedure.procedurexml);
@@ -671,22 +687,26 @@ public class ProcedureGUI extends ModElementGUI<net.mcreator.element.types.Proce
 		});
 	}
 
-	@Override public net.mcreator.element.types.Procedure getElementFromGUI() {
+	@Override
+	public net.mcreator.element.types.Procedure getElementFromGUI() {
 		net.mcreator.element.types.Procedure procedure = new net.mcreator.element.types.Procedure(modElement);
 		procedure.skipDependencyNullCheck = skipDependencyNullCheck.isSelected();
 		procedure.procedurexml = blocklyPanel.getXML();
 		return procedure;
 	}
 
-	@Override public Set<BlocklyPanel> getBlocklyPanels() {
+	@Override
+	public Set<BlocklyPanel> getBlocklyPanels() {
 		return Set.of(blocklyPanel);
 	}
 
-	@Override public @Nullable URI contextURL() throws URISyntaxException {
+	@Override
+	public @Nullable URI contextURL() throws URISyntaxException {
 		return new URI(MCreatorApplication.SERVER_DOMAIN + "/wiki/section/procedure-system");
 	}
 
-	@Override public void search(@Nullable String searchTerm) {
+	@Override
+	public void search(@Nullable String searchTerm) {
 		blocklyEditorToolbar.getSearchField().requestFocusInWindow();
 
 		if (searchTerm != null)

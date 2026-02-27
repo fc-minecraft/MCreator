@@ -65,7 +65,8 @@ public class JBlockStatePropertiesListEntry extends JPanel {
 		namePane.add("North", HelpUtils.wrapWithHelpButton(gui.withEntry("block/custom_property_name"),
 				L10N.label("elementgui.block.custom_property.name")));
 		namePane.add("Center", nameLabel);
-		namePane.setPreferredSize(new Dimension(240, 0));
+		namePane.setPreferredSize(new Dimension(240, 45));
+		namePane.setMinimumSize(new Dimension(240, 45));
 
 		typeLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 		typeLabel.setPreferredSize(new Dimension(0, 28));
@@ -75,10 +76,12 @@ public class JBlockStatePropertiesListEntry extends JPanel {
 		typePane.add("North", HelpUtils.wrapWithHelpButton(gui.withEntry("block/custom_property_type"),
 				L10N.label("elementgui.block.custom_property.type")));
 		typePane.add("Center", typeLabel);
-		typePane.setPreferredSize(new Dimension(160, 0));
+		typePane.setPreferredSize(new Dimension(160, 45));
+		typePane.setMinimumSize(new Dimension(160, 45));
 
 		JPanel boundsPaneWrapper = new JPanel(new BorderLayout());
-		boundsPaneWrapper.setPreferredSize(new Dimension(350, 0));
+		boundsPaneWrapper.setPreferredSize(new Dimension(350, 45));
+		boundsPaneWrapper.setMinimumSize(new Dimension(350, 45));
 		boundsPaneWrapper.add("North", HelpUtils.wrapWithHelpButton(gui.withEntry("block/custom_property_values"),
 				L10N.label("elementgui.block.custom_property.values")));
 		boundsPaneWrapper.add("Center", boundsPane);
@@ -104,7 +107,8 @@ public class JBlockStatePropertiesListEntry extends JPanel {
 		propertyEntries.repaint();
 	}
 
-	@Override public void setEnabled(boolean enabled) {
+	@Override
+	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 
 		remove.setEnabled(enabled);
@@ -115,7 +119,8 @@ public class JBlockStatePropertiesListEntry extends JPanel {
 		return data;
 	}
 
-	@SuppressWarnings("unchecked") public PropertyDataWithValue<?> getEntry() {
+	@SuppressWarnings("unchecked")
+	public PropertyDataWithValue<?> getEntry() {
 		return new PropertyDataWithValue<>((PropertyData<Object>) data, data.getValue(defaultValue));
 	}
 
@@ -137,29 +142,30 @@ public class JBlockStatePropertiesListEntry extends JPanel {
 		defaultValue.setEnabled(isEnabled());
 
 		switch (data) {
-		case PropertyData.LogicType ignored -> boundsPane.add("Center",
-				PanelUtils.join(FlowLayout.LEFT, ComponentUtils.deriveFont(new JLabel("false, true"), 16)));
-		case PropertyData.IntegerType intProp -> {
-			JMinMaxSpinner boundsInt = new JMinMaxSpinner(intProp.getMin(), intProp.getMax(), 0, Integer.MAX_VALUE, 1);
-			boundsInt.setPreferredSize(new Dimension(300, 28));
-			boundsInt.setEnabled(false);
-			boundsPane.add("Center", PanelUtils.join(FlowLayout.LEFT, boundsInt));
-			defaultValue.setPreferredSize(new Dimension(120, 28));
-		}
-		case PropertyData.StringType stringProp -> {
-			JStringListField boundsString = new JStringListField(mcreator, null);
-			boundsString.setPreferredSize(new Dimension(300, 28));
-			boundsString.hideButtons();
-			boundsString.disableItemCentering();
-			boundsString.setEnabled(false);
-			boundsString.setTextList(List.of(stringProp.getArrayData()));
-			boundsString.setBorder(
-					new FlatLineBorder(new Insets(2, 2, 2, 2), UIManager.getColor("Component.borderColor")));
-			boundsPane.add("Center", PanelUtils.join(FlowLayout.LEFT, boundsString));
-			defaultValue.setPreferredSize(new Dimension(180, 28));
-		}
-		default -> {
-		}
+			case PropertyData.LogicType ignored -> boundsPane.add("Center",
+					PanelUtils.join(FlowLayout.LEFT, ComponentUtils.deriveFont(new JLabel("false, true"), 16)));
+			case PropertyData.IntegerType intProp -> {
+				JMinMaxSpinner boundsInt = new JMinMaxSpinner(intProp.getMin(), intProp.getMax(), 0, Integer.MAX_VALUE,
+						1);
+				boundsInt.setPreferredSize(new Dimension(300, 28));
+				boundsInt.setEnabled(false);
+				boundsPane.add("Center", PanelUtils.join(FlowLayout.LEFT, boundsInt));
+				defaultValue.setPreferredSize(new Dimension(120, 28));
+			}
+			case PropertyData.StringType stringProp -> {
+				JStringListField boundsString = new JStringListField(mcreator, null);
+				boundsString.setPreferredSize(new Dimension(300, 28));
+				boundsString.hideButtons();
+				boundsString.disableItemCentering();
+				boundsString.setEnabled(false);
+				boundsString.setTextList(List.of(stringProp.getArrayData()));
+				boundsString.setBorder(
+						new FlatLineBorder(new Insets(2, 2, 2, 2), UIManager.getColor("Component.borderColor")));
+				boundsPane.add("Center", PanelUtils.join(FlowLayout.LEFT, boundsString));
+				defaultValue.setPreferredSize(new Dimension(180, 28));
+			}
+			default -> {
+			}
 		}
 	}
 

@@ -65,6 +65,7 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 	private final BlocklyPanel blocklyPanel;
 
 	private final JTextField search;
+	private final javax.swing.Timer searchTimer;
 
 	public BlocklyEditorToolbar(MCreator mcreator, BlocklyEditorType blocklyEditorType, BlocklyPanel blocklyPanel) {
 		this(mcreator, blocklyEditorType, blocklyPanel, null, true);
@@ -81,21 +82,50 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 	}
 
 	/**
-	 * <p>A {@link BlocklyEditorToolbar} is the top panel added on every Java {@link BlocklyPanel}.
-	 * It contains buttons like templates, an export and an import template buttons.</p>
+	 * <p>
+	 * A {@link BlocklyEditorToolbar} is the top panel added on every Java
+	 * {@link BlocklyPanel}.
+	 * It contains buttons like templates, an export and an import template buttons.
+	 * </p>
 	 *
-	 * @param mcreator          <p>The {@link MCreator} instance used</p>
-	 * @param blocklyEditorType <p>Type of the Blockly editor this toolbar will be used on.</p>
-	 * @param blocklyPanel      <p>The {@link BlocklyPanel} to use for some features</p>
-	 * @param procedureGUI      <p>When a {@link ProcedureGUI} is passed, features specific to {@link net.mcreator.element.types.Procedure} such as variables are enabled.</p>
-	 * @param hasSearchBar      <p>If this toolbar will have a search bar.</p>
-	 * @param extraComponents   <p>List of additional {@link JComponent} to show inside the toolbar.</p>
+	 * @param mcreator
+	 *                          <p>
+	 *                          The {@link MCreator} instance used
+	 *                          </p>
+	 * @param blocklyEditorType
+	 *                          <p>
+	 *                          Type of the Blockly editor this toolbar will be used
+	 *                          on.
+	 *                          </p>
+	 * @param blocklyPanel
+	 *                          <p>
+	 *                          The {@link BlocklyPanel} to use for some features
+	 *                          </p>
+	 * @param procedureGUI
+	 *                          <p>
+	 *                          When a {@link ProcedureGUI} is passed, features
+	 *                          specific to
+	 *                          {@link net.mcreator.element.types.Procedure} such as
+	 *                          variables are enabled.
+	 *                          </p>
+	 * @param hasSearchBar
+	 *                          <p>
+	 *                          If this toolbar will have a search bar.
+	 *                          </p>
+	 * @param extraComponents
+	 *                          <p>
+	 *                          List of additional {@link JComponent} to show inside
+	 *                          the toolbar.
+	 *                          </p>
 	 */
 	public BlocklyEditorToolbar(MCreator mcreator, BlocklyEditorType blocklyEditorType, BlocklyPanel blocklyPanel,
 			ProcedureGUI procedureGUI, boolean hasSearchBar, JComponent... extraComponents) {
 		this.blocklyPanel = blocklyPanel;
 
 		setBorder(null);
+
+		this.searchTimer = new javax.swing.Timer(150, e -> updateSearch(blocklyEditorType));
+		this.searchTimer.setRepeats(false);
 
 		List<ResourcePointer> templates = TemplatesLoader.loadTemplates(blocklyEditorType.extension(),
 				blocklyEditorType.extension());
@@ -111,13 +141,15 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 			add(templateLib);
 
 		templateLib.addMouseListener(new MouseAdapter() {
-			@Override public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 				templateDropdown.show(e.getComponent(), e.getComponent().getWidth(), 0);
 			}
 		});
 
 		search = new JTextField() {
-			@Override public void paintComponent(Graphics g) {
+			@Override
+			public void paintComponent(Graphics g) {
 				super.paintComponent(g);
 				if (getText().isEmpty()) {
 					g.setFont(g.getFont().deriveFont(11f));
@@ -127,29 +159,46 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 			}
 		};
 		search.setBackground(ColorUtils.applyAlpha(search.getBackground(), 100));
+		search.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				search.grabFocus();
+				
+
+			}
+			
+			@Override public void mouseClicked(MouseEvent e) {
+				search.grabFocus();
+				search.requestFocusInWindow();
+			}
+		});
 
 		if (hasSearchBar) {
-			search.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-			search.addFocusListener(new FocusAdapter() {
-				@Override public void focusLost(FocusEvent e) {
-					super.focusLost(e);
-					search.setText("");
-					results.setFocusable(true);
+			search.put
+				arh.addFocusListener(new FocusAdapter() {
+				@Override
+					// 
+					// 
+				public void focusLost(FocusEvent e) {
+					// We don't clear text here anymore to avoid losing query during JCEF focus shifts
 				}
 			});
 			search.setPreferredSize(new Dimension(340, 22));
 
 			search.getDocument().addDocumentListener(new DocumentListener() {
-				@Override public void insertUpdate(DocumentEvent e) {
-					updateSearch(blocklyEditorType);
+				@Override
+				public void insertUpdate(DocumentEvent e) {
+					searchTimer.restart();
 				}
 
-				@Override public void removeUpdate(DocumentEvent e) {
-					updateSearch(blocklyEditorType);
+				@Override
+				public void removeUpdate(DocumentEvent e) {
+					searchTimer.restart();
 				}
 
-				@Override public void changedUpdate(DocumentEvent e) {
-					updateSearch(blocklyEditorType);
+				@Override
+				public void changedUpdate(DocumentEvent e) {
+					searchTimer.restart();
 				}
 			});
 
@@ -181,7 +230,8 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 								L10N.t("blockly.templates." + blocklyEditorType.registryName()
 										+ ".export_failed.message"),
 								L10N.t("blockly.templates." + blocklyEditorType.registryName()
-										+ ".export_failed.title"), JOptionPane.WARNING_MESSAGE);
+										+ ".export_failed.title"),
+								JOptionPane.WARNING_MESSAGE);
 					}
 				}, "Blockly-Blocks-Exporter").start();
 			}
@@ -195,7 +245,9 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 		import_.addActionListener(event -> {
 			File imp = FileDialogs.getOpenDialog(mcreator, new String[] { blocklyEditorType.extension() });
 			if (imp != null) {
-				// Run import in a separate thread to avoid blocking the UI and to avoid deadlocks on macOS
+				//
+				// Run import in a separate thread to avoid blocking the UI and to avoid
+				// deadlocks on macOS
 				new Thread(() -> {
 					try {
 						String procedureXml = ProcedureTemplateIO.importBlocklyXML(imp);
@@ -219,7 +271,8 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 								L10N.t("blockly.templates." + blocklyEditorType.registryName()
 										+ ".import_failed.message"),
 								L10N.t("blockly.templates." + blocklyEditorType.registryName()
-										+ ".import_failed.title"), JOptionPane.WARNING_MESSAGE));
+										+ ".import_failed.title"),
+								JOptionPane.WARNING_MESSAGE));
 					}
 				}, "Blockly-Template-Import").start();
 			}
@@ -229,70 +282,97 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 	}
 
 	private void updateSearch(BlocklyEditorType blocklyEditorType) {
-		if (!search.getText().isEmpty()) {
-			String[] keyWords = search.getText().replaceAll("[^ a-zA-Z0-9/._-]+", "").split(" ");
+		String text = search.getText().trim();
+		if (text.isEmpty()) {
+			results.setVisible(false);
+			return;
+		}
+
+		new Thread(() -> {
+			String cleanedText = text.replaceAll("[^ \\p{L}\\p{N}/._-]+", "");
+			if (cleanedText.isEmpty()) {
+				SwingUtilities.invokeLater(() -> results.setVisible(false));
+				return;
+			}
+
+			String queryLower = cleanedText.toLowerCase(java.util.Locale.ENGLISH);
+			String[] keyWords = queryLower.split("\\s+");
+
+			Map<String, ToolboxBlock> definedBlocks = BlocklyLoader.INSTANCE.getBlockLoader(blocklyEditorType)
+					.getDefinedBlocks();
 
 			Set<ToolboxBlock> filtered = new LinkedHashSet<>();
 
-			for (ToolboxBlock block : BlocklyLoader.INSTANCE.getBlockLoader(blocklyEditorType).getDefinedBlocks()
-					.values()) {
-				if (block.getName().toLowerCase(Locale.ENGLISH)
-						.contains(search.getText().toLowerCase(Locale.ENGLISH))) {
-					filtered.add(block);
-				}
-			}
+			for (ToolboxBlock block : definedBlocks.values()) {
+				String blockNameLower = block.getName().toLowerCase(java.util.Locale.ENGLISH);
 
-			for (ToolboxBlock block : BlocklyLoader.INSTANCE.getBlockLoader(blocklyEditorType).getDefinedBlocks()
-					.values()) {
-				for (String keyWord : keyWords) {
-					if (block.getName().toLowerCase(Locale.ENGLISH).contains(keyWord.toLowerCase(Locale.ENGLISH)) && (
-							block.getToolboxCategory() != null && block.getToolboxCategory().getName()
-									.toLowerCase(Locale.ENGLISH).contains(keyWord.toLowerCase(Locale.ENGLISH)))) {
+				// Priority 1: Direct containment of the full cleaned query
+				if (blockNameLower.contains(queryLower)) {
+					filtered.add(block);
+				} else {
+					boolean allMatch = true;
+					for (String keyWord : keyWords) {
+						boolean wordMatches = blockNameLower.contains(keyWord);
+						if (!wordMatches && block.getToolboxCategory() != null) {
+							wordMatches = block.getToolboxCategory().getName().toLowerCase(java.util.Locale.ENGLISH)
+									.contains(keyWord);
+						}
+						if (!wordMatches) {
+							allMatch = false;
+							break;
+						}
+					}
+
+					if (allMatch) {
 						filtered.add(block);
-						break;
-					} else if (block.getName().toLowerCase(Locale.ENGLISH)
-							.contains(keyWord.toLowerCase(Locale.ENGLISH))) {
-						filtered.add(block);
-						break;
 					}
 				}
+
+				if (filtered.size() >= 25) // Limit results for performance
+					break;
 			}
 
-			if (!filtered.isEmpty()) {
-				results.setVisible(false);
+			final List<ToolboxBlock> finalFiltered = new ArrayList<>(filtered);
+			SwingUtilities.invokeLater(() -> {
+				if (!search.getText().trim().equals(text))
+					return; // Check if search text changed while filtering
 
-				results = new JScrollablePopupMenu();
-				results.setBackground(Theme.current().getBackgroundColor());
-				results.setBorder(BorderFactory.createEmptyBorder());
-				results.putClientProperty(FlatClientProperties.POPUP_BORDER_CORNER_RADIUS, 0);
-				results.setMaximumVisibleRows(16);
+				if (!finalFiltered.isEmpty()) {
+					results.setVisible(false);
+					results.removeAll();
+					results.setBackground(Theme.current().getBackgroundColor());
+					results.setFocusable(false);
+					results.setRequestFocusEnabled(false);
+					results.setBorder(BorderFactory.createEmptyBorder());
+					results.putClientProperty(FlatClientProperties.POPUP_BORDER_CORNER_RADIUS, 0);
+					results.setMaximumVisibleRows(16);
 
-				for (ToolboxBlock block : filtered) {
-					JMenuItem menuItem = new JMenuItem(getHTMLForBlock(block));
-					menuItem.addActionListener(ev -> {
-						results.setVisible(false);
+					for (ToolboxBlock block : finalFiltered) {
+						JMenuItem menuItem = new JMenuItem(getHTMLForBlock(block));
+						menuItem.setFocusable(false);
+						menuItem.addActionListener(ev -> {
+							results.setVisible(false);
+							new Thread(() -> {
+								if (block.getToolboxXML() != null) {
+									blocklyPanel.addBlocksFromXML("<xml>" + block.getToolboxXML() + "</xml>");
+								} else {
+									blocklyPanel.addBlocksFromXML(
+											"<xml><block type=\"" + block.getMachineName() + "\"></block></xml>");
+								}
+							}, "Blockly-Blocks-Adder").start();
+						});
+						results.add(menuItem);
+					}
 
-						new Thread(() -> {
-							if (block.getToolboxXML() != null) {
-								blocklyPanel.addBlocksFromXML("<xml>" + block.getToolboxXML() + "</xml>");
-							} else {
-								blocklyPanel.addBlocksFromXML(
-										"<xml><block type=\"" + block.getMachineName() + "\"></block></xml>");
-							}
-						}, "Blockly-Blocks-Adder").start();
-					});
-
-					results.add(menuItem);
+					if (search.isFocusOwner()) {
+						results.show(search, 0, search.getHeight() + 2);
+						search.requestFocusInWindow(); // Ensure focus stays on search field
+					}
+				} else {
+					results.setVisible(false);
 				}
-
-				results.setFocusable(false);
-				results.show(search, 0, 24);
-			} else {
-				results.setVisible(false);
-			}
-		} else {
-			results.setVisible(false);
-		}
+			});
+		}, "Blockly-Search-Thread").start();
 	}
 
 	public void setTemplateLibButtonWidth(int w) {

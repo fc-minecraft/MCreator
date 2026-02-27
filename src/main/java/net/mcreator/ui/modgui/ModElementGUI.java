@@ -355,7 +355,14 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 					ComponentUtils.applyPadding(PanelUtils.westAndEastElement(toolBarLeft, toolBar), 5, true, false,
 							true, false));
 
-			centerComponent = PanelUtils.centerAndSouthElement(parameters = split, pager);
+			JScrollPane scrollPager = new JScrollPane(pager);
+			scrollPager.setOpaque(false);
+			scrollPager.getViewport().setOpaque(false);
+			scrollPager.setBorder(BorderFactory.createEmptyBorder());
+			scrollPager.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+			scrollPager.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+			centerComponent = PanelUtils.centerAndSouthElement(parameters = split, scrollPager);
 		} else {
 			JButton saveOnly = L10N.button("elementgui.save_keep_open");
 			saveOnly.setMargin(new Insets(1, 40, 1, 40));

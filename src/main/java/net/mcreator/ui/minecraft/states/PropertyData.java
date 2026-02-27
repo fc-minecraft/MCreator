@@ -38,19 +38,24 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Instances of this class store information about certain property (its name, type,
- * minimum and maximum values for number properties, list of allowed values for string properties and so on).
+ * Instances of this class store information about certain property (its name,
+ * type,
+ * minimum and maximum values for number properties, list of allowed values for
+ * string properties and so on).
  *
  * @param <T> Type of values this property can take.
  */
-@JsonAdapter(PropertyData.GSONAdapter.class) public abstract class PropertyData<T> {
+@JsonAdapter(PropertyData.GSONAdapter.class)
+public abstract class PropertyData<T> {
 
-	private static final Map<String, Class<? extends PropertyData<?>>> typeMappings = new HashMap<>() {{
-		put("logic", PropertyData.LogicType.class);
-		put("integer", PropertyData.IntegerType.class);
-		put("number", PropertyData.NumberType.class);
-		put("string", PropertyData.StringType.class);
-	}};
+	private static final Map<String, Class<? extends PropertyData<?>>> typeMappings = new HashMap<>() {
+		{
+			put("logic", PropertyData.LogicType.class);
+			put("integer", PropertyData.IntegerType.class);
+			put("number", PropertyData.NumberType.class);
+			put("string", PropertyData.StringType.class);
+		}
+	};
 
 	private static final Map<Class<? extends PropertyData<?>>, String> typeMappingsReverse = typeMappings.entrySet()
 			.stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
@@ -74,32 +79,37 @@ import java.util.stream.Collectors;
 	}
 
 	/**
-	 * Adds the prefix to the name of this property if it is not a built-in property and returns the result.
-	 * Can be used for cases where property names need to be unique across multiple mod elements that could define property with the same name.
+	 * Adds the prefix to the name of this property if it is not a built-in property
+	 * and returns the result.
+	 * Can be used for cases where property names need to be unique across multiple
+	 * mod elements that could define property with the same name.
 	 *
 	 * @param prefix Prefix to add to the name
 	 * @return The name of this property with the prefix
 	 */
-	@SuppressWarnings("unused") public final String getPrefixedName(String prefix) {
-		return !name.startsWith(NameMapper.MCREATOR_PREFIX) ?
-				name :
-				NameMapper.MCREATOR_PREFIX + prefix + name.substring(7);
+	@SuppressWarnings("unused")
+	public final String getPrefixedName(String prefix) {
+		return !name.startsWith(NameMapper.MCREATOR_PREFIX) ? name
+				: NameMapper.MCREATOR_PREFIX + prefix + name.substring(7);
 	}
 
 	/**
-	 * Provides the default value of type of this property. This is the "null" value of this type, which means
+	 * Provides the default value of type of this property. This is the "null" value
+	 * of this type, which means
 	 * it may be outside value limits defined for a particular property.
 	 *
 	 * @return A default value of this property's type.
 	 */
-	@Nonnull public abstract T getDefaultValue();
+	@Nonnull
+	public abstract T getDefaultValue();
 
 	/**
 	 * Converts passed value of this property to its string representation.
 	 *
 	 * @param value A value of this property's type.
 	 * @return Possible value of this property as a string.
-	 * @throws ClassCastException if the type of passed value doesn't match the type of property or its subtype.
+	 * @throws ClassCastException if the type of passed value doesn't match the type
+	 *                            of property or its subtype.
 	 */
 	public abstract String toString(Object value);
 
@@ -112,12 +122,14 @@ import java.util.stream.Collectors;
 	public abstract T parseObj(JsonElement value);
 
 	/**
-	 * Generates a UI component accepting values of type {@link T} and sets its value to the passed one.
+	 * Generates a UI component accepting values of type {@link T} and sets its
+	 * value to the passed one.
 	 *
 	 * @param mcreator The future parent window of the component returned.
 	 * @param value    Possible value of this property.
 	 * @return A UI component that accepts values of type {@link T}.
-	 * @throws ClassCastException if the type of passed value doesn't match the type of property or its subtype.
+	 * @throws ClassCastException if the type of passed value doesn't match the type
+	 *                            of property or its subtype.
 	 */
 	public abstract JComponent getComponent(MCreator mcreator, @Nullable Object value);
 
@@ -129,15 +141,18 @@ import java.util.stream.Collectors;
 	 */
 	public abstract T getValue(JComponent component);
 
-	@Override public final boolean equals(Object obj) {
+	@Override
+	public final boolean equals(Object obj) {
 		return super.equals(obj) || obj instanceof PropertyData<?> that && this.name.equals(that.name);
 	}
 
-	@Override public final int hashCode() {
+	@Override
+	public final int hashCode() {
 		return name.hashCode();
 	}
 
-	@Override public final String toString() {
+	@Override
+	public final String toString() {
 		return getName();
 	}
 
@@ -150,30 +165,37 @@ import java.util.stream.Collectors;
 			super(name);
 		}
 
-		@Override @Nonnull public Boolean getDefaultValue() {
+		@Override
+		@Nonnull
+		public Boolean getDefaultValue() {
 			return false;
 		}
 
-		@Override public final String toString(Object value) {
+		@Override
+		public final String toString(Object value) {
 			return Boolean.toString((Boolean) value);
 		}
 
-		@Override public final Boolean parseObj(JsonElement value) {
+		@Override
+		public final Boolean parseObj(JsonElement value) {
 			return value.getAsBoolean();
 		}
 
-		@Override public JComponent getComponent(MCreator mcreator, @Nullable Object value) {
+		@Override
+		public JComponent getComponent(MCreator mcreator, @Nullable Object value) {
 			JCheckBox box = new JCheckBox() {
-				@Override public String getText() {
+				@Override
+				public String getText() {
 					return isSelected() ? "true" : "false";
 				}
 			};
 			box.setSelected(Objects.requireNonNullElse((Boolean) value, getDefaultValue()));
-			box.setPreferredSize(new Dimension(54, 25));
+			box.setPreferredSize(new Dimension(75, 25));
 			return box;
 		}
 
-		@Override public Boolean getValue(JComponent component) {
+		@Override
+		public Boolean getValue(JComponent component) {
 			return ((JCheckBox) component).isSelected();
 		}
 	}
@@ -202,26 +224,32 @@ import java.util.stream.Collectors;
 			return max;
 		}
 
-		@Override @Nonnull public Integer getDefaultValue() {
+		@Override
+		@Nonnull
+		public Integer getDefaultValue() {
 			return 0;
 		}
 
-		@Override public final String toString(Object value) {
+		@Override
+		public final String toString(Object value) {
 			return Integer.toString((Integer) value);
 		}
 
-		@Override public final Integer parseObj(JsonElement value) {
+		@Override
+		public final Integer parseObj(JsonElement value) {
 			return value.getAsInt();
 		}
 
-		@Override public JComponent getComponent(MCreator mcreator, @Nullable Object value) {
+		@Override
+		public JComponent getComponent(MCreator mcreator, @Nullable Object value) {
 			value = Math.max(min, Math.min(max, Objects.requireNonNullElse((Integer) value, getDefaultValue())));
 			JSpinner box = new JSpinner(new SpinnerNumberModel((int) value, min, max, 1));
 			box.setPreferredSize(new Dimension(105, 22));
 			return box;
 		}
 
-		@Override public Integer getValue(JComponent component) {
+		@Override
+		public Integer getValue(JComponent component) {
 			return (Integer) ((JSpinner) component).getValue();
 		}
 	}
@@ -253,19 +281,24 @@ import java.util.stream.Collectors;
 			return max;
 		}
 
-		@Override @Nonnull public Double getDefaultValue() {
+		@Override
+		@Nonnull
+		public Double getDefaultValue() {
 			return 0d;
 		}
 
-		@Override public final String toString(Object value) {
+		@Override
+		public final String toString(Object value) {
 			return df.format((double) (Double) value);
 		}
 
-		@Override public final Double parseObj(JsonElement value) {
+		@Override
+		public final Double parseObj(JsonElement value) {
 			return value.getAsDouble();
 		}
 
-		@Override public JComponent getComponent(MCreator mcreator, @Nullable Object value) {
+		@Override
+		public JComponent getComponent(MCreator mcreator, @Nullable Object value) {
 			value = Math.max(min, Math.min(max, Objects.requireNonNullElse((Double) value, getDefaultValue())));
 			JSpinner box = new JSpinner(new SpinnerNumberModel((double) value, min, max, 0.000000001));
 			box.setEditor(new JSpinner.NumberEditor(box, "#.#########"));
@@ -274,7 +307,8 @@ import java.util.stream.Collectors;
 			return box;
 		}
 
-		@Override public Double getValue(JComponent component) {
+		@Override
+		public Double getValue(JComponent component) {
 			return (Double) ((JSpinner) component).getValue();
 		}
 	}
@@ -298,19 +332,24 @@ import java.util.stream.Collectors;
 			return arrayData;
 		}
 
-		@Override @Nonnull public String getDefaultValue() {
+		@Override
+		@Nonnull
+		public String getDefaultValue() {
 			return "";
 		}
 
-		@Override public final String toString(Object value) {
+		@Override
+		public final String toString(Object value) {
 			return (String) value;
 		}
 
-		@Override public final String parseObj(JsonElement value) {
+		@Override
+		public final String parseObj(JsonElement value) {
 			return value.getAsString();
 		}
 
-		@Override public JComponent getComponent(MCreator mcreator, @Nullable Object value) {
+		@Override
+		public JComponent getComponent(MCreator mcreator, @Nullable Object value) {
 			if (arrayData != null) {
 				JComboBox<String> box = new JComboBox<>(arrayData);
 				box.setEditable(false);
@@ -323,24 +362,28 @@ import java.util.stream.Collectors;
 			}
 		}
 
-		@Override public String getValue(JComponent component) {
-			return (String) (component instanceof JComboBox<?> ?
-					((JComboBox<?>) component).getSelectedItem() :
-					((JTextField) component).getText());
+		@Override
+		public String getValue(JComponent component) {
+			return (String) (component instanceof JComboBox<?> ? ((JComboBox<?>) component).getSelectedItem()
+					: ((JTextField) component).getText());
 		}
 	}
 
 	/**
-	 * We need a custom serializer/deserializer for this class because we need to store the type of property.
-	 * Technically type could be determined from properties list, but we don't have a reference to it, and it also
-	 * depends on the ME type, so this is second-best option. There is minimal overhead in storing the type.
+	 * We need a custom serializer/deserializer for this class because we need to
+	 * store the type of property.
+	 * Technically type could be determined from properties list, but we don't have
+	 * a reference to it, and it also
+	 * depends on the ME type, so this is second-best option. There is minimal
+	 * overhead in storing the type.
 	 */
 	static class GSONAdapter implements JsonSerializer<PropertyData<?>>, JsonDeserializer<PropertyData<?>> {
 
 		private static final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting()
 				.setStrictness(Strictness.LENIENT).create();
 
-		@Override public PropertyData<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+		@Override
+		public PropertyData<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 				throws JsonParseException {
 			JsonObject jsonObject = json.getAsJsonObject();
 			return gson.fromJson(jsonObject, typeMappings.get(jsonObject.get("type").getAsString()));
