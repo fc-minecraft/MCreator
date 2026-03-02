@@ -192,8 +192,8 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 
 					if (isBrowser && !search.getText().isEmpty()) {
 						SwingUtilities.invokeLater(() -> {
-							if (search.isShowing() && !search.getText
-
+							if (search.isShowing() && !search.isFocusOwner()) {
+								search.requestFocusInWindow();
 							}
 						});
 					}
