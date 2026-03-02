@@ -38,6 +38,8 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.Closeable;
 import java.util.*;
 import java.util.List;
@@ -66,6 +68,8 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	private List<VariableElement> localVariables = new ArrayList<>();
 
 	private final JLabel loadingLabel;
+	private boolean browserFocusable = true;
+	private final List<Runnable> browserClickListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	public BlocklyPanel(MCreator mcreator, @Nonnull BlocklyEditorType type) {
 		super(new BorderLayout());
@@ -254,7 +258,23 @@ public class BlocklyPanel extends JPanel implements Closeable {
 				}, true);
 				client.addMessageRouter(msgRouter);
 
+				client.addFocusHandler(new CefFocusHandlerAdapter() {
+					@Override
+					public boolean onSetFocus(CefBrowser browser, FocusSource source) {
+						if (!browserFocusable && source != FocusSource.FOCUS_SOURCE_NAVIGATION)
+							return true; // Consume event to prevent focus UNLESS it's a direct navigation (click)
+						return false;
+					}
+				});
+
 				browser = client.createBrowser("about:blank", false, false);
+				browser.getUIComponent().addMouseListener(new MouseAdapter() {
+					@Override
+					public void mousePressed(MouseEvent e) {
+						setBrowserFocusable(true);
+						browserClickListeners.forEach(Runnable::run);
+					}
+				});
 				browserWorkspaceMap.put(browser, mcreator.getWorkspace());
 
 				client.addLoadHandler(new CefLoadHandlerAdapter() {
@@ -577,10 +597,33 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		return type;
 	}
 
+	public void setBrowserFocusable(boolean focusable) {
+		this.browserFocusable = focusable;
+		Component ui = getBrowserUIComponent();
+		if (ui != null) {
+			ui.setFocusable(focusable);
+			if (!focusable && browser != null) {
+				browser.setFocus(false);
+			}
+		}
+	}
+
 	public void setBrowserFocus(boolean focus) {
 		if (browser != null) {
 			browser.setFocus(focus);
 		}
+	}
+
+	public void expelBrowserFocus() {
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
+	}
+
+	public void addBrowserClickListener(Runnable runnable) {
+		browserClickListeners.add(runnable);
+	}
+
+	public Component getBrowserUIComponent() {
+		return browser != null ? browser.getUIComponent() : null;
 	}
 
 	public Object executeJavaScriptSynchronously(String script) {

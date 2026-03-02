@@ -47,12 +47,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.util.*;
 import java.util.List;
@@ -68,6 +63,8 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 
 	private final JTextField search;
 	private final javax.swing.Timer searchTimer;
+
+	private boolean focusKickInProgress = false;
 
 	public BlocklyEditorToolbar(MCreator mcreator, BlocklyEditorType blocklyEditorType, BlocklyPanel blocklyPanel) {
 		this(mcreator, blocklyEditorType, blocklyPanel, null, true);
@@ -126,7 +123,7 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 
 		setBorder(null);
 
-		this.searchTimer = new javax.swing.Timer(150, e -> updateSearch(blocklyEditorType));
+		this.searchTimer = new javax.swing.Timer(300, e -> updateSearch(blocklyEditorType));
 		this.searchTimer.setRepeats(false);
 
 		List<ResourcePointer> templates = TemplatesLoader.loadTemplates(blocklyEditorType.extension(),
@@ -149,6 +146,10 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 			}
 		});
 
+		results.setFocusable(false);
+
+		blocklyPanel.addBrowserClickListener(this::dismissSearch);
+
 		search = new JTextField() {
 			@Override
 			public void paintComponent(Graphics g) {
@@ -161,39 +162,40 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 			}
 		};
 		search.setBackground(ColorUtils.applyAlpha(search.getBackground(), 100));
-		search.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				blocklyPanel.setBrowserFocus(false);
-				search.grabFocus();
-				search.requestFocus();
-				search.requestFocusInWindow();
-			}
-		});
 
 		search.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
+				blocklyPanel.setBrowserFocusable(false);
 				blocklyPanel.setBrowserFocus(false);
 			}
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				// Only take focus back if it was stolen by the CefBrowser (native component)
+				if (focusKickInProgress)
+					return;
 				Component opposite = e.getOppositeComponent();
-				boolean isBrowser = opposite != null && opposite.getClass().getName().contains("CefBrowser");
-
-				if (isBrowser && !search.getText().isEmpty()) {
-					SwingUtilities.invokeLater(() -> {
-						if (search.isShowing() && !search.isFocusOwner()) {
-							blocklyPanel.setBrowserFocus(false);
-							search.grabFocus();
-							search.requestFocusInWindow();
-						}
-					});
-				} else if (!isBrowser) {
-					blocklyPanel.setBrowserFocus(true);
+				if (opposite != null && (opposite == results || SwingUtilities.isDescendingFrom(opposite, results))) {
+					return;
 				}
+				dismissSearch();
+			}
+		});
+
+		search.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				blocklyPanel.setBrowserFocusable(false);
+				blocklyPanel.setBrowserFocus(false);
+				focusKickInProgress = true;
+				blocklyPanel.expelBrowserFocus(); // Force reset of the native keyboard handle
+
+				search.requestFocusInWindow();
+				SwingUtilities.invokeLater(() -> {
+					focusKickInProgress = false;
+					search.grabFocus();
+					search.requestFocusInWindow();
+				});
 			}
 		});
 
@@ -201,13 +203,28 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-					search.setText("");
-					results.setVisible(false);
-					blocklyPanel.requestFocusInWindow();
-					blocklyPanel.setBrowserFocus(true);
+					dismissSearch();
 				}
 			}
 		});
+
+		// Global focus listener to dismiss search when clicking elsewhere in the app
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener("permanentFocusOwner", evt -> {
+			Object newValue = evt.getNewValue();
+			if (newValue instanceof Component) {
+				Component comp = (Component) newValue;
+				if (comp != search && comp != results && !SwingUtilities.isDescendingFrom(comp, results)
+						&& !SwingUtilities.isDescendingFrom(comp, search)) {
+					if (results.isVisible() || !search.getText().isEmpty()) {
+						dismissSearch();
+					}
+				}
+			}
+		});
+
+		if (hasSearchBar) {
+			search.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+			search.setFocusTraversalKeysEnabled(false);
 			search.setPreferredSize(new Dimension(340, 22));
 
 			search.getDocument().addDocumentListener(new DocumentListener() {
@@ -234,14 +251,11 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 			add(searchWrapper);
 		}
 
-	for(
+		for (var component : extraComponents) {
+			add(component);
+		}
 
-	var component:extraComponents)
-	{
-		add(component);
-	}
-
-	add(Box.createHorizontalGlue());
+		add(Box.createHorizontalGlue());
 
 		JButton export = L10N.button("blockly.templates." + blocklyEditorType.registryName() + ".export");
 		export.setIcon(UIRES.get("18px.export"));
@@ -391,11 +405,11 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 					if (search.isFocusOwner()) {
 						if (!wasVisible) {
 							results.show(search, 0, search.getHeight() + 2);
+							SwingUtilities.invokeLater(search::requestFocusInWindow);
 						} else {
 							results.revalidate();
 							results.repaint();
 						}
-						SwingUtilities.invokeLater(search::requestFocusInWindow);
 					}
 				} else {
 					results.setVisible(false);
@@ -464,6 +478,14 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 				BorderFactory.createMatteBorder(1, 1, 1, 1, UIManager.getColor("Component.borderColor")),
 				BorderFactory.createEmptyBorder(1, 0, 1, 0)));
 		ComponentUtils.deriveFont(button, 11);
+	}
+
+	public void dismissSearch() {
+		search.setText("");
+		results.setVisible(false);
+		blocklyPanel.setBrowserFocusable(true);
+		blocklyPanel.setBrowserFocus(true);
+		blocklyPanel.requestFocusInWindow();
 	}
 
 	public JTextField getSearchField() {
