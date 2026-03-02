@@ -100,18 +100,31 @@ public class PreferencesManager {
 		boolean failedToLoad = false;
 
 		try {
-			LOG.debug("Loading preferences from {}", identifier);
 			if (preferencesFileCache != null && preferencesFileCache.containsKey(identifier)) {
-				// Convert values from the file to properly work
-				preferencesFileCache.get(identifier).forEach((section, entries) -> entries.keySet().forEach(
-						entryKey -> PREFERENCES_REGISTRY.get(identifier).stream()
-								.filter(preference -> preference.getID().equals(entryKey) && preference.getSectionKey()
-										.equals(section)).forEach(preference -> {
+				List<PreferencesEntry<?>> registeredEntries = PREFERENCES_REGISTRY.get(identifier);
+				if (registeredEntries != null) {
+					// Create a lookup map for faster access: SectionKey -> EntryID -> Preference
+					Map<String, Map<String, PreferencesEntry<?>>> lookup = new HashMap<>();
+					for (PreferencesEntry<?> entry : registeredEntries) {
+						lookup.computeIfAbsent(entry.getSectionKey(), k -> new HashMap<>()).put(entry.getID(), entry);
+					}
+
+					// Process cached values
+					preferencesFileCache.get(identifier).forEach((section, entries) -> {
+						Map<String, PreferencesEntry<?>> sectionLookup = lookup.get(section);
+						if (sectionLookup != null) {
+							entries.keySet().forEach(entryKey -> {
+								PreferencesEntry<?> preference = sectionLookup.get(entryKey);
+								if (preference != null) {
 									JsonElement value = entries.get(entryKey);
 									if (value != null && value != JsonNull.INSTANCE) {
 										preference.setValueFromJsonElement(value);
 									}
-								})));
+								}
+							});
+						}
+					});
+				}
 			} else {
 				LOG.info("Preferences with identifier {} have no saved values. Default values will be used.",
 						identifier);

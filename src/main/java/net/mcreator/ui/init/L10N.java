@@ -62,43 +62,73 @@ public class L10N {
 	private static Locale selectedLocale = null;
 
 	public static void initTranslations() {
-		initLocalesImpl();
-
-		// Clear selectedLocale cache
+		// Just clear cache, we don't load all at startup anymore
+		rb_en = null;
+		supportedLocales = null;
 		selectedLocale = null;
 
-		if (supportedLocales.containsKey(getLocale())) {
-			rb = supportedLocales.get(getLocale()).resourceBundle();
-		} else {
-			LOG.warn("Locale {} is not supported. Falling back to default locale.", getLocale());
+		// Load only mandatory English and current locale
+		initLocalesImpl();
 
-			rb = supportedLocales.get(DEFAULT_LOCALE).resourceBundle();
+		Locale target = getLocale();
+		if (supportedLocales != null && supportedLocales.containsKey(target)) {
+			rb = getLocaleRegistration(target).resourceBundle();
+		} else {
+			LOG.warn("Locale {} is not supported. Falling back to default locale.", target);
+			rb = getLocaleRegistration(DEFAULT_LOCALE).resourceBundle();
 		}
 
-		LOG.info("Setting default locale to: {}", getLocale());
-		Locale.setDefault(getLocale());
-		JComponent.setDefaultLocale(getLocale());
+		LOG.info("Setting default locale to: {}", target);
+		Locale.setDefault(target);
+		JComponent.setDefaultLocale(target);
 	}
 
 	private static void initLocalesImpl() {
-		if (rb_en != null) // check if locales are already loaded
+		if (supportedLocales != null)
 			return;
 
+		supportedLocales = new HashMap<>();
+
+		// Load English (base)
 		rb_en = ResourceBundle.getBundle("lang/texts", Locale.ROOT, PluginLoader.INSTANCE, new UTF8Control());
-
-		double countAll = Collections.list(rb_en.getKeys()).size();
-
-		Set<String> localeFiles = PluginLoader.INSTANCE.getResourcesInPackage("lang");
-		supportedLocales = localeFiles.stream().map(FilenameUtilsPatched::getBaseName).filter(e -> e.contains("_"))
-				.map(e -> e.split("_")).map(e -> Locale.of(e[1], e[2])).collect(Collectors.toMap(key -> key, value -> {
-					ResourceBundle rb = ResourceBundle.getBundle("lang/texts", value, PluginLoader.INSTANCE,
-							new UTF8Control());
-					return new LocaleRegistration(rb,
-							(int) Math.ceil(Collections.list(rb.getKeys()).size() / countAll * 100d),
-							HelpLoader.getCoverageForLocale(value));
-				}));
-
 		supportedLocales.put(Locale.of("en", "US"), new LocaleRegistration(rb_en, 100, 100));
+
+		// Pre-load Russian (as requested by user)
+		getLocaleRegistration(DEFAULT_LOCALE);
+
+		// Scan for other locales based on filenames, but don't load them yet
+		Set<String> localeFiles = PluginLoader.INSTANCE.getResourcesInPackage("lang");
+		for (String file : localeFiles) {
+			String baseName = FilenameUtilsPatched.getBaseName(file);
+			if (baseName.contains("_")) {
+				String[] parts = baseName.split("_");
+				if (parts.length >= 3) {
+					Locale l = Locale.of(parts[1], parts[2]);
+					if (!supportedLocales.containsKey(l)) {
+						supportedLocales.put(l, null); // Placeholder for lazy loading
+					}
+				}
+			}
+		}
+	}
+
+	private static LocaleRegistration getLocaleRegistration(Locale locale) {
+		initLocalesImpl();
+		LocaleRegistration reg = supportedLocales.get(locale);
+		if (reg == null) { // Lazy load if placeholder or missing
+			try {
+				ResourceBundle bundle = ResourceBundle.getBundle("lang/texts", locale, PluginLoader.INSTANCE,
+						new UTF8Control());
+				double countAll = Collections.list(rb_en.getKeys()).size();
+				int uiPercentage = (int) Math.ceil(Collections.list(bundle.getKeys()).size() / countAll * 100d);
+				reg = new LocaleRegistration(bundle, uiPercentage, HelpLoader.getCoverageForLocale(locale));
+				supportedLocales.put(locale, reg);
+			} catch (Exception e) {
+				LOG.error("Failed to load locale: {}", locale, e);
+				return supportedLocales.get(Locale.of("en", "US"));
+			}
+		}
+		return reg;
 	}
 
 	public static Set<Locale> getSupportedLocales() {
@@ -106,7 +136,7 @@ public class L10N {
 	}
 
 	public static int getUITextsLocaleSupport(Locale locale) {
-		LocaleRegistration localeRegistration = supportedLocales.get(locale);
+		LocaleRegistration localeRegistration = getLocaleRegistration(locale);
 		if (localeRegistration != null)
 			return localeRegistration.uiTextsPercentage();
 
@@ -114,7 +144,7 @@ public class L10N {
 	}
 
 	public static int getHelpTipsSupport(Locale locale) {
-		LocaleRegistration localeRegistration = supportedLocales.get(locale);
+		LocaleRegistration localeRegistration = getLocaleRegistration(locale);
 		if (localeRegistration != null)
 			return localeRegistration.helpTipsPercentage();
 

@@ -164,8 +164,36 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 		search.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
+				blocklyPanel.setBrowserFocus(false);
+				search.grabFocus();
 				search.requestFocus();
 				search.requestFocusInWindow();
+			}
+		});
+
+		search.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				blocklyPanel.setBrowserFocus(false);
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				// Only take focus back if it was stolen by the CefBrowser (native component)
+				Component opposite = e.getOppositeComponent();
+				boolean isBrowser = opposite != null && opposite.getClass().getName().contains("CefBrowser");
+
+				if (isBrowser && !search.getText().isEmpty()) {
+					SwingUtilities.invokeLater(() -> {
+						if (search.isShowing() && !search.isFocusOwner()) {
+							blocklyPanel.setBrowserFocus(false);
+							search.grabFocus();
+							search.requestFocusInWindow();
+						}
+					});
+				} else if (!isBrowser) {
+					blocklyPanel.setBrowserFocus(true);
+				}
 			}
 		});
 
@@ -176,29 +204,10 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 					search.setText("");
 					results.setVisible(false);
 					blocklyPanel.requestFocusInWindow();
+					blocklyPanel.setBrowserFocus(true);
 				}
 			}
 		});
-
-		if (hasSearchBar) {
-			search.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-			search.setFocusTraversalKeysEnabled(false);
-			search.addFocusListener(new FocusAdapter() {
-				@Override
-				public void focusLost(FocusEvent e) {
-					// Only take focus back if it was stolen by the CefBrowser (native component)
-					Component opposite = e.getOppositeComponent();
-					boolean isBrowser = opposite != null && opposite.getClass().getName().contains("CefBrowser");
-
-					if (isBrowser && !search.getText().isEmpty()) {
-						SwingUtilities.invokeLater(() -> {
-							if (search.isShowing() && !search.isFocusOwner()) {
-								search.requestFocusInWindow();
-							}
-						});
-					}
-				}
-			});
 			search.setPreferredSize(new Dimension(340, 22));
 
 			search.getDocument().addDocumentListener(new DocumentListener() {
@@ -225,11 +234,14 @@ public class BlocklyEditorToolbar extends TransparentToolBar {
 			add(searchWrapper);
 		}
 
-		for (var component : extraComponents) {
-			add(component);
-		}
+	for(
 
-		add(Box.createHorizontalGlue());
+	var component:extraComponents)
+	{
+		add(component);
+	}
+
+	add(Box.createHorizontalGlue());
 
 		JButton export = L10N.button("blockly.templates." + blocklyEditorType.registryName() + ".export");
 		export.setIcon(UIRES.get("18px.export"));

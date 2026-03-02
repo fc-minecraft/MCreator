@@ -92,10 +92,13 @@ public class BlocklyPanel extends JPanel implements Closeable {
 
 				client.addRequestHandler(new CefRequestHandlerAdapter() {
 					@Override
-					public CefResourceRequestHandler getResourceRequestHandler(CefBrowser browser, CefFrame frame, CefRequest request, boolean isNavigation, boolean isDownload, String requestInitiator, BoolRef disableDefaultHandling) {
+					public CefResourceRequestHandler getResourceRequestHandler(CefBrowser browser, CefFrame frame,
+							CefRequest request, boolean isNavigation, boolean isDownload, String requestInitiator,
+							BoolRef disableDefaultHandling) {
 						return new CefResourceRequestHandlerAdapter() {
 							@Override
-							public CefResourceHandler getResourceHandler(CefBrowser browser, CefFrame frame, CefRequest request) {
+							public CefResourceHandler getResourceHandler(CefBrowser browser, CefFrame frame,
+									CefRequest request) {
 								if (request.getURL().startsWith("http://mcreator.ui/")) {
 									MCRResourceHandler handler = new MCRResourceHandler();
 									handler.setWorkspace(mcreator.getWorkspace());
@@ -109,15 +112,25 @@ public class BlocklyPanel extends JPanel implements Closeable {
 
 				client.addDisplayHandler(new CefDisplayHandlerAdapter() {
 					@Override
-					public boolean onConsoleMessage(CefBrowser browser, org.cef.CefSettings.LogSeverity level, String message, String source, int line) {
+					public boolean onConsoleMessage(CefBrowser browser, org.cef.CefSettings.LogSeverity level,
+							String message, String source, int line) {
 						String logMsg = "[JS] " + message + " (" + source + ":" + line + ")";
-						if (message.contains("Refused to get unsafe header")) return false;
-						
+						if (message.contains("Refused to get unsafe header"))
+							return false;
+
 						switch (level) {
-							case LOGSEVERITY_ERROR: LOG.error(logMsg); break;
-							case LOGSEVERITY_WARNING: LOG.warn(logMsg); break;
-							case LOGSEVERITY_INFO: LOG.info(logMsg); break;
-							default: LOG.debug(logMsg); break;
+							case LOGSEVERITY_ERROR:
+								LOG.error(logMsg);
+								break;
+							case LOGSEVERITY_WARNING:
+								LOG.warn(logMsg);
+								break;
+							case LOGSEVERITY_INFO:
+								LOG.info(logMsg);
+								break;
+							default:
+								LOG.debug(logMsg);
+								break;
 						}
 						return false;
 					}
@@ -126,7 +139,8 @@ public class BlocklyPanel extends JPanel implements Closeable {
 				CefMessageRouter msgRouter = CefMessageRouter.create();
 				msgRouter.addHandler(new CefMessageRouterHandlerAdapter() {
 					@Override
-					public boolean onQuery(CefBrowser browser, CefFrame frame, long query_id, String request, boolean persistent,
+					public boolean onQuery(CefBrowser browser, CefFrame frame, long query_id, String request,
+							boolean persistent,
 							CefQueryCallback callback) {
 						if (request.startsWith("t:")) {
 							String key = request.substring(2);
@@ -156,7 +170,12 @@ public class BlocklyPanel extends JPanel implements Closeable {
 								String color = parts[2];
 								bridge.openColorSelector(color, (result) -> {
 									String res = (String) result;
-									browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + (res!=null?res:"") + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
+									browser.executeJavaScript(
+											"if(window.javabridge.callbacks['" + id
+													+ "']) window.javabridge.callbacks['" + id + "'].callback('"
+													+ (res != null ? res : "")
+													+ "'); delete window.javabridge.callbacks['" + id + "'];",
+											browser.getURL(), 0);
 								});
 								callback.success("");
 								return true;
@@ -168,7 +187,12 @@ public class BlocklyPanel extends JPanel implements Closeable {
 								String type = parts[2];
 								bridge.openMCItemSelector(type, (result) -> {
 									String res = (String) result;
-									browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + (res!=null?res:"") + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
+									browser.executeJavaScript(
+											"if(window.javabridge.callbacks['" + id
+													+ "']) window.javabridge.callbacks['" + id + "'].callback('"
+													+ (res != null ? res : "")
+													+ "'); delete window.javabridge.callbacks['" + id + "'];",
+											browser.getURL(), 0);
 								});
 								callback.success("");
 								return true;
@@ -181,14 +205,19 @@ public class BlocklyPanel extends JPanel implements Closeable {
 								String typeFilter = parts.length > 3 ? parts[3] : null;
 								String customEntryProviders = parts.length > 4 ? parts[4] : null;
 
-								if ("null".equals(typeFilter)) typeFilter = null;
-								if ("null".equals(customEntryProviders)) customEntryProviders = null;
+								if ("null".equals(typeFilter))
+									typeFilter = null;
+								if ("null".equals(customEntryProviders))
+									customEntryProviders = null;
 
 								bridge.openEntrySelector(type, typeFilter, customEntryProviders, (result) -> {
 									String[] res = (String[]) result;
 									String val = res[0].replace("'", "\\'");
 									String name = res[1].replace("'", "\\'");
-									browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + val + "', '" + name + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
+									browser.executeJavaScript("if(window.javabridge.callbacks['" + id
+											+ "']) window.javabridge.callbacks['" + id + "'].callback('" + val + "', '"
+											+ name + "'); delete window.javabridge.callbacks['" + id + "'];",
+											browser.getURL(), 0);
 								});
 								callback.success("");
 								return true;
@@ -200,7 +229,12 @@ public class BlocklyPanel extends JPanel implements Closeable {
 								String data = parts[2];
 								bridge.openAIConditionEditor(data, (result) -> {
 									String res = (String) result;
-									browser.executeJavaScript("if(window.javabridge.callbacks['" + id + "']) window.javabridge.callbacks['" + id + "'].callback('" + (res!=null?res:"") + "'); delete window.javabridge.callbacks['" + id + "'];", browser.getURL(), 0);
+									browser.executeJavaScript(
+											"if(window.javabridge.callbacks['" + id
+													+ "']) window.javabridge.callbacks['" + id + "'].callback('"
+													+ (res != null ? res : "")
+													+ "'); delete window.javabridge.callbacks['" + id + "'];",
+											browser.getURL(), 0);
 								});
 								callback.success("");
 								return true;
@@ -230,8 +264,7 @@ public class BlocklyPanel extends JPanel implements Closeable {
 							String url = browser.getURL();
 							if (url.equalsIgnoreCase("about:blank")) {
 								browser.loadURL(BLOCKLY_URL);
-							} 
-							else if (url.startsWith("http://mcreator.ui/")) {
+							} else if (url.startsWith("http://mcreator.ui/")) {
 								if (httpStatusCode == 200) {
 									injectSetupScripts();
 								} else {
@@ -240,9 +273,10 @@ public class BlocklyPanel extends JPanel implements Closeable {
 							}
 						}
 					}
-					
+
 					@Override
-					public void onLoadError(CefBrowser browser, CefFrame frame, ErrorCode errorCode, String errorText, String failedUrl) {
+					public void onLoadError(CefBrowser browser, CefFrame frame, ErrorCode errorCode, String errorText,
+							String failedUrl) {
 						if (frame.isMain()) {
 							LOG.error("Blockly Load Error: " + errorCode + " - " + errorText + " for " + failedUrl);
 						}
@@ -283,29 +317,37 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	private void injectSetupScripts() {
 		StringBuilder initScript = new StringBuilder();
 
-		initScript.append("function loadScript(src) { return new Promise((resolve, reject) => { var s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.head.appendChild(s); }); }\n");
+		initScript.append(
+				"function loadScript(src) { return new Promise((resolve, reject) => { var s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.head.appendChild(s); }); }\n");
 
 		initScript.append("window.javabridge = {};\n");
 		initScript.append("window.javabridge.callbacks = {};\n");
-		initScript.append("window.javabridge.triggerEvent = function() { window.cefQuery({request: 'triggerEvent', persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
+		initScript.append(
+				"window.javabridge.triggerEvent = function() { window.cefQuery({request: 'triggerEvent', persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
 
-		initScript.append("window.javabridge.getMCItemURI = function(name) { return 'http://mcreator.ui/icon/' + name + '.png'; };\n");
+		initScript.append(
+				"window.javabridge.getMCItemURI = function(name) { return 'http://mcreator.ui/icon/' + name + '.png'; };\n");
 
 		String startBlock = bridge.startBlockForEditor(type.registryName());
-		initScript.append("window.javabridge.startBlockForEditor = function(editor) { return '" + (startBlock!=null?startBlock:"") + "'; };\n");
+		initScript.append("window.javabridge.startBlockForEditor = function(editor) { return '"
+				+ (startBlock != null ? startBlock : "") + "'; };\n");
 
 		initScript.append("""
-			window.javabridge.registerCallback = function(callback) {
-				var id = 'cb_' + Math.floor(Math.random() * 1000000);
-				window.javabridge.callbacks[id] = callback;
-				return id;
-			};
-		""");
+					window.javabridge.registerCallback = function(callback) {
+						var id = 'cb_' + Math.floor(Math.random() * 1000000);
+						window.javabridge.callbacks[id] = callback;
+						return id;
+					};
+				""");
 
-		initScript.append("window.javabridge.openColorSelector = function(color, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openColorSelector:' + id + ':' + color, persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
-		initScript.append("window.javabridge.openMCItemSelector = function(type, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openMCItemSelector:' + id + ':' + type, persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
-		initScript.append("window.javabridge.openAIConditionEditor = function(data, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openAIConditionEditor:' + id + ':' + data, persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
-		initScript.append("window.javabridge.openEntrySelector = function(type, typeFilter, customEntryProviders, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openEntrySelector:' + id + ':' + type + ':' + (typeFilter?typeFilter:'null') + ':' + (customEntryProviders?customEntryProviders:'null'), persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
+		initScript.append(
+				"window.javabridge.openColorSelector = function(color, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openColorSelector:' + id + ':' + color, persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
+		initScript.append(
+				"window.javabridge.openMCItemSelector = function(type, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openMCItemSelector:' + id + ':' + type, persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
+		initScript.append(
+				"window.javabridge.openAIConditionEditor = function(data, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openAIConditionEditor:' + id + ':' + data, persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
+		initScript.append(
+				"window.javabridge.openEntrySelector = function(type, typeFilter, customEntryProviders, callback) { var id = window.javabridge.registerCallback(callback); window.cefQuery({request: 'openEntrySelector:' + id + ':' + type + ':' + (typeFilter?typeFilter:'null') + ':' + (customEntryProviders?customEntryProviders:'null'), persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); };\n");
 
 		Gson gson = new Gson();
 		Map<String, String> elementNames = new HashMap<>();
@@ -318,36 +360,39 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		}
 		initScript.append("window.MCR_ELEMENT_NAMES = " + gson.toJson(elementNames) + ";\n");
 
-        initScript.append("window.javabridge.getReadableNameOf = function(id) { return window.MCR_ELEMENT_NAMES[id] || id; };\n");
-        initScript.append("window.javabridge.getDependencies = function() { return []; };\n");
-        initScript.append("window.javabridge.isPlayerVariable = function(name) { return false; };\n");
+		initScript.append(
+				"window.javabridge.getReadableNameOf = function(id) { return window.MCR_ELEMENT_NAMES[id] || id; };\n");
+		initScript.append("window.javabridge.getDependencies = function() { return []; };\n");
+		initScript.append("window.javabridge.isPlayerVariable = function(name) { return false; };\n");
 
 		initScript.append("window.MCR_TEXTS = {};\n");
-		
+
 		Map<String, String> texts = new HashMap<>();
 
 		ResourceBundle rb = L10N.getSupportedLocales().contains(L10N.getLocale())
-                ? ResourceBundle.getBundle("lang/texts", L10N.getLocale(), PluginLoader.INSTANCE, new net.mcreator.util.locale.UTF8Control())
-                : ResourceBundle.getBundle("lang/texts", Locale.ROOT, PluginLoader.INSTANCE, new net.mcreator.util.locale.UTF8Control());
+				? ResourceBundle.getBundle("lang/texts", L10N.getLocale(), PluginLoader.INSTANCE,
+						new net.mcreator.util.locale.UTF8Control())
+				: ResourceBundle.getBundle("lang/texts", Locale.ROOT, PluginLoader.INSTANCE,
+						new net.mcreator.util.locale.UTF8Control());
 
-        for (String key : Collections.list(rb.getKeys())) {
-            if (key.startsWith("blockly.")) {
-                texts.put(key, rb.getString(key));
-            }
-        }
+		for (String key : Collections.list(rb.getKeys())) {
+			if (key.startsWith("blockly.")) {
+				texts.put(key, rb.getString(key));
+			}
+		}
 
 		initScript.append("window.MCR_TEXTS = " + gson.toJson(texts) + ";\n");
 		initScript.append("window.javabridge.t = function(key) { return window.MCR_TEXTS[key] || key; };\n");
 
 		initScript.append("window.MCR_LISTS = {};\n");
 		Set<String> datalists = new HashSet<>(DataListLoader.getCache().keySet());
-		String[] explicitTypes = {"procedure", "entity", "spawnableEntity", "gui", "achievement", "effect", "potion",
-                                  "gamerulesboolean", "gamerulesnumber", "fluid", "sound", "particle", "direction",
-                                  "schematic", "enhancement", "biome", "dimension_custom", "villagerprofessions"};
-        datalists.addAll(Arrays.asList(explicitTypes));
-        for (VariableType vt : VariableTypeLoader.INSTANCE.getAllVariableTypes()) {
-             datalists.add("procedure_retval_" + vt.getName());
-        }
+		String[] explicitTypes = { "procedure", "entity", "spawnableEntity", "gui", "achievement", "effect", "potion",
+				"gamerulesboolean", "gamerulesnumber", "fluid", "sound", "particle", "direction",
+				"schematic", "enhancement", "biome", "dimension_custom", "villagerprofessions" };
+		datalists.addAll(Arrays.asList(explicitTypes));
+		for (VariableType vt : VariableTypeLoader.INSTANCE.getAllVariableTypes()) {
+			datalists.add("procedure_retval_" + vt.getName());
+		}
 		for (String t : datalists) {
 			try {
 				String[] list = BlocklyJavascriptBridge.getListOfForWorkspace(mcreator.getWorkspace(), t);
@@ -372,31 +417,35 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		if (PreferencesManager.PREFERENCES.blockly.legacyFont.get()) {
 			css = css.replace("font-family: sans-serif;", "");
 		}
-		initScript.append("var style = document.createElement('style'); style.innerHTML = `" + css.replace("`", "\\`") + "`; document.head.appendChild(style);\n");
+		initScript.append("var style = document.createElement('style'); style.innerHTML = `" + css.replace("`", "\\`")
+				+ "`; document.head.appendChild(style);\n");
 
 		initScript.append("window.editorType = '" + type.registryName() + "';\n");
 
 		String prefScript = "var MCR_BLOCKLY_PREF = { "
-						+ "'comments' : " + PreferencesManager.PREFERENCES.blockly.enableComments.get() + ","
-						+ "'renderer' : '" + PreferencesManager.PREFERENCES.blockly.blockRenderer.get().toLowerCase(Locale.ENGLISH) + "',"
-						+ "'collapse' : " + PreferencesManager.PREFERENCES.blockly.enableCollapse.get() + ","
-						+ "'trashcan' : " + PreferencesManager.PREFERENCES.blockly.enableTrashcan.get() + ","
-						+ "'maxScale' : " + PreferencesManager.PREFERENCES.blockly.maxScale.get() / 100.0 + ","
-						+ "'minScale' : " + PreferencesManager.PREFERENCES.blockly.minScale.get() / 100.0 + ","
-						+ "'scaleSpeed' : " + PreferencesManager.PREFERENCES.blockly.scaleSpeed.get() / 100.0 + ","
-						+ "'saturation' :" + PreferencesManager.PREFERENCES.blockly.colorSaturation.get() / 100.0 + ","
-						+ "'value' :" + PreferencesManager.PREFERENCES.blockly.colorValue.get() / 100.0
-						+ " };\n";
+				+ "'comments' : " + PreferencesManager.PREFERENCES.blockly.enableComments.get() + ","
+				+ "'renderer' : '"
+				+ PreferencesManager.PREFERENCES.blockly.blockRenderer.get().toLowerCase(Locale.ENGLISH) + "',"
+				+ "'collapse' : " + PreferencesManager.PREFERENCES.blockly.enableCollapse.get() + ","
+				+ "'trashcan' : " + PreferencesManager.PREFERENCES.blockly.enableTrashcan.get() + ","
+				+ "'maxScale' : " + PreferencesManager.PREFERENCES.blockly.maxScale.get() / 100.0 + ","
+				+ "'minScale' : " + PreferencesManager.PREFERENCES.blockly.minScale.get() / 100.0 + ","
+				+ "'scaleSpeed' : " + PreferencesManager.PREFERENCES.blockly.scaleSpeed.get() / 100.0 + ","
+				+ "'saturation' :" + PreferencesManager.PREFERENCES.blockly.colorSaturation.get() / 100.0 + ","
+				+ "'value' :" + PreferencesManager.PREFERENCES.blockly.colorValue.get() / 100.0
+				+ " };\n";
 		initScript.append(prefScript);
 
 		browser.executeJavaScript(initScript.toString(), browser.getURL(), 0);
 
 		StringBuilder loaderScript = new StringBuilder();
 		loaderScript.append("loadScript('http://mcreator.ui/jsdist/blockly_compressed.js')");
-		loaderScript.append(".then(() => loadScript('http://mcreator.ui/jsdist/msg/" + L10N.getBlocklyLangName() + ".js'))");
+		loaderScript.append(
+				".then(() => loadScript('http://mcreator.ui/jsdist/msg/" + L10N.getBlocklyLangName() + ".js'))");
 		loaderScript.append(".then(() => loadScript('http://mcreator.ui/jsdist/blocks_compressed.js'))");
 		loaderScript.append(".then(() => loadScript('http://mcreator.ui/blockly/js/mcreator_blockly.js'))");
-		loaderScript.append(".then(() => { window.cefQuery({request: 'blocklyLoaded', persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); })");
+		loaderScript.append(
+				".then(() => { window.cefQuery({request: 'blocklyLoaded', persistent: false, onSuccess: function(r){}, onFailure: function(e,m){}}); })");
 		loaderScript.append(".catch(e => console.error('Blockly Load Error: ', e));");
 
 		browser.executeJavaScript(loaderScript.toString(), browser.getURL(), 0);
@@ -435,7 +484,8 @@ public class BlocklyPanel extends JPanel implements Closeable {
 				Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom('%s'), workspace);
 				workspace.clearUndo();
 				""".formatted(cleanXML);
-		if (browser != null) browser.executeJavaScript(script, browser.getURL(), 0);
+		if (browser != null)
+			browser.executeJavaScript(script, browser.getURL(), 0);
 
 		ThreadUtil.runOnSwingThread(
 				() -> changeListeners.forEach(listener -> listener.stateChanged(new ChangeEvent(xml))));
@@ -446,22 +496,26 @@ public class BlocklyPanel extends JPanel implements Closeable {
 			addTaskToRunAfterLoaded(() -> addBlocksFromXML(xml));
 			return;
 		}
-		if (browser == null) return;
+		if (browser == null)
+			return;
 		String cleanXML = xml.replace("xmlns=\"http://www.w3.org/1999/xhtml\"", "")
 				.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r");
 
 		int index = cleanXML.indexOf("</block><block");
 		if (index == -1) {
 			browser.executeJavaScript(
-					"Blockly.Xml.appendDomToWorkspace(Blockly.Xml.textToDom('" + cleanXML + "'), workspace)", browser.getURL(), 0);
+					"Blockly.Xml.appendDomToWorkspace(Blockly.Xml.textToDom('" + cleanXML + "'), workspace)",
+					browser.getURL(), 0);
 		} else {
 			index += 8;
 			browser.executeJavaScript(
 					"Blockly.Xml.appendDomToWorkspace(Blockly.Xml.textToDom('" + cleanXML.substring(0, index)
-							+ "</xml>'), workspace)", browser.getURL(), 0);
+							+ "</xml>'), workspace)",
+					browser.getURL(), 0);
 			browser.executeJavaScript(
 					"Blockly.Xml.appendDomToWorkspace(Blockly.Xml.textToDom('<xml>" + cleanXML.substring(index)
-							+ "'), workspace)", browser.getURL(), 0);
+							+ "'), workspace)",
+					browser.getURL(), 0);
 		}
 	}
 
@@ -470,7 +524,9 @@ public class BlocklyPanel extends JPanel implements Closeable {
 			addTaskToRunAfterLoaded(() -> addGlobalVariable(name, type));
 			return;
 		}
-		if (browser != null) browser.executeJavaScript("global_variables.push({name: '" + name + "', type: '" + type + "'})", browser.getURL(), 0);
+		if (browser != null)
+			browser.executeJavaScript("global_variables.push({name: '" + name + "', type: '" + type + "'})",
+					browser.getURL(), 0);
 	}
 
 	public void addLocalVariable(String name, String type) {
@@ -478,7 +534,9 @@ public class BlocklyPanel extends JPanel implements Closeable {
 			addTaskToRunAfterLoaded(() -> addLocalVariable(name, type));
 			return;
 		}
-		if (browser != null) browser.executeJavaScript("workspace.createVariable('" + name + "', '" + type + "', '" + name + "')", browser.getURL(), 0);
+		if (browser != null)
+			browser.executeJavaScript("workspace.createVariable('" + name + "', '" + type + "', '" + name + "')",
+					browser.getURL(), 0);
 	}
 
 	public void removeLocalVariable(String name) {
@@ -486,7 +544,8 @@ public class BlocklyPanel extends JPanel implements Closeable {
 			addTaskToRunAfterLoaded(() -> removeLocalVariable(name));
 			return;
 		}
-		if (browser != null) browser.executeJavaScript("workspace.deleteVariableById('" + name + "')", browser.getURL(), 0);
+		if (browser != null)
+			browser.executeJavaScript("workspace.deleteVariableById('" + name + "')", browser.getURL(), 0);
 	}
 
 	public List<VariableElement> getLocalVariablesList() {
@@ -499,7 +558,8 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		bridge.addExternalTrigger(external_trigger);
 	}
 
-	@Override public void close() {
+	@Override
+	public void close() {
 		if (client != null) {
 			if (browser != null) {
 				browserWorkspaceMap.remove(browser);
@@ -517,8 +577,15 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		return type;
 	}
 
+	public void setBrowserFocus(boolean focus) {
+		if (browser != null) {
+			browser.setFocus(focus);
+		}
+	}
+
 	public Object executeJavaScriptSynchronously(String script) {
-		if (browser != null) browser.executeJavaScript(script, browser.getURL(), 0);
+		if (browser != null)
+			browser.executeJavaScript(script, browser.getURL(), 0);
 		return null;
 	}
 }

@@ -54,27 +54,33 @@ public class GradleSection extends PreferencesSection {
 		int totalRam = (int) (osBean.getTotalMemorySize() / 1048576);
 		int freeRam = (int) (osBean.getFreeMemorySize() / 1048576);
 
-		// Base calculation: Free RAM - 1.5GB buffer
-		int targetRam = freeRam - 1536;
+		// 1. Increase the safety buffer to 2.5 GB. 
+		// This reserves a "dmz" for the OS and the upcoming Minecraft game client.
+		int targetRam = freeRam - 2560; 
 
 		LOG.info("Smart RAM Calc: Total: " + totalRam + "MB, Free: " + freeRam + "MB.");
 
-		// --- POWER USER OVERRIDE ---
-		// If the user has more than 12GB of TOTAL RAM, we assume the OS can handle
-		// swapping.
-		// We force a minimum of 3072MB (3GB) even if free RAM is currently low.
+		// 2. High-Spec PC logic (>12GB)
 		if (totalRam > 12000) {
-			if (targetRam < 3072) {
-				LOG.info("High-Spec PC detected (>12GB). Overriding safety buffer. Forcing minimum 3GB.");
-				targetRam = 3072;
+			// If free RAM is below 5GB, it means the user has other apps (like a browser) open.
+			// We cap the default to ensure the game client doesn't crash on launch.
+			if (freeRam < 5120) { 
+				LOG.info("High-Spec PC but memory is busy. Limiting Gradle to leave room for the Game client.");
+				if (targetRam > 2048)
+					targetRam = 2048; 
 			}
 		}
 
-		// Final Constraints
-		if (targetRam > 4096)
-			targetRam = 4096; // Cap default at 4GB
+		// --- HARD CONSTRAINTS ---
+		
+		// 3. Set a reasonable ceiling at 3072MB (3 GB). 
+		// This is the "golden mean" for modding; it's enough for Forge but avoids starving the system.
+		if (targetRam > 3072)
+			targetRam = 3072; 
+
+		// 4. Absolute floor at 1024MB. Gradle simply won't run with less.
 		if (targetRam < 1024)
-			targetRam = 1024; // Absolute floor 1GB
+			targetRam = 1024; 
 
 		LOG.info("Smart RAM Decision: Setting default Xmx to: " + targetRam + "MB.");
 

@@ -19,6 +19,7 @@
 package net.mcreator.ui;
 
 import javafx.application.Platform;
+import java.util.concurrent.CompletableFuture;
 import net.mcreator.Launcher;
 import net.mcreator.blockly.data.BlocklyLoader;
 import net.mcreator.element.ModElementTypeLoader;
@@ -98,57 +99,46 @@ public final class MCreatorApplication {
 
 			splashScreen.setProgress(10, L10N.t("splash.loading_themes"));
 
-			// We load UI theme now as theme plugins are loaded at this point
-			ThemeManager.loadThemes();
-
 			splashScreen.setProgress(15, L10N.t("splash.loading_core"));
 
-			UIRES.preloadImages();
+			// SUB-TASK: Parallel Initialization of independent components
+			LOG.info("Starting parallel startup tasks...");
+			CompletableFuture<Void> themesFuture = CompletableFuture.runAsync(ThemeManager::loadThemes);
+			CompletableFuture<Void> imagesFuture = CompletableFuture.runAsync(UIRES::preloadImages);
 
-			// load translations after plugins are loaded
+			// load translations after plugins are loaded (Fast now due to lazy loading)
 			L10N.initTranslations();
 
-			// Now that UIRES is loaded, we can load the theme (theme can use UIRES icons)
+			// Race Condition FIX: Wait for themes and images before starting ANY task that
+			// might load MCItem
+			// MCItem has static final fields that call UIRES.get(), so UIRES MUST be ready.
+			CompletableFuture.allOf(themesFuture, imagesFuture).join();
 			ThemeManager.applySelectedTheme();
+
+			// NOW start other background tasks that depend on UIRES/Themes
+			CompletableFuture<Void> helpFuture = CompletableFuture.runAsync(HelpLoader::preloadCache);
+			CompletableFuture<Void> iconsFuture = CompletableFuture.runAsync(BlockItemIcons::init);
+			CompletableFuture<Void> dataFuture = CompletableFuture.runAsync(DataListLoader::preloadCache);
+			CompletableFuture<Void> imageMakerFuture = CompletableFuture.runAsync(ImageMakerTexturesCache::init);
+			CompletableFuture<Void> armorMakerFuture = CompletableFuture.runAsync(ArmorMakerTexturesCache::init);
+			CompletableFuture<Void> varTypeFuture = CompletableFuture.runAsync(VariableTypeLoader::loadVariableTypes);
+			CompletableFuture<Void> javascriptsFuture = CompletableFuture.runAsync(BlocklyJavaScriptsLoader::init);
+			CompletableFuture<Void> toolboxesFuture = CompletableFuture.runAsync(BlocklyToolboxesLoader::init);
+			CompletableFuture<Void> animationsFuture = CompletableFuture.runAsync(EntityAnimationsLoader::init);
 
 			taskbarIntegration = new TaskbarIntegration();
 
 			splashScreen.setProgress(25, L10N.t("splash.loading_components"));
 
-			// preload help entries cache
-			HelpLoader.preloadCache();
-
-			splashScreen.setProgress(35, L10N.t("splash.loading_plugin_data"));
-
-			// load datalists and icons for them after plugins are loaded
-			BlockItemIcons.init();
-			DataListLoader.preloadCache();
-
-			splashScreen.setProgress(45, L10N.t("splash.building_cache"));
-
-			// load templates for image makers
-			ImageMakerTexturesCache.init();
-			ArmorMakerTexturesCache.init();
-
-			splashScreen.setProgress(55, L10N.t("splash.loading_plugin_data"));
-
-			// load apis defined by plugins after plugins are loaded
-			ModAPIManager.initAPIs();
-
-			// load variable elements
-			VariableTypeLoader.loadVariableTypes();
-
-			// load special files for Blockly
-			BlocklyJavaScriptsLoader.init();
-			BlocklyToolboxesLoader.init();
+			// Wait for the rest of background tasks
+			CompletableFuture.allOf(helpFuture, iconsFuture, dataFuture, imageMakerFuture, armorMakerFuture,
+					varTypeFuture, javascriptsFuture, toolboxesFuture, animationsFuture).join();
+			LOG.info("Parallel startup tasks finished.");
 
 			splashScreen.setProgress(60, L10N.t("splash.processing_data"));
 
 			// load blockly blocks after plugins are loaded
 			BlocklyLoader.init();
-
-			// load entity animations for the Java Model animation editor
-			EntityAnimationsLoader.init();
 
 			// register mod element types
 			ModElementTypeLoader.loadModElements();

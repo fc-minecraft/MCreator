@@ -27,9 +27,11 @@ import net.mcreator.ui.init.UIRES;
 import net.mcreator.util.StringUtils;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Window;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.lang.reflect.InvocationTargetException;
 import java.util.stream.Collectors;
 
@@ -109,24 +111,53 @@ public class StartupNotifications {
 		// We do this check in background to not freeze UI
 		new Thread(() -> {
 			try {
+				List<String> pathsToExclude = new ArrayList<>();
 				File gradleCache = net.mcreator.util.OfflineCacheManager.getOfflineCacheDir();
-				if (!gradleCache.exists())
-					return;
+				if (gradleCache.exists())
+					pathsToExclude.add(gradleCache.getAbsolutePath());
 
-				String path = gradleCache.getAbsolutePath();
+				if (parent instanceof net.mcreator.workspace.IWorkspaceProvider workspaceProvider) {
+					File workspaceFile = workspaceProvider.getWorkspace().getFileManager().getWorkspaceFile();
+					if (workspaceFile != null)
+						pathsToExclude.add(workspaceFile.getParentFile().getAbsolutePath());
+				}
+
+				String javaPath = System.getProperty("java.home") + File.separator + "bin" + File.separator
+						+ "java.exe";
+				File javaExe = new File(javaPath);
+
 				ProcessBuilder pb = new ProcessBuilder("powershell", "-Command",
-						"Get-MpPreference | Select-Object -ExpandProperty ExclusionPath");
+						"Get-MpPreference | Select-Object -ExpandProperty ExclusionPath; Get-MpPreference | Select-Object -ExpandProperty ExclusionProcess");
 				Process p = pb.start();
 				String output = new String(p.getInputStream().readAllBytes());
 
-				if (!output.contains(path)) {
+				List<String> missingPaths = pathsToExclude.stream().filter(path -> !output.contains(path)).toList();
+				boolean javaMissing = !output.contains(javaExe.getAbsolutePath())
+						&& !output.contains(javaExe.getName());
+
+				if (!missingPaths.isEmpty() || javaMissing) {
 					SwingUtilities.invokeLater(() -> {
 						parent.addNotification(UIRES.get("18px.warning"),
 								"Антивирус может замедлять работу программы.<br>Добавить MCreator в исключения?",
 								new NotificationsRenderer.ActionButton("Добавить", e -> {
 									try {
-										String cmd = "Start-Process powershell -Verb RunAs -WindowStyle Hidden -ArgumentList 'Add-MpPreference -ExclusionPath \""
-												+ path + "\"'";
+										StringBuilder arguments = new StringBuilder();
+										if (!missingPaths.isEmpty()) {
+											arguments.append("-ExclusionPath ").append(missingPaths.stream()
+													.map(s -> "\"" + s + "\"")
+													.collect(Collectors.joining(", ")));
+										}
+										if (javaMissing) {
+											if (!arguments.isEmpty())
+												arguments.append("; ");
+											arguments.append("Add-MpPreference -ExclusionProcess \"")
+													.append(javaExe.getAbsolutePath()).append("\"");
+											// Also add to ExclusionPath just in case
+											arguments.append(", \"").append(javaExe.getName()).append("\"");
+										}
+
+										String cmd = "Start-Process powershell -Verb RunAs -WindowStyle Hidden -ArgumentList 'Add-MpPreference "
+												+ arguments + "'";
 										new ProcessBuilder("powershell", "-Command", cmd).start();
 										PreferencesManager.PREFERENCES.ui.defenderExclusionAsked.set(true);
 										PreferencesManager.savePreferences();

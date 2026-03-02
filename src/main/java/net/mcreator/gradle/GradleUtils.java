@@ -82,7 +82,7 @@ public class GradleUtils {
 		// --- OPTIMIZATIONS START ---
 
 		// Always use G1GC (modern standard) and enable caching/daemon
-		launcher.addJvmArguments("-XX:+UseG1GC");
+		launcher.addJvmArguments("-XX:+UseG1GC", "-Xshare:off");
 
 		List<String> buildArgs = new ArrayList<>();
 		buildArgs.add("-Dorg.gradle.caching=true");
