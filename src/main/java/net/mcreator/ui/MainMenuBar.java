@@ -25,6 +25,7 @@ import net.mcreator.ui.laf.themes.Theme;
 import net.mcreator.ui.views.editor.image.ImageMakerView;
 import net.mcreator.ui.workspace.selector.RecentWorkspaceEntry;
 import net.mcreator.ui.dialogs.UserFeedbackDialog;
+import net.mcreator.ui.dialogs.ErrorLogDialog;
 
 import javax.swing.*;
 import java.awt.*;
@@ -153,6 +154,10 @@ public abstract class MainMenuBar extends JMenuBar {
 		JMenuItem sendFeedback = new JMenuItem(L10N.t("menubar.help.feedback"));
 		sendFeedback.addActionListener(e -> new UserFeedbackDialog(mcreator).setVisible(true));
 		help.add(sendFeedback);
+
+		JMenuItem errorLog = new JMenuItem(L10N.t("menubar.help.error_log"));
+		errorLog.addActionListener(e -> ErrorLogDialog.showDialog(mcreator));
+		help.add(errorLog);
 
 		help.add(mcreator.getActionRegistry().aboutMCreator);
 		help.setMnemonic('H');
