@@ -1,3 +1,4 @@
+_merge_with_existing: true
 Blocks.QUARTZ_BLOCK:
   - Blocks.QUARTZ_BLOCK
   - "#c:quartz_ores"

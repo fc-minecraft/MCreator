@@ -50,6 +50,9 @@ public class UnsupportedComponent extends JPanel {
 			} else {
 				parent.remove(index);
 				parent.add(new UnsupportedComponent(comp), index);
+				if (parentLayout instanceof GridLayout gridLayout && gridLayout.getColumns() == 2 && index % 2 == 1) {
+					parent.getComponent(index - 1).setVisible(false);
+				}
 			}
 		}
 	}

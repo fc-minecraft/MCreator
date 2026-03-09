@@ -361,6 +361,7 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 			scrollPager.setBorder(BorderFactory.createEmptyBorder());
 			scrollPager.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 			scrollPager.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			scrollPager.getHorizontalScrollBar().setUnitIncrement(20);
 
 			centerComponent = PanelUtils.centerAndSouthElement(parameters = split, scrollPager);
 		} else {

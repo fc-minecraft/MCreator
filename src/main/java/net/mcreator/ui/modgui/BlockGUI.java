@@ -735,7 +735,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 		rent.setOpaque(false);
 
 		rent.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/rotation_mode"),
-				L10N.label("elementgui.block.rotation_mode")));
+				new JLabel(L10N.t("elementgui.block.rotation_mode").replaceAll("<br>.*", "").replace("<html>", ""))));
 		rent.add(rotationMode);
 
 		rent.add(HelpUtils.wrapWithHelpButton(this.withEntry("block/enable_pitch"),

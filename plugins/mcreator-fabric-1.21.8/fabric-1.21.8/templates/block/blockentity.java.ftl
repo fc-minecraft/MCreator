@@ -27,6 +27,13 @@ public class ${name}BlockEntity extends RandomizableContainerBlockEntity impleme
 		<#if data.sensitiveToVibration>, GameEventListener.Provider<VibrationSystem.Listener>, VibrationSystem</#if> {
 
 	private NonNullList<ItemStack> stacks = NonNullList.withSize(${data.inventorySize}, ItemStack.EMPTY);
+	<#if data.hasEnergyStorage>
+	private int energyStorage = ${data.energyInitial};
+	</#if>
+	<#if data.isFluidTank>
+	private long fluidTankAmount;
+	private String fluidTankType = "";
+	</#if>
 
 	<#if data.sensitiveToVibration>
 	private final VibrationSystem.Listener vibrationListener = new VibrationSystem.Listener(this);
@@ -57,6 +64,13 @@ public class ${name}BlockEntity extends RandomizableContainerBlockEntity impleme
 
 		ContainerHelper.loadAllItems(valueInput, this.stacks);
 
+		<#if data.hasEnergyStorage>
+		this.energyStorage = valueInput.getInteger("energyStorage");
+		</#if>
+		<#if data.isFluidTank>
+		this.fluidTankAmount = valueInput.getLong("fluidAmount");
+		this.fluidTankType = valueInput.getString("fluidType");
+		</#if>
 		<#if data.sensitiveToVibration>
 		this.vibrationData = valueInput.read("listener", VibrationSystem.Data.CODEC).orElseGet(VibrationSystem.Data::new);
 		</#if>
@@ -68,6 +82,13 @@ public class ${name}BlockEntity extends RandomizableContainerBlockEntity impleme
 		if (!this.trySaveLootTable(valueOutput))
 			ContainerHelper.saveAllItems(valueOutput, this.stacks);
 
+		<#if data.hasEnergyStorage>
+		valueOutput.putInteger("energyStorage", this.energyStorage);
+		</#if>
+		<#if data.isFluidTank>
+		valueOutput.putLong("fluidAmount", this.fluidTankAmount);
+		valueOutput.putString("fluidType", this.fluidTankType);
+		</#if>
 		<#if data.sensitiveToVibration>
 		valueOutput.store("listener", VibrationSystem.Data.CODEC, this.vibrationData);
 		</#if>
