@@ -258,7 +258,7 @@ import java.util.stream.Stream;
 
 	public String getCredits() {
 		if (credits == null || credits.isBlank())
-			return "Created using mod maker MCreator - https://mcreator.net/about";
+			return "Создано учениками в школе программирования FunCode";
 		return credits;
 	}
 

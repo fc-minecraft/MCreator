@@ -360,7 +360,7 @@ public class WorkspaceDialogs {
 			}
 
 			websiteURL.setText(MCreatorApplication.SERVER_DOMAIN);
-			author.setText("MCreator");
+			author.setText("FunCode");
 			version.setText("1.0.0");
 
 			generator.setUI(new BasicComboBoxUI() {

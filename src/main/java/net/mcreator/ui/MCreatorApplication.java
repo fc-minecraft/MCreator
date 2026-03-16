@@ -72,7 +72,7 @@ public final class MCreatorApplication {
 	private static final Logger LOG = LogManager.getLogger("Application");
 
 	public static final IWebAPI WEB_API = new MCreatorNetWebAPI();
-	public static final String SERVER_DOMAIN = "https://mcreator.net";
+	public static final String SERVER_DOMAIN = "https://funcode.school";
 	public static boolean isInternet = true;
 
 	private static boolean applicationStarted = false;

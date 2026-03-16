@@ -20,13 +20,10 @@ package net.mcreator.ui.action.impl.workspace;
 
 import net.mcreator.gradle.GradleResultCode;
 import net.mcreator.io.FileIO;
-import net.mcreator.ui.MCreatorApplication;
 import net.mcreator.ui.action.ActionRegistry;
 import net.mcreator.ui.action.impl.gradle.GradleAction;
 import net.mcreator.ui.dialogs.file.FileDialogs;
 import net.mcreator.ui.init.L10N;
-import net.mcreator.ui.init.UIRES;
-import net.mcreator.util.DesktopUtils;
 import net.mcreator.util.FilenameUtilsPatched;
 
 import javax.swing.*;
@@ -67,17 +64,13 @@ public class ExportWorkspaceForDistAction extends GradleAction {
 			}
 
 			if (taskResult == GradleResultCode.STATUS_OK && exportFileObject.isFile()) {
-				Object[] options2 = { L10N.t("dialog.workspace.export.option.donate_and_export"),
-						L10N.t("dialog.workspace.export.option.just_export"),
+				Object[] options2 = { L10N.t("dialog.workspace.export.option.just_export"),
 						UIManager.getString("OptionPane.cancelButtonText") };
 				int n = JOptionPane.showOptionDialog(actionRegistry.getMCreator(),
 						L10N.t("dialog.workspace.export.message"), L10N.t("dialog.workspace.export.title"),
-						JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, UIRES.get("export_donate"),
-						options2, options2[0]);
-				if (n == 2 || n == JOptionPane.CLOSED_OPTION) {
+						JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options2, options2[0]);
+				if (n != 0) {
 					return;
-				} else if (n == 0) {
-					DesktopUtils.browseSafe(MCreatorApplication.SERVER_DOMAIN + "/donate");
 				}
 
 				String suggestedFileName = actionRegistry.getMCreator().getWorkspaceSettings().getModID() + "-"
