@@ -62,10 +62,14 @@ public class GeneratorTokens {
 		return rawname
 				.replace("@WORKSPACEROOT", workspace.getWorkspaceFolder().getAbsolutePath())
 				.replace("@modid", workspaceSettings.getModID())
+				.replace("@version", workspaceSettings.getVersion())
 				.replace("@JavaModName", workspaceSettings.getJavaModName())
 				.replace("@modpicture", workspaceSettings.getModPicture() != null ? workspaceSettings.getModPicture() : "")
 				.replace("@BASEPACKAGEPATH", workspaceSettings.getModElementsPackage().replace(".", "/"))
-				.replace("@BASEPACKAGE", workspaceSettings.getModElementsPackage());
+				.replace("@BASEPACKAGE", workspaceSettings.getModElementsPackage())
+				// Fallback for paths that use tokens without @ prefix (common in generator.yaml gradle task definitions)
+				.replace("modid", workspaceSettings.getModID())
+				.replace("version", workspaceSettings.getVersion());
 		//@formatter:on
 	}
 

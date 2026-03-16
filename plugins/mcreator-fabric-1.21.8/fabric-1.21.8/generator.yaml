@@ -15,7 +15,7 @@ gradle:
   sync_task: eclipse
   run_client: runClient
   run_server: runServer
-  export_file: "build/libs/modid-1.0.jar"
+  export_file: "build/libs/modid-version.jar"
 
 import_formatter:
   duplicates_whitelist:
@@ -60,6 +60,10 @@ other_textures_dir: "@MODASSETSROOT/textures"
 vanilla_resources_jar: ".*-merged-.*.jar"
 vanilla_block_textures_dir: "assets/minecraft/textures/block"
 vanilla_item_textures_dir: "assets/minecraft/textures/item"
+vanilla_entity_textures_dir: "assets/minecraft/textures/entity"
+vanilla_effect_textures_dir: "assets/minecraft/textures/mob_effect"
+vanilla_particle_textures_dir: "assets/minecraft/textures/particle"
+vanilla_screen_textures_dir: "assets/minecraft/textures/gui"
 
 base_templates:
   - template: modbase/mod.java.ftl

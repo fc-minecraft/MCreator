@@ -47,8 +47,24 @@ public class ExportWorkspaceForDistAction extends GradleAction {
 		actionRegistry.getMCreator().getGradleConsole().exec("build", taskResult -> {
 			String exportFile = actionRegistry.getMCreator().getGeneratorConfiguration()
 					.getGradleTaskFor("export_file");
+			exportFile = net.mcreator.generator.GeneratorTokens.replaceTokens(
+					actionRegistry.getMCreator().getWorkspace(), exportFile);
 			String exportExtension = FilenameUtilsPatched.getExtension(exportFile);
 			File exportFileObject = new File(actionRegistry.getMCreator().getWorkspaceFolder(), exportFile);
+
+			if (taskResult == GradleResultCode.STATUS_OK && !exportFileObject.isFile()) {
+				// Fallback: search in the same directory for a JAR that might be the mod JAR
+				File libsDir = exportFileObject.getParentFile();
+				if (libsDir != null && libsDir.isDirectory()) {
+					File[] files = libsDir.listFiles((dir, name) -> name.endsWith(".jar") && !name.contains("-sources")
+							&& !name.contains("-dev") && !name.contains("-api"));
+					if (files != null && files.length > 0) {
+						// Pick the one that looks most like a mod JAR (e.g. not sources)
+						// If there is only one, use it.
+						exportFileObject = files[0];
+					}
+				}
+			}
 
 			if (taskResult == GradleResultCode.STATUS_OK && exportFileObject.isFile()) {
 				Object[] options2 = { L10N.t("dialog.workspace.export.option.donate_and_export"),

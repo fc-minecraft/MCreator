@@ -63,6 +63,7 @@ public class BedrockUtils {
 
 				mcreator.getGradleConsole().exec("build", taskResult -> {
 					String exportFile = workspace.getGeneratorConfiguration().getGradleTaskFor("export_file");
+					exportFile = net.mcreator.generator.GeneratorTokens.replaceTokens(workspace, exportFile);
 
 					File addonFile = new File(workspace.getWorkspaceFolder(), exportFile);
 					if (addonFile.isFile()) {

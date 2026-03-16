@@ -560,6 +560,13 @@ tags:
   - tag: BLOCKS:minecraft:climbable
     condition: isLadder
 
+  - tag: BLOCKS:minecraft:dirt
+    condition: plantsGrowOn
+  - tag: BLOCKS:minecraft:sand
+    condition: plantsGrowOn
+  - tag: BLOCKS:minecraft:terracotta
+    condition: plantsGrowOn
+
   - tag: GAME_EVENTS:minecraft:@registryname_can_listen
     condition:
       - hasInventory

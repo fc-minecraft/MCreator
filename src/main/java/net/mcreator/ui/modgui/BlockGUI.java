@@ -132,7 +132,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 	private final JCheckBox isBonemealable = L10N.checkbox("elementgui.common.enable");
 
 	private final JComboBox<String> tintType = new TranslatedComboBox(
-			//@formatter:off
+	//@formatter:off
 			Map.entry("No tint", "elementgui.block.tint.no_tint"),
 			Map.entry("Grass", "elementgui.block.tint.grass"),
 			Map.entry("Foliage", "elementgui.block.tint.foliage"),
@@ -183,7 +183,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 	private final MCItemHolder strippingResult = new MCItemHolder(mcreator, ElementUtil::loadBlocks);
 
 	private final JComboBox<String> generationShape = new TranslatedComboBox(
-			//@formatter:off
+	//@formatter:off
 			Map.entry("UNIFORM", "elementgui.block.shape.uniform"),
 			Map.entry("TRIANGLE", "elementgui.block.shape.triangle")
 			//@formatter:on
@@ -199,7 +199,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 	private final JCheckBox isLadder = L10N.checkbox("elementgui.common.enable");
 
 	private final JComboBox<String> reactionToPushing = new TranslatedComboBox(
-			//@formatter:off
+	//@formatter:off
 			Map.entry("NORMAL", "elementgui.block.pushing.normal"),
 			Map.entry("DESTROY", "elementgui.block.pushing.destroy"),
 			Map.entry("BLOCK", "elementgui.block.pushing.block"),
@@ -209,7 +209,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 	);
 
 	private final JComboBox<String> offsetType = new TranslatedComboBox(
-			//@formatter:off
+	//@formatter:off
 			Map.entry("NONE", "elementgui.block.offset.none"),
 			Map.entry("XZ", "elementgui.block.offset.xz"),
 			Map.entry("XYZ", "elementgui.block.offset.xyz")
@@ -220,7 +220,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 	private final JCheckBox hasBlockItem = L10N.checkbox("elementgui.common.enable");
 	private final JSpinner maxStackSize = new JSpinner(new SpinnerNumberModel(64, 1, 99, 1));
 	private final TranslatedComboBox rarity = new TranslatedComboBox(
-			//@formatter:off
+	//@formatter:off
 			Map.entry("COMMON", "elementgui.common.rarity_common"),
 			Map.entry("UNCOMMON", "elementgui.common.rarity_uncommon"),
 			Map.entry("RARE", "elementgui.common.rarity_rare"),
@@ -272,7 +272,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 			Collections.emptyMap());
 
 	private final JComboBox<String> transparencyType = new TranslatedComboBox(
-			//@formatter:off
+	//@formatter:off
 			Map.entry("SOLID", "elementgui.block.transparency.solid"),
 			Map.entry("CUTOUT", "elementgui.block.transparency.cutout"),
 			Map.entry("CUTOUT_MIPPED", "elementgui.block.transparency.cutout_mipped"),
@@ -305,7 +305,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 	private final CardLayout blockBaseCardLayout = new CardLayout();
 	private final JPanel blockBasePropertiesPanel = new JPanel(blockBaseCardLayout);
 	private final JComboBox<String> blockSetType = new TranslatedComboBox(
-			//@formatter:off
+	//@formatter:off
 			Map.entry("OAK", "elementgui.block.block_set_type.oak"),
 			Map.entry("STONE", "elementgui.block.block_set_type.stone"),
 			Map.entry("IRON", "elementgui.block.block_set_type.iron")
@@ -327,7 +327,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 		super.finalizeGUI();
 	}
 
-	@Override protected void initGUI() {
+	@Override
+	protected void initGUI() {
 		destroyTool.setRenderer(new ItemTexturesComboBoxRenderer() {
 			@Override
 			public Component getListCellRendererComponent(JList<? extends String> list, String value, int index,
@@ -376,7 +377,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		onBlockAdded = new ProcedureSelector(this.withEntry("block/when_added"), mcreator,
 				L10N.t("elementgui.block.event_on_block_added"), Dependency.fromString(
-				"x:number/y:number/z:number/world:world/blockstate:blockstate/oldState:blockstate/moving:logic"));
+						"x:number/y:number/z:number/world:world/blockstate:blockstate/oldState:blockstate/moving:logic"));
 		onNeighbourBlockChanges = new ProcedureSelector(this.withEntry("block/when_neighbour_changes"), mcreator,
 				L10N.t("elementgui.common.event_on_neighbour_block_changes"),
 				Dependency.fromString("x:number/y:number/z:number/world:world/blockstate:blockstate"));
@@ -403,14 +404,15 @@ public class BlockGUI extends ModElementGUI<Block> {
 				Dependency.fromString("x:number/y:number/z:number/world:world/entity:entity/blockstate:blockstate"));
 		onEntityFallsOn = new ProcedureSelector(this.withEntry("common/when_entity_falls_on"), mcreator,
 				L10N.t("elementgui.common.event_on_entity_falls_on"), Dependency.fromString(
-				"x:number/y:number/z:number/world:world/entity:entity/blockstate:blockstate/distance:number"));
+						"x:number/y:number/z:number/world:world/entity:entity/blockstate:blockstate/distance:number"));
 		onBlockPlayedBy = new ProcedureSelector(this.withEntry("block/when_block_placed_by"), mcreator,
 				L10N.t("elementgui.common.event_on_block_placed_by"), Dependency.fromString(
-				"x:number/y:number/z:number/world:world/entity:entity/itemstack:itemstack/blockstate:blockstate"));
+						"x:number/y:number/z:number/world:world/entity:entity/itemstack:itemstack/blockstate:blockstate"));
 		onRightClicked = new ProcedureSelector(this.withEntry("block/when_right_clicked"), mcreator,
 				L10N.t("elementgui.block.event_on_right_clicked"), VariableTypeLoader.BuiltInTypes.ACTIONRESULTTYPE,
 				Dependency.fromString(
-						"x:number/y:number/z:number/world:world/entity:entity/direction:direction/blockstate:blockstate/hitX:number/hitY:number/hitZ:number")).makeReturnValueOptional();
+						"x:number/y:number/z:number/world:world/entity:entity/direction:direction/blockstate:blockstate/hitX:number/hitY:number/hitZ:number"))
+				.makeReturnValueOptional();
 		onRedstoneOn = new ProcedureSelector(this.withEntry("block/on_redstone_on"), mcreator,
 				L10N.t("elementgui.block.event_on_redstone_on"),
 				Dependency.fromString("x:number/y:number/z:number/world:world/blockstate:blockstate"));
@@ -419,7 +421,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 				Dependency.fromString("x:number/y:number/z:number/world:world/blockstate:blockstate"));
 		onHitByProjectile = new ProcedureSelector(this.withEntry("block/on_hit_by_projectile"), mcreator,
 				L10N.t("elementgui.common.event_on_block_hit_by_projectile"), Dependency.fromString(
-				"x:number/y:number/z:number/world:world/entity:entity/direction:direction/blockstate:blockstate/hitX:number/hitY:number/hitZ:number"));
+						"x:number/y:number/z:number/world:world/entity:entity/direction:direction/blockstate:blockstate/hitX:number/hitY:number/hitZ:number"));
 		onBonemealSuccess = new ProcedureSelector(this.withEntry("block/on_bonemeal_success"), mcreator,
 				L10N.t("elementgui.common.event_on_bonemeal_success"), ProcedureSelector.Side.SERVER,
 				Dependency.fromString("x:number/y:number/z:number/world:world/blockstate:blockstate")).makeInline();
@@ -427,7 +429,7 @@ public class BlockGUI extends ModElementGUI<Block> {
 		emittedRedstonePower = new NumberProcedureSelector(this.withEntry("block/redstone_power"), mcreator,
 				L10N.t("elementgui.block.redstone_power"), AbstractProcedureSelector.Side.BOTH,
 				new JSpinner(new SpinnerNumberModel(15, 0, 15, 1)), 130, Dependency.fromString(
-				"x:number/y:number/z:number/world:world/direction:direction/blockstate:blockstate"));
+						"x:number/y:number/z:number/world:world/direction:direction/blockstate:blockstate"));
 
 		specialInformation = new StringListProcedureSelector(this.withEntry("block/special_information"), mcreator,
 				L10N.t("elementgui.common.special_information"), AbstractProcedureSelector.Side.CLIENT,
@@ -437,11 +439,13 @@ public class BlockGUI extends ModElementGUI<Block> {
 		placingCondition = new ProcedureSelector(this.withEntry("block/placing_condition"), mcreator,
 				L10N.t("elementgui.block.event_placing_condition"), VariableTypeLoader.BuiltInTypes.LOGIC,
 				Dependency.fromString("x:number/y:number/z:number/world:world/blockstate:blockstate")).setDefaultName(
-				L10N.t("condition.common.no_additional")).makeInline();
+						L10N.t("condition.common.no_additional"))
+				.makeInline();
 		isBonemealTargetCondition = new ProcedureSelector(this.withEntry("block/bonemeal_target_condition"), mcreator,
 				L10N.t("elementgui.common.event_is_bonemeal_target"), VariableTypeLoader.BuiltInTypes.LOGIC,
 				Dependency.fromString(
-						"x:number/y:number/z:number/world:world/blockstate:blockstate/clientSide:logic")).makeInline();
+						"x:number/y:number/z:number/world:world/blockstate:blockstate/clientSide:logic"))
+				.makeInline();
 		bonemealSuccessCondition = new ProcedureSelector(this.withEntry("block/bonemeal_success_condition"), mcreator,
 				L10N.t("elementgui.common.event_bonemeal_success_condition"), ProcedureSelector.Side.SERVER, true,
 				VariableTypeLoader.BuiltInTypes.LOGIC,
@@ -449,19 +453,23 @@ public class BlockGUI extends ModElementGUI<Block> {
 		additionalHarvestCondition = new ProcedureSelector(this.withEntry("block/event_additional_harvest_condition"),
 				mcreator, L10N.t("elementgui.block.event_additional_harvest_condition"),
 				VariableTypeLoader.BuiltInTypes.LOGIC, Dependency.fromString(
-				"x:number/y:number/z:number/entity:entity/world:world/blockstate:blockstate")).setDefaultName(
-				L10N.t("condition.common.no_additional")).makeInline();
+						"x:number/y:number/z:number/entity:entity/world:world/blockstate:blockstate"))
+				.setDefaultName(
+						L10N.t("condition.common.no_additional"))
+				.makeInline();
 
 		inventoryAutomationTakeCondition = new ProcedureSelector(
 				this.withEntry("block/inventory_automation_take_condition"), mcreator,
 				L10N.t("elementgui.block.inventory_automation_take_condition"), VariableTypeLoader.BuiltInTypes.LOGIC,
 				Dependency.fromString("index:number/itemstack:itemstack/direction:direction")).setDefaultName(
-				L10N.t("condition.common.no_additional")).makeInline();
+						L10N.t("condition.common.no_additional"))
+				.makeInline();
 		inventoryAutomationPlaceCondition = new ProcedureSelector(
 				this.withEntry("block/inventory_automation_place_condition"), mcreator,
 				L10N.t("elementgui.block.inventory_automation_place_condition"), VariableTypeLoader.BuiltInTypes.LOGIC,
 				Dependency.fromString("index:number/itemstack:itemstack/direction:direction")).setDefaultName(
-				L10N.t("condition.common.no_additional")).makeInline();
+						L10N.t("condition.common.no_additional"))
+				.makeInline();
 		vibrationSensitivityRadius = new NumberProcedureSelector(this.withEntry("block/vibration_sensitivity_radius"),
 				mcreator, L10N.t("elementgui.block.vibration_sensitivity_radius"),
 				AbstractProcedureSelector.Side.SERVER, new JSpinner(new SpinnerNumberModel(7, 0, Integer.MAX_VALUE, 1)),
@@ -469,12 +477,15 @@ public class BlockGUI extends ModElementGUI<Block> {
 		canReceiveVibrationCondition = new ProcedureSelector(this.withEntry("block/receive_vibration_condition"),
 				mcreator, L10N.t("elementgui.block.receive_vibration_condition"), AbstractProcedureSelector.Side.SERVER,
 				true, VariableTypeLoader.BuiltInTypes.LOGIC, Dependency.fromString(
-				"x:number/y:number/z:number/world:world/blockstate:blockstate/entity:entity/vibrationX:number/vibrationY:number/vibrationZ:number")).setDefaultName(
-				L10N.t("condition.common.true")).makeInline();
+						"x:number/y:number/z:number/world:world/blockstate:blockstate/entity:entity/vibrationX:number/vibrationY:number/vibrationZ:number"))
+				.setDefaultName(
+						L10N.t("condition.common.true"))
+				.makeInline();
 		onReceivedVibration = new ProcedureSelector(this.withEntry("block/on_received_vibration"), mcreator,
 				L10N.t("elementgui.block.on_received_vibration"), AbstractProcedureSelector.Side.SERVER, true,
 				Dependency.fromString(
-						"x:number/y:number/z:number/world:world/blockstate:blockstate/entity:entity/sourceentity:entity/vibrationX:number/vibrationY:number/vibrationZ:number/distance:number")).makeInline();
+						"x:number/y:number/z:number/world:world/blockstate:blockstate/entity:entity/sourceentity:entity/vibrationX:number/vibrationY:number/vibrationZ:number/distance:number"))
+				.makeInline();
 
 		statePropertiesList = new JBlockStatePropertiesList(mcreator, this, this::nonUserProvidedProperties);
 		statePropertiesList.setPreferredSize(new Dimension(0, 0)); // prevent resizing beyond the editor tab
@@ -494,7 +505,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 			hasTransparency.setEnabled(true);
 			connectedSides.setEnabled(true);
 			blockBasePropertiesPanel.setVisible(false);
-			// Re-enable block item if user switches from flower pot to any other block base option
+			// Re-enable block item if user switches from flower pot to any other block base
+			// option
 			if (!isEditingMode() && !hasBlockItem.isSelected()) {
 				hasBlockItem.setSelected(true);
 				updateBlockItemSettings();
@@ -513,84 +525,84 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 				String selectedBlockBase = blockBase.getSelectedItem();
 				switch (selectedBlockBase) {
-				case "Pane" -> {
-					connectedSides.setEnabled(false);
-					connectedSides.setSelected(false);
+					case "Pane" -> {
+						connectedSides.setEnabled(false);
+						connectedSides.setSelected(false);
 
-					if (!isEditingMode()) {
-						transparencyType.setSelectedItem("CUTOUT_MIPPED");
-						lightOpacity.setValue(0);
+						if (!isEditingMode()) {
+							transparencyType.setSelectedItem("CUTOUT_MIPPED");
+							lightOpacity.setValue(0);
+						}
 					}
-				}
-				case "Leaves" -> {
-					transparencyType.setEnabled(false);
-					transparencyType.setSelectedItem("SOLID");
+					case "Leaves" -> {
+						transparencyType.setEnabled(false);
+						transparencyType.setSelectedItem("SOLID");
 
-					if (!isEditingMode()) {
-						lightOpacity.setValue(1);
-						reactionToPushing.setSelectedItem("DESTROY");
-						hasTransparency.setSelected(true);
-						ignitedByLava.setSelected(true);
+						if (!isEditingMode()) {
+							lightOpacity.setValue(1);
+							reactionToPushing.setSelectedItem("DESTROY");
+							hasTransparency.setSelected(true);
+							ignitedByLava.setSelected(true);
+						}
 					}
-				}
-				case "TrapDoor" -> {
-					isBonemealable.setEnabled(false);
-					isBonemealable.setSelected(false);
-					showBlockBaseCard("blockSetType");
-					if (!isEditingMode()) {
-						lightOpacity.setValue(0);
-						hasTransparency.setSelected(true);
-					}
-				}
-				case "Fence" -> {
-					showBlockBaseCard("blockSetType");
-					if (!isEditingMode()) {
-						lightOpacity.setValue(0);
-						hasTransparency.setSelected(true);
-					}
-				}
-				case "Door" -> {
-					showBlockBaseCard("blockSetType");
-					if (!isEditingMode()) {
-						lightOpacity.setValue(0);
-						hasTransparency.setSelected(true);
-						reactionToPushing.setSelectedItem("DESTROY");
-					}
-				}
-				case "PressurePlate", "Button" -> {
-					showBlockBaseCard("blockSetType");
-					if (!isEditingMode()) {
-						lightOpacity.setValue(0);
-						hasTransparency.setSelected(true);
-						isNotColidable.setSelected(true);
-						reactionToPushing.setSelectedItem("DESTROY");
-					}
-				}
-				case "FlowerPot" -> {
-					showBlockBaseCard("flowerPot");
-					renderType.setEnabled(true);
-					if (!isEditingMode()) {
-						renderType.setSelectedItem(pottedPlantModel);
-						hasBlockItem.setSelected(false);
-						updateBlockItemSettings();
-						lightOpacity.setValue(0);
-						hasTransparency.setSelected(true);
-						transparencyType.setSelectedItem("CUTOUT");
-						hardness.setValue(0d);
-						resistance.setValue(0d);
-						soundOnStep.setSelectedItem("STONE");
-						reactionToPushing.setSelectedItem("DESTROY");
-					}
-				}
-				case null, default -> {
-					if (!isEditingMode()) {
-						lightOpacity.setValue(0);
-						if ("Wall".equals(selectedBlockBase) || "FenceGate".equals(selectedBlockBase)
-								|| "EndRod".equals(selectedBlockBase)) {
+					case "TrapDoor" -> {
+						isBonemealable.setEnabled(false);
+						isBonemealable.setSelected(false);
+						showBlockBaseCard("blockSetType");
+						if (!isEditingMode()) {
+							lightOpacity.setValue(0);
 							hasTransparency.setSelected(true);
 						}
 					}
-				}
+					case "Fence" -> {
+						showBlockBaseCard("blockSetType");
+						if (!isEditingMode()) {
+							lightOpacity.setValue(0);
+							hasTransparency.setSelected(true);
+						}
+					}
+					case "Door" -> {
+						showBlockBaseCard("blockSetType");
+						if (!isEditingMode()) {
+							lightOpacity.setValue(0);
+							hasTransparency.setSelected(true);
+							reactionToPushing.setSelectedItem("DESTROY");
+						}
+					}
+					case "PressurePlate", "Button" -> {
+						showBlockBaseCard("blockSetType");
+						if (!isEditingMode()) {
+							lightOpacity.setValue(0);
+							hasTransparency.setSelected(true);
+							isNotColidable.setSelected(true);
+							reactionToPushing.setSelectedItem("DESTROY");
+						}
+					}
+					case "FlowerPot" -> {
+						showBlockBaseCard("flowerPot");
+						renderType.setEnabled(true);
+						if (!isEditingMode()) {
+							renderType.setSelectedItem(pottedPlantModel);
+							hasBlockItem.setSelected(false);
+							updateBlockItemSettings();
+							lightOpacity.setValue(0);
+							hasTransparency.setSelected(true);
+							transparencyType.setSelectedItem("CUTOUT");
+							hardness.setValue(0d);
+							resistance.setValue(0d);
+							soundOnStep.setSelectedItem("STONE");
+							reactionToPushing.setSelectedItem("DESTROY");
+						}
+					}
+					case null, default -> {
+						if (!isEditingMode()) {
+							lightOpacity.setValue(0);
+							if ("Wall".equals(selectedBlockBase) || "FenceGate".equals(selectedBlockBase)
+									|| "EndRod".equals(selectedBlockBase)) {
+								hasTransparency.setSelected(true);
+							}
+						}
+					}
 				}
 			}
 
@@ -627,12 +639,14 @@ public class BlockGUI extends ModElementGUI<Block> {
 		// Card for block bases with block set type
 		blockBasePropertiesPanel.add(PanelUtils.gridElements(1, 2, 2, 2,
 				HelpUtils.wrapWithHelpButton(this.withEntry("block/block_set_type"),
-						L10N.label("elementgui.block.block_set_type")), blockSetType), "blockSetType");
+						L10N.label("elementgui.block.block_set_type")),
+				blockSetType), "blockSetType");
 
 		// Card for flower pots
 		blockBasePropertiesPanel.add(PanelUtils.gridElements(1, 2, 2, 2,
-						HelpUtils.wrapWithHelpButton(this.withEntry("block/potted_plant"),
-								L10N.label("elementgui.block.potted_plant")), PanelUtils.centerInPanel(pottedPlant)),
+				HelpUtils.wrapWithHelpButton(this.withEntry("block/potted_plant"),
+						L10N.label("elementgui.block.potted_plant")),
+				PanelUtils.centerInPanel(pottedPlant)),
 				"flowerPot");
 
 		JComponent blockBasePanel = PanelUtils.northAndCenterElement(PanelUtils.gridElements(1, 2, 2, 2,
@@ -747,6 +761,16 @@ public class BlockGUI extends ModElementGUI<Block> {
 		rent.add(isWaterloggable);
 
 		rotationMode.setPreferredSize(new Dimension(320, 42));
+		rotationMode.setRenderer(new DefaultListCellRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+					boolean cellHasFocus) {
+				if (value instanceof String str) {
+					value = str.replaceAll("<br>.*", "").replace("<html>", "");
+				}
+				return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			}
+		});
 		renderType.setRenderer(new ModelComboBoxRenderer());
 
 		enablePitch.setOpaque(false);
@@ -1444,7 +1468,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		JComponent animationsList = PanelUtils.northAndCenterElement(
 				HelpUtils.wrapWithHelpButton(this.withEntry("block/model_animations"),
-						L10N.label("elementgui.block.model_animations")), animations);
+						L10N.label("elementgui.block.model_animations")),
+				animations);
 		animationsList.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		animationsPane.setOpaque(false);
@@ -1460,7 +1485,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 		}));
 
 		pottedPlant.setValidator(new MCItemHolderValidator(pottedPlant) {
-			@Override public ValidationResult validate() {
+			@Override
+			public ValidationResult validate() {
 				if (!"FlowerPot".equals(blockBase.getSelectedItem()))
 					return ValidationResult.PASSED;
 				return super.validate();
@@ -1488,7 +1514,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 
 		addPage(L10N.t("elementgui.common.page_visual"), pane2).validate(page1group);
 		addPage(L10N.t("elementgui.common.page_bounding_boxes"), bbPane, false);
-		addPage(L10N.t("elementgui.block.page_states"), bsPane, false).lazyValidate(statePropertiesList::getValidationResult);
+		addPage(L10N.t("elementgui.block.page_states"), bsPane, false)
+				.lazyValidate(statePropertiesList::getValidationResult);
 		addPage(L10N.t("elementgui.block.page_animations"), animationsPane, false);
 		addPage(L10N.t("elementgui.common.page_properties"), pane3).validate(page3group);
 		addPage(L10N.t("elementgui.common.page_advanced_properties"), pane7);
@@ -1670,7 +1697,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 		openGUIOnRightClick.setEnabled(isGuiBoundToEmpty);
 	}
 
-	@Override public void reloadDataLists() {
+	@Override
+	public void reloadDataLists() {
 		super.reloadDataLists();
 
 		AbstractProcedureSelector.ReloadContext context = AbstractProcedureSelector.ReloadContext.create(
@@ -1712,13 +1740,15 @@ public class BlockGUI extends ModElementGUI<Block> {
 				ListUtils.merge(Arrays.asList(normal, singleTexture, cross, crop, grassBlock, pottedPlantModel),
 						Model.getModelsWithTextureMaps(mcreator.getWorkspace()).stream()
 								.filter(el -> el.getType() == Model.Type.JSON || el.getType() == Model.Type.OBJ)
-								.collect(Collectors.toList()), Model.getJavaModels(mcreator.getWorkspace())));
+								.collect(Collectors.toList()),
+						Model.getJavaModels(mcreator.getWorkspace())));
 
 		ComboBoxUtil.updateComboBoxContents(aiPathNodeType,
 				Arrays.asList(ElementUtil.getDataListAsStringArray("pathnodetypes")), "DEFAULT");
 	}
 
-	@Override public void openInEditingMode(Block block) {
+	@Override
+	public void openInEditingMode(Block block) {
 		itemTexture.setTexture(block.itemTexture);
 		particleTexture.setTexture(block.particleTexture);
 		textures.setTextures(block.texture, block.textureTop, block.textureLeft, block.textureFront, block.textureRight,
@@ -1882,7 +1912,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 		refreshSpawnProperties();
 	}
 
-	@Override public Block getElementFromGUI() {
+	@Override
+	public Block getElementFromGUI() {
 		Block block = new Block(modElement);
 		block.name = name.getText();
 		block.hasTransparency = hasTransparency.isSelected();
@@ -2056,7 +2087,8 @@ public class BlockGUI extends ModElementGUI<Block> {
 		return block;
 	}
 
-	@Override public @Nullable URI contextURL() throws URISyntaxException {
+	@Override
+	public @Nullable URI contextURL() throws URISyntaxException {
 		return new URI(MCreatorApplication.SERVER_DOMAIN + "/wiki/how-make-block");
 	}
 

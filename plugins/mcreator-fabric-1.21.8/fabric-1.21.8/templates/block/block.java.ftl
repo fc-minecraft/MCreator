@@ -619,6 +619,9 @@ public class ${name}Block extends
 		</#if>
 	</#if>
 
+	// Fabric does not use canSustainPlant, use block tags instead (added in block.definition.yaml)
+
+
 	<#if data.sensitiveToVibration && data.hasInventory>
 	@Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockstate, BlockEntityType<T> blockEntityType) {
 		if (!level.isClientSide && blockEntityType == ${JavaModName}BlockEntities.${REGISTRYNAME}) {

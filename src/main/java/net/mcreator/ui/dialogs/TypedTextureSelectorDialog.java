@@ -63,14 +63,22 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 
 	private boolean loadExternalTextures = false;
 
+	private JToggleButton all;
+	private JToggleButton user;
+
 	public TypedTextureSelectorDialog(MCreator mcreator, TextureType type) {
 		super(mcreator);
 		this.type = type;
 		this.mcreator = mcreator;
 
-		if (type == TextureType.BLOCK || type == TextureType.ITEM) {
+		if (type == TextureType.BLOCK || type == TextureType.ITEM || type == TextureType.EFFECT
+				|| type == TextureType.PARTICLE || type == TextureType.SCREEN) {
 			loadExternalTextures(true);
 		}
+
+
+		this.all = new JToggleButton(L10N.t("dialog.textures_selector.all"), true);
+		this.user = new JToggleButton(L10N.t("dialog.textures_selector.user"), false);
 
 		setModal(true);
 		setTitle(L10N.t("dialog.textures_selector.title", type));

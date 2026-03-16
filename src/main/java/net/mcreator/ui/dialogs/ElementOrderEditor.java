@@ -57,7 +57,7 @@ public class ElementOrderEditor {
 
 		JPanel top = new JPanel(new BorderLayout());
 
-		top.add("West", L10N.label("dialog.element_order.instructions"));
+		top.add("West", new JLabel("<html><body style='width: 500px'>" + L10N.t("dialog.element_order.instructions") + "</body></html>"));
 		top.add("South", tabMovers);
 
 		mainPanel.add("North", top);
@@ -188,7 +188,7 @@ public class ElementOrderEditor {
 
 		int resultval = JOptionPane.showOptionDialog(mcreator, mainPanel, L10N.t("dialog.element_order.editor_title"),
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-				new String[] { "Save layout", UIManager.getString("OptionPane.cancelButtonText") }, "");
+				new String[] { L10N.t("action.save_layout"), UIManager.getString("OptionPane.cancelButtonText") }, "");
 		if (resultval == 0) {
 			for (Map.Entry<String, DefaultListModel<ModElement>> entry : tabEditors.entrySet()) {
 				ModElement[] newOrder = Collections.list(entry.getValue().elements()).toArray(new ModElement[0]);

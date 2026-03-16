@@ -118,7 +118,7 @@ public class DataListEntry {
 			return net.mcreator.ui.init.L10N.t("entity.minecraft." + secondaryKey);
 		}
 
-		return readableName;
+		return net.mcreator.ui.init.L10N.t(readableName);
 	}
 
 	public String getDescription() {
