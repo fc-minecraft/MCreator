@@ -3,11 +3,12 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "${data.itemTexture.format("%s:item/%s")}"
+    "layer0": "${data.itemTexture.formatWithCategory("%s:%s/%s", "item")}"
   },
   "render_type": "translucent"
 }
 <#else>
+<#-- ... rest of file ... -->
 {
   "parent": "item/generated",
   "textures": {

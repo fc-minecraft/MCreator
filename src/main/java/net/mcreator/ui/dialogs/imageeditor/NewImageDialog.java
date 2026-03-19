@@ -25,12 +25,14 @@ import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
 import net.mcreator.ui.dialogs.MCreatorDialog;
 import net.mcreator.ui.dialogs.TextureSelectorDialog;
+import net.mcreator.ui.workspace.resources.TextureType;
 import net.mcreator.ui.init.ImageMakerTexturesCache;
 import net.mcreator.ui.init.L10N;
 import net.mcreator.ui.views.editor.image.ImageMakerView;
 import net.mcreator.ui.views.editor.image.layer.Layer;
 import net.mcreator.util.image.ImageUtils;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -44,12 +46,23 @@ public class NewImageDialog extends MCreatorDialog {
 
 	private ResourcePointer selection;
 
+	private final TextureType preferredTextureType;
+
 	public NewImageDialog(MCreator window) {
-		this(window, new ImageMakerView(window));
+		this(window, (TextureType) null);
+	}
+
+	public NewImageDialog(MCreator window, @Nullable TextureType preferredTextureType) {
+		this(window, new ImageMakerView(window, preferredTextureType), preferredTextureType);
 	}
 
 	public NewImageDialog(MCreator window, ImageMakerView imageMakerView) {
+		this(window, imageMakerView, null);
+	}
+
+	public NewImageDialog(MCreator window, ImageMakerView imageMakerView, @Nullable TextureType preferredTextureType) {
 		super(window, L10N.t("dialog.imageeditor.new_image_title"), true);
+		this.preferredTextureType = preferredTextureType;
 
 		List<ResourcePointer> templatesSorted = new ArrayList<>(ImageMakerTexturesCache.CACHE.keySet());
 		templatesSorted.sort(Comparator.comparing(resourcePointer -> resourcePointer.identifier.toString()));

@@ -97,15 +97,22 @@ public final class ExternalTexture extends Texture {
 			String vanillaResourcesJar = workspace.getGeneratorConfiguration().getSpecificRoot("vanilla_resources_jar");
 			String root = workspace.getGeneratorConfiguration()
 					.getSpecificRoot("vanilla_" + type.getID() + "_textures_dir");
+			boolean anyVanillaLoaded = false;
 			if (vanillaResourcesJar != null && root != null) {
 				boolean found = false;
+				Pattern vanillaPattern = Pattern.compile(vanillaResourcesJar);
 				for (LibraryInfo libraryInfo : libraryInfos) {
 					File libraryFile = new File(libraryInfo.getLocationAsString());
-					if (libraryFile.isFile() && Pattern.compile(vanillaResourcesJar).matcher(libraryFile.getName())
-							.find()) {
-						loadTexturesFrom(libraryFile, "minecraft", root, type, textures);
-						found = true;
-						break;
+					if (libraryFile.isFile()) {
+						String fileName = libraryFile.getName();
+						if (vanillaPattern.matcher(fileName).find() || (fileName.contains("minecraft") && fileName
+								.contains("client") && fileName.endsWith(".jar"))) {
+							found = true;
+							loadTexturesFrom(libraryFile, "minecraft", root, type, textures);
+							anyVanillaLoaded = true;
+							LOG.debug("Loaded vanilla textures from: {}", libraryFile.getAbsolutePath());
+							break;
+						}
 					}
 				}
 				// We don't log this warning in testing environment because GeneratorsTest already tests for this
@@ -114,10 +121,12 @@ public final class ExternalTexture extends Texture {
 				// thus external textures are not loaded
 				if (!found && !TestUtil.isTestingEnvironment()) {
 					LOG.warn("Vanilla resources jar not found: {}", vanillaResourcesJar);
+				} else if (found) {
+					anyVanillaLoaded = true;
 				}
 			}
 
-			boolean anyVanillaLoaded = !textures.isEmpty();
+			// check dependency mods
 
 			for (String dep : workspace.getWorkspaceSettings().getMCreatorDependencies()) {
 				ModAPIImplementation apiImpl = ModAPIManager.getModAPIForNameAndGenerator(dep,

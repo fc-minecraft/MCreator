@@ -151,7 +151,7 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 		JButton createTx2 = L10N.button("dialog.textures_selector.create_from_scratch");
 		createTx2.setIcon(UIRES.get("18px.add"));
 		createTx2.addActionListener(event -> {
-			NewImageDialog newImageDialog = new NewImageDialog(mcreator);
+			NewImageDialog newImageDialog = new NewImageDialog(mcreator, type);
 			newImageDialog.setVisible(true);
 			dispose();
 		});
@@ -195,6 +195,9 @@ public class TypedTextureSelectorDialog extends MCreatorDialog {
 			@Override
 			protected List<Texture> doInBackground() {
 				List<Texture> result = new ArrayList<>(CustomTexture.getTexturesOfType(mcreator.getWorkspace(), type));
+				if (type == TextureType.ITEM)
+					result.addAll(CustomTexture.getTexturesOfType(mcreator.getWorkspace(), TextureType.BLOCK));
+
 				if (loadExternalTextures) {
 					result.addAll(ExternalTexture.getTexturesOfType(mcreator.getWorkspace(), type));
 				}

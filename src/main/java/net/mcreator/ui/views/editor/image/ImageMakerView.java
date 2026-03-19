@@ -50,6 +50,7 @@ import net.mcreator.util.image.ImageUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -98,8 +99,16 @@ public class ImageMakerView extends ViewBase implements MouseListener, MouseMoti
 	private boolean active;
 	private boolean canEdit = true;
 
+	private final TextureType preferredTextureType;
+
 	public ImageMakerView(MCreator f) {
+		this(f, null);
+	}
+
+	public ImageMakerView(MCreator f, @Nullable TextureType preferredTextureType) {
 		super(f);
+
+		this.preferredTextureType = preferredTextureType;
 
 		versionManager = new VersionManager(this);
 		clipboardManager = new ClipboardManager(this);
@@ -313,6 +322,9 @@ public class ImageMakerView extends ViewBase implements MouseListener, MouseMoti
 		Image image = canvasRenderer.render();
 
 		JComboBox<TextureType> types = new JComboBox<>(TextureType.getSupportedTypes(mcreator.getWorkspace(), false));
+		if (preferredTextureType != null)
+			types.setSelectedItem(preferredTextureType);
+
 		VTextField name = new VTextField(20);
 		name.setValidator(new RegistryNameValidator(name, L10N.t("dialog.image_maker.texture_name")));
 		name.enableRealtimeValidation();

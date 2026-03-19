@@ -1,7 +1,7 @@
 {
     "parent": "item/generated",
     "textures": {
-      "layer0": "${data.texture.format("%s:item/%s")}"
+      "layer0": "${data.getTexture().formatWithCategory("%s:%s/%s", "item")}"
     },
     "display": {
       "thirdperson_righthand": {

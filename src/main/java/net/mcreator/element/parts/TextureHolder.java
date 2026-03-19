@@ -125,6 +125,16 @@ import java.lang.reflect.Type;
 		return pattern.formatted(namespace(), name());
 	}
 
+	public String formatWithCategory(String pattern, String defaultCategory) {
+		net.mcreator.ui.workspace.resources.TextureType defaultType = java.util.Arrays.stream(
+						net.mcreator.ui.workspace.resources.TextureType.values())
+				.filter(t -> t.getID().equals(defaultCategory)).findFirst()
+				.orElse(net.mcreator.ui.workspace.resources.TextureType.ITEM);
+		Texture t = toTexture(defaultType);
+		String category = (t != null) ? t.getTextureType().getID() : defaultCategory;
+		return pattern.formatted(namespace(), category, name());
+	}
+
 	@Override public String toString() {
 		return getRawTextureName();
 	}

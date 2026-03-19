@@ -2,9 +2,9 @@
   "parent": "item/generated",
   "textures": {
     <#if data.itemTexture?has_content>
-    "layer0": "${data.itemTexture.format("%s:item/%s")}"
+    "layer0": "${data.itemTexture.formatWithCategory("%s:%s/%s", "item")}"
     <#else>
-    "layer0": "${data.texture.format("%s:block/%s")}"
+    "layer0": "${data.getTexture().formatWithCategory("%s:%s/%s", "block")}"
     </#if>
   }
 }

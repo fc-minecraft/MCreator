@@ -21,6 +21,7 @@ package net.mcreator.workspace.resources;
 
 import net.mcreator.ui.workspace.resources.TextureType;
 import net.mcreator.util.FilenameUtilsPatched;
+import net.mcreator.util.image.EmptyIcon;
 import net.mcreator.workspace.Workspace;
 
 import javax.annotation.Nullable;
@@ -48,6 +49,10 @@ public abstract class Texture {
 
 	public String getTextureName() {
 		return textureName;
+	}
+
+	public net.mcreator.ui.workspace.resources.TextureType getTextureType() {
+		return textureType;
 	}
 
 	@Override public final boolean equals(Object o) {
@@ -82,6 +87,35 @@ public abstract class Texture {
 		if (name == null || name.isBlank())
 			return null;
 
+		Texture found = fromNameInternal(workspace, textureType, name);
+		if (isTextureFound(found))
+			return found;
+
+		// Fallback: check other categories if not found in the requested one
+		for (TextureType type : TextureType.values()) {
+			if (type == textureType)
+				continue;
+
+			found = fromNameInternal(workspace, type, name);
+			if (isTextureFound(found))
+				return found;
+		}
+
+		return fromNameInternal(workspace, textureType, name);
+	}
+
+	private static boolean isTextureFound(Texture texture) {
+		if (texture instanceof CustomTexture customTexture)
+			return customTexture.getTextureFile().isFile();
+		if (texture instanceof ExternalTexture externalTexture) {
+			// ExternalTexture.getTexture always returns a non-null object,
+			// but we can check if it's a dummy by checking its icon (EmptyIcon)
+			return !(externalTexture.getTextureIcon(null) instanceof net.mcreator.util.image.EmptyIcon.ImageIcon);
+		}
+		return texture != null;
+	}
+
+	private static Texture fromNameInternal(Workspace workspace, TextureType textureType, String name) {
 		if (name.indexOf(':') == -1) {
 			File textureFile = workspace.getFolderManager().getTextureFile(name, textureType);
 			// If texture file contains .png, but we can't find it, we may need to remove one level of extensions
