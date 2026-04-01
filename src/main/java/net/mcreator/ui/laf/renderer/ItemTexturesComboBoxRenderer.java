@@ -45,9 +45,14 @@ public class ItemTexturesComboBoxRenderer extends JLabel implements ListCellRend
 			setForeground(list.getForeground());
 		}
 
-		setText(value);
+		if (value == null)
+			return this;
+
+		String translationKey = "item_textures.value." + value.toLowerCase(java.util.Locale.ENGLISH).replace(" ", "_");
+		setText(net.mcreator.ui.init.L10N.hasTranslation(translationKey) ? net.mcreator.ui.init.L10N.t(translationKey) : value);
 
 		if (value.equals("Special") || value.equals("MultiTool")) {
+
 			setIcon(IconUtils.resize(UIRES.get("mod"), 30, 30));
 		} else {
 			setIcon(IconUtils.resize(BlockItemIcons.getIconFor(value), 30, 30));
