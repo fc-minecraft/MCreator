@@ -55,6 +55,11 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class StructureGUI extends ModElementGUI<Structure> {
 
@@ -111,6 +116,8 @@ public class StructureGUI extends ModElementGUI<Structure> {
 
 	private final ValidationGroup page1group = new ValidationGroup();
 
+	private static final Map<String, File> externalStructures = new HashMap<>();
+
 	public StructureGUI(MCreator mcreator, ModElement modElement, boolean editingMode) {
 		super(mcreator, modElement, editingMode);
 		this.initGUI();
@@ -123,6 +130,29 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		restrictionBiomes = new BiomeListField(mcreator, true);
 		ignoreBlocks = new MCItemListField(mcreator, ElementUtil::loadBlocks);
 		jigsaw = new JJigsawPoolsList(mcreator, this, modElement);
+
+		structureSelector.addPopupMenuListener(new PopupMenuListener() {
+			@Override public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+				scanExternalStructures();
+			}
+
+			@Override public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+			}
+
+			@Override public void popupMenuCanceled(PopupMenuEvent e) {
+			}
+		});
+
+		structureSelector.addActionListener(e -> {
+			String selected = structureSelector.getSelectedItem();
+			if (selected != null && externalStructures.containsKey(selected)) {
+				File externalFile = externalStructures.get(selected);
+				File localFile = new File(mcreator.getFolderManager().getStructuresDir(), selected + ".nbt");
+				if (!localFile.exists()) {
+					FileIO.copyFile(externalFile, localFile);
+				}
+			}
+		});
 
 		terrainAdaptation.addActionListener(e -> {
 			int max = "none".equals(terrainAdaptation.getSelectedItem()) ? 128 : 116;
@@ -141,8 +171,18 @@ public class StructureGUI extends ModElementGUI<Structure> {
 			ignoreBlocks.setListElements(List.of(new MItemBlock(modElement.getWorkspace(), "Blocks.STRUCTURE_BLOCK")));
 		}
 
-		JPanel params = new JPanel(new GridLayout(9, 2, 5, 2));
+		JPanel params = new JPanel(new GridBagLayout());
 		params.setOpaque(false);
+
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weighty = 0;
+		gbc.insets = new Insets(2, 5, 2, 5);
+		gbc.anchor = GridBagConstraints.WEST;
+
+		int row = 0;
 
 		JButton importnbt = new JButton(UIRES.get("18px.add"));
 		importnbt.setToolTipText(L10N.t("elementgui.structuregen.import_tooltip"));
@@ -158,59 +198,99 @@ public class StructureGUI extends ModElementGUI<Structure> {
 			}
 		});
 
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
 		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/biomes_to_spawn"),
-				L10N.label("elementgui.structuregen.biomes_to_spawn")));
-		params.add(restrictionBiomes);
+				L10N.label("elementgui.structuregen.biomes_to_spawn")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(restrictionBiomes, gbc);
 
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
 		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/separation_spacing"),
-				L10N.label("elementgui.structuregen.separation_spacing")));
-		params.add(separation_spacing);
+				L10N.label("elementgui.structuregen.separation_spacing")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(separation_spacing, gbc);
 
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
 		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/generation_step"),
-				L10N.label("elementgui.structuregen.generation_stage")));
-		params.add(generationStep);
+				L10N.label("elementgui.structuregen.generation_stage")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(generationStep, gbc);
 
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
 		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/ground_detection"),
-				L10N.label("elementgui.structuregen.surface_detection_type")));
-		params.add(surfaceDetectionType);
+				L10N.label("elementgui.structuregen.surface_detection_type")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(surfaceDetectionType, gbc);
 
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
 		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/start_height"),
-				L10N.label("elementgui.structuregen.start_height")));
+				L10N.label("elementgui.structuregen.start_height")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
 		params.add(PanelUtils.westAndCenterElement(useStartHeight,
-				PanelUtils.westAndCenterElement(startHeightProviderType, startHeightRange, 5, 5), 5, 5));
+				PanelUtils.westAndCenterElement(startHeightProviderType, startHeightRange, 5, 5), 5, 5), gbc);
 
 		useStartHeight.addActionListener(e -> updateEnabledFields());
 
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
 		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/terrain_adaptation"),
-				L10N.label("elementgui.structuregen.terrain_adaptation")));
-		params.add(terrainAdaptation);
+				L10N.label("elementgui.structuregen.terrain_adaptation")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(terrainAdaptation, gbc);
 
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
 		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/structure"),
-				L10N.label("elementgui.structuregen.select_tooltip")));
-		params.add(PanelUtils.centerAndEastElement(structureSelector, importnbt));
+				L10N.label("elementgui.structuregen.select_tooltip")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		JButton refreshStructures = new JButton(UIRES.get("18px.add_new"));
+		refreshStructures.setToolTipText(L10N.t("elementgui.common.refresh"));
+		refreshStructures.setOpaque(false);
+		refreshStructures.addActionListener(e -> scanExternalStructures());
+		params.add(PanelUtils.centerAndEastElement(structureSelector, PanelUtils.join(refreshStructures, importnbt)), gbc);
 
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
 		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/projection"),
-				L10N.label("elementgui.structuregen.projection")));
-		params.add(projection);
+				L10N.label("elementgui.structuregen.projection")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(projection, gbc);
 
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
 		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/ignore_blocks"),
-				L10N.label("elementgui.structuregen.ignore_blocks")));
-		params.add(ignoreBlocks);
+				L10N.label("elementgui.structuregen.ignore_blocks")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(ignoreBlocks, gbc);
 
 		pane5.setOpaque(false);
 
 		pane5.add("Center", PanelUtils.totalCenterInPanel(params));
 
-		JPanel jigsawSize = new JPanel(new GridLayout(2, 2, 10, 2));
+		JPanel jigsawSize = new JPanel(new GridBagLayout());
 		jigsawSize.setOpaque(false);
 
-		jigsawSize.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/jigsaw_size"),
-				L10N.label("elementgui.structuregen.jigsaw_size")));
-		jigsawSize.add(size);
+		GridBagConstraints gbcJ = new GridBagConstraints();
+		gbcJ.fill = GridBagConstraints.HORIZONTAL;
+		gbcJ.insets = new Insets(2, 5, 2, 5);
+		gbcJ.anchor = GridBagConstraints.WEST;
 
+		gbcJ.gridy = 0; gbcJ.gridx = 0; gbcJ.weightx = 0;
+		jigsawSize.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/jigsaw_size"),
+				L10N.label("elementgui.structuregen.jigsaw_size")), gbcJ);
+		gbcJ.gridx = 1; gbcJ.weightx = 1;
+		jigsawSize.add(size, gbcJ);
+
+		gbcJ.gridy = 1; gbcJ.gridx = 0; gbcJ.weightx = 0;
 		jigsawSize.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/jigsaw_max_distance_from_center"),
-				L10N.label("elementgui.structuregen.jigsaw_max_distance_from_center")));
-		jigsawSize.add(maxDistanceFromCenter);
+				L10N.label("elementgui.structuregen.jigsaw_max_distance_from_center")), gbcJ);
+		gbcJ.gridx = 1; gbcJ.weightx = 1;
+		jigsawSize.add(maxDistanceFromCenter, gbcJ);
 
 		jigsawSize.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 0));
 
@@ -253,7 +333,7 @@ public class StructureGUI extends ModElementGUI<Structure> {
 	@Override public void reloadDataLists() {
 		super.reloadDataLists();
 
-		ComboBoxUtil.updateComboBoxContents(structureSelector, mcreator.getFolderManager().getStructureList());
+		updateStructureSelector();
 
 		jigsaw.reloadDataLists();
 	}
@@ -304,4 +384,61 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		return new URI(MCreatorApplication.SERVER_DOMAIN + "/wiki/how-make-structure");
 	}
 
+
+	private void scanExternalStructures() {
+		File runDir = mcreator.getFolderManager().getClientRunDir();
+		File savesDir = new File(runDir, "saves");
+		if (!savesDir.exists())
+			return;
+
+		new SwingWorker<List<File>, Void>() {
+			@Override protected List<File> doInBackground() {
+				List<File> found = new ArrayList<>();
+				File[] worlds = savesDir.listFiles(File::isDirectory);
+				if (worlds != null) {
+					for (File world : worlds) {
+						File structDir = new File(world, "generated/minecraft/structures");
+						if (structDir.exists() && structDir.isDirectory()) {
+							File[] structures = structDir.listFiles(f -> f.getName().endsWith(".nbt"));
+							if (structures != null) {
+								Collections.addAll(found, structures);
+							}
+						}
+					}
+				}
+				return found;
+			}
+
+			@Override protected void done() {
+				try {
+					List<File> found = get();
+					boolean updated = false;
+					for (File file : found) {
+						String name = FilenameUtilsPatched.removeExtension(file.getName());
+						if (!externalStructures.containsKey(name)) {
+							externalStructures.put(name, file);
+							updated = true;
+						}
+					}
+				if (updated) {
+					updateStructureSelector();
+				}
+				} catch (Exception ignore) {
+				}
+			}
+		}.execute();
+	}
+
+	private void updateStructureSelector() {
+		String selected = structureSelector.getSelectedItem();
+		List<String> structures = new ArrayList<>(mcreator.getFolderManager().getStructureList());
+		externalStructures.forEach((name, file) -> {
+			if (!structures.contains(name)) {
+				structures.add(name);
+			}
+		});
+		Collections.sort(structures);
+		ComboBoxUtil.updateComboBoxContents(structureSelector, structures);
+		structureSelector.setSelectedItem(selected);
+	}
 }
