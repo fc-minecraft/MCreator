@@ -58,6 +58,8 @@ import java.util.Map;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Stream;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -76,19 +78,8 @@ public class StructureGUI extends ModElementGUI<Structure> {
 
 
 
-	private final JComboBox<String> terrainAdaptation = new TranslatedComboBox(
-			Map.entry("none", "elementgui.structuregen.terrain_adaptation.none"),
-			Map.entry("beard_thin", "elementgui.structuregen.terrain_adaptation.beard_thin"),
-			Map.entry("beard_box", "elementgui.structuregen.terrain_adaptation.beard_box"),
-			Map.entry("bury", "elementgui.structuregen.terrain_adaptation.bury"),
-			Map.entry("encapsulate", "elementgui.structuregen.terrain_adaptation.encapsulate")
-	);
-
-
-	private final JComboBox<String> projection = new TranslatedComboBox(
-			Map.entry("rigid", "elementgui.structuregen.projection.rigid"),
-			Map.entry("terrain_matching", "elementgui.structuregen.projection.terrain_matching")
-	);
+	private JComboBox<String> terrainAdaptation;
+	private JComboBox<String> projection;
 
 	private BiomeListField restrictionBiomes;
 
@@ -107,8 +98,10 @@ public class StructureGUI extends ModElementGUI<Structure> {
 
 	private SearchableComboBox<String> structureSelector;
 
-	private final JComboBox<String> generationStep = new JComboBox<>(
-			ElementUtil.getDataListAsStringArray("generationsteps"));
+	private final JComboBox<String> generationStep = new TranslatedComboBox(
+			Stream.of(ElementUtil.getDataListAsStringArray("generationsteps"))
+					.map(step -> Map.entry(step, "datalist.genstep." + step.toLowerCase(Locale.ENGLISH)))
+					.toArray(Map.Entry[]::new));
 
 	private final JSpinner size = new JSpinner(new SpinnerNumberModel(1, 0, 20, 1));
 	private final JSpinner maxDistanceFromCenter = new JSpinner(new SpinnerNumberModel(64, 1, 128, 1));
@@ -130,6 +123,19 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		restrictionBiomes = new BiomeListField(mcreator, true);
 		ignoreBlocks = new MCItemListField(mcreator, ElementUtil::loadBlocks);
 		jigsaw = new JJigsawPoolsList(mcreator, this, modElement);
+
+		projection = new TranslatedComboBox(
+				Map.entry("rigid", "elementgui.structuregen.projection.rigid"),
+				Map.entry("terrain_matching", "elementgui.structuregen.projection.terrain_matching")
+		);
+
+		terrainAdaptation = new TranslatedComboBox(
+				Map.entry("none", "elementgui.structuregen.terrain_adaptation.none"),
+				Map.entry("beard_thin", "elementgui.structuregen.terrain_adaptation.beard_thin"),
+				Map.entry("beard_box", "elementgui.structuregen.terrain_adaptation.beard_box"),
+				Map.entry("bury", "elementgui.structuregen.terrain_adaptation.bury"),
+				Map.entry("encapsulate", "elementgui.structuregen.terrain_adaptation.encapsulate")
+		);
 
 		structureSelector.addPopupMenuListener(new PopupMenuListener() {
 			@Override public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
@@ -168,6 +174,7 @@ public class StructureGUI extends ModElementGUI<Structure> {
 
 		if (!isEditingMode()) {
 			generationStep.setSelectedItem("SURFACE_STRUCTURES");
+			projection.setSelectedItem("rigid");
 			ignoreBlocks.setListElements(List.of(new MItemBlock(modElement.getWorkspace(), "Blocks.STRUCTURE_BLOCK")));
 		}
 
@@ -354,6 +361,7 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		generationStep.setSelectedItem(structure.generationStep);
 		size.setValue(structure.size);
 		maxDistanceFromCenter.setValue(structure.maxDistanceFromCenter);
+		projection.setSelectedItem(structure.projection);
 		jigsaw.setEntries(structure.jigsawPools);
 
 		updateEnabledFields();
