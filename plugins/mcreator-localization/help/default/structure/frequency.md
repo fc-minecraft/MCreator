@@ -1,0 +1,1 @@
+* **Spawn probability** - The probability of the structure spawning in its designated grid cell. A value of 1.0 (100%) means it will always try to spawn, while lower values add more randomness by skipping some potential locations.

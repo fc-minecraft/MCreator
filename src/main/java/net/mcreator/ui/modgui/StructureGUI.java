@@ -46,6 +46,8 @@ import net.mcreator.ui.validation.validators.ItemListFieldValidator;
 import net.mcreator.util.FilenameUtilsPatched;
 import net.mcreator.workspace.elements.ModElement;
 
+import java.util.Map;
+
 import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
@@ -85,6 +87,12 @@ public class StructureGUI extends ModElementGUI<Structure> {
 
 	private final JMinMaxSpinner separation_spacing = new JMinMaxSpinner(2, 5, 0, 1000000, 1,
 			L10N.t("elementgui.structuregen.separation"), L10N.t("elementgui.structuregen.spacing"));
+
+	private final JSpinner frequency = new JSpinner(new SpinnerNumberModel(1.0, 0.0, 1.0, 0.05));
+	private final JComboBox<String> spreadType = new TranslatedComboBox(
+			Map.entry("linear", "elementgui.structuregen.spread_type.linear"),
+			Map.entry("triangular", "elementgui.structuregen.spread_type.triangular")
+	);
 
 	private final JCheckBox useStartHeight = L10N.checkbox("elementgui.common.enable");
 	private final JComboBox<String> startHeightProviderType = new TranslatedComboBox(
@@ -218,6 +226,20 @@ public class StructureGUI extends ModElementGUI<Structure> {
 				L10N.label("elementgui.structuregen.separation_spacing")), gbc);
 		gbc.gridx = 1; gbc.weightx = 1;
 		params.add(separation_spacing, gbc);
+
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
+		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/frequency"),
+				L10N.label("elementgui.structuregen.frequency")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(frequency, gbc);
+
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
+		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/spread_type"),
+				L10N.label("elementgui.structuregen.spread_type")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(spreadType, gbc);
 
 		gbc.gridy = row++;
 		gbc.gridx = 0; gbc.weightx = 0;
@@ -358,6 +380,8 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		restrictionBiomes.setListElements(structure.restrictionBiomes);
 		separation_spacing.setMinValue(structure.separation);
 		separation_spacing.setMaxValue(structure.spacing);
+		frequency.setValue((double) structure.frequency);
+		spreadType.setSelectedItem(structure.spreadType);
 		generationStep.setSelectedItem(structure.generationStep);
 		size.setValue(structure.size);
 		maxDistanceFromCenter.setValue(structure.maxDistanceFromCenter);
@@ -381,6 +405,8 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		structure.structure = structureSelector.getSelectedItem();
 		structure.separation = separation_spacing.getIntMinValue();
 		structure.spacing = separation_spacing.getIntMaxValue();
+		structure.frequency = ((Double) frequency.getValue()).floatValue();
+		structure.spreadType = (String) spreadType.getSelectedItem();
 		structure.generationStep = (String) generationStep.getSelectedItem();
 		structure.size = (int) size.getValue();
 		structure.maxDistanceFromCenter = (int) maxDistanceFromCenter.getValue();
