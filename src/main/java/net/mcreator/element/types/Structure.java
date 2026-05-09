@@ -67,6 +67,8 @@ import java.util.List;
 		this.size = 1;
 		this.maxDistanceFromCenter = 64;
 		this.jigsawPools = new ArrayList<>();
+		this.spacing = 20;
+		this.separation = 8;
 
 		this.useStartHeight = false;
 		this.startHeightProviderType = "UNIFORM";

@@ -85,7 +85,7 @@ public class StructureGUI extends ModElementGUI<Structure> {
 
 	private BiomeListField restrictionBiomes;
 
-	private final JMinMaxSpinner separation_spacing = new JMinMaxSpinner(2, 5, 0, 1000000, 1,
+	private final JMinMaxSpinner separation_spacing = new JMinMaxSpinner(8, 20, 0, 1000000, 1,
 			L10N.t("elementgui.structuregen.separation"), L10N.t("elementgui.structuregen.spacing"));
 
 	private final JSpinner frequency = new JSpinner(new SpinnerNumberModel(1.0, 0.0, 1.0, 0.05));
@@ -429,7 +429,7 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		structure.separation = separation_spacing.getIntMinValue();
 		structure.spacing = separation_spacing.getIntMaxValue();
 		structure.frequency = ((Double) frequency.getValue()).floatValue();
-		structure.frequencyReductionMethod = frequencyReductionMethod.getSelectedItem();
+		structure.frequencyReductionMethod = (String) frequencyReductionMethod.getSelectedItem();
 		structure.spreadType = (String) spreadType.getSelectedItem();
 		structure.salt = (int) salt.getValue();
 		structure.generationStep = (String) generationStep.getSelectedItem();
