@@ -31,6 +31,7 @@ import net.mcreator.ui.component.TranslatedComboBox;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
+import net.mcreator.ui.dialogs.StructurePlacementPreview;
 import net.mcreator.ui.dialogs.file.FileDialogs;
 import net.mcreator.ui.help.HelpUtils;
 import net.mcreator.ui.init.L10N;
@@ -247,6 +248,19 @@ public class StructureGUI extends ModElementGUI<Structure> {
 				L10N.label("elementgui.structuregen.spread_type")), gbc);
 		gbc.gridx = 1; gbc.weightx = 1;
 		params.add(spreadType, gbc);
+
+		gbc.gridy = row++;
+		gbc.gridx = 1; gbc.weightx = 1;
+		JButton visualize = new JButton(L10N.t("elementgui.structuregen.visualize"));
+		visualize.addActionListener(e -> {
+			StructurePlacementPreview preview = new StructurePlacementPreview(mcreator,
+					separation_spacing.getIntMaxValue(),
+					separation_spacing.getIntMinValue(),
+					((Double) frequency.getValue()).floatValue(),
+					(String) spreadType.getSelectedItem());
+			preview.setVisible(true);
+		});
+		params.add(visualize, gbc);
 
 		gbc.gridy = row++;
 		gbc.gridx = 0; gbc.weightx = 0;
