@@ -10,7 +10,7 @@
   "elements": [
     <#list data.getPoolParts() as part>
     {
-      "weight": ${part.weight},
+      "weight": ${part.weight?c},
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "${modid}:${part.structure}",

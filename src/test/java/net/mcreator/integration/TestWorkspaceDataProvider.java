@@ -924,6 +924,10 @@ public class TestWorkspaceDataProvider {
 			structure.generationStep = TestWorkspaceDataProvider.getRandomItem(random,
 					ElementUtil.getDataListAsStringArray("generationsteps"));
 			structure.size = 4;
+			structure.frequency = 0.1f + random.nextFloat() * 0.9f;
+			structure.frequencyReductionMethod = random.nextBoolean() ? "default" : "legacy_type_1";
+			structure.spreadType = random.nextBoolean() ? "linear" : "triangular";
+			structure.salt = random.nextInt(10000);
 			structure.maxDistanceFromCenter = 96;
 			structure.jigsawPools = new ArrayList<>();
 			if (!emptyLists) {

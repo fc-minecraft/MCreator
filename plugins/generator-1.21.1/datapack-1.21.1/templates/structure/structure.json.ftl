@@ -2,8 +2,8 @@
 {
   "type": "minecraft:jigsaw",
   "start_pool": "${modid}:${registryname}",
-  "size": ${data.size},
-  "max_distance_from_center": ${data.maxDistanceFromCenter},
+  "size": ${data.size?c},
+  "max_distance_from_center": ${data.maxDistanceFromCenter?c},
   "spawn_overrides": {},
   "step": "${generator.map(data.generationStep, "generationsteps")}",
   "terrain_adaptation": "${data.terrainAdaptation}",
@@ -11,14 +11,15 @@
     <#if data.useStartHeight>
     "type": "minecraft:${data.startHeightProviderType?lower_case}",
     "min_inclusive": {
-      "absolute": ${data.startHeightMin}
+      "absolute": ${data.startHeightMin?c}
     },
     "max_inclusive": {
-      "absolute": ${data.startHeightMax}
+      "absolute": ${data.startHeightMax?c}
     }
     <#else>
     "absolute": 0
     </#if>
+
   },
   <#if !data.useStartHeight>
   "project_start_to_heightmap": "${data.surfaceDetectionType}",

@@ -89,10 +89,17 @@ public class StructureGUI extends ModElementGUI<Structure> {
 			L10N.t("elementgui.structuregen.separation"), L10N.t("elementgui.structuregen.spacing"));
 
 	private final JSpinner frequency = new JSpinner(new SpinnerNumberModel(1.0, 0.0, 1.0, 0.05));
-	private final JComboBox<String> spreadType = new TranslatedComboBox(
+	private final TranslatedComboBox spreadType = new TranslatedComboBox(
 			Map.entry("linear", "elementgui.structuregen.spread_type.linear"),
 			Map.entry("triangular", "elementgui.structuregen.spread_type.triangular")
 	);
+	private final TranslatedComboBox frequencyReductionMethod = new TranslatedComboBox(
+			Map.entry("default", "elementgui.structuregen.frequency_reduction_method.default"),
+			Map.entry("legacy_type_1", "elementgui.structuregen.frequency_reduction_method.legacy_type_1"),
+			Map.entry("legacy_type_2", "elementgui.structuregen.frequency_reduction_method.legacy_type_2"),
+			Map.entry("legacy_type_3", "elementgui.structuregen.frequency_reduction_method.legacy_type_3")
+	);
+	private final JSpinner salt = new JSpinner(new SpinnerNumberModel(-1, -1, Integer.MAX_VALUE, 1));
 
 	private final JCheckBox useStartHeight = L10N.checkbox("elementgui.common.enable");
 	private final JComboBox<String> startHeightProviderType = new TranslatedComboBox(
@@ -243,6 +250,20 @@ public class StructureGUI extends ModElementGUI<Structure> {
 
 		gbc.gridy = row++;
 		gbc.gridx = 0; gbc.weightx = 0;
+		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/frequency_reduction_method"),
+				L10N.label("elementgui.structuregen.frequency_reduction_method")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(frequencyReductionMethod, gbc);
+
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
+		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/salt"),
+				L10N.label("elementgui.structuregen.salt")), gbc);
+		gbc.gridx = 1; gbc.weightx = 1;
+		params.add(salt, gbc);
+
+		gbc.gridy = row++;
+		gbc.gridx = 0; gbc.weightx = 0;
 		params.add(HelpUtils.wrapWithHelpButton(this.withEntry("structure/generation_step"),
 				L10N.label("elementgui.structuregen.generation_stage")), gbc);
 		gbc.gridx = 1; gbc.weightx = 1;
@@ -381,7 +402,9 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		separation_spacing.setMinValue(structure.separation);
 		separation_spacing.setMaxValue(structure.spacing);
 		frequency.setValue((double) structure.frequency);
+		frequencyReductionMethod.setSelectedItem(structure.frequencyReductionMethod);
 		spreadType.setSelectedItem(structure.spreadType);
+		salt.setValue(structure.salt);
 		generationStep.setSelectedItem(structure.generationStep);
 		size.setValue(structure.size);
 		maxDistanceFromCenter.setValue(structure.maxDistanceFromCenter);
@@ -406,7 +429,9 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		structure.separation = separation_spacing.getIntMinValue();
 		structure.spacing = separation_spacing.getIntMaxValue();
 		structure.frequency = ((Double) frequency.getValue()).floatValue();
+		structure.frequencyReductionMethod = frequencyReductionMethod.getSelectedItem();
 		structure.spreadType = (String) spreadType.getSelectedItem();
+		structure.salt = (int) salt.getValue();
 		structure.generationStep = (String) generationStep.getSelectedItem();
 		structure.size = (int) size.getValue();
 		structure.maxDistanceFromCenter = (int) maxDistanceFromCenter.getValue();

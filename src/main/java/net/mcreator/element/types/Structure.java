@@ -39,7 +39,9 @@ import java.util.List;
 	public int spacing;
 	public int separation;
 	public float frequency;
+	public String frequencyReductionMethod;
 	public String spreadType;
+	public int salt;
 
 	@ModElementReference public List<BiomeEntry> restrictionBiomes;
 	public String terrainAdaptation;
@@ -72,7 +74,9 @@ import java.util.List;
 		this.startHeightMax = 128;
 
 		this.frequency = 1.0f;
+		this.frequencyReductionMethod = "default";
 		this.spreadType = "linear";
+		this.salt = -1;
 	}
 
 	public List<JigsawPool.JigsawPart> getPoolParts() {
