@@ -225,15 +225,15 @@ public class Generator implements IGenerator, Closeable {
 
 					// Fix Arrays.stream ambiguity by using Fully Qualified Name
 					if (content.contains("Arrays.stream")) {
-						content = content.replace("Arrays.stream", "java.util.Arrays.stream");
+						content = content.replaceAll("(?<!java\\.util\\.)Arrays\\.stream", "java.util.Arrays.stream");
 						changed = true;
 					}
 
 					// Fix List/ArrayList ambiguity by using Fully Qualified Name
 					if (content.contains("List<") || content.contains("ArrayList")) {
-						content = content.replaceAll("\\bList<", "java.util.List<");
-						content = content.replaceAll("\\bArrayList<", "java.util.ArrayList<");
-						content = content.replaceAll("new ArrayList", "new java.util.ArrayList");
+						content = content.replaceAll("(?<!java\\.util\\.)\\bList<", "java.util.List<");
+						content = content.replaceAll("(?<!java\\.util\\.)\\bArrayList<", "java.util.ArrayList<");
+						content = content.replaceAll("(?<!java\\.util\\.)new ArrayList", "new java.util.ArrayList");
 						changed = true;
 					}
 

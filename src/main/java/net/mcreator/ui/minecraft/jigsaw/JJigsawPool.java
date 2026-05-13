@@ -154,7 +154,7 @@ public class JJigsawPool extends JEntriesList {
 		Structure.JigsawPool pool = new Structure.JigsawPool();
 		pool.poolName = poolName.getText();
 		pool.fallbackPool = fallbackPool.getEditor().getItem().toString();
-		pool.poolParts = entryList.stream().map(JJigsawPart::getEntry).toList();
+		pool.poolParts = entryList.stream().map(JJigsawPart::getEntry).collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 		return pool.poolParts.isEmpty() ? null : pool;
 	}
 

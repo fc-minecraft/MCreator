@@ -46,6 +46,10 @@ import net.mcreator.ui.validation.validators.ItemListFieldSingleTagValidator;
 import net.mcreator.ui.validation.validators.ItemListFieldValidator;
 import net.mcreator.util.FilenameUtilsPatched;
 import net.mcreator.workspace.elements.ModElement;
+import net.mcreator.ui.component.JStringListField;
+import net.mcreator.ui.minecraft.ModElementListField;
+import net.mcreator.element.ModElementType;
+import net.mcreator.generator.mapping.NonMappableElement;
 
 import java.util.Map;
 
@@ -123,6 +127,8 @@ public class StructureGUI extends ModElementGUI<Structure> {
 	private final JSpinner maxDistanceFromCenter = new JSpinner(new SpinnerNumberModel(64, 1, 128, 1));
 	private JJigsawPoolsList jigsaw;
 
+	private ModElementListField chestLootTables;
+
 	private final ValidationGroup page1group = new ValidationGroup();
 
 	private static final Map<String, File> externalStructures = new HashMap<>();
@@ -139,6 +145,8 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		restrictionBiomes = new BiomeListField(mcreator, true);
 		ignoreBlocks = new MCItemListField(mcreator, ElementUtil::loadBlocks);
 		jigsaw = new JJigsawPoolsList(mcreator, this, modElement);
+		chestLootTables = new ModElementListField(mcreator, ModElementType.LOOTTABLE);
+		chestLootTables.disableItemCentering();
 
 		projection = new TranslatedComboBox(
 				Map.entry("rigid", "elementgui.structuregen.projection.rigid"),
@@ -382,8 +390,17 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		});
 		page1group.addValidationElement(structureSelector);
 
+		JPanel pane8 = new JPanel(new BorderLayout(5, 5));
+		pane8.setOpaque(false);
+		pane8.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		
+		pane8.add("North", HelpUtils.wrapWithHelpButton(this.withEntry("structure/chest_loot_tables"),
+				L10N.label("elementgui.structuregen.chest_loot_tables")));
+		pane8.add("Center", chestLootTables);
+
 		addPage(L10N.t("elementgui.common.page_properties"), pane5).validate(page1group);
 		addPage(L10N.t("elementgui.structuregen.page_jigsaw"), pane7, false).lazyValidate(jigsaw::getValidationResult);
+		addPage(L10N.t("elementgui.structuregen.page_loot_tables"), pane8);
 
 		updateEnabledFields();
 	}
@@ -424,6 +441,11 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		maxDistanceFromCenter.setValue(structure.maxDistanceFromCenter);
 		projection.setSelectedItem(structure.projection);
 		jigsaw.setEntries(structure.jigsawPools);
+		if (structure.chestLootTables != null) {
+			chestLootTables.setListElements(structure.chestLootTables.stream().map(s -> new NonMappableElement(s.value.startsWith("CUSTOM:") ? s.value : "CUSTOM:" + s.value)).toList());
+		} else {
+			chestLootTables.setListElements(new ArrayList<>());
+		}
 
 		updateEnabledFields();
 	}
@@ -450,6 +472,10 @@ public class StructureGUI extends ModElementGUI<Structure> {
 		structure.size = (int) size.getValue();
 		structure.maxDistanceFromCenter = (int) maxDistanceFromCenter.getValue();
 		structure.jigsawPools = jigsaw.getEntries();
+		structure.chestLootTables = chestLootTables.getListElements().stream()
+				.map(NonMappableElement::getUnmappedValue)
+				.map(Structure.LootTableEntry::new)
+				.collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 		return structure;
 	}
 

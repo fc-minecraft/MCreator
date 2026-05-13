@@ -52,7 +52,7 @@ public class AboutAction extends BasicAction {
 		logoPanel.add("North", new JLabel(AppIcon.getAppIcon(128, 128)));
 		logoPanel.setBorder(BorderFactory.createEmptyBorder(0, 24, 0, 0));
 
-		String message = "MCreator FunCode Edition\n\n" +
+		String message = "MCreator Enterprise (FunCode Edition)\n\n" +
 				"Версия: " + Launcher.version.getFullString() + "\n" +
 				"Разработано для обучения программированию.\n\n" +
 				"Сборка и адаптация специально для FunCode.\n" +

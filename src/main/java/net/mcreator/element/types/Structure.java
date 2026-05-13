@@ -24,8 +24,11 @@ import net.mcreator.element.parts.MItemBlock;
 import net.mcreator.workspace.elements.ModElement;
 import net.mcreator.workspace.references.ModElementReference;
 import net.mcreator.workspace.references.ResourceReference;
+import com.google.gson.*;
+import com.google.gson.annotations.JsonAdapter;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +45,36 @@ import java.util.List;
 	public String frequencyReductionMethod;
 	public String spreadType;
 	public int salt;
+	
+	@JsonAdapter(LootTableEntry.Adapter.class)
+	public static class LootTableEntry {
+		@ModElementReference public String value;
+
+		public LootTableEntry() {
+		}
+
+		public LootTableEntry(String value) {
+			this.value = value;
+		}
+
+		public static class Adapter implements JsonDeserializer<LootTableEntry> {
+			@Override
+			public LootTableEntry deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+					throws JsonParseException {
+				if (json.isJsonPrimitive()) {
+					return new LootTableEntry(json.getAsString());
+				}
+				JsonObject obj = json.getAsJsonObject();
+				LootTableEntry entry = new LootTableEntry();
+				if (obj.has("value")) {
+					entry.value = obj.get("value").getAsString();
+				}
+				return entry;
+			}
+		}
+	}
+
+	@ModElementReference public List<LootTableEntry> chestLootTables;
 
 	@ModElementReference public List<BiomeEntry> restrictionBiomes;
 	public String terrainAdaptation;
@@ -79,6 +112,7 @@ import java.util.List;
 		this.frequencyReductionMethod = "default";
 		this.spreadType = "linear";
 		this.salt = -1;
+		this.chestLootTables = new ArrayList<>();
 	}
 
 	public List<JigsawPool.JigsawPart> getPoolParts() {
@@ -87,6 +121,7 @@ import java.util.List;
 		part.structure = structure;
 		part.projection = projection;
 		part.ignoredBlocks = ignoredBlocks;
+		part.chestLootTables = new ArrayList<>(chestLootTables);
 		return Collections.singletonList(part);
 	}
 
@@ -101,12 +136,11 @@ import java.util.List;
 		}
 
 		public static class JigsawPart {
-
 			public int weight;
 			@ResourceReference("structure") public String structure;
 			public String projection;
 			@ModElementReference public List<MItemBlock> ignoredBlocks;
-
+			@ModElementReference public List<LootTableEntry> chestLootTables;
 		}
 
 	}

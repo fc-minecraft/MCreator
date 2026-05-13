@@ -23,6 +23,9 @@ import net.mcreator.element.types.Structure;
 import net.mcreator.minecraft.ElementUtil;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.component.SearchableComboBox;
+import net.mcreator.ui.minecraft.ModElementListField;
+import net.mcreator.element.ModElementType;
+import net.mcreator.generator.mapping.NonMappableElement;
 import net.mcreator.ui.component.util.ComboBoxUtil;
 import net.mcreator.ui.component.util.ComponentUtils;
 import net.mcreator.ui.component.util.PanelUtils;
@@ -36,6 +39,7 @@ import net.mcreator.ui.validation.Validator;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JJigsawPart extends JPanel implements IValidable {
@@ -47,6 +51,7 @@ public class JJigsawPart extends JPanel implements IValidable {
 	private final SearchableComboBox<String> structureSelector = new SearchableComboBox<>();
 	private final JComboBox<String> projection = new JComboBox<>(new String[] { "rigid", "terrain_matching" });
 	private final MCItemListField ignoreBlocks;
+	private final ModElementListField chestLootTables;
 
 	public JJigsawPart(MCreator mcreator, JJigsawPool listParent, JPanel parent, List<JJigsawPart> entryList) {
 		super(new BorderLayout());
@@ -56,6 +61,10 @@ public class JJigsawPart extends JPanel implements IValidable {
 
 		ignoreBlocks = new MCItemListField(mcreator, ElementUtil::loadBlocks);
 		ignoreBlocks.setPreferredSize(new Dimension(260, 30));
+
+		chestLootTables = new ModElementListField(mcreator, ModElementType.LOOTTABLE);
+		chestLootTables.setPreferredSize(new Dimension(260, 30));
+		chestLootTables.disableItemCentering();
 
 		structureSelector.setValidator(() -> {
 			if (structureSelector.getSelectedItem() == null || structureSelector.getSelectedItem().isEmpty())
@@ -80,6 +89,9 @@ public class JJigsawPart extends JPanel implements IValidable {
 
 		line.add(L10N.label("elementgui.structuregen.ignore_blocks"));
 		line.add(ignoreBlocks);
+
+		line.add(L10N.label("elementgui.structuregen.chest_loot_tables"));
+		line.add(chestLootTables);
 
 		final JComponent container = PanelUtils.expandHorizontally(this);
 
@@ -113,6 +125,7 @@ public class JJigsawPart extends JPanel implements IValidable {
 		structureSelector.setEnabled(enabled);
 		projection.setEnabled(enabled);
 		ignoreBlocks.setEnabled(enabled);
+		chestLootTables.setEnabled(enabled);
 	}
 
 	public void reloadDataLists() {
@@ -125,6 +138,10 @@ public class JJigsawPart extends JPanel implements IValidable {
 		part.structure = structureSelector.getSelectedItem();
 		part.projection = (String) projection.getSelectedItem();
 		part.ignoredBlocks = ignoreBlocks.getListElements();
+		part.chestLootTables = chestLootTables.getListElements().stream()
+				.map(NonMappableElement::getUnmappedValue)
+				.map(Structure.LootTableEntry::new)
+				.collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 		return part;
 	}
 
@@ -133,6 +150,12 @@ public class JJigsawPart extends JPanel implements IValidable {
 		structureSelector.setSelectedItem(part.structure);
 		projection.setSelectedItem(part.projection);
 		ignoreBlocks.setListElements(part.ignoredBlocks);
+		if (part.chestLootTables != null) {
+			chestLootTables.setListElements(part.chestLootTables.stream()
+					.map(s -> new NonMappableElement(s.value.startsWith("CUSTOM:") ? s.value : "CUSTOM:" + s.value)).toList());
+		} else {
+			chestLootTables.setListElements(new ArrayList<>());
+		}
 	}
 
 	@Override public ValidationResult getValidationStatus() {

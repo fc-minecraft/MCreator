@@ -43,7 +43,7 @@ public class ModElementListField extends JItemListField<NonMappableElement> {
 						w -> w.getModElements().stream().filter(e -> e.getType() == this.type).map(ModElement::getName)
 								.toArray(String[]::new), L10N.t("dialog.list_field.mod_element_title"),
 						L10N.t("dialog.list_field.mod_element_message", type.getReadableName().toLowerCase(Locale.ENGLISH)))
-				.stream().map(NonMappableElement::new).toList();
+				.stream().map(name -> new NonMappableElement("CUSTOM:" + name)).toList();
 	}
 
 }
