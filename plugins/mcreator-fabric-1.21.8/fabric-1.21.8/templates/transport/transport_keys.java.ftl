@@ -18,10 +18,14 @@ import org.lwjgl.glfw.GLFW;
 /**
  * Client-side keybind registration and tick handler for ${name} transport.
  * Controls: [${data.engineToggleKey}] = toggle engine, [${data.dismountKey}] = hold to dismount.
+ *
+ * NOTE: KeyMapping.isDown() / consumeClick() are suppressed while riding a vehicle.
+ * We use InputConstants.isKeyDown() (raw GLFW) for reliable polling.
  */
 @Environment(EnvType.CLIENT)
 public class ${name}TransportKeys {
 
+	/** Registered for Minecraft key settings screen only. Actual detection uses raw GLFW below. */
 	public static final KeyMapping ENGINE_TOGGLE = KeyBindingHelper.registerKeyBinding(
 		new KeyMapping(
 			"key.${modid}.${registryname}.engine_toggle",
@@ -40,7 +44,13 @@ public class ${name}TransportKeys {
 		)
 	);
 
+	// Raw GLFW key codes for in-vehicle polling
+	private static final int ENGINE_KEY_CODE  = GLFW.GLFW_KEY_${data.engineToggleKey};
+	private static final int DISMOUNT_KEY_CODE = GLFW.GLFW_KEY_${data.dismountKey};
+
+	private static boolean engineWasDown  = false;
 	private static boolean dismountWasDown = false;
+	private static int clientDismountTicks = 0;
 
 	public static void register() {
 		ClientTickEvents.END_CLIENT_TICK.register(${name}TransportKeys::onClientTick);
@@ -48,43 +58,92 @@ public class ${name}TransportKeys {
 
 	private static void onClientTick(Minecraft mc) {
 		if (mc.player == null || mc.screen != null) {
+			// Reset states when no player or screen is open
 			if (dismountWasDown) {
 				dismountWasDown = false;
-				sendIfInTransport(${name}ControlPacket.ACTION_DISMOUNT_RELEASE);
+				if (mc.player != null && mc.player.getVehicle() instanceof ${name}Entity) {
+					ClientPlayNetworking.send(new ${name}ControlPacket(${name}ControlPacket.ACTION_DISMOUNT_RELEASE));
+				}
 			}
-			return;
-		}
-		Entity vehicle = mc.player.getVehicle();
-		if (!(vehicle instanceof ${name}Entity)) {
-			if (dismountWasDown) {
-				dismountWasDown = false;
-			}
-			// Consume clicks even when not in transport (prevents queued-click issues)
-			ENGINE_TOGGLE.consumeClick();
+			engineWasDown = false;
+			clientDismountTicks = 0;
 			return;
 		}
 
-		// Engine toggle on key press (edge trigger)
-		if (ENGINE_TOGGLE.consumeClick()) {
+		Entity vehicleEntity = mc.player.getVehicle();
+		if (!(vehicleEntity instanceof ${name}Entity vehicle)) {
+			dismountWasDown = false;
+			engineWasDown   = false;
+			clientDismountTicks = 0;
+			return;
+		}
+
+		// --- Raw GLFW polling (works while riding) ---
+		long window = mc.getWindow().getWindow();
+
+		// Engine toggle: edge-triggered (press, not hold)
+		boolean engineDown = InputConstants.isKeyDown(window, ENGINE_KEY_CODE);
+		if (engineDown && !engineWasDown) {
 			ClientPlayNetworking.send(new ${name}ControlPacket(${name}ControlPacket.ACTION_ENGINE_TOGGLE));
 		}
+		engineWasDown = engineDown;
 
-		// Dismount: hold logic — send packet every tick while held
-		boolean dismountDown = DISMOUNT.isDown();
+		// Dismount: level-triggered (hold)
+		boolean dismountDown = InputConstants.isKeyDown(window, DISMOUNT_KEY_CODE);
 		if (dismountDown) {
 			ClientPlayNetworking.send(new ${name}ControlPacket(${name}ControlPacket.ACTION_DISMOUNT_HOLD));
 			dismountWasDown = true;
-		} else if (dismountWasDown) {
-			// Key released — cancel dismount countdown
-			ClientPlayNetworking.send(new ${name}ControlPacket(${name}ControlPacket.ACTION_DISMOUNT_RELEASE));
-			dismountWasDown = false;
+			clientDismountTicks = Math.min(20, clientDismountTicks + 1);
+		} else {
+			if (dismountWasDown) {
+				ClientPlayNetworking.send(new ${name}ControlPacket(${name}ControlPacket.ACTION_DISMOUNT_RELEASE));
+				dismountWasDown = false;
+			}
+			clientDismountTicks = 0;
 		}
-	}
 
-	private static void sendIfInTransport(int action) {
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.player != null && mc.player.getVehicle() instanceof ${name}Entity) {
-			ClientPlayNetworking.send(new ${name}ControlPacket(action));
+		// --- Client-side HUD rendering ---
+		StringBuilder hud = new StringBuilder();
+
+		// Dismount progress bar
+		if (clientDismountTicks > 0) {
+			int progress = (clientDismountTicks * 10) / 20;
+			hud.append("§eВыход: §c");
+			for (int i = 0; i < 10; i++) {
+				hud.append(i < progress ? "█" : "░");
+			}
+			hud.append("  ");
+		}
+
+		// Engine status
+		<#if data.showEngineHUD>
+		hud.append(vehicle.isEngineOn() ? "§aДвигатель: ВКЛ" : "§cДвигатель: ВЫКЛ");
+		</#if>
+
+		// Throttle status (direct reading of client-side physics value)
+		<#if data.showThrottleHUD>
+		int throttlePct = (int) (Math.abs(vehicle.getThrottle()) * 100);
+		hud.append(" §7|§b Тяга: ").append(throttlePct).append("%");
+		</#if>
+
+		// Fuel status
+		<#if data.showFuelHUD && data.enableFuel>
+		float fuel = vehicle.getFuel();
+		float cap  = ${(data.fuelCapacity)?c}f;
+		int   pct  = (int) ((fuel / cap) * 100);
+		hud.append(" §7|§e Топливо: ").append(pct).append("%");
+		</#if>
+
+		// Control hints (only show when engine is OFF)
+		<#if data.showHints>
+		if (!vehicle.isEngineOn()) {
+			hud.append("  §8[").append("${data.engineToggleKey}").append(" - завести]");
+			hud.append("  §8[").append("${data.dismountKey}").append(" - выйти (держать)]");
+		}
+		</#if>
+
+		if (hud.length() > 0) {
+			mc.player.displayClientMessage(net.minecraft.network.chat.Component.literal(hud.toString()), true);
 		}
 	}
 }

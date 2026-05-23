@@ -1,0 +1,1 @@
+Enable explosion when colliding with solid blocks at high speed.

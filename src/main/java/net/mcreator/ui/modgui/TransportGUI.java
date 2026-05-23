@@ -75,7 +75,7 @@ public class TransportGUI extends ModElementGUI<Transport> {
 			Map.entry("WATER", "elementgui.transport.type.water")
 	);
 
-	private final JSpinner speed = new JSpinner(new SpinnerNumberModel(0.3, 0, 50, 0.05));
+	private final JSpinner speed = new JSpinner(new SpinnerNumberModel(0.6, 0, 50, 0.05));
 	private final JSpinner strafeSpeed = new JSpinner(new SpinnerNumberModel(0.15, 0, 50, 0.05));
 	private final JSpinner steeringSpeed = new JSpinner(new SpinnerNumberModel(0.05, 0, 1, 0.01));
 	private final JSpinner jumpForce = new JSpinner(new SpinnerNumberModel(0.5, 0, 10, 0.05));
@@ -97,9 +97,9 @@ public class TransportGUI extends ModElementGUI<Transport> {
 			Map.entry("PLANE", "elementgui.transport.plane_mechanics"),
 			Map.entry("HELICOPTER", "elementgui.transport.helicopter_mechanics")
 	);
-	private final JSpinner maxAltitude = new JSpinner(new SpinnerNumberModel(256.0, 0.0, 1000.0, 10.0));
+	private final JSpinner maxAltitude = new JSpinner(new SpinnerNumberModel(320.0, 0.0, 1000.0, 10.0));
 	private final JCheckBox enableCrash = new JCheckBox();
-	private final JSpinner crashSpeed = new JSpinner(new SpinnerNumberModel(0.8, 0.1, 10.0, 0.1));
+	private final JSpinner crashSpeed = new JSpinner(new SpinnerNumberModel(0.4, 0.1, 10.0, 0.1));
 	private final JCheckBox enableFuel = new JCheckBox();
 	private final FuelItemsEditorView fuelItemsEditor;
 	private final JSpinner fuelConsumption = new JSpinner(new SpinnerNumberModel(0.1, 0.0, 100.0, 0.05));
@@ -124,13 +124,13 @@ public class TransportGUI extends ModElementGUI<Transport> {
 	private final JCheckBox showHints       = new JCheckBox();
 
 	// Phase 2: Physics
-	private final JSpinner accelerationRate = new JSpinner(new SpinnerNumberModel(0.02, 0.001, 1.0, 0.005));
-	private final JSpinner brakeFactor      = new JSpinner(new SpinnerNumberModel(0.04, 0.001, 1.0, 0.005));
-	private final JSpinner stallSpeed       = new JSpinner(new SpinnerNumberModel(0.1, 0.0, 5.0, 0.01));
-	private final JSpinner inertiaFactor    = new JSpinner(new SpinnerNumberModel(0.95, 0.0, 1.0, 0.01));
+	private final JSpinner accelerationRate = new JSpinner(new SpinnerNumberModel(0.04, 0.001, 1.0, 0.005));
+	private final JSpinner brakeFactor      = new JSpinner(new SpinnerNumberModel(0.06, 0.001, 1.0, 0.005));
+	private final JSpinner stallSpeed       = new JSpinner(new SpinnerNumberModel(0.15, 0.0, 5.0, 0.01));
+	private final JSpinner inertiaFactor    = new JSpinner(new SpinnerNumberModel(0.98, 0.0, 1.0, 0.01));
 
 	// Phase 2: Crash expanded
-	private final JSpinner explosionRadius      = new JSpinner(new SpinnerNumberModel(3.0, 0.5, 20.0, 0.5));
+	private final JSpinner explosionRadius      = new JSpinner(new SpinnerNumberModel(2.0, 0.5, 20.0, 0.5));
 	private final JCheckBox crashDamageToPlayer = new JCheckBox();
 	private final JCheckBox crashDropItems      = new JCheckBox();
 
@@ -499,13 +499,13 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		showHints.setSelected(transport.showHints);
 
 		// Phase 2: Physics
-		accelerationRate.setValue(transport.accelerationRate > 0 ? transport.accelerationRate : 0.02);
-		brakeFactor.setValue(transport.brakeFactor > 0 ? transport.brakeFactor : 0.04);
-		stallSpeed.setValue(transport.stallSpeed > 0 ? transport.stallSpeed : 0.1);
-		inertiaFactor.setValue(transport.inertiaFactor > 0 ? transport.inertiaFactor : 0.95);
+		accelerationRate.setValue(transport.accelerationRate > 0 ? transport.accelerationRate : 0.04);
+		brakeFactor.setValue(transport.brakeFactor > 0 ? transport.brakeFactor : 0.06);
+		stallSpeed.setValue(transport.stallSpeed > 0 ? transport.stallSpeed : 0.15);
+		inertiaFactor.setValue(transport.inertiaFactor > 0 ? transport.inertiaFactor : 0.98);
 
 		// Phase 2: Crash
-		explosionRadius.setValue(transport.explosionRadius > 0 ? (double) transport.explosionRadius : 3.0);
+		explosionRadius.setValue(transport.explosionRadius > 0 ? (double) transport.explosionRadius : 2.0);
 		crashDamageToPlayer.setSelected(transport.crashDamageToPlayer);
 		crashDropItems.setSelected(transport.crashDropItems);
 		explosionRadius.setEnabled(transport.enableCrash);
@@ -753,93 +753,142 @@ public class TransportGUI extends ModElementGUI<Transport> {
 			boneRotations.clear();
 			boneParents.clear();
 
-			// Matches bone definition: PartDefinition <name> = <parent>.addOrReplaceChild("<id>", ..., PartPose.offset/offsetAndRotation/rotation/ZERO)
-			Pattern bonePattern = Pattern.compile("(?s)(?:PartDefinition\\s+)?(?:this\\.)?([a-zA-Z0-9_]+)\\s*=\\s*(?:this\\.)?([a-zA-Z0-9_]+)\\.addOrReplaceChild\\(\\s*\"([^\"]+)\"\\s*,[^;]*?PartPose\\s*\\.\\s*(?:(ZERO)|(offset|offsetAndRotation|rotation)\\s*\\(([^)]+)\\))");
-			Matcher matcher = bonePattern.matcher(content);
-			while (matcher.find()) {
-				String varName = matcher.group(1);
-				String parentVar = matcher.group(2);
-				String zeroMethod = matcher.group(4);
-				String methodName = matcher.group(5);
-				String argsStr = matcher.group(6);
+			// ----------------------------------------------------------------
+			// Pass 1: collect all bone (PartDefinition) declarations.
+			// Handles addOrReplaceChild(...) with PartPose.ZERO / offset / rotation / offsetAndRotation.
+			// We walk char-by-char to find "addOrReplaceChild(", then grab the PartPose args robustly.
+			// ----------------------------------------------------------------
+			Pattern boneDeclPat = Pattern.compile(
+				"(?:PartDefinition\\s+)?([a-zA-Z0-9_]+)\\s*=\\s*(?:[a-zA-Z0-9_]+)\\.addOrReplaceChild\\s*\\(");
+			Matcher boneDecl = boneDeclPat.matcher(content);
+			while (boneDecl.find()) {
+				String varName = boneDecl.group(1);
+				if (varName.equals("meshdefinition") || varName.equals("partdefinition")) continue;
 
-				float ox = 0, oy = 0, oz = 0;
-				float rx = 0, ry = 0, rz = 0;
+				// Find parent: the identifier before .addOrReplaceChild
+				int eqIdx = content.lastIndexOf('=', boneDecl.start() + varName.length() + 10);
+				String beforeEq = content.substring(Math.max(0, boneDecl.start()), boneDecl.end());
+				Pattern parentPat = Pattern.compile("=\\s*([a-zA-Z0-9_]+)\\.addOrReplaceChild");
+				Matcher parentMatch = parentPat.matcher(beforeEq);
+				String parentVar = "partdefinition";
+				if (parentMatch.find()) parentVar = parentMatch.group(1);
 
-				if ("ZERO".equals(zeroMethod)) {
-					// No-op, all zero
-				} else if ("offset".equals(methodName) && argsStr != null) {
-					String[] args = argsStr.split(",");
-					if (args.length >= 3) {
-						ox = Float.parseFloat(args[0].trim().replaceAll("(?i)f", ""));
-						oy = Float.parseFloat(args[1].trim().replaceAll("(?i)f", ""));
-						oz = Float.parseFloat(args[2].trim().replaceAll("(?i)f", ""));
-					}
-				} else if ("rotation".equals(methodName) && argsStr != null) {
-					String[] args = argsStr.split(",");
-					if (args.length >= 3) {
-						rx = Float.parseFloat(args[0].trim().replaceAll("(?i)f", ""));
-						ry = Float.parseFloat(args[1].trim().replaceAll("(?i)f", ""));
-						rz = Float.parseFloat(args[2].trim().replaceAll("(?i)f", ""));
-					}
-				} else if ("offsetAndRotation".equals(methodName) && argsStr != null) {
-					String[] args = argsStr.split(",");
-					if (args.length >= 6) {
-						ox = Float.parseFloat(args[0].trim().replaceAll("(?i)f", ""));
-						oy = Float.parseFloat(args[1].trim().replaceAll("(?i)f", ""));
-						oz = Float.parseFloat(args[2].trim().replaceAll("(?i)f", ""));
-						rx = Float.parseFloat(args[3].trim().replaceAll("(?i)f", ""));
-						ry = Float.parseFloat(args[4].trim().replaceAll("(?i)f", ""));
-						rz = Float.parseFloat(args[5].trim().replaceAll("(?i)f", ""));
+				// Grab full argument list of addOrReplaceChild(...)
+				int argsStart = boneDecl.end();
+				int depth = 1;
+				int pos = argsStart;
+				while (pos < content.length() && depth > 0) {
+					char c = content.charAt(pos);
+					if (c == '(') depth++;
+					else if (c == ')') depth--;
+					pos++;
+				}
+				String fullArgs = content.substring(argsStart, pos - 1);
+
+				// Find PartPose.ZERO / .offset(...) / .rotation(...) / .offsetAndRotation(...)
+				// IMPORTANT: offsetAndRotation must be FIRST since "offset" is a prefix of it
+				Pattern posePat = Pattern.compile(
+					"PartPose\\s*\\.\\s*(ZERO|offsetAndRotation|rotation|offset)\\s*(?:\\(([^)]+)\\))?");
+				Matcher poseMatcher = posePat.matcher(fullArgs);
+				float ox = 0, oy = 0, oz = 0, rx = 0, ry = 0, rz = 0;
+				if (poseMatcher.find()) {
+					String method = poseMatcher.group(1);
+					String args = poseMatcher.group(2);
+					if (args != null) {
+						String[] a = args.split(",");
+						try {
+							if ("offset".equals(method) && a.length >= 3) {
+								ox = parseF(a[0]); oy = parseF(a[1]); oz = parseF(a[2]);
+							} else if ("rotation".equals(method) && a.length >= 3) {
+								rx = parseF(a[0]); ry = parseF(a[1]); rz = parseF(a[2]);
+							} else if ("offsetAndRotation".equals(method) && a.length >= 6) {
+								ox = parseF(a[0]); oy = parseF(a[1]); oz = parseF(a[2]);
+								rx = parseF(a[3]); ry = parseF(a[4]); rz = parseF(a[5]);
+							}
+						} catch (NumberFormatException ignored) {}
 					}
 				}
-
-				boneOffsets.put(varName, new float[] { ox, oy, oz });
+				boneOffsets.put(varName, new float[]{ox, oy, oz});
 				boneParents.put(varName, parentVar);
-				if (rx != 0.0f || ry != 0.0f || rz != 0.0f) {
-					boneRotations.put(varName, new float[] { rx, ry, rz });
+				if (rx != 0 || ry != 0 || rz != 0) {
+					boneRotations.put(varName, new float[]{rx, ry, rz});
 				}
 			}
 
-			// Parse cubes: we look for .addBox(...) calls and assign them to the last declared PartDefinition variable
-			String[] lines = content.split("\n");
+			// ----------------------------------------------------------------
+			// Pass 2: collect all addBox calls.
+			// Strategy: for each addBox, find the nearest preceding bone variable assignment.
+			// We scan through the "createBodyLayer" method linearly, tracking current bone.
+			// ----------------------------------------------------------------
+			// Find the body of createBodyLayer
+			int methodStart = content.indexOf("createBodyLayer");
+			if (methodStart < 0) methodStart = 0;
+			// Limit to method body
+			int braceStart = content.indexOf('{', methodStart);
+			int methodEnd = content.length();
+			if (braceStart >= 0) {
+				int d = 1;
+				int p = braceStart + 1;
+				while (p < content.length() && d > 0) {
+					char c = content.charAt(p);
+					if (c == '{') d++;
+					else if (c == '}') d--;
+					p++;
+				}
+				methodEnd = p;
+			}
+			String methodBody = content.substring(Math.max(0, braceStart), Math.min(content.length(), methodEnd));
+
+			// Walk line by line, track current bone var, emit boxes
 			String currentBoneVar = null;
-			for (String line : lines) {
-				Matcher boneVarMatcher = Pattern.compile("(?:PartDefinition\\s+)?(?:this\\.)?([a-zA-Z0-9_]+)\\s*=").matcher(line);
-				if (boneVarMatcher.find()) {
-					String varName = boneVarMatcher.group(1);
-					if (boneOffsets.containsKey(varName) || varName.equals("partdefinition") || varName.equals("meshdefinition")) {
-						currentBoneVar = varName;
+			// Regex: any known bone variable = something (either addOrReplaceChild or addChild etc.)
+			Pattern assignPat = Pattern.compile("\\b([a-zA-Z0-9_]+)\\s*=\\s*[a-zA-Z0-9_]+\\.(?:addOrReplaceChild|addChild)");
+			Pattern addBoxPat = Pattern.compile(
+				"addBox\\(\\s*([-0-9.Ee]+)F?\\s*,\\s*([-0-9.Ee]+)F?\\s*,\\s*([-0-9.Ee]+)F?\\s*," +
+				"\\s*([-0-9.Ee]+)F?\\s*,\\s*([-0-9.Ee]+)F?\\s*,\\s*([-0-9.Ee]+)F?");
+
+			String[] statements = methodBody.split(";");
+			for (String stmt : statements) {
+				stmt = stmt.trim();
+				// Update current bone if this statement contains a bone assignment
+				Matcher assignMatcher = assignPat.matcher(stmt);
+				if (assignMatcher.find()) {
+					String v = assignMatcher.group(1);
+					if (boneOffsets.containsKey(v)) {
+						currentBoneVar = v;
 					}
 				}
-				if (currentBoneVar != null && line.contains("addBox")) {
-					Matcher boxMatcher = Pattern.compile("addBox\\(([-0-9.fF]+)\\s*,\\s*([-0-9.fF]+)\\s*,\\s*([-0-9.fF]+)\\s*,\\s*([-0-9.fF]+)\\s*,\\s*([-0-9.fF]+)\\s*,\\s*([-0-9.fF]+)").matcher(line);
-					while (boxMatcher.find()) {
-						float x = Float.parseFloat(boxMatcher.group(1).replaceAll("(?i)f", ""));
-						float y = Float.parseFloat(boxMatcher.group(2).replaceAll("(?i)f", ""));
-						float z = Float.parseFloat(boxMatcher.group(3).replaceAll("(?i)f", ""));
-						float w = Float.parseFloat(boxMatcher.group(4).replaceAll("(?i)f", ""));
-						float h = Float.parseFloat(boxMatcher.group(5).replaceAll("(?i)f", ""));
-						float d = Float.parseFloat(boxMatcher.group(6).replaceAll("(?i)f", ""));
 
-						float[][] worldCorners = new float[8][3];
-						float[][] localCorners = new float[][] {
-							{x, y, z},
-							{x + w, y, z},
-							{x + w, y + h, z},
-							{x, y + h, z},
-							{x, y, z + d},
-							{x + w, y, z + d},
-							{x + w, y + h, z + d},
-							{x, y + h, z + d}
-						};
-						for (int i = 0; i < 8; i++) {
-							worldCorners[i] = transformToWorld(localCorners[i], currentBoneVar);
-						}
-						boxes.add(new Box3D(worldCorners));
+				// Collect all addBox calls on this statement
+				if (stmt.contains("addBox")) {
+					Matcher boxMatcher = addBoxPat.matcher(stmt);
+					while (boxMatcher.find()) {
+						try {
+							float x = parseF(boxMatcher.group(1));
+							float y = parseF(boxMatcher.group(2));
+							float z = parseF(boxMatcher.group(3));
+							float w = parseF(boxMatcher.group(4));
+							float h = parseF(boxMatcher.group(5));
+							float d = parseF(boxMatcher.group(6));
+
+							String bone = currentBoneVar;
+							float[][] localCorners = {
+								{x, y, z}, {x+w, y, z}, {x+w, y+h, z}, {x, y+h, z},
+								{x, y, z+d}, {x+w, y, z+d}, {x+w, y+h, z+d}, {x, y+h, z+d}
+							};
+							float[][] worldCorners = new float[8][3];
+							for (int i = 0; i < 8; i++) {
+								worldCorners[i] = transformToWorld(localCorners[i], bone);
+							}
+							boxes.add(new Box3D(worldCorners));
+						} catch (NumberFormatException ignored) {}
 					}
 				}
 			}
+		}
+
+		private static float parseF(String s) {
+			return Float.parseFloat(s.trim().replaceAll("(?i)f$", ""));
 		}
 
 		private float[] transformToWorld(float[] pos, String bone) {
@@ -866,12 +915,12 @@ public class TransportGUI extends ModElementGUI<Transport> {
 			float y = pos[1];
 			float z = pos[2];
 
-			// 1. Pitch (X)
-			float cosX = (float) Math.cos(pitch);
-			float sinX = (float) Math.sin(pitch);
-			float x1 = x;
-			float y1 = y * cosX - z * sinX;
-			float z1 = y * sinX + z * cosX;
+			// 1. Roll (Z)
+			float cosZ = (float) Math.cos(roll);
+			float sinZ = (float) Math.sin(roll);
+			float x1 = x * cosZ - y * sinZ;
+			float y1 = x * sinZ + y * cosZ;
+			float z1 = z;
 
 			// 2. Yaw (Y)
 			float cosY = (float) Math.cos(yaw);
@@ -880,12 +929,12 @@ public class TransportGUI extends ModElementGUI<Transport> {
 			float y2 = y1;
 			float z2 = -x1 * sinY + z1 * cosY;
 
-			// 3. Roll (Z)
-			float cosZ = (float) Math.cos(roll);
-			float sinZ = (float) Math.sin(roll);
-			float x3 = x2 * cosZ - y2 * sinZ;
-			float y3 = x2 * sinZ + y2 * cosZ;
-			float z3 = z2;
+			// 3. Pitch (X)
+			float cosX = (float) Math.cos(pitch);
+			float sinX = (float) Math.sin(pitch);
+			float x3 = x2;
+			float y3 = y2 * cosX - z2 * sinX;
+			float z3 = y2 * sinX + z2 * cosX;
 
 			return new float[]{x3, y3, z3};
 		}

@@ -83,15 +83,9 @@ public class ${name}Entity extends PathfinderMob {
 		}
 	}
 
-	/** Called every tick the player holds the dismount key. */
 	public void onDismountHeld(Player player) {
 		lastDismountPacketTick = this.level().getGameTime();
 		dismountHoldTicks++;
-
-		int progress = Math.min(10, (dismountHoldTicks * 10) / DISMOUNT_TICKS_REQUIRED);
-		StringBuilder bar = new StringBuilder("§eВыход: §c");
-		for (int i = 0; i < 10; i++) bar.append(i < progress ? "█" : "░");
-		player.displayClientMessage(net.minecraft.network.chat.Component.literal(bar.toString()), true);
 
 		if (dismountHoldTicks >= DISMOUNT_TICKS_REQUIRED) {
 			canDismount = true;
@@ -215,16 +209,29 @@ public class ${name}Entity extends PathfinderMob {
 
 	@Override
 	public void removePassenger(Entity passenger) {
-		if (passenger instanceof Player && !this.level().isClientSide()) {
+		// Always allow removal if entity is dead/dying, being removed, or passenger is not a player
+		boolean forceAllow = !this.isAlive() || this.isRemoved();
+
+		if (!forceAllow && passenger instanceof Player && !this.level().isClientSide()) {
 			if (!canDismount) {
-				// Block vanilla dismount (Shift key, bed, death etc.) unless key threshold reached
-				super.removePassenger(passenger);
+				// Block accidental Shift-dismount — player must hold the dedicated key
+				// Re-attach the passenger silently
 				passenger.startRiding(this, true);
 				return;
 			}
 		}
 		super.removePassenger(passenger);
-		resetDismountCounter();
+		if (passenger instanceof Player) {
+			resetDismountCounter();
+		}
+	}
+
+	/** Override die() to ensure passengers are always ejected on death. */
+	@Override
+	public void die(net.minecraft.world.damagesource.DamageSource source) {
+		canDismount = true; // allow ejection
+		this.ejectPassengers();
+		super.die(source);
 	}
 
 	// =========================================================================
@@ -302,37 +309,7 @@ public class ${name}Entity extends PathfinderMob {
 				}
 			}
 
-			// --- HUD ---
-			Entity passenger = this.getFirstPassenger();
-			if (passenger instanceof Player player) {
-				StringBuilder hud = new StringBuilder();
 
-				<#if data.showEngineHUD>
-				hud.append(this.entityData.get(DATA_ENGINE) ? "§aДвигатель: ВКЛ" : "§cДвигатель: ВЫКЛ");
-				</#if>
-				<#if data.showThrottleHUD>
-				int throttlePct = (int) (Math.abs(this.entityData.get(DATA_THROTTLE)) * 100);
-				hud.append(" §7|§b Тяга: ").append(throttlePct).append("%");
-				</#if>
-				<#if data.showFuelHUD && data.enableFuel>
-				float fuel = this.entityData.get(DATA_FUEL);
-				float cap  = ${(data.fuelCapacity)?c}f;
-				int   pct  = (int) ((fuel / cap) * 100);
-				hud.append(" §7|§e Топливо: ").append(pct).append("%");
-				</#if>
-
-				<#if data.showHints>
-				if (!this.entityData.get(DATA_ENGINE)) {
-					hud.append("  §8[").append("${data.engineToggleKey}").append(" - завести]");
-				}
-				hud.append("  §8[").append("${data.dismountKey}").append(" - выйти (держать)]");
-				</#if>
-
-				if (hud.length() > 0) {
-					player.displayClientMessage(
-						net.minecraft.network.chat.Component.literal(hud.toString()), true);
-				}
-			}
 		}
 
 		super.tick();
@@ -383,18 +360,24 @@ public class ${name}Entity extends PathfinderMob {
 
 		<#if data.planeMechanics>
 		// === PLANE ===
-		double verticalInput  = -0.04;
+		double gravity = 0.05;
+		double verticalInput = -gravity;
 		float  passengerPitch = passenger.getXRot();
 		double pitchRad       = -passengerPitch * (Math.PI / 180.0);
 
 		if (speed > ${data.stallSpeed}) {
-			verticalInput += Math.sin(pitchRad) * speed * 1.5;
+			double maxSpeedValue = ${data.speed} > 0.01 ? ${data.speed} : 0.3;
+			double liftFactor = Math.min(1.0, speed / maxSpeedValue);
+			double lift = gravity * liftFactor;
+			
+			verticalInput += lift + Math.sin(pitchRad) * speed * 2.0;
+			
+			if (!engineOn) {
+				verticalInput = Math.min(verticalInput, -0.03); // smooth glide descent
+			}
 		} else {
-			// Stall — nose drops hard
-			verticalInput = Math.min(verticalInput, -0.15);
-		}
-		if (!engineOn || speed < ${data.stallSpeed}) {
-			verticalInput = Math.min(verticalInput, -0.08);
+			// Stall — drops faster
+			verticalInput = -0.12;
 		}
 		if (this.getY() >= ${data.maxAltitude}) {
 			verticalInput = Math.min(verticalInput, -0.1);

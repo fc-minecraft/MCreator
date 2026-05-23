@@ -138,7 +138,7 @@ public class Transport extends GeneratableElement
 		this.itemTexture = "";
 		this.transportType = "LAND";
 
-		this.speed = 0.3;
+		this.speed = 0.6;
 		this.strafeSpeed = 0.15;
 		this.steeringSpeed = 0.05;
 		this.jumpForce = 0.5;
@@ -155,9 +155,9 @@ public class Transport extends GeneratableElement
 		this.maxHealth = 20.0;
 		this.planeMechanics = false;
 		this.helicopterMechanics = false;
-		this.maxAltitude = 256.0;
+		this.maxAltitude = 320.0;
 		this.enableCrash = false;
-		this.crashSpeed = 0.8;
+		this.crashSpeed = 0.4;
 		this.enableFuel = false;
 		this.fuelItem = element != null ? new MItemBlock(element.getWorkspace(), "Items.COAL") : null;
 		this.fuelItems = new ArrayList<>();
@@ -183,13 +183,13 @@ public class Transport extends GeneratableElement
 		this.showHints = true;
 
 		// Phase 2: Physics
-		this.accelerationRate = 0.02;
-		this.brakeFactor = 0.04;
-		this.stallSpeed = 0.1;
-		this.inertiaFactor = 0.95;
+		this.accelerationRate = 0.04;
+		this.brakeFactor = 0.06;
+		this.stallSpeed = 0.15;
+		this.inertiaFactor = 0.98;
 
 		// Phase 2: Crash
-		this.explosionRadius = 3.0f;
+		this.explosionRadius = 2.0f;
 		this.crashDamageToPlayer = true;
 		this.crashDropItems = false;
 	}

@@ -1,0 +1,1 @@
+Item texture used for spawn item if spawn egg is disabled.
