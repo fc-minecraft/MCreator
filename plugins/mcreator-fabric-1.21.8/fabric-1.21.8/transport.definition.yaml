@@ -1,0 +1,26 @@
+templates:
+  - template: transport/transport.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/entity/@NAMEEntity.java"
+  - template: transport/transport_renderer.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/client/renderer/@NAMERenderer.java"
+  - template: transport/transport_packet.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/network/@NAMEControlPacket.java"
+  - template: transport/transport_keys.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/client/@NAMETransportKeys.java"
+  - template: transport/spawn_egg.json.ftl
+    writer: json
+    name: "@MODASSETSROOT/models/item/@registryname_spawn_egg.json"
+  - template: json/model_spawn_egg.json.ftl
+    writer: json
+    name: "@MODASSETSROOT/items/@registryname_spawn_egg.json"
+
+localizationkeys:
+  - key: item.@modid.@registryname_spawn_egg
+    mapto: mobName
+    suffix: " Spawn Egg"
+    condition: hasSpawnEgg
+  - key: item.@modid.@registryname_spawn_egg
+    mapto: mobName
+    condition: "!hasSpawnEgg"
+  - key: entity.@modid.@registryname
+    mapto: mobName

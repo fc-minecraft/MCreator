@@ -73,6 +73,7 @@ public class ModElementTypeLoader {
 		ModElementType.TOOL = register(new ModElementType<>("tool", 't', ToolGUI::new, Tool.class)).coveredOn(GeneratorFlavor.baseLanguage(JAVA));
 		ModElementType.VILLAGERPROFESSION = register(new ModElementType<>("villagerprofession", null, VillagerProfessionGUI::new, VillagerProfession.class)).coveredOn(GeneratorFlavor.baseLanguage(JAVA));
 		ModElementType.VILLAGERTRADE = register(new ModElementType<>("villagertrade", null, VillagerTradeGUI::new, VillagerTrade.class)).coveredOn(GeneratorFlavor.baseLanguage(JAVA));
+		ModElementType.TRANSPORT = register(new ModElementType<>("transport", null, TransportGUI::new, Transport.class)).coveredOn(GeneratorFlavor.FABRIC);
 
 		// Unregistered type used to mask legacy removed mod element types
 		ModElementType.UNKNOWN = new ModElementType<>("unknown", null, (mc, me, e) -> null, GeneratableElement.Unknown.class);
