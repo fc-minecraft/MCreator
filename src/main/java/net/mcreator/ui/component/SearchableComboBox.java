@@ -74,6 +74,8 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 				} else if (value instanceof Model model && model.getType() == Model.Type.BUILTIN) {
 					setText(L10N.t(
 							"model.builtin." + model.getReadableName().toLowerCase(Locale.ENGLISH).replace(" ", "_")));
+				} else if (value instanceof String str && L10N.hasTranslation("datalist.mobspawntypes." + str)) {
+					setText(L10N.t("datalist.mobspawntypes." + str));
 				}
 				return this;
 			}
@@ -107,6 +109,8 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 		} else if (anItem instanceof Model model && model.getType() == Model.Type.BUILTIN) {
 			itemToDisplay = L10N
 					.t("model.builtin." + model.getReadableName().toLowerCase(Locale.ENGLISH).replace(" ", "_"));
+		} else if (anItem instanceof String str && L10N.hasTranslation("datalist.mobspawntypes." + str)) {
+			itemToDisplay = L10N.t("datalist.mobspawntypes." + str);
 		}
 		super.configureEditor(anEditor, itemToDisplay);
 	}
@@ -166,6 +170,8 @@ public class SearchableComboBox<T> extends VComboBox<T> implements KeyListener, 
 				} else if (element instanceof Model m && m.getType() == Model.Type.BUILTIN) {
 					elementAsString = L10N
 							.t("model.builtin." + m.getReadableName().toLowerCase(Locale.ENGLISH).replace(" ", "_"));
+				} else if (element instanceof String str && L10N.hasTranslation("datalist.mobspawntypes." + str)) {
+					elementAsString = L10N.t("datalist.mobspawntypes." + str);
 				} else {
 					elementAsString = element.toString();
 				}

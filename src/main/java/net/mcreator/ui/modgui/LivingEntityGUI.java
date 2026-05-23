@@ -157,7 +157,7 @@ public class LivingEntityGUI extends ModElementGUI<LivingEntity> implements IBlo
 
 	private final TabListField creativeTabs = new TabListField(mcreator);
 
-	private final JComboBox<String> mobSpawningType = new JComboBox<>(
+	private final JComboBox<String> mobSpawningType = new SearchableComboBox<>(
 			ElementUtil.getDataListAsStringArray("mobspawntypes"));
 
 	private MCItemHolder mobDrop;

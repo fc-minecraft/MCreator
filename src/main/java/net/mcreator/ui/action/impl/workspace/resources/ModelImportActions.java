@@ -92,9 +92,10 @@ public class ModelImportActions {
 			setIcon(UIRES.get("16px.importjavamodel"));
 		}
 
-		@Override public boolean isEnabled() {
-			return actionRegistry.getMCreator().getGeneratorStats().getBaseCoverageInfo().get("model_java")
-					!= GeneratorStats.CoverageStatus.NONE;
+		@Override
+		public boolean isEnabled() {
+			return actionRegistry.getMCreator().getGeneratorStats().getBaseCoverageInfo()
+					.get("model_java") != GeneratorStats.CoverageStatus.NONE;
 		}
 	}
 
@@ -185,9 +186,9 @@ public class ModelImportActions {
 		if (!classJavaSource.getName().startsWith("Model"))
 			classJavaSource.setName("Model" + classJavaSource.getName());
 
-		String finalModelCode = mcreator != null ?
-				JavaModelAnimationEditorDialog.openAnimationEditorDialog(mcreator, classJavaSource.toString()) :
-				classJavaSource.toString();
+		String finalModelCode = mcreator != null
+				? JavaModelAnimationEditorDialog.openAnimationEditorDialog(mcreator, classJavaSource.toString())
+				: classJavaSource.toString();
 
 		if (finalModelCode == null)
 			finalModelCode = classJavaSource.toString();
@@ -206,7 +207,7 @@ public class ModelImportActions {
 
 		if (workspace.getGeneratorConfiguration().getJavaModelsKey().equals("legacy")) {
 			FileIO.writeStringToFile(finalModelCode.replace("setRotationAngles(f, f1, f2, f3, f4, f5);",
-							"setRotationAngles(f, f1, f2, f3, f4, f5, entity);"),
+					"setRotationAngles(f, f1, f2, f3, f4, f5, entity);"),
 					new File(workspace.getFolderManager().getModelsDir(), classJavaSource.getName() + ".java"));
 		} else {
 			FileIO.writeStringToFile(finalModelCode, new File(workspace.getFolderManager().getModelsDir(),
@@ -231,15 +232,28 @@ public class ModelImportActions {
 			setIcon(UIRES.get("16px.importjsonmodel"));
 		}
 
-		@Override public boolean isEnabled() {
-			return actionRegistry.getMCreator().getGeneratorStats().getBaseCoverageInfo().get("model_json")
-					!= GeneratorStats.CoverageStatus.NONE;
+		@Override
+		public boolean isEnabled() {
+			return actionRegistry.getMCreator().getGeneratorStats().getBaseCoverageInfo()
+					.get("model_json") != GeneratorStats.CoverageStatus.NONE;
 		}
 	}
 
 	public static void importJSONModel(MCreator mcreator, File file) {
-		// find the textures
 		String cmodel = FileIO.readFileToString(file);
+
+		if (cmodel.contains("\"minecraft:geometry\"") || cmodel.contains("\"format_version\"")) {
+			JOptionPane.showMessageDialog(mcreator,
+					"This appears to be a Bedrock or GeckoLib model.\n" +
+							"The 'Import JSON 3D Model' action is intended ONLY for Vanilla Block/Item JSON models.\n" +
+							"To use Bedrock/GeckoLib models, you usually need a specialized plugin (e.g., Geckolib) " +
+							"and its specific import action, or use a Java model for vanilla entities.",
+					"Invalid Model Format",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		// find the textures
 		HashSet<String> txs = new HashSet<>();
 		Pattern pattern = Pattern.compile("\"#(.*?)\"");
 		Matcher matcher = pattern.matcher(cmodel);
@@ -248,11 +262,19 @@ public class ModelImportActions {
 
 		if (!txs.isEmpty()) {
 			newTextureMapDialog(mcreator, txs, file, true);
-
-			mcreator.reloadWorkspaceTabContents();
-			if (mcreator.getTabs().getCurrentTab().getContent() instanceof ModElementGUI)
-				((ModElementGUI<?>) mcreator.getTabs().getCurrentTab().getContent()).reloadDataLists();
+		} else {
+			String modelNameBase = RegistryNameFixer.fix(file.getName());
+			FileIO.copyFile(file, new File(mcreator.getFolderManager().getModelsDir(), modelNameBase));
+			JOptionPane.showMessageDialog(mcreator,
+					"Model imported, but no texture variables (e.g., #texture) were found in the JSON.\n" +
+							"Ensure that this is a valid Vanilla Block/Item model.",
+					"Warning",
+					JOptionPane.WARNING_MESSAGE);
 		}
+
+		mcreator.reloadWorkspaceTabContents();
+		if (mcreator.getTabs().getCurrentTab().getContent() instanceof ModElementGUI)
+			((ModElementGUI<?>) mcreator.getTabs().getCurrentTab().getContent()).reloadDataLists();
 	}
 
 	public static class OBJ extends BasicAction {
@@ -272,9 +294,10 @@ public class ModelImportActions {
 			setIcon(UIRES.get("16px.importobjmodel"));
 		}
 
-		@Override public boolean isEnabled() {
-			return actionRegistry.getMCreator().getGeneratorStats().getBaseCoverageInfo().get("model_obj")
-					!= GeneratorStats.CoverageStatus.NONE;
+		@Override
+		public boolean isEnabled() {
+			return actionRegistry.getMCreator().getGeneratorStats().getBaseCoverageInfo()
+					.get("model_obj") != GeneratorStats.CoverageStatus.NONE;
 		}
 	}
 
