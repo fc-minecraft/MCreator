@@ -509,10 +509,6 @@ public class WorkspacePanel extends AbstractMainWorkspacePanel {
 
 		se.add("East", modElementsBar);
 
-		JPanel leftPan = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		leftPan.setOpaque(false);
-		leftPan.add(search);
-
 		JPanel filterSort = new JPanel(new GridLayout(1, 2, 0, 0));
 		filterSort.setOpaque(false);
 
@@ -536,7 +532,7 @@ public class WorkspacePanel extends AbstractMainWorkspacePanel {
 		filterSort.add(filter);
 		filterSort.add(sort);
 
-		se.add("West", leftPan);
+		se.add("Center", search);
 
 		JScrollablePopupMenu filterPopup = new JScrollablePopupMenu();
 		filterPopup.add(new UnregisteredAction(L10N.t("workspace.elements.list.filter_all"), e -> search.setText("")));
