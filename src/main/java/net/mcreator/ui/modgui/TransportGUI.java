@@ -524,6 +524,9 @@ public class TransportGUI extends ModElementGUI<Transport> {
 			flightMode.setSelectedItem("NONE");
 		}
 		maxAltitude.setEnabled(isAir);
+
+		boolean isPlane = "PLANE".equals(flightMode.getSelectedItem());
+		stallSpeed.setEnabled(isPlane);
 	}
 
 	@Override public Transport getElementFromGUI() {

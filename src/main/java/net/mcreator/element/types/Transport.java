@@ -138,7 +138,7 @@ public class Transport extends GeneratableElement
 		this.itemTexture = "";
 		this.transportType = "LAND";
 
-		this.speed = 0.6;
+		this.speed = 0.8;
 		this.strafeSpeed = 0.15;
 		this.steeringSpeed = 0.05;
 		this.jumpForce = 0.5;
@@ -183,9 +183,9 @@ public class Transport extends GeneratableElement
 		this.showHints = true;
 
 		// Phase 2: Physics
-		this.accelerationRate = 0.04;
-		this.brakeFactor = 0.06;
-		this.stallSpeed = 0.15;
+		this.accelerationRate = 0.015;
+		this.brakeFactor = 0.02;
+		this.stallSpeed = 0.35;
 		this.inertiaFactor = 0.98;
 
 		// Phase 2: Crash

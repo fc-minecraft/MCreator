@@ -31,7 +31,7 @@ public class ${name}TransportKeys {
 			"key.${modid}.${registryname}.engine_toggle",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_${data.engineToggleKey},
-			"key.categories.${JavaModName?lower_case}.transport"
+			"key.categories.${modid}.transport"
 		)
 	);
 
@@ -40,7 +40,7 @@ public class ${name}TransportKeys {
 			"key.${modid}.${registryname}.dismount",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_${data.dismountKey},
-			"key.categories.${JavaModName?lower_case}.transport"
+			"key.categories.${modid}.transport"
 		)
 	);
 
@@ -108,22 +108,32 @@ public class ${name}TransportKeys {
 		// Dismount progress bar
 		if (clientDismountTicks > 0) {
 			int progress = (clientDismountTicks * 10) / 20;
-			hud.append("§eВыход: §c");
+			hud.append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.exit").getString());
 			for (int i = 0; i < 10; i++) {
 				hud.append(i < progress ? "█" : "░");
 			}
 			hud.append("  ");
 		}
 
-		// Engine status
+		// Engine status / Speed
 		<#if data.showEngineHUD>
-		hud.append(vehicle.isEngineOn() ? "§aДвигатель: ВКЛ" : "§cДвигатель: ВЫКЛ");
+		if (vehicle.isEngineOn()) {
+			net.minecraft.world.phys.Vec3 vel = vehicle.getDeltaMovement();
+			double speedBs = Math.sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z) * 20.0;
+			hud.append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.speed").getString())
+			   .append(Math.round(speedBs))
+			   .append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.speed_unit").getString());
+		} else {
+			hud.append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.engine_off").getString());
+		}
 		</#if>
 
 		// Throttle status (direct reading of client-side physics value)
 		<#if data.showThrottleHUD>
 		int throttlePct = (int) (Math.abs(vehicle.getThrottle()) * 100);
-		hud.append(" §7|§b Тяга: ").append(throttlePct).append("%");
+		hud.append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.throttle").getString())
+		   .append(throttlePct)
+		   .append("%");
 		</#if>
 
 		// Fuel status
@@ -131,14 +141,20 @@ public class ${name}TransportKeys {
 		float fuel = vehicle.getFuel();
 		float cap  = ${(data.fuelCapacity)?c}f;
 		int   pct  = (int) ((fuel / cap) * 100);
-		hud.append(" §7|§e Топливо: ").append(pct).append("%");
+		hud.append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.fuel").getString())
+		   .append(pct)
+		   .append("%");
 		</#if>
 
 		// Control hints (only show when engine is OFF)
 		<#if data.showHints>
 		if (!vehicle.isEngineOn()) {
-			hud.append("  §8[").append("${data.engineToggleKey}").append(" - завести]");
-			hud.append("  §8[").append("${data.dismountKey}").append(" - выйти (держать)]");
+			hud.append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.hint_start").getString())
+			   .append("${data.engineToggleKey}")
+			   .append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.hint_start_action").getString());
+			hud.append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.hint_exit").getString())
+			   .append("${data.dismountKey}")
+			   .append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.hint_exit_action").getString());
 		}
 		</#if>
 

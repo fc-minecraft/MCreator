@@ -19,8 +19,45 @@ localizationkeys:
     mapto: mobName
     suffix: " Spawn Egg"
     condition: hasSpawnEgg
-  - key: item.@modid.@registryname_spawn_egg
-    mapto: mobName
-    condition: "!hasSpawnEgg"
   - key: entity.@modid.@registryname
     mapto: mobName
+  - key: key.@modid.@registryname.engine_toggle
+    mapto: mobName
+    suffix: " Запустить/Остановить двигатель"
+  - key: key.@modid.@registryname.dismount
+    mapto: mobName
+    suffix: " Покинуть транспорт"
+  - key: key.categories.@modid.transport
+    suffix: "Транспорт"
+  - key: hud.@modid.@registryname.engine_on
+    suffix: "Двигатель: ВКЛ"
+  - key: hud.@modid.@registryname.engine_off
+    suffix: "Двигатель: ВЫКЛ"
+  - key: hud.@modid.@registryname.engine_started
+    suffix: "§aДвигатель: ЗАПУЩЕН"
+  - key: hud.@modid.@registryname.engine_stopped
+    suffix: "§cДвигатель: ОСТАНОВЛЕН"
+  - key: hud.@modid.@registryname.speed
+    suffix: "§aСкорость: "
+  - key: hud.@modid.@registryname.speed_unit
+    suffix: " б/с"
+  - key: hud.@modid.@registryname.throttle
+    suffix: " §7|§b Тяга: "
+  - key: hud.@modid.@registryname.fuel
+    suffix: " §7|§e Топливо: "
+  - key: hud.@modid.@registryname.fuel_full
+    suffix: "§eБак полон!"
+  - key: hud.@modid.@registryname.fuel_refueled
+    suffix: "§aЗаправлено! Топливо: "
+  - key: hud.@modid.@registryname.fuel_empty
+    suffix: "§cТопливо закончилось! Двигатель заглох."
+  - key: hud.@modid.@registryname.exit
+    suffix: "§eВыход: §c"
+  - key: hud.@modid.@registryname.hint_start
+    suffix: "  §8["
+  - key: hud.@modid.@registryname.hint_start_action
+    suffix: " - запуск двигателя]"
+  - key: hud.@modid.@registryname.hint_exit
+    suffix: "  §8["
+  - key: hud.@modid.@registryname.hint_exit_action
+    suffix: " - выход (удерживать)]"

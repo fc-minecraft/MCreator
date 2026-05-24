@@ -147,7 +147,7 @@ public class LocalizationUtils {
 				String mapto = (String) template.get("mapto");
 				String value;
 				if (mapto == null) {
-					value = (String) entry;
+					value = entry instanceof String str ? str : "";
 				} else {
 					Object rawValue = TemplateExpressionParser.getValueFrom(mapto, entry);
 					value = rawValue != null ? rawValue.toString() : "";

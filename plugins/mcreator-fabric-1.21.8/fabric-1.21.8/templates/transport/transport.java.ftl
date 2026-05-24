@@ -33,6 +33,7 @@ public class ${name}Entity extends PathfinderMob {
 	// --- Server-side state ---
 	private Vec3 lastVelocity = Vec3.ZERO;
 	private int  soundTicks   = 0;
+	private double currentFlightSpeed = 0.0;
 
 	/** Ticks passenger has been holding the dismount key. Resets on key release. */
 	private int  dismountHoldTicks = 0;
@@ -77,7 +78,7 @@ public class ${name}Entity extends PathfinderMob {
 		Entity passenger = this.getFirstPassenger();
 		if (passenger instanceof Player player) {
 			player.displayClientMessage(
-				net.minecraft.network.chat.Component.literal(!engineState ? "§aДвигатель: ЗАПУЩЕН" : "§cДвигатель: ОСТАНОВЛЕН"),
+				net.minecraft.network.chat.Component.translatable(!engineState ? "hud.${modid}.${registryname}.engine_started" : "hud.${modid}.${registryname}.engine_stopped"),
 				true
 			);
 		}
@@ -162,15 +163,17 @@ public class ${name}Entity extends PathfinderMob {
 						net.minecraft.sounds.SoundSource.NEUTRAL, 1.0f, 1.0f);
 					float newFuel = this.entityData.get(DATA_FUEL);
 					sourceentity.displayClientMessage(
-						net.minecraft.network.chat.Component.literal(
-							"§aЗаправлено! Топливо: " + Math.round(newFuel) + " / " + (int) capacity),
+						net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.fuel_refueled")
+							.append(String.valueOf(Math.round(newFuel)))
+							.append(" / ")
+							.append(String.valueOf((int) capacity)),
 						true
 					);
 				}
 				return InteractionResult.SUCCESS;
 			} else {
 				sourceentity.displayClientMessage(
-					net.minecraft.network.chat.Component.literal("§eБак полон!"), true);
+					net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.fuel_full"), true);
 				return InteractionResult.SUCCESS;
 			}
 		}
@@ -189,8 +192,7 @@ public class ${name}Entity extends PathfinderMob {
 
 	@Override
 	protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions dimensions, float f) {
-		return super.getPassengerAttachmentPoint(entity, dimensions, f)
-			.add(${data.seatOffsetX}f, ${data.seatOffsetY}f, ${data.seatOffsetZ}f);
+		return new Vec3(${data.seatOffsetX}f, ${data.seatOffsetY}f + 0.6f, ${data.seatOffsetZ}f);
 	}
 
 	@Override public boolean dismountsUnderwater() { return false; }
@@ -285,7 +287,7 @@ public class ${name}Entity extends PathfinderMob {
 					Entity passenger = this.getFirstPassenger();
 					if (passenger instanceof Player player) {
 						player.displayClientMessage(
-							net.minecraft.network.chat.Component.literal("§cТопливо кончилось! Двигатель заглох."), true);
+							net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.fuel_empty"), true);
 					}
 				}
 				this.entityData.set(DATA_FUEL, fuel);
@@ -326,17 +328,6 @@ public class ${name}Entity extends PathfinderMob {
 		LivingEntity passenger = this.getControllingPassenger();
 		if (!this.isVehicle() || passenger == null) { super.travel(dir); return; }
 
-		// Steering
-		float targetYaw    = passenger.getYRot();
-		float yawDiff      = Mth.wrapDegrees(targetYaw - this.getYRot());
-		float steerDegrees = (float) ${data.steeringSpeed} * 45.0f;
-		this.setYRot(this.getYRot() + Mth.clamp(yawDiff, -steerDegrees, steerDegrees));
-		this.yRotO     = this.getYRot();
-		this.setXRot(passenger.getXRot() * 0.5f);
-		this.setRot(this.getYRot(), this.getXRot());
-		this.yBodyRot  = this.getYRot();
-		this.yHeadRot  = this.getYRot();
-
 		float strafeInput  = passenger.xxa;
 		float forwardInput = passenger.zza;
 		boolean engineOn   = this.entityData.get(DATA_ENGINE);
@@ -344,50 +335,209 @@ public class ${name}Entity extends PathfinderMob {
 
 		<#if data.transportType == "AIR">
 		// ---- AIR ----
+		<#if data.planeMechanics>
+		// === PLANE ===
+		long time = this.level().getGameTime();
+
+		// 1. Calculate target pitch based on keyboard input (Space = pitch up, Shift = pitch down)
+		float targetPitch = 0.0f;
+		if (getJumping(passenger)) {
+			targetPitch = -35.0f; // climb / nose up (negative pitch is up in MC)
+		} else if (passenger.isShiftKeyDown()) {
+			targetPitch = 35.0f;  // dive / nose down (positive pitch is down in MC)
+		}
+
+		// If stalling, force the nose down and disable user pitch control!
+		boolean isStalling = this.currentFlightSpeed < ${data.stallSpeed} && !this.onGround();
+		if (isStalling) {
+			targetPitch = 30.0f; // Force nose down to gain speed
+		}
+
+		// Add slight turbulence to pitch & yaw if flying in the air (wind wobble)
+		double pitchTurbulence = 0.0;
+		double yawTurbulence = 0.0;
+		if (!this.onGround()) {
+			pitchTurbulence = Math.sin(time * 0.04) * 0.35 + Math.cos(time * 0.09) * 0.15;
+			yawTurbulence = Math.cos(time * 0.03) * 0.25;
+		}
+
+		float pitchDiff = targetPitch - this.getXRot();
+		float pitchSpeed = isStalling ? 0.15f : 0.07f;
+		this.setXRot((float)(this.getXRot() + pitchDiff * pitchSpeed + pitchTurbulence));
+
+		// Steering yaw following passenger look angle (mouse direction)
+		float targetYaw = passenger.getYRot();
+		float yawDiff = Mth.wrapDegrees(targetYaw - this.getYRot());
+		float maxSteer = (float) ${data.steeringSpeed} * 45.0f;
+		float yawStep = Mth.clamp(yawDiff * 0.05f, -maxSteer, maxSteer); // 5% interpolation per tick for smooth yaw turns
+		this.setYRot((float)(this.getYRot() + yawStep + yawTurbulence));
+		this.setRot(this.getYRot(), this.getXRot());
+		this.yBodyRot = this.getYRot();
+		this.yHeadRot = this.getYRot();
+
+		// 2. Calculate throttle
 		if (engineOn) {
 			if (forwardInput > 0.0f) {
 				throttle = Math.min(1.0f, throttle + (float)${data.accelerationRate});
 			} else if (forwardInput < 0.0f) {
 				throttle = Math.max(-0.3f, throttle - (float)${data.brakeFactor});
 			} else {
-				throttle += (0.0f - throttle) * 0.01f; // slow coast
+				// Cruise control: slow throttle decay when no keys are pressed
+				throttle += (0.0f - throttle) * 0.005f;
 			}
 		} else {
-			throttle += (0.0f - throttle) * 0.08f;
+			throttle += (0.0f - throttle) * 0.05f;
 		}
 		this.entityData.set(DATA_THROTTLE, throttle);
-		double speed = throttle * ${data.speed};
 
-		<#if data.planeMechanics>
-		// === PLANE ===
-		double gravity = 0.05;
-		double verticalInput = -gravity;
-		float  passengerPitch = passenger.getXRot();
-		double pitchRad       = -passengerPitch * (Math.PI / 180.0);
+		// 3. Speed calculation with momentum and gravity drag
+		double baseTargetSpeed = throttle * ${data.speed};
+		double yawRad = -this.getYRot() * (Math.PI / 180.0);
+		double pitchRad = -this.getXRot() * (Math.PI / 180.0);
 
-		if (speed > ${data.stallSpeed}) {
-			double maxSpeedValue = ${data.speed} > 0.01 ? ${data.speed} : 0.3;
-			double liftFactor = Math.min(1.0, speed / maxSpeedValue);
-			double lift = gravity * liftFactor;
-			
-			verticalInput += lift + Math.sin(pitchRad) * speed * 2.0;
-			
-			if (!engineOn) {
-				verticalInput = Math.min(verticalInput, -0.03); // smooth glide descent
-			}
-		} else {
-			// Stall — drops faster
-			verticalInput = -0.12;
+		// Gravity affects speed: climbing slows down, diving increases speed
+		double gravitySpeedModifier = Math.sin(pitchRad) * 0.5; // climbing (pitchRad > 0) reduces speed, diving increases
+		double targetSpeed = baseTargetSpeed - gravitySpeedModifier;
+		if (targetSpeed < 0.0) {
+			targetSpeed = 0.0;
 		}
+
+		double speedInterpolation;
+		if (engineOn) {
+			speedInterpolation = 0.008; // Slower speed changes due to aircraft mass/inertia (heavy momentum)
+		} else {
+			speedInterpolation = this.onGround() ? 0.1 : 0.004; // slow speed decay in air (glide), faster on ground
+		}
+		this.currentFlightSpeed = Mth.lerp(speedInterpolation, this.currentFlightSpeed, targetSpeed);
+		double speed = this.currentFlightSpeed;
+
+		// 4. Direction vectors based on Pitch & Yaw (realistic 3D flight trajectory)
+		double cosPitch = Math.cos(pitchRad);
+		double vx = Math.sin(yawRad) * cosPitch * speed;
+		double vz = Math.cos(yawRad) * cosPitch * speed;
+		double vy = Math.sin(pitchRad) * speed * 0.8; // scaled for climbs matching speed/pitch
+
+		// 5. Lift and Gravity
+		double gravity = 0.08; // Standard MC gravity
+		double maxSpeedVal = ${data.speed} > 0.01 ? ${data.speed} : 0.5;
+		double liftFactor = (speed * speed) / (maxSpeedVal * maxSpeedVal);
+		liftFactor = Mth.clamp(liftFactor, 0.0, 1.5);
+		double lift = gravity * liftFactor * cosPitch;
+
+		double thermalLift = !this.onGround() ? (Math.sin(time * 0.02) * 0.012) : 0.0;
+		double verticalInput = vy - gravity + lift + thermalLift;
+
+		// Glide mechanics when engine is off but we have speed
+		if (!engineOn && speed >= ${data.stallSpeed}) {
+			verticalInput = Math.max(verticalInput, -0.05); // smooth glide
+		}
+
+		// Stall physics
+		if (isStalling) {
+			double stallFactor = 1.0 - (speed / ${data.stallSpeed});
+			verticalInput = -0.3 * stallFactor; // Fall down fast!
+		}
+
 		if (this.getY() >= ${data.maxAltitude}) {
 			verticalInput = Math.min(verticalInput, -0.1);
 		}
-		double yawRad = -this.getYRot() * (Math.PI / 180.0);
-		this.setDeltaMovement(Math.sin(yawRad) * speed, verticalInput, Math.cos(yawRad) * speed);
-		super.travel(new Vec3(strafeInput * ${data.strafeSpeed}, verticalInput, speed));
+
+		Vec3 motion = new Vec3(vx, verticalInput, vz);
+		this.setDeltaMovement(motion);
+		super.travel(Vec3.ZERO);
+		// Retain motion vector in next tick (bypassing vanilla 0.8 air friction)
+		this.setDeltaMovement(motion.scale(0.99));
 
 		<#elseif data.helicopterMechanics>
 		// === HELICOPTER ===
+		float targetYaw = passenger.getYRot();
+		float yawDiff = Mth.wrapDegrees(targetYaw - this.getYRot());
+		float maxSteer = (float) ${data.steeringSpeed} * 45.0f;
+		float yawStep = Mth.clamp(yawDiff * 0.05f, -maxSteer, maxSteer); // 5% interpolation per tick for smooth yaw turns
+		this.setYRot(this.getYRot() + yawStep);
+		
+		// Tilt forward/backward based on input
+		float targetPitch = forwardInput * 15.0f;
+		float pitchDiff = targetPitch - this.getXRot();
+		this.setXRot(this.getXRot() + pitchDiff * 0.1f);
+		this.setRot(this.getYRot(), this.getXRot());
+		this.yBodyRot = this.getYRot();
+		this.yHeadRot = this.getYRot();
+
+		if (engineOn) {
+			if (forwardInput > 0.0f) {
+				throttle = Math.min(1.0f, throttle + (float)${data.accelerationRate} * 2);
+			} else if (forwardInput < 0.0f) {
+				throttle = Math.max(-0.5f, throttle - (float)${data.brakeFactor} * 2);
+			} else {
+				throttle += (0.0f - throttle) * 0.1f;
+			}
+		} else {
+			throttle += (0.0f - throttle) * 0.2f;
+		}
+		this.entityData.set(DATA_THROTTLE, throttle);
+
+		double speed = throttle * ${data.speed};
+		double strafeSpeed = strafeInput * ${data.strafeSpeed};
+
+		double verticalInput = 0.0;
+		if (engineOn) {
+			if (getJumping(passenger)) {
+				verticalInput = ${data.jumpForce};
+			} else if (passenger.isShiftKeyDown()) {
+				verticalInput = -${data.jumpForce};
+			} else {
+				// Hover stabilization
+				Vec3 current = this.getDeltaMovement();
+				verticalInput = -current.y * 0.5;
+			}
+		} else {
+			// Autorotation fall
+			verticalInput = -0.08;
+		}
+
+		if (this.getY() >= ${data.maxAltitude}) {
+			verticalInput = Math.min(verticalInput, -0.1);
+		}
+
+		double yawRad = -this.getYRot() * (Math.PI / 180.0);
+		double vx = Math.sin(yawRad) * speed + Math.cos(yawRad) * strafeSpeed;
+		double vz = Math.cos(yawRad) * speed - Math.sin(yawRad) * strafeSpeed;
+
+		Vec3 motion = new Vec3(vx, verticalInput, vz);
+		this.setDeltaMovement(motion);
+		super.travel(Vec3.ZERO);
+		this.setDeltaMovement(new Vec3(motion.x * 0.95, motion.y, motion.z * 0.95));
+
+		<#else>
+		// === GENERIC AIR ===
+		float targetYaw = passenger.getYRot();
+		float yawDiff = Mth.wrapDegrees(targetYaw - this.getYRot());
+		float maxSteer = (float) ${data.steeringSpeed} * 45.0f;
+		float yawStep = Mth.clamp(yawDiff * 0.05f, -maxSteer, maxSteer); // 5% interpolation per tick for smooth yaw turns
+		this.setYRot(this.getYRot() + yawStep);
+		
+		float targetPitch = passenger.getXRot() * 0.5f;
+		float pitchDiff = targetPitch - this.getXRot();
+		this.setXRot(this.getXRot() + pitchDiff * 0.05f); // 5% interpolation per tick for smooth pitch shifts
+		this.setRot(this.getYRot(), this.getXRot());
+
+		if (engineOn) {
+			if (forwardInput > 0.0f) {
+				throttle = Math.min(1.0f, throttle + (float)${data.accelerationRate} * 3);
+			} else if (forwardInput < 0.0f) {
+				throttle = Math.max(-0.5f, throttle - (float)${data.brakeFactor} * 3);
+			} else {
+				throttle += (0.0f - throttle) * 0.2f;
+			}
+		} else {
+			throttle += (0.0f - throttle) * 0.2f;
+		}
+		this.entityData.set(DATA_THROTTLE, throttle);
+
+		double speed = throttle * ${data.speed};
+		double strafeSpeed = strafeInput * ${data.strafeSpeed};
+
 		double verticalInput = 0.0;
 		if (engineOn) {
 			if (getJumping(passenger)) {
@@ -395,94 +545,127 @@ public class ${name}Entity extends PathfinderMob {
 			} else if (passenger.isShiftKeyDown()) {
 				verticalInput = -${data.jumpForce};
 			}
-			// Hover: if engine on and no vertical input, apply subtle counter-gravity
-			if (verticalInput == 0.0) {
-				Vec3 current = this.getDeltaMovement();
-				verticalInput = -current.y * 0.5; // dampen vertical drift
-			}
-		} else {
-			// Autorotation: slow fall
-			verticalInput = -0.08;
-		}
-		if (this.getY() >= ${data.maxAltitude}) {
-			verticalInput = Math.min(verticalInput, -0.1);
-		}
-		double yawRad = -this.getYRot() * (Math.PI / 180.0);
-		this.setDeltaMovement(Math.sin(yawRad) * speed, verticalInput, Math.cos(yawRad) * speed);
-		super.travel(new Vec3(strafeInput * ${data.strafeSpeed}, verticalInput, speed));
-
-		<#else>
-		// === GENERIC AIR ===
-		double verticalInput = 0;
-		if (engineOn) {
-			if (getJumping(passenger))      verticalInput =  ${data.jumpForce};
-			else if (passenger.isShiftKeyDown()) verticalInput = -${data.jumpForce};
 		} else {
 			verticalInput = -0.25;
 		}
-		if (this.getY() >= ${data.maxAltitude}) verticalInput = Math.min(verticalInput, -0.1);
-		super.travel(new Vec3(strafeInput * ${data.strafeSpeed}, verticalInput, speed));
+
+		if (this.getY() >= ${data.maxAltitude}) {
+			verticalInput = Math.min(verticalInput, -0.1);
+		}
+
+		double yawRad = -this.getYRot() * (Math.PI / 180.0);
+		double vx = Math.sin(yawRad) * speed + Math.cos(yawRad) * strafeSpeed;
+		double vz = Math.cos(yawRad) * speed - Math.sin(yawRad) * strafeSpeed;
+
+		Vec3 motion = new Vec3(vx, verticalInput, vz);
+		this.setDeltaMovement(motion);
+		super.travel(Vec3.ZERO);
+		this.setDeltaMovement(motion.scale(0.95));
 		</#if>
 
 		<#elseif data.transportType == "WATER">
 		// ---- WATER ----
+		// Steering
+		float targetYaw    = passenger.getYRot();
+		float yawDiff      = Mth.wrapDegrees(targetYaw - this.getYRot());
+		float steerDegrees = (float) ${data.steeringSpeed} * 45.0f;
+		this.setYRot(this.getYRot() + Mth.clamp(yawDiff, -steerDegrees, steerDegrees));
+		this.setXRot(passenger.getXRot() * 0.5f);
+		this.setRot(this.getYRot(), this.getXRot());
+		this.yBodyRot  = this.getYRot();
+		this.yHeadRot  = this.getYRot();
+
 		<#if data.enableFuel>
 		if (engineOn) {
-			if (forwardInput > 0.0f)      throttle = Math.min(1.0f,  throttle + (float)${data.accelerationRate} * 5);
-			else if (forwardInput < 0.0f) throttle = Math.max(-0.5f, throttle - (float)${data.brakeFactor} * 5);
-			else                          throttle += (0.0f - throttle) * 0.15f;
+			if (forwardInput > 0.0f)      throttle = Math.min(1.0f,  throttle + (float)${data.accelerationRate} * 2);
+			else if (forwardInput < 0.0f) throttle = Math.max(-0.5f, throttle - (float)${data.brakeFactor} * 2);
+			else                          throttle += (0.0f - throttle) * 0.05f;
 		} else {
-			throttle += (0.0f - throttle) * 0.2f;
+			throttle += (0.0f - throttle) * 0.1f;
 		}
 		<#else>
-		throttle = forwardInput;
+		if (engineOn) {
+			throttle = forwardInput;
+		} else {
+			throttle = 0.0f;
+		}
 		</#if>
 		this.entityData.set(DATA_THROTTLE, throttle);
 		double speed = throttle * ${data.speed};
-		double verticalInput = 0;
+
+		Vec3 cur = this.getDeltaMovement();
+		double verticalInput = cur.y;
 		if (this.isInWater()) {
-			verticalInput = 0.05;
+			verticalInput = 0.02; // floating buoyancy
 			if (getJumping(passenger))           verticalInput =  ${data.jumpForce};
 			else if (passenger.isShiftKeyDown()) verticalInput = -${data.jumpForce};
-		}
-		this.setSpeed((float) speed);
-		if (this.isInWater()) {
-			super.travel(new Vec3(strafeInput * ${data.strafeSpeed}, verticalInput, speed));
 		} else {
-			// On land, apply inertia
-			Vec3 cur = this.getDeltaMovement();
-			this.setDeltaMovement(cur.x * ${data.inertiaFactor}, dir.y, cur.z * ${data.inertiaFactor});
-			super.travel(new Vec3(strafeInput * ${data.strafeSpeed} * 0.2, dir.y, speed * 0.2));
+			verticalInput = cur.y - 0.08; // normal gravity out of water
 		}
+
+		// Vector-based velocity with water drift (grip coefficient)
+		double yawRad = -this.getYRot() * (Math.PI / 180.0);
+		double targetVx = Math.sin(yawRad) * speed + Math.cos(yawRad) * (strafeInput * ${data.strafeSpeed});
+		double targetVz = Math.cos(yawRad) * speed - Math.sin(yawRad) * (strafeInput * ${data.strafeSpeed});
+
+		double grip = this.isInWater() ? 0.08 : 0.02; // slides a lot more on land, drifts in water
+		double vx = Mth.lerp(grip, cur.x, targetVx);
+		double vz = Mth.lerp(grip, cur.z, targetVz);
+
+		Vec3 motion = new Vec3(vx, verticalInput, vz);
+		this.setDeltaMovement(motion);
+		super.travel(Vec3.ZERO);
 
 		<#else>
 		// ---- LAND ----
+		// Steering
+		float targetYaw    = passenger.getYRot();
+		float yawDiff      = Mth.wrapDegrees(targetYaw - this.getYRot());
+		float steerDegrees = (float) ${data.steeringSpeed} * 45.0f;
+		this.setYRot(this.getYRot() + Mth.clamp(yawDiff, -steerDegrees, steerDegrees));
+		this.setXRot(passenger.getXRot() * 0.5f);
+		this.setRot(this.getYRot(), this.getXRot());
+		this.yBodyRot  = this.getYRot();
+		this.yHeadRot  = this.getYRot();
+
 		<#if data.enableFuel>
 		if (engineOn) {
-			if (forwardInput > 0.0f)      throttle = Math.min(1.0f,  throttle + (float)${data.accelerationRate} * 5);
-			else if (forwardInput < 0.0f) throttle = Math.max(-0.5f, throttle - (float)${data.brakeFactor} * 5);
-			else                          throttle += (0.0f - throttle) * (float)${data.brakeFactor} * 3;
+			if (forwardInput > 0.0f)      throttle = Math.min(1.0f,  throttle + (float)${data.accelerationRate} * 2);
+			else if (forwardInput < 0.0f) throttle = Math.max(-0.5f, throttle - (float)${data.brakeFactor} * 2);
+			else                          throttle += (0.0f - throttle) * (float)${data.brakeFactor} * 0.5f;
 		} else {
 			// Coast-to-stop with inertia
-			throttle += (0.0f - throttle) * 0.15f;
+			throttle += (0.0f - throttle) * 0.05f;
 		}
 		<#else>
-		throttle = forwardInput;
+		if (engineOn) {
+			throttle = forwardInput;
+		} else {
+			throttle = 0.0f;
+		}
 		</#if>
 		this.entityData.set(DATA_THROTTLE, throttle);
 		double speed = throttle * ${data.speed};
 
-		// Apply inertia to horizontal movement
 		Vec3 cur = this.getDeltaMovement();
-		double smoothX = cur.x * ${data.inertiaFactor};
-		double smoothZ = cur.z * ${data.inertiaFactor};
-
+		double vy = cur.y;
 		if (getJumping(passenger) && this.onGround() && (!${data.enableFuel?string("true","false")} || engineOn)) {
-			this.setDeltaMovement(smoothX, ${data.jumpForce}, smoothZ);
+			vy = ${data.jumpForce};
 		}
 
-		this.setSpeed((float) speed);
-		super.travel(new Vec3(strafeInput * ${data.strafeSpeed}, dir.y, speed));
+		// Vector-based velocity with tire grip (using inertiaFactor from UI)
+		double yawRad = -this.getYRot() * (Math.PI / 180.0);
+		double targetVx = Math.sin(yawRad) * speed + Math.cos(yawRad) * (strafeInput * ${data.strafeSpeed});
+		double targetVz = Math.cos(yawRad) * speed - Math.sin(yawRad) * (strafeInput * ${data.strafeSpeed});
+
+		// Calculate traction based on the inertiaFactor setting (default 0.98 -> 0.22 traction)
+		double traction = this.onGround() ? (1.0 - ${data.inertiaFactor} * 0.8) : 0.05;
+		double vx = Mth.lerp(traction, cur.x, targetVx);
+		double vz = Mth.lerp(traction, cur.z, targetVz);
+
+		Vec3 motion = new Vec3(vx, vy, vz);
+		this.setDeltaMovement(motion);
+		super.travel(Vec3.ZERO);
 		</#if>
 
 		// Animation
