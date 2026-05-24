@@ -162,6 +162,40 @@ public class LocalizationUtils {
 					value = prefix + value;
 
 				generator.getWorkspace().setLocalization(key, value);
+
+				// Process specific language overrides if defined in the template
+				for (String lang : generator.getWorkspace().getLanguageMap().keySet()) {
+					if (lang.equals("en_us"))
+						continue;
+
+					String langSuffixKey = "suffix_" + lang;
+					String langPrefixKey = "prefix_" + lang;
+					boolean hasLangSuffix = template.containsKey(langSuffixKey);
+					boolean hasLangPrefix = template.containsKey(langPrefixKey);
+
+					if (hasLangSuffix || hasLangPrefix) {
+						String langValue = "";
+						if (mapto != null) {
+							Object rawValue = TemplateExpressionParser.getValueFrom(mapto, entry);
+							langValue = rawValue != null ? rawValue.toString() : "";
+						} else if (entry instanceof String str) {
+							langValue = str;
+						}
+
+						String langSuffix = hasLangSuffix ? (String) template.get(langSuffixKey) : suffix;
+						if (langSuffix != null)
+							langValue += langSuffix;
+
+						String langPrefix = hasLangPrefix ? (String) template.get(langPrefixKey) : prefix;
+						if (langPrefix != null)
+							langValue = langPrefix + langValue;
+
+						LinkedHashMap<String, String> langMap = generator.getWorkspace().getLanguageMap().get(lang);
+						if (langMap != null) {
+							langMap.put(key, langValue);
+						}
+					}
+				}
 			}
 		} catch (Throwable e) {
 			generator.getLogger().error("Failed to parse values for key {}", key, e);

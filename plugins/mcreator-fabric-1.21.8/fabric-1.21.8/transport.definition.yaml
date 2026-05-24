@@ -18,46 +18,67 @@ localizationkeys:
   - key: item.@modid.@registryname_spawn_egg
     mapto: mobName
     suffix: " Spawn Egg"
+    prefix_ru_ru: "Яйцо призыва "
+    suffix_ru_ru: ""
     condition: hasSpawnEgg
   - key: entity.@modid.@registryname
     mapto: mobName
   - key: key.@modid.@registryname.engine_toggle
     mapto: mobName
-    suffix: " Запустить/Остановить двигатель"
+    suffix: " Toggle Engine"
+    suffix_ru_ru: " Запустить/Остановить двигатель"
   - key: key.@modid.@registryname.dismount
     mapto: mobName
-    suffix: " Покинуть транспорт"
+    suffix: " Dismount"
+    suffix_ru_ru: " Покинуть транспорт"
   - key: key.categories.@modid.transport
-    suffix: "Транспорт"
+    suffix: "Transport"
+    suffix_ru_ru: "Транспорт"
   - key: hud.@modid.@registryname.engine_on
-    suffix: "Двигатель: ВКЛ"
+    suffix: "Engine: ON"
+    suffix_ru_ru: "Двигатель: ВКЛ"
   - key: hud.@modid.@registryname.engine_off
-    suffix: "Двигатель: ВЫКЛ"
+    suffix: "Engine: OFF"
+    suffix_ru_ru: "Двигатель: ВЫКЛ"
   - key: hud.@modid.@registryname.engine_started
-    suffix: "§aДвигатель: ЗАПУЩЕН"
+    suffix: "§aEngine: STARTED"
+    suffix_ru_ru: "§aДвигатель: ЗАПУЩЕН"
   - key: hud.@modid.@registryname.engine_stopped
-    suffix: "§cДвигатель: ОСТАНОВЛЕН"
+    suffix: "§cEngine: STOPPED"
+    suffix_ru_ru: "§cДвигатель: ОСТАНОВЛЕН"
   - key: hud.@modid.@registryname.speed
-    suffix: "§aСкорость: "
+    suffix: "§aSpeed: "
+    suffix_ru_ru: "§aСкорость: "
   - key: hud.@modid.@registryname.speed_unit
-    suffix: " б/с"
+    suffix: " b/s"
+    suffix_ru_ru: " б/с"
   - key: hud.@modid.@registryname.throttle
-    suffix: " §7|§b Тяга: "
+    suffix: " §7|§b Throttle: "
+    suffix_ru_ru: " §7|§b Тяга: "
   - key: hud.@modid.@registryname.fuel
-    suffix: " §7|§e Топливо: "
+    suffix: " §7|§e Fuel: "
+    suffix_ru_ru: " §7|§e Топливо: "
   - key: hud.@modid.@registryname.fuel_full
-    suffix: "§eБак полон!"
+    suffix: "§eFuel tank is full!"
+    suffix_ru_ru: "§eБак полон!"
   - key: hud.@modid.@registryname.fuel_refueled
-    suffix: "§aЗаправлено! Топливо: "
+    suffix: "§aRefueled! Fuel: "
+    suffix_ru_ru: "§aЗаправлено! Топливо: "
   - key: hud.@modid.@registryname.fuel_empty
-    suffix: "§cТопливо закончилось! Двигатель заглох."
+    suffix: "§cOut of fuel! Engine stopped."
+    suffix_ru_ru: "§cТопливо закончилось! Двигатель заглох."
   - key: hud.@modid.@registryname.exit
-    suffix: "§eВыход: §c"
+    suffix: "§eExit: §c"
+    suffix_ru_ru: "§eВыход: §c"
   - key: hud.@modid.@registryname.hint_start
     suffix: "  §8["
+    suffix_ru_ru: "  §8["
   - key: hud.@modid.@registryname.hint_start_action
-    suffix: " - запуск двигателя]"
+    suffix: " - start engine]"
+    suffix_ru_ru: " - запуск двигателя]"
   - key: hud.@modid.@registryname.hint_exit
     suffix: "  §8["
+    suffix_ru_ru: "  §8["
   - key: hud.@modid.@registryname.hint_exit_action
-    suffix: " - выход (удерживать)]"
+    suffix: " - exit (hold)]"
+    suffix_ru_ru: " - выход (удерживать)]"
