@@ -103,6 +103,7 @@ public class Transport extends GeneratableElement
 	public boolean showHints;
 	@ModElementReference @Nullable public String overlayBoundTo;
 	public List<HudElement> hudElements;
+	@Nonnull public String hudType;
 
 	// Phase 2: Realistic physics
 	public double accelerationRate;  // throttle gain per tick when key held
@@ -247,6 +248,7 @@ public class Transport extends GeneratableElement
 		this.dismountKey = "Q";
 
 		// Phase 2: HUD – default elements
+		this.hudType = "ACTIONBAR";
 		this.showEngineHUD = true;
 		this.showFuelHUD = true;
 		this.showThrottleHUD = true;
@@ -254,11 +256,16 @@ public class Transport extends GeneratableElement
 		this.overlayBoundTo = "";
 
 		this.hudElements = new ArrayList<>();
-		this.hudElements.add(new HudElement("el_engine", "Engine Status", "VEHICLE_VALUE", "ENGINE_STATUS", "Engine: ", "TOP_LEFT", 10, 10, new Color(255, 255, 255), "ALWAYS", 80, 6));
-		this.hudElements.add(new HudElement("el_speed",  "Speedometer",   "VEHICLE_VALUE", "SPEED",         "Speed: ",  "TOP_LEFT", 10, 22, new Color(100, 220, 255), "ENGINE_ON", 80, 6));
-		this.hudElements.add(new HudElement("el_throttle","Throttle",      "PROGRESS_BAR",  "THROTTLE",      "Throttle", "TOP_LEFT", 10, 34, new Color(80, 200, 120), "ENGINE_ON", 80, 6));
-		this.hudElements.add(new HudElement("el_fuel",   "Fuel Level",    "PROGRESS_BAR",  "FUEL",          "Fuel",     "TOP_LEFT", 10, 46, new Color(255, 200, 60), "ENGINE_ON", 80, 6));
-		this.hudElements.add(new HudElement("el_hints",  "Control Hints", "TEXT",           "",              "[" + this.engineToggleKey + "] Engine  [" + this.dismountKey + "] Exit", "BOTTOM_LEFT", 10, -20, new Color(200, 200, 200), "ENGINE_OFF", 80, 6));
+		this.hudElements.add(new HudElement("el_engine", "Engine Status", "VEHICLE_VALUE", "ENGINE_STATUS",
+				net.mcreator.ui.init.L10N.t("elementgui.transport.hud.default_prefix.engine"), "TOP_LEFT", 10, 10, new Color(255, 255, 255), "ALWAYS", 80, 6));
+		this.hudElements.add(new HudElement("el_speed",  "Speedometer",   "VEHICLE_VALUE", "SPEED",
+				net.mcreator.ui.init.L10N.t("elementgui.transport.hud.default_prefix.speed"),  "TOP_LEFT", 10, 22, new Color(100, 220, 255), "ENGINE_ON", 80, 6));
+		this.hudElements.add(new HudElement("el_throttle","Throttle",      "PROGRESS_BAR",  "THROTTLE",
+				net.mcreator.ui.init.L10N.t("elementgui.transport.hud.default_prefix.throttle"), "TOP_LEFT", 10, 34, new Color(80, 200, 120), "ENGINE_ON", 80, 6));
+		this.hudElements.add(new HudElement("el_fuel",   "Fuel Level",    "PROGRESS_BAR",  "FUEL",
+				net.mcreator.ui.init.L10N.t("elementgui.transport.hud.default_prefix.fuel"),     "TOP_LEFT", 10, 46, new Color(255, 200, 60), "ENGINE_ON", 80, 6));
+		this.hudElements.add(new HudElement("el_hints",  "Control Hints", "TEXT",           "",
+				String.format(net.mcreator.ui.init.L10N.t("elementgui.transport.hud.default_prefix.hints"), this.engineToggleKey, this.dismountKey), "BOTTOM_LEFT", 10, -20, new Color(200, 200, 200), "ENGINE_OFF", 80, 6));
 
 		// Phase 2: Physics
 		this.accelerationRate = 0.015;
@@ -356,6 +363,15 @@ public class Transport extends GeneratableElement
 			this.hudElements.add(new HudElement("el_speed",  "Speedometer",   "VEHICLE_VALUE", "SPEED",         "Speed: ",  "TOP_LEFT", 10, 22, new Color(100, 220, 255), "ENGINE_ON", 80, 6));
 			this.hudElements.add(new HudElement("el_throttle","Throttle",      "PROGRESS_BAR",  "THROTTLE",      "Throttle", "TOP_LEFT", 10, 34, new Color(80, 200, 120), "ENGINE_ON", 80, 6));
 			this.hudElements.add(new HudElement("el_fuel",   "Fuel Level",    "PROGRESS_BAR",  "FUEL",          "Fuel",     "TOP_LEFT", 10, 46, new Color(255, 200, 60), "ENGINE_ON", 80, 6));
+		}
+		if (this.hudType == null || this.hudType.isEmpty()) {
+			if (this.overlayBoundTo != null && !this.overlayBoundTo.isEmpty()) {
+				this.hudType = "OVERLAY";
+			} else if (this.hudElements != null && !this.hudElements.isEmpty()) {
+				this.hudType = "CUSTOM";
+			} else {
+				this.hudType = "ACTIONBAR";
+			}
 		}
 	}
 

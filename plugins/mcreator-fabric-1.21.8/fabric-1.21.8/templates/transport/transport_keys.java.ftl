@@ -116,7 +116,7 @@ public class ${name}TransportKeys {
 			hud.append("  ");
 			mc.player.displayClientMessage(net.minecraft.network.chat.Component.literal(hud.toString()), true);
 		} else {
-			<#if !data.overlayBoundTo?has_content>
+			<#if data.hudType == "ACTIONBAR">
 			// Engine status / Speed
 			<#if data.showEngineHUD>
 			if (vehicle.isEngineOn()) {
@@ -159,21 +159,11 @@ public class ${name}TransportKeys {
 				   .append(net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.hint_exit_action").getString());
 			}
 			</#if>
-			</#if>
 
-			// Actionbar fallback only if no custom HUD elements are configured
-			boolean hasHudElements = false;
-			<#if data.hudElements??>
-			<#if data.hudElements?size > 0>
-			hasHudElements = true;
-			</#if>
-			</#if>
-
-			if (!hasHudElements) {
-				if (hud.length() > 0) {
-					mc.player.displayClientMessage(net.minecraft.network.chat.Component.literal(hud.toString()), true);
-				}
+			if (hud.length() > 0) {
+				mc.player.displayClientMessage(net.minecraft.network.chat.Component.literal(hud.toString()), true);
 			}
+			</#if>
 		}
 	}
 
@@ -186,7 +176,7 @@ public class ${name}TransportKeys {
 		if (!(vehicleEntity instanceof ${name}Entity vehicle))
 			return;
 
-		<#if data.overlayBoundTo?has_content>
+		<#if data.hudType != "CUSTOM">
 		return;
 		</#if>
 
@@ -271,8 +261,8 @@ public class ${name}TransportKeys {
 				<#elseif element.valueExpression == "ENGINE_STATUS">
 				{
 					valueStr = vehicle.isEngineOn() ?
-						net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.engine_on").getString() :
-						net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.engine_off").getString();
+						net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.value.engine_on").getString() :
+						net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.value.engine_off").getString();
 					valueRatio = vehicle.isEngineOn() ? 1.0 : 0.0;
 				}
 				<#elseif element.valueExpression == "ALTITUDE">

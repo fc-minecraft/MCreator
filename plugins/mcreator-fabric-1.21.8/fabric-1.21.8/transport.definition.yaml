@@ -82,3 +82,9 @@ localizationkeys:
   - key: hud.@modid.@registryname.hint_exit_action
     suffix: " - exit (hold)]"
     suffix_ru_ru: " - выход (удерживать)]"
+  - key: hud.@modid.@registryname.value.engine_on
+    suffix: "ON"
+    suffix_ru_ru: "ВКЛ"
+  - key: hud.@modid.@registryname.value.engine_off
+    suffix: "OFF"
+    suffix_ru_ru: "ВЫКЛ"

@@ -126,6 +126,11 @@ public class TransportGUI extends ModElementGUI<Transport> {
 	private final JCheckBox showFuelHUD     = new JCheckBox();
 	private final JCheckBox showThrottleHUD = new JCheckBox();
 	private final JCheckBox showHints       = new JCheckBox();
+	private final JComboBox<String> hudType = new TranslatedComboBox(
+			Map.entry("ACTIONBAR", "elementgui.transport.hud_type.actionbar"),
+			Map.entry("CUSTOM", "elementgui.transport.hud_type.custom"),
+			Map.entry("OVERLAY", "elementgui.transport.hud_type.overlay")
+	);
 	private SingleModElementSelector overlayBoundTo;
 
 	// Phase 2: Physics
@@ -379,6 +384,10 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		showHints.setText(L10N.t("elementgui.transport.show_hints"));
 		showHints.setOpaque(false);
 
+		hudType.addActionListener(e -> updateHUDCheckboxesState());
+		keybindGrid.add(HelpUtils.wrapWithHelpButton(this.withEntry("transport/hud_type"), L10N.label("elementgui.transport.hud_type")));
+		keybindGrid.add(hudType);
+
 		keybindGrid.add(showEngineHUD);   keybindGrid.add(new JLabel());
 		keybindGrid.add(showFuelHUD);     keybindGrid.add(new JLabel());
 		keybindGrid.add(showThrottleHUD); keybindGrid.add(new JLabel());
@@ -429,7 +438,15 @@ public class TransportGUI extends ModElementGUI<Transport> {
 
 		addPage(L10N.t("elementgui.transport.page_controls"), PanelUtils.totalCenterInPanel(controlsPanel));
 
-		hudEditorPanel = new HudEditorPanel(mcreator, () -> !overlayBoundTo.isEmpty());
+		hudEditorPanel = new HudEditorPanel(mcreator, () -> {
+			String selectedType = (String) hudType.getSelectedItem();
+			if ("ACTIONBAR".equals(selectedType)) {
+				return L10N.t("elementgui.transport.hud.disabled_actionbar");
+			} else if ("OVERLAY".equals(selectedType)) {
+				return L10N.t("elementgui.transport.hud.disabled_overlay");
+			}
+			return null;
+		});
 		addPage(L10N.t("elementgui.transport.page_hud_editor"), hudEditorPanel);
 
 		updateFlightControlsState();
@@ -514,6 +531,7 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		spinSpeed.setValue(transport.spinSpeed);
 
 		// Phase 2: Controls & HUD
+		hudType.setSelectedItem(transport.hudType != null && !transport.hudType.isEmpty() ? transport.hudType : "ACTIONBAR");
 		engineToggleKey.setSelectedItem(
 			transport.engineToggleKey != null && !transport.engineToggleKey.isEmpty() ? transport.engineToggleKey : "F");
 		dismountKey.setSelectedItem(
@@ -550,11 +568,17 @@ public class TransportGUI extends ModElementGUI<Transport> {
 	}
 
 	private void updateHUDCheckboxesState() {
-		boolean hasCustomOverlay = !overlayBoundTo.isEmpty();
-		showEngineHUD.setEnabled(!hasCustomOverlay);
-		showFuelHUD.setEnabled(!hasCustomOverlay);
-		showThrottleHUD.setEnabled(!hasCustomOverlay);
-		showHints.setEnabled(!hasCustomOverlay);
+		String selectedType = (String) hudType.getSelectedItem();
+		boolean isActionbar = "ACTIONBAR".equals(selectedType);
+		boolean isOverlay = "OVERLAY".equals(selectedType);
+
+		showEngineHUD.setEnabled(isActionbar);
+		showFuelHUD.setEnabled(isActionbar);
+		showThrottleHUD.setEnabled(isActionbar);
+		showHints.setEnabled(isActionbar);
+
+		overlayBoundTo.setEnabled(isOverlay);
+
 		if (hudEditorPanel != null) {
 			hudEditorPanel.refreshOverlayState();
 		}
@@ -609,6 +633,7 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		transport.spinSpeed = ((Number) spinSpeed.getValue()).doubleValue();
 
 		// Phase 2: Controls & HUD
+		transport.hudType         = (String) hudType.getSelectedItem();
 		transport.engineToggleKey = (String) engineToggleKey.getSelectedItem();
 		transport.dismountKey     = (String) dismountKey.getSelectedItem();
 		transport.showEngineHUD   = showEngineHUD.isSelected();
@@ -630,15 +655,17 @@ public class TransportGUI extends ModElementGUI<Transport> {
 
 		if (hudEditorPanel != null) {
 			transport.hudElements = hudEditorPanel.getElements();
-			transport.showEngineHUD = false;
-			transport.showFuelHUD = false;
-			transport.showThrottleHUD = false;
-			transport.showHints = false;
-			for (Transport.HudElement el : transport.hudElements) {
-				if ("el_engine".equals(el.id)) transport.showEngineHUD = true;
-				if ("el_fuel".equals(el.id)) transport.showFuelHUD = true;
-				if ("el_throttle".equals(el.id)) transport.showThrottleHUD = true;
-				if ("el_hints".equals(el.id)) transport.showHints = true;
+			if ("CUSTOM".equals(transport.hudType)) {
+				transport.showEngineHUD = false;
+				transport.showFuelHUD = false;
+				transport.showThrottleHUD = false;
+				transport.showHints = false;
+				for (Transport.HudElement el : transport.hudElements) {
+					if ("el_engine".equals(el.id)) transport.showEngineHUD = true;
+					if ("el_fuel".equals(el.id)) transport.showFuelHUD = true;
+					if ("el_throttle".equals(el.id)) transport.showThrottleHUD = true;
+					if ("el_hints".equals(el.id)) transport.showHints = true;
+				}
 			}
 		}
 

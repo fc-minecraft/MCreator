@@ -54,7 +54,7 @@ public class HudPreviewPanel extends JPanel {
 
 	private final DefaultListModel<Transport.HudElement> listModel;
 	private final Supplier<Transport.HudElement>          selectionSupplier;
-	private final Supplier<Boolean>                       overlayActiveSupplier;
+	private final Supplier<String>                        disabledMessageSupplier;
 
 	/** Called when a drag changes xOffset/yOffset so spinners can update. */
 	private @Nullable SpinnerSyncCallback spinnerSync;
@@ -75,10 +75,10 @@ public class HudPreviewPanel extends JPanel {
 
 	public HudPreviewPanel(DefaultListModel<Transport.HudElement> listModel,
 			Supplier<Transport.HudElement> selectionSupplier,
-			Supplier<Boolean>              overlayActiveSupplier) {
-		this.listModel             = listModel;
-		this.selectionSupplier     = selectionSupplier;
-		this.overlayActiveSupplier = overlayActiveSupplier;
+			Supplier<String>               disabledMessageSupplier) {
+		this.listModel               = listModel;
+		this.selectionSupplier       = selectionSupplier;
+		this.disabledMessageSupplier = disabledMessageSupplier;
 
 		setBackground(new Color(18, 18, 18));
 		setBorder(BorderFactory.createLineBorder(new Color(50, 50, 50)));
@@ -86,7 +86,7 @@ public class HudPreviewPanel extends JPanel {
 
 		MouseAdapter ma = new MouseAdapter() {
 			@Override public void mousePressed(MouseEvent e) {
-				if (Boolean.TRUE.equals(overlayActiveSupplier.get())) return;
+				if (disabledMessageSupplier.get() != null) return;
 				Rectangle r = screenRect();
 				if (!r.contains(e.getPoint())) return;
 				int vx = toV(e.getX() - r.x, r.width,  VW);
@@ -146,13 +146,13 @@ public class HudPreviewPanel extends JPanel {
 				r.x, r.y + r.height, new Color(20, 35, 60)));
 		g2.fillRect(r.x, r.y, r.width, r.height);
 
-		// Overlay-bound warning
-		if (Boolean.TRUE.equals(overlayActiveSupplier.get())) {
+		// Warning when HUD editor is disabled
+		String disabledMsg = disabledMessageSupplier.get();
+		if (disabledMsg != null) {
 			g2.setColor(new Color(220, 60, 60));
 			g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
-			String msg = L10N.t("elementgui.transport.hud.overlay_warning");
 			FontMetrics fm = g2.getFontMetrics();
-			g2.drawString(msg, r.x + (r.width - fm.stringWidth(msg)) / 2, r.y + r.height / 2);
+			g2.drawString(disabledMsg, r.x + (r.width - fm.stringWidth(disabledMsg)) / 2, r.y + r.height / 2);
 			return;
 		}
 
@@ -233,11 +233,11 @@ public class HudPreviewPanel extends JPanel {
 		return switch (el.type != null ? el.type : "") {
 			case "TEXT"          -> p.isEmpty() ? "<text>" : p;
 			case "VEHICLE_VALUE" -> p + switch (el.valueExpression != null ? el.valueExpression : "") {
-				case "SPEED"         -> "42 m/s";
+				case "SPEED"         -> "42 " + L10N.t("elementgui.transport.hud.val_speed_unit", "b/s");
 				case "FUEL"          -> "67%";
 				case "THROTTLE"      -> "80%";
-				case "ENGINE_STATUS" -> "ON";
-				case "ALTITUDE"      -> "120 m";
+				case "ENGINE_STATUS" -> L10N.t("elementgui.transport.hud.val_engine_on", "ON");
+				case "ALTITUDE"      -> "120 " + L10N.t("elementgui.transport.hud.val_altitude_unit", "m");
 				case "HEALTH"        -> "20 ♥";
 				default              -> "…";
 			};
@@ -297,9 +297,19 @@ public class HudPreviewPanel extends JPanel {
 		};
 	}
 
-	private static Rectangle elBounds(Transport.HudElement el) {
-		int ew = "PROGRESS_BAR".equals(el.type) ? Math.max(el.barWidth,  8) : 90;
-		int eh = "PROGRESS_BAR".equals(el.type) ? Math.max(el.barHeight + 12, 14) : 10;
+	private Rectangle elBounds(Transport.HudElement el) {
+		int ew = 90;
+		if ("PROGRESS_BAR".equals(el.type)) {
+			ew = Math.max(el.barWidth, 8);
+		} else {
+			String previewText = buildPreviewText(el);
+			if (previewText != null) {
+				Font monoFont = new Font("Monospaced", Font.PLAIN, 7);
+				FontMetrics fm = getFontMetrics(monoFont);
+				ew = Math.max(90, fm.stringWidth(previewText) + 4);
+			}
+		}
+		int eh = "PROGRESS_BAR".equals(el.type) ? Math.max(el.barHeight + 12, 14) : 12;
 		return new Rectangle(absX(el), absY(el), ew, eh);
 	}
 

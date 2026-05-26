@@ -90,7 +90,7 @@ public class HudEditorPanel extends JPanel {
 	// Property controls (always visible)
 	// ─────────────────────────────────────────────────────────────────────────
 
-	private final JTextField     labelField    = new JTextField();
+	private final JTextField     labelField    = new JTextField(12);
 	private final JComboBox<String> typeCombo  = new JComboBox<>(ELEMENT_TYPES);
 	private final JComboBox<String> anchorCombo= new JComboBox<>(ANCHORS);
 	private final JSpinner       xSpin         = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 1));
@@ -102,7 +102,7 @@ public class HudEditorPanel extends JPanel {
 	// ─────────────────────────────────────────────────────────────────────────
 
 	private final JComboBox<String> valueExprCombo  = new JComboBox<>(VALUE_EXPRESSIONS);
-	private final JTextField        textContentField = new JTextField();
+	private final JTextField        textContentField = new JTextField(12);
 	private final JComboBox<String> displayCondCombo = new JComboBox<>(DISPLAY_CONDITIONS);
 	private final JSpinner          barWidthSpin     = new JSpinner(new SpinnerNumberModel(80, 8, 400, 4));
 	private final JSpinner          barHeightSpin    = new JSpinner(new SpinnerNumberModel(6,  2, 40,  1));
@@ -118,15 +118,15 @@ public class HudEditorPanel extends JPanel {
 
 	private final HudPreviewPanel preview;
 
-	// supplier checked when redrawing to know if a custom overlay is active
-	private final Supplier<Boolean> overlayActiveSupplier;
+	// supplier checked when redrawing to know if a custom overlay or actionbar is active and gets disabled message
+	private final Supplier<String> disabledMessageSupplier;
 
 	// ─────────────────────────────────────────────────────────────────────────
 	// Constructor
 	// ─────────────────────────────────────────────────────────────────────────
 
-	public HudEditorPanel(MCreator mcreator, Supplier<Boolean> overlayActiveSupplier) {
-		this.overlayActiveSupplier = overlayActiveSupplier;
+	public HudEditorPanel(MCreator mcreator, Supplier<String> disabledMessageSupplier) {
+		this.disabledMessageSupplier = disabledMessageSupplier;
 		this.colorPicker           = new JColor(mcreator, false, false).withColorTextColumns(5);
 
 		setLayout(new BorderLayout(8, 8));
@@ -138,7 +138,7 @@ public class HudEditorPanel extends JPanel {
 		add(leftPanel, BorderLayout.WEST);
 
 		// ── CENTER: preview ───────────────────────────────────────────────────
-		preview = new HudPreviewPanel(listModel, () -> selected, overlayActiveSupplier);
+		preview = new HudPreviewPanel(listModel, () -> selected, disabledMessageSupplier);
 		preview.setSpinnerSyncCallback((newX, newY) -> {
 			updating = true;
 			xSpin.setValue(newX);
@@ -309,7 +309,7 @@ public class HudEditorPanel extends JPanel {
 
 		JScrollPane scroll = new JScrollPane(grid,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scroll.setBorder(null);
 
 		JPanel outer = new JPanel(new BorderLayout());
