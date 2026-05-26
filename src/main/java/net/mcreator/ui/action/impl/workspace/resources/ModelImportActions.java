@@ -242,7 +242,7 @@ public class ModelImportActions {
 	public static void importJSONModel(MCreator mcreator, File file) {
 		String cmodel = FileIO.readFileToString(file);
 
-		if (cmodel.contains("\"minecraft:geometry\"") || cmodel.contains("\"format_version\"")) {
+		if (cmodel.contains("\"minecraft:geometry\"") || (cmodel.contains("\"format_version\"") && !cmodel.contains("\"elements\""))) {
 			JOptionPane.showMessageDialog(mcreator,
 					"This appears to be a Bedrock or GeckoLib model.\n" +
 							"The 'Import JSON 3D Model' action is intended ONLY for Vanilla Block/Item JSON models.\n" +
@@ -250,6 +250,10 @@ public class ModelImportActions {
 							"and its specific import action, or use a Java model for vanilla entities.",
 					"Invalid Model Format",
 					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		if (!validateJSONModelRotations(mcreator, cmodel)) {
 			return;
 		}
 
@@ -356,6 +360,51 @@ public class ModelImportActions {
 			// copy the actual model
 			FileIO.copyFile(modelFile, new File(mcreator.getFolderManager().getModelsDir(), modelNameBase));
 		}
+	}
+
+	private static boolean validateJSONModelRotations(MCreator mcreator, String jsonString) {
+		try {
+			com.google.gson.JsonElement json = com.google.gson.JsonParser.parseString(jsonString);
+			if (json.isJsonObject() && json.getAsJsonObject().has("elements")) {
+				com.google.gson.JsonArray elements = json.getAsJsonObject().getAsJsonArray("elements");
+				for (int i = 0; i < elements.size(); i++) {
+					com.google.gson.JsonElement el = elements.get(i);
+					if (el.isJsonObject() && el.getAsJsonObject().has("rotation")) {
+						com.google.gson.JsonElement rotEl = el.getAsJsonObject().get("rotation");
+						if (rotEl.isJsonObject()) {
+							com.google.gson.JsonObject rot = rotEl.getAsJsonObject();
+							boolean hasAxis = rot.has("axis");
+							boolean hasMultipleAxes = rot.has("x") || rot.has("y") || rot.has("z");
+							if (!hasAxis || hasMultipleAxes) {
+								int elementIndex = i + 1;
+								String message = L10N.t("dialog.workspace.resources.import_json_model.invalid_rotation.message", elementIndex);
+								JOptionPane.showMessageDialog(mcreator,
+										message,
+										L10N.t("dialog.workspace.resources.import_json_model.invalid_rotation.title"),
+										JOptionPane.ERROR_MESSAGE);
+								return false;
+							}
+
+							if (rot.has("angle")) {
+								double angle = rot.get("angle").getAsDouble();
+								if (angle != 0 && angle != 22.5 && angle != 45 && angle != -22.5 && angle != -45) {
+									int elementIndex = i + 1;
+									String message = L10N.t("dialog.workspace.resources.import_json_model.invalid_angle.message", elementIndex, angle);
+									JOptionPane.showMessageDialog(mcreator,
+											message,
+											L10N.t("dialog.workspace.resources.import_json_model.invalid_angle.title"),
+											JOptionPane.ERROR_MESSAGE);
+									return false;
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOG.error("Failed to validate JSON model rotations", e);
+		}
+		return true;
 	}
 
 }
