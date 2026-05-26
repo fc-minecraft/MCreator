@@ -101,6 +101,8 @@ public class Transport extends GeneratableElement
 	public boolean showFuelHUD;
 	public boolean showThrottleHUD;
 	public boolean showHints;
+	@ModElementReference @Nullable public String overlayBoundTo;
+	public List<HudElement> hudElements;
 
 	// Phase 2: Realistic physics
 	public double accelerationRate;  // throttle gain per tick when key held
@@ -122,6 +124,74 @@ public class Transport extends GeneratableElement
 		public FuelEntry(MItemBlock item, double fuelAmount) {
 			this.item = item;
 			this.fuelAmount = fuelAmount;
+		}
+	}
+
+	public static class HudElement {
+		/** Unique internal id (UUID). */
+		public String id;
+		/** User-visible label shown in editor and optionally rendered as prefix in-game. */
+		public String label;
+		/**
+		 * Element type:
+		 *  TEXT         – static text content
+		 *  VEHICLE_VALUE – renders a named vehicle data value (speed, fuel, throttle, engine_status, altitude)
+		 *  PROGRESS_BAR  – renders a colored progress bar for a named vehicle value
+		 */
+		public String type;
+		/** For VEHICLE_VALUE / PROGRESS_BAR: which value to show (SPEED, FUEL, THROTTLE, ENGINE_STATUS, ALTITUDE). */
+		public String valueExpression;
+		/** For TEXT type: the static string to display. Also used as label prefix for VEHICLE_VALUE. */
+		public String textContent;
+		/** Anchor corner/edge of the screen. */
+		public String anchor;
+		/** Pixel offset from the anchor X. */
+		public int xOffset;
+		/** Pixel offset from the anchor Y. */
+		public int yOffset;
+		/** Rendering color (ARGB). */
+		public Color color;
+		/**
+		 * Display condition:
+		 *  ALWAYS, ENGINE_ON, ENGINE_OFF, MOVING
+		 */
+		public String displayCondition;
+		/** Width of the bar in pixels (only for PROGRESS_BAR). */
+		public int barWidth;
+		/** Height of the bar in pixels (only for PROGRESS_BAR). */
+		public int barHeight;
+
+		public HudElement() {}
+
+		/** Convenience constructor for simple value indicators. */
+		public HudElement(String id, String label, String type, String valueExpression,
+				String textContent, String anchor, int xOffset, int yOffset,
+				Color color, String displayCondition, int barWidth, int barHeight) {
+			this.id = id;
+			this.label = label;
+			this.type = type;
+			this.valueExpression = valueExpression;
+			this.textContent = textContent;
+			this.anchor = anchor;
+			this.xOffset = xOffset;
+			this.yOffset = yOffset;
+			this.color = color;
+			this.displayCondition = displayCondition;
+			this.barWidth = barWidth;
+			this.barHeight = barHeight;
+		}
+
+		/** Returns a human-readable description for the editor list. */
+		public String getDisplayName() {
+			if (label != null && !label.isEmpty()) return label;
+			if (type != null) {
+				switch (type) {
+					case "VEHICLE_VALUE": return (valueExpression != null ? valueExpression : "Value") + " indicator";
+					case "PROGRESS_BAR": return (valueExpression != null ? valueExpression : "Value") + " bar";
+					case "TEXT": return "Text: " + (textContent != null && textContent.length() > 16 ? textContent.substring(0, 16) + "…" : textContent);
+				}
+			}
+			return "HUD element";
 		}
 	}
 
@@ -176,11 +246,19 @@ public class Transport extends GeneratableElement
 		this.engineToggleKey = "F";
 		this.dismountKey = "Q";
 
-		// Phase 2: HUD
+		// Phase 2: HUD – default elements
 		this.showEngineHUD = true;
 		this.showFuelHUD = true;
 		this.showThrottleHUD = true;
 		this.showHints = true;
+		this.overlayBoundTo = "";
+
+		this.hudElements = new ArrayList<>();
+		this.hudElements.add(new HudElement("el_engine", "Engine Status", "VEHICLE_VALUE", "ENGINE_STATUS", "Engine: ", "TOP_LEFT", 10, 10, new Color(255, 255, 255), "ALWAYS", 80, 6));
+		this.hudElements.add(new HudElement("el_speed",  "Speedometer",   "VEHICLE_VALUE", "SPEED",         "Speed: ",  "TOP_LEFT", 10, 22, new Color(100, 220, 255), "ENGINE_ON", 80, 6));
+		this.hudElements.add(new HudElement("el_throttle","Throttle",      "PROGRESS_BAR",  "THROTTLE",      "Throttle", "TOP_LEFT", 10, 34, new Color(80, 200, 120), "ENGINE_ON", 80, 6));
+		this.hudElements.add(new HudElement("el_fuel",   "Fuel Level",    "PROGRESS_BAR",  "FUEL",          "Fuel",     "TOP_LEFT", 10, 46, new Color(255, 200, 60), "ENGINE_ON", 80, 6));
+		this.hudElements.add(new HudElement("el_hints",  "Control Hints", "TEXT",           "",              "[" + this.engineToggleKey + "] Engine  [" + this.dismountKey + "] Exit", "BOTTOM_LEFT", 10, -20, new Color(200, 200, 200), "ENGINE_OFF", 80, 6));
 
 		// Phase 2: Physics
 		this.accelerationRate = 0.015;
@@ -271,6 +349,13 @@ public class Transport extends GeneratableElement
 			if (this.fuelItem != null && !this.fuelItem.isEmpty()) {
 				this.fuelItems.add(new FuelEntry(this.fuelItem, 250.0));
 			}
+		}
+		if (this.hudElements == null || this.hudElements.isEmpty()) {
+			this.hudElements = new ArrayList<>();
+			this.hudElements.add(new HudElement("el_engine", "Engine Status", "VEHICLE_VALUE", "ENGINE_STATUS", "Engine: ", "TOP_LEFT", 10, 10, new Color(255, 255, 255), "ALWAYS", 80, 6));
+			this.hudElements.add(new HudElement("el_speed",  "Speedometer",   "VEHICLE_VALUE", "SPEED",         "Speed: ",  "TOP_LEFT", 10, 22, new Color(100, 220, 255), "ENGINE_ON", 80, 6));
+			this.hudElements.add(new HudElement("el_throttle","Throttle",      "PROGRESS_BAR",  "THROTTLE",      "Throttle", "TOP_LEFT", 10, 34, new Color(80, 200, 120), "ENGINE_ON", 80, 6));
+			this.hudElements.add(new HudElement("el_fuel",   "Fuel Level",    "PROGRESS_BAR",  "FUEL",          "Fuel",     "TOP_LEFT", 10, 46, new Color(255, 200, 60), "ENGINE_ON", 80, 6));
 		}
 	}
 

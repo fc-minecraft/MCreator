@@ -61,6 +61,7 @@ public class ${name}Entity extends PathfinderMob {
 	public boolean isEngineOn()  { return this.entityData.get(DATA_ENGINE); }
 	public float   getFuel()     { return this.entityData.get(DATA_FUEL); }
 	public float   getThrottle() { return this.entityData.get(DATA_THROTTLE); }
+	public float   getFuelCapacity() { return ${(data.fuelCapacity)?c}f; }
 
 	// =========================================================================
 	// Packet handlers (called from ${name}ControlPacket)

@@ -41,6 +41,22 @@ package ${package}.client.screens;
 			z = entity.getZ();
 		}
 
+		<#assign boundToTransports = []>
+		<#list w.getWorkspace().getModElements() as me>
+			<#if me.getType().getRegistryName() == "transport">
+				<#assign transportElement = me.getGeneratableElement()>
+				<#if transportElement.overlayBoundTo?? && transportElement.overlayBoundTo == data.getModElement().getName()>
+					<#assign boundToTransports = boundToTransports + [me.getName()]>
+				</#if>
+			</#if>
+		</#list>
+		<#if boundToTransports?size > 0>
+		if (entity != null && (
+			<#list boundToTransports as t>
+			entity.getVehicle() instanceof ${package}.entity.${t}Entity<#if t_has_next> || </#if>
+			</#list>
+		)) {
+		</#if>
 		if (<@procedureOBJToConditionCode data.displayCondition/>) {
 			<#if data.baseTexture?has_content>
 				guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ResourceLocation.parse("${modid}:textures/screens/${data.baseTexture}"), 0, 0, 0, 0, w, h, w, h);
@@ -91,6 +107,9 @@ package ${package}.client.screens;
 				}
 			</#list>
 		}
+		<#if boundToTransports?size > 0>
+		}
+		</#if>
 	}
 }
 
