@@ -1,4 +1,21 @@
 <#-- @formatter:off -->
+<#macro localizeText textVal>
+	<#compress>
+		<#if textVal == "Engine: " || textVal == "Engine Status" || textVal == "Двигатель: ">
+			net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.custom.engine").getString()
+		<#elseif textVal == "Speed: " || textVal == "Speedometer" || textVal == "Скорость: ">
+			net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.custom.speed").getString()
+		<#elseif textVal == "Throttle" || textVal == "Тяга">
+			net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.custom.throttle").getString()
+		<#elseif textVal == "Fuel" || textVal == "Fuel Level" || textVal == "Топливо">
+			net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.custom.fuel").getString()
+		<#elseif textVal?starts_with("[") && (textVal?ends_with("Exit") || textVal?ends_with("Выход") || textVal?contains("Exit") || textVal?contains("Выход") || textVal?contains("Engine") || textVal?contains("Двигатель"))>
+			net.minecraft.network.chat.Component.translatable("hud.${modid}.${registryname}.custom.hints", "${data.engineToggleKey}", "${data.dismountKey}").getString()
+		<#else>
+			"${textVal}"
+		</#if>
+	</#compress>
+</#macro>
 package ${package}.client;
 
 import ${package}.${JavaModName};
@@ -282,11 +299,11 @@ public class ${name}TransportKeys {
 				</#if>
 
 				<#if element.type == "TEXT">
-				guiGraphics.drawString(mc.font, "${element.textContent}", x, y, color, false);
+				guiGraphics.drawString(mc.font, <@localizeText element.textContent />, x, y, color, false);
 				<#elseif element.type == "VEHICLE_VALUE">
-				guiGraphics.drawString(mc.font, "${element.textContent}" + valueStr, x, y, color, false);
+				guiGraphics.drawString(mc.font, <@localizeText element.textContent /> + valueStr, x, y, color, false);
 				<#elseif element.type == "PROGRESS_BAR">
-				String prefix = "${element.textContent}";
+				String prefix = <@localizeText element.textContent />;
 				if (!prefix.isEmpty()) {
 					guiGraphics.drawString(mc.font, prefix, x, y, color, false);
 					y += 10;

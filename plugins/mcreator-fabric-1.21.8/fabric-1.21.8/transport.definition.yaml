@@ -88,3 +88,18 @@ localizationkeys:
   - key: hud.@modid.@registryname.value.engine_off
     suffix: "OFF"
     suffix_ru_ru: "ВЫКЛ"
+  - key: hud.@modid.@registryname.custom.engine
+    suffix: "Engine: "
+    suffix_ru_ru: "Двигатель: "
+  - key: hud.@modid.@registryname.custom.speed
+    suffix: "Speed: "
+    suffix_ru_ru: "Скорость: "
+  - key: hud.@modid.@registryname.custom.throttle
+    suffix: "Throttle"
+    suffix_ru_ru: "Тяга"
+  - key: hud.@modid.@registryname.custom.fuel
+    suffix: "Fuel"
+    suffix_ru_ru: "Топливо"
+  - key: hud.@modid.@registryname.custom.hints
+    suffix: "[%1$s] Engine  [%2$s] Exit"
+    suffix_ru_ru: "[%1$s] Двигатель  [%2$s] Выход"
