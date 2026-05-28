@@ -1,0 +1,1 @@
+Jump force (for land) or vertical climb speed (for air/water).

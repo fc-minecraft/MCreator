@@ -1,0 +1,1 @@
+Throttle acceleration rate when moving forward.

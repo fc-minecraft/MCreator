@@ -1,0 +1,1 @@
+Secondary color (dots) of the spawn egg.

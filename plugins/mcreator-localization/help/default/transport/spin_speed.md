@@ -1,0 +1,1 @@
+Rotation speed multiplier of animated spin parts.

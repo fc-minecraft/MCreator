@@ -1,0 +1,1 @@
+Sideways movement (strafe) speed.

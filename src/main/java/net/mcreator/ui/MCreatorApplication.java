@@ -117,8 +117,12 @@ public final class MCreatorApplication {
 
 			// NOW start other background tasks that depend on UIRES/Themes
 			CompletableFuture<Void> helpFuture = CompletableFuture.runAsync(HelpLoader::preloadCache);
+			// BlockItemIcons MUST finish before DataListLoader, because MCItem constructors
+			// (called inside DataListLoader::preloadCache for "blocksitems" list) invoke
+			// BlockItemIcons.getIconForItem() at construction time. Running them in parallel
+			// is a race condition that causes all item icons to show as "!" (missingblockicon).
 			CompletableFuture<Void> iconsFuture = CompletableFuture.runAsync(BlockItemIcons::init);
-			CompletableFuture<Void> dataFuture = CompletableFuture.runAsync(DataListLoader::preloadCache);
+			CompletableFuture<Void> dataFuture = iconsFuture.thenRunAsync(DataListLoader::preloadCache);
 			CompletableFuture<Void> imageMakerFuture = CompletableFuture.runAsync(ImageMakerTexturesCache::init);
 			CompletableFuture<Void> armorMakerFuture = CompletableFuture.runAsync(ArmorMakerTexturesCache::init);
 			CompletableFuture<Void> varTypeFuture = CompletableFuture.runAsync(VariableTypeLoader::loadVariableTypes);

@@ -1,0 +1,1 @@
+Comma-separated bone names of model parts that rotate when engine is ON (e.g., propeller, rotor).

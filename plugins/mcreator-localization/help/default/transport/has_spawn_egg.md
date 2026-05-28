@@ -1,0 +1,1 @@
+Enable or disable the spawn egg item in creative tabs.

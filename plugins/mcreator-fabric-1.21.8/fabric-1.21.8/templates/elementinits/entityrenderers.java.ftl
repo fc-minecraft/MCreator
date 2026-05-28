@@ -38,8 +38,11 @@ package ${package}.init;
 				</#if>
 			<#else>
 				EntityRendererRegistry.register(${JavaModName}Entities.${entity.getModElement().getRegistryNameUpper()}, ${entity.getModElement().getName()}Renderer::new);
-				<#if entity.hasCustomProjectile()>
+				<#if entity.getModElement().getTypeString() == "livingentity" && entity.hasCustomProjectile()>
 				EntityRendererRegistry.register(${JavaModName}Entities.${entity.getModElement().getRegistryNameUpper()}_PROJECTILE, ThrownItemRenderer::new);
+				</#if>
+				<#if entity.getModElement().getTypeString() == "transport">
+				${entity.getModElement().getName()}TransportKeys.register();
 				</#if>
 			</#if>
 		</#list>

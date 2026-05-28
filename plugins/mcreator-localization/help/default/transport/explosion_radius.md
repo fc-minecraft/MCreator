@@ -1,0 +1,1 @@
+Radius and power of the crash explosion.

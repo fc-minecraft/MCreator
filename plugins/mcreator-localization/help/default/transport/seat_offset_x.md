@@ -1,0 +1,1 @@
+Seat position horizontal X offset relative to model center.

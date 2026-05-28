@@ -26,7 +26,7 @@
 
 package ${package}.init;
 
-<#assign hasLivingEntities = w.hasElementsOfType("livingentity")>
+<#assign hasLivingEntities = w.hasElementsOfType("livingentity") || w.hasElementsOfType("transport")>
 
 public class ${JavaModName}Entities {
 
@@ -59,6 +59,13 @@ public class ${JavaModName}Entities {
 					of(${entity.getModElement().getName()}EntityProjectile::new, MobCategory.MISC).clientTrackingRange(64)
 						.updateInterval(1).sized(0.5f, 0.5f));
 			</#if>
+		<#elseif entity.getModElement().getTypeString() == "transport">
+			${entity.getModElement().getRegistryNameUpper()} =
+				register("${entity.getModElement().getRegistryName()}", EntityType.Builder.<${entity.getModElement().getName()}Entity>
+						of(${entity.getModElement().getName()}Entity::new, MobCategory.MISC)
+							.clientTrackingRange(64).updateInterval(3)
+							.sized(1.2f, 1.2f)
+						);
 		</#if>
 	</#list>
 
@@ -66,6 +73,17 @@ public class ${JavaModName}Entities {
 			init();
 			registerAttributes();
 		</#if>
+
+		<#list entities as entity>
+			<#if entity.getModElement().getTypeString() == "transport">
+			net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playC2S().register(
+				${package}.network.${entity.getModElement().getName()}ControlPacket.TYPE,
+				${package}.network.${entity.getModElement().getName()}ControlPacket.STREAM_CODEC);
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(
+				${package}.network.${entity.getModElement().getName()}ControlPacket.TYPE,
+				${package}.network.${entity.getModElement().getName()}ControlPacket::handleData);
+			</#if>
+		</#list>
 	}
 
 	// Start of user code block custom entities
@@ -89,6 +107,8 @@ public class ${JavaModName}Entities {
 	public static void registerAttributes() {
 		<#list entities as entity>
 			<#if entity.getModElement().getTypeString() == "livingentity">
+				FabricDefaultAttributeRegistry.register(${entity.getModElement().getRegistryNameUpper()}, ${entity.getModElement().getName()}Entity.createAttributes());
+			<#elseif entity.getModElement().getTypeString() == "transport">
 				FabricDefaultAttributeRegistry.register(${entity.getModElement().getRegistryNameUpper()}, ${entity.getModElement().getName()}Entity.createAttributes());
 			</#if>
 		</#list>

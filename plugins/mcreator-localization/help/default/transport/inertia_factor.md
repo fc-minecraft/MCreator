@@ -1,0 +1,1 @@
+Friction/momentum conservation factor on land or water (0 = instant stop, 1 = endless slide).
