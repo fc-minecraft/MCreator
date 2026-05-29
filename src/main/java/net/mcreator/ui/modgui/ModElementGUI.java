@@ -265,7 +265,7 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 			pager.add(forward);
 
 			JButton save = L10N.button("elementgui.save_mod_element");
-			save.setMargin(new Insets(1, 40, 1, 40));
+			save.setMargin(new Insets(1, 20, 1, 20));
 			save.setBackground(Theme.current().getInterfaceAccentColor());
 			save.setForeground(Theme.current().getSecondAltBackgroundColor());
 			save.addActionListener(event -> {
@@ -288,7 +288,7 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 			});
 
 			JButton saveOnly = L10N.button("elementgui.save_keep_open");
-			saveOnly.setMargin(new Insets(1, 40, 1, 40));
+			saveOnly.setMargin(new Insets(1, 20, 1, 20));
 			saveOnly.setBackground(Theme.current().getAltBackgroundColor());
 			saveOnly.setForeground(Theme.current().getForegroundColor());
 			saveOnly.addActionListener(event -> {
@@ -320,7 +320,7 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 
 			if (modElementCodeViewer != null) {
 				JToggleButton codeViewer = L10N.togglebutton("elementgui.code_viewer");
-				codeViewer.setMargin(new Insets(1, 40, 1, 40));
+				codeViewer.setMargin(new Insets(1, 20, 1, 20));
 				codeViewer.addActionListener(e -> {
 					if (codeViewer.isSelected()) {
 						modElementCodeViewer.setVisible(true);
@@ -341,7 +341,7 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 				URI helpURI = this.contextURL();
 				if (helpURI != null) {
 					JButton help = L10N.button("common.help");
-					help.setMargin(new Insets(1, 40, 1, 40));
+					help.setMargin(new Insets(1, 20, 1, 20));
 					toolBarLeft.add(help);
 					help.addActionListener(e -> DesktopUtils.browse(helpURI));
 				}
@@ -366,7 +366,7 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 			centerComponent = PanelUtils.centerAndSouthElement(parameters = split, scrollPager);
 		} else {
 			JButton saveOnly = L10N.button("elementgui.save_keep_open");
-			saveOnly.setMargin(new Insets(1, 40, 1, 40));
+			saveOnly.setMargin(new Insets(1, 20, 1, 20));
 			saveOnly.setBackground(Theme.current().getAltBackgroundColor());
 			saveOnly.setForeground(Theme.current().getForegroundColor());
 			saveOnly.addActionListener(event -> {
@@ -378,7 +378,7 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 			});
 
 			JButton save = L10N.button("elementgui.save_mod_element");
-			save.setMargin(new Insets(1, 40, 1, 40));
+			save.setMargin(new Insets(1, 20, 1, 20));
 			save.setBackground(Theme.current().getInterfaceAccentColor());
 			save.setForeground(Theme.current().getSecondAltBackgroundColor());
 			save.addActionListener(event -> {
@@ -399,7 +399,7 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 
 			if (modElementCodeViewer != null) {
 				JToggleButton codeViewer = L10N.togglebutton("elementgui.code_viewer");
-				codeViewer.setMargin(new Insets(1, 40, 1, 40));
+				codeViewer.setMargin(new Insets(1, 20, 1, 20));
 				codeViewer.addActionListener(e -> {
 					if (codeViewer.isSelected()) {
 						modElementCodeViewer.setVisible(true);
@@ -420,7 +420,7 @@ public abstract class ModElementGUI<GE extends GeneratableElement> extends ViewB
 				URI helpURI = this.contextURL();
 				if (helpURI != null) {
 					JButton help = L10N.button("common.help");
-					help.setMargin(new Insets(1, 40, 1, 40));
+					help.setMargin(new Insets(1, 20, 1, 20));
 					toolBarLeft.add(help);
 					help.addActionListener(e -> DesktopUtils.browse(helpURI));
 				}

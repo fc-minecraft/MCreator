@@ -1,0 +1,1 @@
+Flight style: NONE, PLANE (needs forward speed to fly), HELICOPTER (Space/Shift to hover and change altitude).

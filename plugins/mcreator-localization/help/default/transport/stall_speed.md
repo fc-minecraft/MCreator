@@ -1,0 +1,1 @@
+Cruising speed below which a plane stalls and starts falling.

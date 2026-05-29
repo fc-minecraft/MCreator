@@ -1,0 +1,1 @@
+Creative inventory tab where the spawn egg appears.

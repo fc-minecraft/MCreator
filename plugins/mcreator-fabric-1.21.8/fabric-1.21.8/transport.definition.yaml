@@ -1,0 +1,105 @@
+templates:
+  - template: transport/transport.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/entity/@NAMEEntity.java"
+  - template: transport/transport_renderer.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/client/renderer/@NAMERenderer.java"
+  - template: transport/transport_packet.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/network/@NAMEControlPacket.java"
+  - template: transport/transport_keys.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/client/@NAMETransportKeys.java"
+  - template: transport/spawn_egg.json.ftl
+    writer: json
+    name: "@MODASSETSROOT/models/item/@registryname_spawn_egg.json"
+  - template: json/model_spawn_egg.json.ftl
+    writer: json
+    name: "@MODASSETSROOT/items/@registryname_spawn_egg.json"
+
+localizationkeys:
+  - key: item.@modid.@registryname_spawn_egg
+    mapto: mobName
+    suffix: " Spawn Egg"
+    prefix_ru_ru: "Яйцо призыва "
+    suffix_ru_ru: ""
+    condition: hasSpawnEgg
+  - key: entity.@modid.@registryname
+    mapto: mobName
+  - key: key.@modid.@registryname.engine_toggle
+    mapto: mobName
+    suffix: " Toggle Engine"
+    suffix_ru_ru: " Запустить/Остановить двигатель"
+  - key: key.@modid.@registryname.dismount
+    mapto: mobName
+    suffix: " Dismount"
+    suffix_ru_ru: " Покинуть транспорт"
+  - key: key.categories.@modid.transport
+    suffix: "Transport"
+    suffix_ru_ru: "Транспорт"
+  - key: hud.@modid.@registryname.engine_on
+    suffix: "Engine: ON"
+    suffix_ru_ru: "Двигатель: ВКЛ"
+  - key: hud.@modid.@registryname.engine_off
+    suffix: "Engine: OFF"
+    suffix_ru_ru: "Двигатель: ВЫКЛ"
+  - key: hud.@modid.@registryname.engine_started
+    suffix: "§aEngine: STARTED"
+    suffix_ru_ru: "§aДвигатель: ЗАПУЩЕН"
+  - key: hud.@modid.@registryname.engine_stopped
+    suffix: "§cEngine: STOPPED"
+    suffix_ru_ru: "§cДвигатель: ОСТАНОВЛЕН"
+  - key: hud.@modid.@registryname.speed
+    suffix: "§aSpeed: "
+    suffix_ru_ru: "§aСкорость: "
+  - key: hud.@modid.@registryname.speed_unit
+    suffix: " b/s"
+    suffix_ru_ru: " б/с"
+  - key: hud.@modid.@registryname.throttle
+    suffix: " §7|§b Throttle: "
+    suffix_ru_ru: " §7|§b Тяга: "
+  - key: hud.@modid.@registryname.fuel
+    suffix: " §7|§e Fuel: "
+    suffix_ru_ru: " §7|§e Топливо: "
+  - key: hud.@modid.@registryname.fuel_full
+    suffix: "§eFuel tank is full!"
+    suffix_ru_ru: "§eБак полон!"
+  - key: hud.@modid.@registryname.fuel_refueled
+    suffix: "§aRefueled! Fuel: "
+    suffix_ru_ru: "§aЗаправлено! Топливо: "
+  - key: hud.@modid.@registryname.fuel_empty
+    suffix: "§cOut of fuel! Engine stopped."
+    suffix_ru_ru: "§cТопливо закончилось! Двигатель заглох."
+  - key: hud.@modid.@registryname.exit
+    suffix: "§eExit: §c"
+    suffix_ru_ru: "§eВыход: §c"
+  - key: hud.@modid.@registryname.hint_start
+    suffix: "  §8["
+    suffix_ru_ru: "  §8["
+  - key: hud.@modid.@registryname.hint_start_action
+    suffix: " - start engine]"
+    suffix_ru_ru: " - запуск двигателя]"
+  - key: hud.@modid.@registryname.hint_exit
+    suffix: "  §8["
+    suffix_ru_ru: "  §8["
+  - key: hud.@modid.@registryname.hint_exit_action
+    suffix: " - exit (hold)]"
+    suffix_ru_ru: " - выход (удерживать)]"
+  - key: hud.@modid.@registryname.value.engine_on
+    suffix: "ON"
+    suffix_ru_ru: "ВКЛ"
+  - key: hud.@modid.@registryname.value.engine_off
+    suffix: "OFF"
+    suffix_ru_ru: "ВЫКЛ"
+  - key: hud.@modid.@registryname.custom.engine
+    suffix: "Engine: "
+    suffix_ru_ru: "Двигатель: "
+  - key: hud.@modid.@registryname.custom.speed
+    suffix: "Speed: "
+    suffix_ru_ru: "Скорость: "
+  - key: hud.@modid.@registryname.custom.throttle
+    suffix: "Throttle"
+    suffix_ru_ru: "Тяга"
+  - key: hud.@modid.@registryname.custom.fuel
+    suffix: "Fuel"
+    suffix_ru_ru: "Топливо"
+  - key: hud.@modid.@registryname.custom.hints
+    suffix: "[%1$s] Engine  [%2$s] Exit"
+    suffix_ru_ru: "[%1$s] Двигатель  [%2$s] Выход"

@@ -46,7 +46,7 @@ public class JLootTableEntry extends JPanel {
 	private final JCheckBox explosionDecay = L10N.checkbox("elementgui.loot_table.enable_explosion_decay");
 
 	private final JComboBox<String> silkTouchMode = new JComboBox<>(
-			new String[] { "Ignore silk touch", "Only with silk touch", "Only without silk touch" });
+			new String[] { L10N.t("elementgui.loot_table.silk_touch.ignore"), L10N.t("elementgui.loot_table.silk_touch.only_with"), L10N.t("elementgui.loot_table.silk_touch.only_without") });
 
 	public JLootTableEntry(MCreator mcreator, JLootTablePool listParent, JPanel parent,
 			List<JLootTableEntry> entryList) {

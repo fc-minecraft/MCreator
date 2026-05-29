@@ -1,0 +1,1 @@
+Keyboard key to exit the transport. Must be held for 1 second.

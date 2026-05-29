@@ -1,0 +1,1 @@
+Fuel consumed per tick while engine is running.

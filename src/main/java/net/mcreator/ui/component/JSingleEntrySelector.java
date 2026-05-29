@@ -124,13 +124,13 @@ public abstract class JSingleEntrySelector<T> extends JPanel implements IValidab
 	}
 
 	public boolean isEmpty() {
-		return currentEntry == null;
+		return currentEntry == null || (currentEntry instanceof String s && s.isEmpty());
 	}
 
 	public void updateReadableText() {
 		boolean isSupported = true;
 		readableText.setIcon(null);
-		if (currentEntry == null) {
+		if (isEmpty()) {
 			readableText.setText(defaultText);
 			readableText.setForeground(Theme.current().getAltForegroundColor());
 			readableText.setBackground(Theme.current().getAltBackgroundColor());

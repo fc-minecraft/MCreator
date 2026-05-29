@@ -43,7 +43,7 @@ public class ${JavaModName}Items {
 			<#if item.enableBody>public static Item ${item.getModElement().getRegistryNameUpper()}_CHESTPLATE;</#if>
 			<#if item.enableLeggings>public static Item ${item.getModElement().getRegistryNameUpper()}_LEGGINGS;</#if>
 			<#if item.enableBoots>public static Item ${item.getModElement().getRegistryNameUpper()}_BOOTS;</#if>
-		<#elseif item.getModElement().getTypeString() == "livingentity">
+		<#elseif item.getModElement().getTypeString() == "livingentity" || item.getModElement().getTypeString() == "transport">
 			public static Item ${item.getModElement().getRegistryNameUpper()}_SPAWN_EGG;
 		<#elseif item.getModElement().getTypeString() == "fluid" && item.generateBucket>
 			public static Item ${item.getModElement().getRegistryNameUpper()}_BUCKET;
@@ -77,6 +77,34 @@ public class ${JavaModName}Items {
 				${item.getModElement().getRegistryNameUpper()}_SPAWN_EGG =
 					register("${item.getModElement().getRegistryName()}_spawn_egg",
 						properties -> new SpawnEggItem(${JavaModName}Entities.${item.getModElement().getRegistryNameUpper()}, properties));
+			<#elseif item.getModElement().getTypeString() == "transport">
+				<#if item.hasSpawnEgg>
+				${item.getModElement().getRegistryNameUpper()}_SPAWN_EGG =
+					register("${item.getModElement().getRegistryName()}_spawn_egg",
+						properties -> new SpawnEggItem(${JavaModName}Entities.${item.getModElement().getRegistryNameUpper()}, properties));
+				<#else>
+				${item.getModElement().getRegistryNameUpper()}_SPAWN_EGG =
+					register("${item.getModElement().getRegistryName()}_spawn_egg",
+						properties -> new Item(properties) {
+							@Override
+							public InteractionResult useOn(net.minecraft.world.item.context.UseOnContext context) {
+								Level world = context.getLevel();
+								if (!world.isClientSide()) {
+									ItemStack itemStack = context.getItemInHand();
+									BlockPos blockPos = context.getClickedPos();
+									Direction direction = context.getClickedFace();
+									BlockState blockState = world.getBlockState(blockPos);
+									BlockPos spawnPos = blockState.getCollisionShape(world, blockPos).isEmpty() ? blockPos : blockPos.relative(direction);
+									Entity entity = ${JavaModName}Entities.${item.getModElement().getRegistryNameUpper()}.spawn((net.minecraft.server.level.ServerLevel) world, itemStack, context.getPlayer(), spawnPos, net.minecraft.world.entity.MobSpawnType.SPAWN_EGG, true, false);
+									if (entity != null) {
+										itemStack.shrink(1);
+										world.gameEvent(context.getPlayer(), net.minecraft.world.level.gameevent.GameEvent.ENTITY_PLACE, spawnPos);
+									}
+								}
+								return InteractionResult.SUCCESS;
+							}
+						});
+				</#if>
 			<#elseif item.getModElement().getTypeString() == "dimension" && item.hasIgniter()>
 				${item.getModElement().getRegistryNameUpper()} =
 					register("${item.getModElement().getRegistryName()}", ${item.getModElement().getName()}Item::new);

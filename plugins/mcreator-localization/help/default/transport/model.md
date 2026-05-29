@@ -1,0 +1,1 @@
+3D model used for rendering the transport.

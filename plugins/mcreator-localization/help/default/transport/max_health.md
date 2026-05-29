@@ -1,0 +1,1 @@
+Maximum health points of the transport entity.

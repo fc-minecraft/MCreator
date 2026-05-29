@@ -1,0 +1,1 @@
+Seat position vertical Y offset relative to model center.

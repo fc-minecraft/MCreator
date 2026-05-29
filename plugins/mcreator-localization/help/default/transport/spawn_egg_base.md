@@ -1,0 +1,1 @@
+Primary color of the spawn egg.

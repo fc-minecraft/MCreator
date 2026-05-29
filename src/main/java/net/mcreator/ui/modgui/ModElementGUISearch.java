@@ -85,7 +85,7 @@ public class ModElementGUISearch extends JTextField {
 
 		ComponentUtils.deriveFont(this, 12);
 		setOpaque(false);
-		setPreferredSize(new Dimension(240, 20));
+		setPreferredSize(new Dimension(150, 20));
 		setBackground(ColorUtils.applyAlpha(getBackground(), 150));
 		putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
 		putClientProperty("TextField.margin", new Insets(0, 0, 0, 0));

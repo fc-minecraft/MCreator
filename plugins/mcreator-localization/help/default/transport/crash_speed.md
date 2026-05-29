@@ -1,0 +1,1 @@
+Minimum speed required to trigger a crash explosion.
