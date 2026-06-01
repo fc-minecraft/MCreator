@@ -64,7 +64,7 @@ public class BlocklyPanel extends JPanel implements Closeable {
 
 	private final List<ChangeListener> changeListeners = new CopyOnWriteArrayList<>();
 
-	private String lastKnownXML = "";
+	private volatile String lastKnownXML = "";
 	private List<VariableElement> localVariables = new ArrayList<>();
 
 	private final JLabel loadingLabel;
@@ -494,6 +494,7 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	}
 
 	public void setXML(String xml) {
+		this.lastKnownXML = xml;
 		if (!loaded) {
 			addTaskToRunAfterLoaded(() -> setXML(xml));
 			return;
