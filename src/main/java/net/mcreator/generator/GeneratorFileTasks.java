@@ -171,6 +171,14 @@ public class GeneratorFileTasks {
 						for (Model model : modelList) {
 							if (model.getType() == Model.Type.JAVA) {
 								String modelCode = FileIO.readFileToString(model.getFile());
+								java.util.regex.Pattern classPattern = java.util.regex.Pattern.compile("public\\s+class\\s+([a-zA-Z0-9_$]+)");
+								java.util.regex.Matcher classMatcher = classPattern.matcher(modelCode);
+								if (classMatcher.find()) {
+									String oldClassName = classMatcher.group(1);
+									if (!oldClassName.equals(model.getReadableName())) {
+										modelCode = modelCode.replaceAll("\\b" + java.util.regex.Pattern.quote(oldClassName) + "\\b", model.getReadableName());
+									}
+								}
 								try {
 									modelCode = generator.getTemplateGeneratorFromName("templates")
 											.generateFromTemplate(template, new HashMap<>(
