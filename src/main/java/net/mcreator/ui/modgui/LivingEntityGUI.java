@@ -271,6 +271,8 @@ public class LivingEntityGUI extends ModElementGUI<LivingEntity> implements IBlo
 	private BiomeListField restrictionBiomes;
 
 	private BlocklyPanel blocklyPanel;
+	private JDialog previewDialog;
+	private EntityModelPreviewPanel dialogPreviewPanel;
 	private final CompileNotesPanel compileNotesPanel = new CompileNotesPanel();
 	private Map<String, ToolboxBlock> externalBlocks;
 	private final List<BlocklyChangedListener> blocklyChangedListeners = new ArrayList<>();
@@ -620,11 +622,35 @@ public class LivingEntityGUI extends ModElementGUI<LivingEntity> implements IBlo
 				L10N.label("elementgui.living_entity.texture")));
 		spo2.add(mobModelTexture);
 
+		JButton previewHitboxButton = new JButton("3D");
+		previewHitboxButton.addActionListener(e -> {
+			if (previewDialog == null) {
+				previewDialog = new JDialog((Window) SwingUtilities.getWindowAncestor(this), "Hitbox Preview", Dialog.ModalityType.MODELESS);
+				previewDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+				previewDialog.setLayout(new BorderLayout());
+				dialogPreviewPanel = new EntityModelPreviewPanel();
+				dialogPreviewPanel.loadModel((Model) mobModel.getSelectedItem());
+				dialogPreviewPanel.setHitboxDimensions(((Number) modelWidth.getValue()).doubleValue(), ((Number) modelHeight.getValue()).doubleValue());
+				previewDialog.add(dialogPreviewPanel, BorderLayout.CENTER);
+				previewDialog.setSize(500, 500);
+				previewDialog.setLocationRelativeTo(this);
+				previewDialog.addWindowListener(new java.awt.event.WindowAdapter() {
+					@Override
+					public void windowClosed(java.awt.event.WindowEvent we) {
+						previewDialog = null;
+						dialogPreviewPanel = null;
+					}
+				});
+			}
+			previewDialog.setVisible(true);
+			previewDialog.toFront();
+		});
+
 		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("entity/bounding_box"),
 				L10N.label("elementgui.living_entity.bounding_box")));
 		spo2.add(PanelUtils.join(FlowLayout.LEFT, 0, 0, modelWidth, new JEmptyBox(2, 2), modelHeight,
 				new JEmptyBox(2, 2), modelShadowSize, new JEmptyBox(2, 2), mountedYOffset, new JEmptyBox(2, 2),
-				disableCollisions));
+				disableCollisions, new JEmptyBox(2, 2), previewHitboxButton));
 
 		spo2.add(new JEmptyBox());
 		spo2.add(visualScale);
@@ -721,7 +747,11 @@ public class LivingEntityGUI extends ModElementGUI<LivingEntity> implements IBlo
 				modelWidth.setValue(0.6);
 				modelHeight.setValue(1.95);
 			}
+			updateLivePreviewModel();
 		});
+
+		modelWidth.addChangeListener(e -> updateLivePreview());
+		modelHeight.addChangeListener(e -> updateLivePreview());
 
 		spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("entity/spawn_egg_options"),
 				L10N.label("elementgui.living_entity.spawn_egg_options")));
@@ -838,6 +868,10 @@ public class LivingEntityGUI extends ModElementGUI<LivingEntity> implements IBlo
 				setDefaultAISet();
 			}
 		});
+
+		if (!isEditingMode()) {
+			setDefaultAISet();
+		}
 
 		aipan.add("North", aitopoveral);
 
@@ -1025,6 +1059,18 @@ public class LivingEntityGUI extends ModElementGUI<LivingEntity> implements IBlo
 
 		enableOrDisableFields();
 
+		this.addAncestorListener(new javax.swing.event.AncestorListener() {
+			@Override public void ancestorAdded(javax.swing.event.AncestorEvent event) {}
+			@Override public void ancestorMoved(javax.swing.event.AncestorEvent event) {}
+			@Override public void ancestorRemoved(javax.swing.event.AncestorEvent event) {
+				if (previewDialog != null) {
+					previewDialog.dispose();
+					previewDialog = null;
+					dialogPreviewPanel = null;
+				}
+			}
+		});
+
 		editorReady = true;
 	}
 
@@ -1102,6 +1148,22 @@ public class LivingEntityGUI extends ModElementGUI<LivingEntity> implements IBlo
 						.collect(Collectors.toList())), "Default item");
 
 		disableMobModelCheckBoxListener = false;
+	}
+
+	private void updateLivePreview() {
+		if (dialogPreviewPanel != null) {
+			double width = ((Number) modelWidth.getValue()).doubleValue();
+			double height = ((Number) modelHeight.getValue()).doubleValue();
+			dialogPreviewPanel.setHitboxDimensions(width, height);
+		}
+	}
+
+	private void updateLivePreviewModel() {
+		if (dialogPreviewPanel != null) {
+			Model selected = (Model) mobModel.getSelectedItem();
+			dialogPreviewPanel.loadModel(selected);
+			updateLivePreview();
+		}
 	}
 
 	private void enableOrDisableFields() {
@@ -1265,7 +1327,7 @@ public class LivingEntityGUI extends ModElementGUI<LivingEntity> implements IBlo
 		if (model != null)
 			mobModel.setSelectedItem(model);
 
-		blocklyPanel.addTaskToRunAfterLoaded(() -> blocklyPanel.setXML(livingEntity.aixml));
+		blocklyPanel.setXML(livingEntity.aixml);
 
 		enableOrDisableFields();
 
