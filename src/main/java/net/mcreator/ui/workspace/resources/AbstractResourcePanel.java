@@ -87,7 +87,17 @@ public abstract class AbstractResourcePanel<T> extends JPanel implements IReload
 
 		bar.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 0));
 
-		add("North", bar);
+		JScrollPane scrollPane = new JScrollPane(bar);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+		scrollPane.setBorder(null);
+		scrollPane.setOpaque(false);
+		scrollPane.getViewport().setOpaque(false);
+		scrollPane.addMouseWheelListener(e -> {
+			JScrollBar hBar = scrollPane.getHorizontalScrollBar();
+			hBar.setValue(hBar.getValue() + e.getWheelRotation() * 25);
+		});
+		add("North", scrollPane);
 	}
 
 	abstract protected void deleteCurrentlySelected();

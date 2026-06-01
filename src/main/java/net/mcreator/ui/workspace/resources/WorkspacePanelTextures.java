@@ -165,7 +165,17 @@ public class WorkspacePanelTextures extends JPanel implements IReloadableFiltera
 		bar.add(AbstractWorkspacePanel.createToolBarButton("workspace.textures.export_selected", UIRES.get("16px.ext"),
 				e -> exportSelectedImages()));
 
-		add("North", bar);
+		JScrollPane scrollPane = new JScrollPane(bar);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+		scrollPane.setBorder(null);
+		scrollPane.setOpaque(false);
+		scrollPane.getViewport().setOpaque(false);
+		scrollPane.addMouseWheelListener(e -> {
+			JScrollBar hBar = scrollPane.getHorizontalScrollBar();
+			hBar.setValue(hBar.getValue() + e.getWheelRotation() * 25);
+		});
+		add("North", scrollPane);
 
 		// Register event handler for texture changes
 		FileWatcher fileWatcher = workspacePanel.getMCreator().getGenerator().getFileWatcher();
