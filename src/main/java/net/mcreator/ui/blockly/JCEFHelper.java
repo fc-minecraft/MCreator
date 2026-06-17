@@ -57,7 +57,7 @@ public class JCEFHelper {
                 }
             });
 
-            builder.getCefSettings().windowless_rendering_enabled = false;
+            builder.getCefSettings().windowless_rendering_enabled = true;
             builder.getCefSettings().log_severity = org.cef.CefSettings.LogSeverity.LOGSEVERITY_WARNING;
 
             builder.addJcefArgs("--disable-extensions");

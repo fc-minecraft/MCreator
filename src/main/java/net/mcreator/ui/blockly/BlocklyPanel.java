@@ -267,7 +267,7 @@ public class BlocklyPanel extends JPanel implements Closeable {
 					}
 				});
 
-				browser = client.createBrowser("about:blank", false, false);
+				browser = client.createBrowser("about:blank", true, false);
 				browser.getUIComponent().addMouseListener(new MouseAdapter() {
 					@Override
 					public void mousePressed(MouseEvent e) {

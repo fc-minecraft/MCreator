@@ -61,12 +61,11 @@ public class AIConditionEditor {
 		}
 
 		MCreatorDialog window = new MCreatorDialog(parent, L10N.t("dialog.ai_condition.panel_name"));
-		window.setSize(450, 140);
+		window.setSize(480, 260);
 		window.setLocationRelativeTo(parent);
 		window.setModal(true);
 
-		JPanel conditions = new JPanel();
-		conditions.add(PanelUtils.centerAndEastElement(startCondition, continueCondition, 20, 5));
+		JPanel conditions = PanelUtils.column(10, startCondition, continueCondition);
 
 		JButton ok = new JButton(UIManager.getString("OptionPane.okButtonText"));
 		ok.addActionListener(e -> {
@@ -84,7 +83,7 @@ public class AIConditionEditor {
 		JPanel options = new JPanel();
 		options.add(PanelUtils.join(ok, cancel));
 
-		window.add("Center", PanelUtils.totalCenterInPanel(PanelUtils.centerAndSouthElement(conditions, options)));
+		window.add("Center", PanelUtils.totalCenterInPanel(PanelUtils.centerAndSouthElement(conditions, options, 0, 15)));
 		window.setVisible(true);
 
 		return retVal;
