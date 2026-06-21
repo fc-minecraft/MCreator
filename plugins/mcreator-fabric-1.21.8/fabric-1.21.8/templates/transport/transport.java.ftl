@@ -193,7 +193,26 @@ public class ${name}Entity extends PathfinderMob {
 
 	@Override
 	protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions dimensions, float f) {
-		return new Vec3(${data.seatOffsetX}f, ${data.seatOffsetY}f + 0.6f, ${data.seatOffsetZ}f);
+		float localX = -${data.seatOffsetX}f;
+		float localY = ${data.seatOffsetY}f;
+		float localZ = ${data.seatOffsetZ}f;
+
+		<#if data.modelYawOffset?? && data.modelYawOffset != 0.0>
+		float angleRad = (float) Math.toRadians(${data.modelYawOffset}f);
+		float cos = (float) Math.cos(angleRad);
+		float sin = (float) Math.sin(angleRad);
+		float newX = localX * cos + localZ * sin;
+		float newZ = -localX * sin + localZ * cos;
+		localX = newX;
+		localZ = newZ;
+		</#if>
+
+		return new Vec3(localX, localY, localZ);
+	}
+
+	@Override
+	protected void positionRider(Entity passenger, Entity.MoveFunction moveFunction) {
+		super.positionRider(passenger, moveFunction);
 	}
 
 	@Override public boolean dismountsUnderwater() { return false; }
@@ -201,7 +220,7 @@ public class ${name}Entity extends PathfinderMob {
 
 	@Override
 	public boolean isNoGravity() {
-		<#if data.transportType == "AIR">return true;
+		<#if data.transportType == "AIR">return this.isVehicle(); // Custom gravity only when ridden
 		<#else>return super.isNoGravity();
 		</#if>
 	}
@@ -229,12 +248,12 @@ public class ${name}Entity extends PathfinderMob {
 		}
 	}
 
-	/** Override die() to ensure passengers are always ejected on death. */
 	@Override
 	public void die(net.minecraft.world.damagesource.DamageSource source) {
 		canDismount = true; // allow ejection
 		this.ejectPassengers();
 		super.die(source);
+		this.discard();
 	}
 
 	// =========================================================================
@@ -316,6 +335,16 @@ public class ${name}Entity extends PathfinderMob {
 		}
 
 		super.tick();
+		this.hurtTime = 0; // Disable red damage flash
+		<#if data.seatYaw?? && data.seatYaw != 0.0>
+		this.yBodyRot = this.getYRot() + ${data.seatYaw}f; // Offset body for passenger yaw
+		this.yBodyRotO = this.yRotO + ${data.seatYaw}f;
+		<#else>
+		this.yBodyRot = this.getYRot(); // Sync body with vehicle rotation
+		this.yBodyRotO = this.yRotO;
+		</#if>
+		this.yHeadRot = this.getYRot();
+		this.yHeadRotO = this.yRotO;
 	}
 
 	// =========================================================================
@@ -336,6 +365,11 @@ public class ${name}Entity extends PathfinderMob {
 
 		<#if data.transportType == "AIR">
 		// ---- AIR ----
+		if (this.isInWater()) {
+			engineOn = false;
+			this.entityData.set(DATA_ENGINE, false);
+		}
+
 		<#if data.planeMechanics>
 		// === PLANE ===
 		long time = this.level().getGameTime();
@@ -428,6 +462,13 @@ public class ${name}Entity extends PathfinderMob {
 		double thermalLift = !this.onGround() ? (Math.sin(time * 0.02) * 0.012) : 0.0;
 		double verticalInput = vy - gravity + lift + thermalLift;
 
+		if (this.isInWater()) {
+			verticalInput = -0.1; // sink in water
+			speed *= 0.5; // lose speed in water
+			vx *= 0.5;
+			vz *= 0.5;
+		}
+
 		// Glide mechanics when engine is off but we have speed
 		if (!engineOn && speed >= ${data.stallSpeed}) {
 			verticalInput = Math.max(verticalInput, -0.05); // smooth glide
@@ -497,6 +538,11 @@ public class ${name}Entity extends PathfinderMob {
 			verticalInput = -0.08;
 		}
 
+		if (this.isInWater()) {
+			verticalInput = -0.1; // sink in water
+			speed *= 0.5; // lose speed in water
+		}
+
 		if (this.getY() >= ${data.maxAltitude}) {
 			verticalInput = Math.min(verticalInput, -0.1);
 		}
@@ -548,6 +594,11 @@ public class ${name}Entity extends PathfinderMob {
 			}
 		} else {
 			verticalInput = -0.25;
+		}
+
+		if (this.isInWater()) {
+			verticalInput = -0.1; // sink in water
+			speed *= 0.5; // lose speed in water
 		}
 
 		if (this.getY() >= ${data.maxAltitude}) {

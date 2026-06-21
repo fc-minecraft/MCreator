@@ -70,6 +70,8 @@ public class ModelPreviewPanel extends JPanel {
 
 	private final List<Box3D> boxes = new ArrayList<>();
 	private float seatX = 0, seatY = 0, seatZ = 0;
+	private float seatYawAngle = 0;
+	private float modelYawAngle = 0;
 
 	private float yaw   = -0.8f;
 	private float pitch =  0.4f;
@@ -139,10 +141,16 @@ public class ModelPreviewPanel extends JPanel {
 		this.nudgeCallback = callback;
 	}
 
-	public void setSeatOffset(double x, double y, double z) {
+	public void setSeatOffset(double x, double y, double z, double yawAngle) {
 		seatX = (float) x;
 		seatY = (float) y;
 		seatZ = (float) z;
+		seatYawAngle = (float) yawAngle;
+		repaint();
+	}
+
+	public void setModelYaw(double yawAngle) {
+		modelYawAngle = (float) yawAngle;
 		repaint();
 	}
 
@@ -332,7 +340,14 @@ public class ModelPreviewPanel extends JPanel {
 
 		// Model wireframe
 		g2.setColor(Theme.current().getForegroundColor());
-		for (Box3D b : boxes) box3D(g2, b, w, h);
+		float modelRad = (float) Math.toRadians(-modelYawAngle);
+		for (Box3D b : boxes) {
+			if (modelYawAngle != 0) {
+				box3DRotated(g2, b, 0, 0, modelRad, w, h);
+			} else {
+				box3D(g2, b, w, h);
+			}
+		}
 
 		// Seat marker (red cross)
 		float sx = -seatX * 16f, sy = 24f - seatY * 16f, sz = -seatZ * 16f;
@@ -345,10 +360,33 @@ public class ModelPreviewPanel extends JPanel {
 		// Sitting player (cyan)
 		g2.setColor(new Color(0, 180, 220));
 		g2.setStroke(new BasicStroke(1));
-		box3D(g2, new Box3D(sx-2,    sy-14, sz-2,   4,  4, 4), w, h); // Head
-		box3D(g2, new Box3D(sx-2.5f, sy-10, sz-1.5f,5,  6, 3), w, h); // Torso
-		box3D(g2, new Box3D(sx-2.5f, sy-4,  sz-6,   5,  2, 6), w, h); // Thighs
-		box3D(g2, new Box3D(sx-2.5f, sy-2,  sz-6,   5,  6, 2), w, h); // Shins
+		float rad = (float) Math.toRadians(-seatYawAngle);
+		box3DRotated(g2, new Box3D(sx-2,    sy-14, sz-2,   4,  4, 4), sx, sz, rad, w, h); // Head
+		box3DRotated(g2, new Box3D(sx-2.5f, sy-10, sz-1.5f,5,  6, 3), sx, sz, rad, w, h); // Torso
+		box3DRotated(g2, new Box3D(sx-2.5f, sy-4,  sz-6,   5,  2, 6), sx, sz, rad, w, h); // Thighs
+		box3DRotated(g2, new Box3D(sx-2.5f, sy-2,  sz-6,   5,  6, 2), sx, sz, rad, w, h); // Shins
+	}
+
+	private void box3DRotated(Graphics2D g2, Box3D b, float cx, float cz, float angleRad, int w, int h) {
+		Point[] p = new Point[8];
+		for (int i = 0; i < 8; i++) {
+			float dx = b.corners[i][0] - cx;
+			float dz = b.corners[i][2] - cz;
+			float rx = cx + dx * (float)Math.cos(angleRad) - dz * (float)Math.sin(angleRad);
+			float rz = cz + dx * (float)Math.sin(angleRad) + dz * (float)Math.cos(angleRad);
+			p[i] = project(rx, b.corners[i][1], rz, w, h);
+		}
+		g2.setColor(new Color(150, 150, 150, 20));
+		fillFace(g2, p[0], p[1], p[2], p[3]);
+		fillFace(g2, p[4], p[5], p[6], p[7]);
+		fillFace(g2, p[0], p[4], p[7], p[3]);
+		fillFace(g2, p[1], p[5], p[6], p[2]);
+		fillFace(g2, p[0], p[1], p[5], p[4]);
+		fillFace(g2, p[3], p[2], p[6], p[7]);
+		g2.setColor(new Color(0, 180, 220));
+		edge(g2, p[0], p[1]); edge(g2, p[1], p[2]); edge(g2, p[2], p[3]); edge(g2, p[3], p[0]);
+		edge(g2, p[4], p[5]); edge(g2, p[5], p[6]); edge(g2, p[6], p[7]); edge(g2, p[7], p[4]);
+		edge(g2, p[0], p[4]); edge(g2, p[1], p[5]); edge(g2, p[2], p[6]); edge(g2, p[3], p[7]);
 	}
 
 	private void box3D(Graphics2D g2, Box3D b, int w, int h) {

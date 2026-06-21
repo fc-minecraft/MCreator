@@ -103,6 +103,21 @@ public class ${name}Renderer extends <#if humanoid>net.minecraft.client.renderer
 	}
 
 	@Override
+	public void render(${renderState} state, com.mojang.blaze3d.vertex.PoseStack poseStack, net.minecraft.client.renderer.MultiBufferSource bufferSource, int packedLight) {
+		<#assign rot = 0>
+		<#if data.modelYawOffset??><#assign rot = rot + data.modelYawOffset></#if>
+		<#if data.seatYaw??><#assign rot = rot + data.seatYaw></#if>
+		<#if rot != 0>
+		poseStack.pushPose();
+		poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(${rot}f));
+		super.render(state, poseStack, bufferSource, packedLight);
+		poseStack.popPose();
+		<#else>
+		super.render(state, poseStack, bufferSource, packedLight);
+		</#if>
+	}
+
+	@Override
 	public ResourceLocation getTextureLocation(${renderState} state) {
 		return ResourceLocation.parse("${modid}:textures/entities/${data.texture}");
 	}

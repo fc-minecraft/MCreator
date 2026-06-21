@@ -87,6 +87,8 @@ public class TransportGUI extends ModElementGUI<Transport> {
 	private final JSpinner seatOffsetX = new JSpinner(new SpinnerNumberModel(0.0, -100, 100, 0.05));
 	private final JSpinner seatOffsetY = new JSpinner(new SpinnerNumberModel(0.0, -100, 100, 0.05));
 	private final JSpinner seatOffsetZ = new JSpinner(new SpinnerNumberModel(0.0, -100, 100, 0.05));
+	private final JSpinner seatYaw = new JSpinner(new SpinnerNumberModel(0.0, -360.0, 360.0, 1.0));
+	private final JSpinner modelYawOffset = new JSpinner(new SpinnerNumberModel(0.0, -360.0, 360.0, 1.0));
 
 	private final JCheckBox hasSpawnEgg = L10N.checkbox("elementgui.transport.has_spawn_egg");
 	private final JColor spawnEggBaseColor = new JColor(mcreator, false, false).withColorTextColumns(5);
@@ -183,7 +185,7 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		});
 
 		// Page 1: Visuals
-		JPanel visualsPanel = new JPanel(new GridLayout(8, 2, 5, 5));
+		JPanel visualsPanel = new JPanel(new GridLayout(9, 2, 5, 5));
 		visualsPanel.setOpaque(false);
 
 		visualsPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("transport/name"), L10N.label("elementgui.transport.name")));
@@ -191,6 +193,9 @@ public class TransportGUI extends ModElementGUI<Transport> {
 
 		visualsPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("transport/model"), L10N.label("elementgui.transport.model")));
 		visualsPanel.add(transportModel);
+
+		visualsPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("transport/model_yaw"), L10N.label("elementgui.transport.model_yaw")));
+		visualsPanel.add(modelYawOffset);
 
 		visualsPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("transport/texture"), L10N.label("elementgui.transport.texture")));
 		visualsPanel.add(transportTexture);
@@ -233,7 +238,7 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		JPanel seatPanel = new JPanel(new BorderLayout(10, 10));
 		seatPanel.setOpaque(false);
 
-		JPanel seatControls = new JPanel(new GridLayout(3, 2, 5, 5));
+		JPanel seatControls = new JPanel(new GridLayout(4, 2, 5, 5));
 		seatControls.setOpaque(false);
 		seatControls.add(HelpUtils.wrapWithHelpButton(this.withEntry("transport/seat_offset_x"), L10N.label("elementgui.transport.seat_offset_x")));
 		seatControls.add(seatOffsetX);
@@ -241,6 +246,8 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		seatControls.add(seatOffsetY);
 		seatControls.add(HelpUtils.wrapWithHelpButton(this.withEntry("transport/seat_offset_z"), L10N.label("elementgui.transport.seat_offset_z")));
 		seatControls.add(seatOffsetZ);
+		seatControls.add(HelpUtils.wrapWithHelpButton(this.withEntry("transport/seat_yaw"), L10N.label("elementgui.transport.seat_yaw")));
+		seatControls.add(seatYaw);
 
 		seatPanel.add(seatControls, BorderLayout.NORTH);
 		seatPanel.add(previewPanel, BorderLayout.CENTER);
@@ -250,6 +257,8 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		seatOffsetX.addChangeListener(e -> updatePreviewOffset());
 		seatOffsetY.addChangeListener(e -> updatePreviewOffset());
 		seatOffsetZ.addChangeListener(e -> updatePreviewOffset());
+		seatYaw.addChangeListener(e -> updatePreviewOffset());
+		modelYawOffset.addChangeListener(e -> updatePreviewOffset());
 
 		transportTexture.setValidator(() -> {
 			if (!biped.equals(transportModel.getSelectedItem())) {
@@ -461,7 +470,10 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		double x = ((Number) seatOffsetX.getValue()).doubleValue();
 		double y = ((Number) seatOffsetY.getValue()).doubleValue();
 		double z = ((Number) seatOffsetZ.getValue()).doubleValue();
-		previewPanel.setSeatOffset(x, y, z);
+		double yaw = ((Number) seatYaw.getValue()).doubleValue();
+		double modYaw = ((Number) modelYawOffset.getValue()).doubleValue();
+		previewPanel.setSeatOffset(x, y, z, yaw);
+		previewPanel.setModelYaw(modYaw);
 	}
 
 	@Override public void reloadDataLists() {
@@ -496,6 +508,8 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		seatOffsetX.setValue(transport.seatOffsetX);
 		seatOffsetY.setValue(transport.seatOffsetY);
 		seatOffsetZ.setValue(transport.seatOffsetZ);
+		seatYaw.setValue(transport.seatYaw);
+		modelYawOffset.setValue(transport.modelYawOffset);
 
 		hasSpawnEgg.setSelected(transport.hasSpawnEgg);
 		spawnEggBaseColor.setColor(transport.spawnEggBaseColor);
@@ -612,6 +626,8 @@ public class TransportGUI extends ModElementGUI<Transport> {
 		transport.seatOffsetX = ((Number) seatOffsetX.getValue()).doubleValue();
 		transport.seatOffsetY = ((Number) seatOffsetY.getValue()).doubleValue();
 		transport.seatOffsetZ = ((Number) seatOffsetZ.getValue()).doubleValue();
+		transport.seatYaw = ((Number) seatYaw.getValue()).doubleValue();
+		transport.modelYawOffset = ((Number) modelYawOffset.getValue()).doubleValue();
 
 		transport.hasSpawnEgg = hasSpawnEgg.isSelected();
 		transport.spawnEggBaseColor = spawnEggBaseColor.getColor();

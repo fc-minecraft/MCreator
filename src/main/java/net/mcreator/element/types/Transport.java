@@ -72,6 +72,8 @@ public class Transport extends GeneratableElement
 	public double seatOffsetX;
 	public double seatOffsetY;
 	public double seatOffsetZ;
+	public double seatYaw;
+	public double modelYawOffset;
 
 	public boolean hasSpawnEgg;
 	public Color spawnEggBaseColor;
@@ -217,6 +219,8 @@ public class Transport extends GeneratableElement
 		this.seatOffsetX = 0.0;
 		this.seatOffsetY = 0.0;
 		this.seatOffsetZ = 0.0;
+		this.seatYaw = 0.0;
+		this.modelYawOffset = 0.0;
 
 		this.hasSpawnEgg = true;
 		this.spawnEggBaseColor = new Color(255, 255, 255);
