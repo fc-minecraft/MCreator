@@ -22,6 +22,10 @@ import net.mcreator.preferences.PreferencesManager;
 import net.mcreator.ui.MCreator;
 import net.mcreator.ui.gradle.GradleErrorDialogs;
 
+import javax.swing.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class GradleErrorDecoder {
 
 	/**
@@ -101,6 +105,9 @@ public class GradleErrorDecoder {
 
 		}
 
+		// Check for runtime Minecraft model loading errors (visible in game log)
+		checkRuntimeModelErrors(out, whereToShow);
+
 		// check if the gameplay crashed, we do not do anything in such cases
 		if (out.contains("Task :runClient FAILED") || out.contains("Execution failed for task ':runClient'")) {
 			return GradleResultCode.JAVA_RUN_CRASHED;
@@ -113,6 +120,25 @@ public class GradleErrorDecoder {
 
 		//if no error is detected, we return STATUS_OK
 		return GradleResultCode.STATUS_OK;
+	}
+
+	/**
+	 * Checks for runtime Minecraft model loading errors in the game log output and shows a warning.
+	 * Called both on successful and failed game runs.
+	 */
+	public static void checkRuntimeModelErrors(String out, MCreator whereToShow) {
+		if (out.contains("Failed to load model") || out.contains("Missing block model")
+				|| out.contains("Missing axis, expected to find a string")) {
+			String modelName = extractModelName(out);
+			String msg = "<html><b>Minecraft не смог загрузить одну или несколько 3D-моделей.</b><br><br>"
+					+ (modelName != null ? "Проблемная модель: <b>" + modelName + "</b><br><br>" : "")
+					+ "<b>Что делать:</b><br>"
+					+ "— Проверь JSON-модели в разделе <b>Ресурсы → Модели</b><br>"
+					+ "— Убедись, что в модели нет вращений по нескольким осям одновременно<br>"
+					+ "— Экспортируй модель заново из Blockbench";
+			SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(whereToShow, msg,
+					"Ошибка загрузки модели", JOptionPane.WARNING_MESSAGE));
+		}
 	}
 
 	public static boolean isErrorCausedByCorruptedCaches(String errortext) {
@@ -139,6 +165,19 @@ public class GradleErrorDecoder {
 		errortext = errortext.replace('\u00a0', ' '); // normalize spaces
 		return errortext.contains("java.rmi.server.ExportException: Port already in use:") && errortext.contains(
 				".jmxremote.");
+	}
+
+	/**
+	 * Tries to extract the first model identifier from Minecraft log lines like:
+	 * "Failed to load model exampleproject:models/custom/stickexp.json"
+	 * or "Missing block model: exampleproject:block/tent"
+	 */
+	private static String extractModelName(String out) {
+		Matcher m1 = Pattern.compile("Failed to load model ([^\\s\\n]+)").matcher(out);
+		if (m1.find()) return m1.group(1);
+		Matcher m2 = Pattern.compile("Missing block model: ([^\\s\\n\\]]+)").matcher(out);
+		if (m2.find()) return m2.group(1);
+		return null;
 	}
 
 }

@@ -622,6 +622,11 @@ public class GradleConsole extends JPanel implements ISearchable {
 				SwingUtilities.invokeLater(() -> {
 					ref.getWorkspace().checkFailingGradleDependenciesAndClear(); // clear flag without checking
 
+					// Check for runtime Minecraft model errors even on successful game run
+					if (command.startsWith("run")) {
+						GradleErrorDecoder.checkRuntimeModelErrors(taskOut.toString(), ref);
+					}
+
 					succeed();
 					MCREvent.event(new WorkspaceTaskFinishedEvent.TaskSuccessful(ref));
 					taskComplete(GradleResultCode.STATUS_OK);
