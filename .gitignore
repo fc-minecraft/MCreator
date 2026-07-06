@@ -42,3 +42,5 @@ plugins/mcreator-fabric-generator/
 /jcef-bundle/
 # LOCAL SECRETS
 .env
+
+/tmp/
