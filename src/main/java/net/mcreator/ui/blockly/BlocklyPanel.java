@@ -174,12 +174,14 @@ public class BlocklyPanel extends JPanel implements Closeable {
 								String color = parts[2];
 								bridge.openColorSelector(color, (result) -> {
 									String res = (String) result;
-									browser.executeJavaScript(
-											"if(window.javabridge.callbacks['" + id
-													+ "']) window.javabridge.callbacks['" + id + "'].callback('"
-													+ (res != null ? res : "")
-													+ "'); delete window.javabridge.callbacks['" + id + "'];",
-											browser.getURL(), 0);
+									if (browser != null) {
+										browser.executeJavaScript(
+												"if(window.javabridge.callbacks['" + id
+														+ "']) window.javabridge.callbacks['" + id + "'].callback('"
+														+ (res != null ? res : "")
+														+ "'); delete window.javabridge.callbacks['" + id + "'];",
+												browser.getURL(), 0);
+									}
 								});
 								callback.success("");
 								return true;
@@ -191,12 +193,14 @@ public class BlocklyPanel extends JPanel implements Closeable {
 								String type = parts[2];
 								bridge.openMCItemSelector(type, (result) -> {
 									String res = (String) result;
-									browser.executeJavaScript(
-											"if(window.javabridge.callbacks['" + id
-													+ "']) window.javabridge.callbacks['" + id + "'].callback('"
-													+ (res != null ? res : "")
-													+ "'); delete window.javabridge.callbacks['" + id + "'];",
-											browser.getURL(), 0);
+									if (browser != null) {
+										browser.executeJavaScript(
+												"if(window.javabridge.callbacks['" + id
+														+ "']) window.javabridge.callbacks['" + id + "'].callback('"
+														+ (res != null ? res : "")
+														+ "'); delete window.javabridge.callbacks['" + id + "'];",
+												browser.getURL(), 0);
+									}
 								});
 								callback.success("");
 								return true;
@@ -218,10 +222,12 @@ public class BlocklyPanel extends JPanel implements Closeable {
 									String[] res = (String[]) result;
 									String val = res[0].replace("'", "\\'");
 									String name = res[1].replace("'", "\\'");
-									browser.executeJavaScript("if(window.javabridge.callbacks['" + id
-											+ "']) window.javabridge.callbacks['" + id + "'].callback('" + val + "', '"
-											+ name + "'); delete window.javabridge.callbacks['" + id + "'];",
-											browser.getURL(), 0);
+									if (browser != null) {
+										browser.executeJavaScript("if(window.javabridge.callbacks['" + id
+												+ "']) window.javabridge.callbacks['" + id + "'].callback('" + val + "', '"
+												+ name + "'); delete window.javabridge.callbacks['" + id + "'];",
+												browser.getURL(), 0);
+									}
 								});
 								callback.success("");
 								return true;
@@ -233,12 +239,14 @@ public class BlocklyPanel extends JPanel implements Closeable {
 								String data = parts[2];
 								bridge.openAIConditionEditor(data, (result) -> {
 									String res = (String) result;
-									browser.executeJavaScript(
-											"if(window.javabridge.callbacks['" + id
-													+ "']) window.javabridge.callbacks['" + id + "'].callback('"
-													+ (res != null ? res : "")
-													+ "'); delete window.javabridge.callbacks['" + id + "'];",
-											browser.getURL(), 0);
+									if (browser != null) {
+										browser.executeJavaScript(
+												"if(window.javabridge.callbacks['" + id
+														+ "']) window.javabridge.callbacks['" + id + "'].callback('"
+														+ (res != null ? res : "")
+														+ "'); delete window.javabridge.callbacks['" + id + "'];",
+												browser.getURL(), 0);
+									}
 								});
 								callback.success("");
 								return true;
@@ -335,6 +343,8 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	}
 
 	private void injectSetupScripts() {
+		if (browser == null)
+			return;
 		StringBuilder initScript = new StringBuilder();
 
 		initScript.append(
@@ -472,6 +482,8 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	}
 
 	private void executePluginScripts() {
+		if (browser == null)
+			return;
 		for (String script : BlocklyJavaScriptsLoader.INSTANCE.getScripts()) {
 			browser.executeJavaScript(script, browser.getURL(), 0);
 		}
@@ -494,12 +506,13 @@ public class BlocklyPanel extends JPanel implements Closeable {
 	}
 
 	public void setXML(String xml) {
-		this.lastKnownXML = xml;
+		final String finalXml = xml == null ? "" : xml;
+		this.lastKnownXML = finalXml;
 		if (!loaded) {
-			addTaskToRunAfterLoaded(() -> setXML(xml));
+			addTaskToRunAfterLoaded(() -> setXML(finalXml));
 			return;
 		}
-		String cleanXML = xml.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r");
+		String cleanXML = finalXml.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r");
 		String script = """
 				workspace.clear();
 				Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom('%s'), workspace);
@@ -509,7 +522,7 @@ public class BlocklyPanel extends JPanel implements Closeable {
 			browser.executeJavaScript(script, browser.getURL(), 0);
 
 		ThreadUtil.runOnSwingThread(
-				() -> changeListeners.forEach(listener -> listener.stateChanged(new ChangeEvent(xml))));
+				() -> changeListeners.forEach(listener -> listener.stateChanged(new ChangeEvent(finalXml))));
 	}
 
 	public void addBlocksFromXML(String xml) {
@@ -584,7 +597,7 @@ public class BlocklyPanel extends JPanel implements Closeable {
 		if (client != null) {
 			if (browser != null) {
 				browserWorkspaceMap.remove(browser);
-				browser.close(true);
+				// browser.close(true); // Commented out to prevent native JCEF segfault/crash on tab close
 				browser = null;
 			}
 		}
