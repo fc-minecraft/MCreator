@@ -38,8 +38,12 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.io.Closeable;
 import java.util.*;
 import java.util.List;
@@ -276,6 +280,47 @@ public class BlocklyPanel extends JPanel implements Closeable {
 				});
 
 				browser = client.createBrowser("about:blank", true, false);
+
+				browser.getUIComponent().addHierarchyListener(new HierarchyListener() {
+					private boolean wrapped = false;
+					@Override
+					public void hierarchyChanged(HierarchyEvent e) {
+						if (!wrapped && (e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0 && browser.getUIComponent().isShowing()) {
+							for (MouseWheelListener l : browser.getUIComponent().getMouseWheelListeners()) {
+								if (l.getClass().getName().contains("BlocklyPanel"))
+									continue;
+								browser.getUIComponent().removeMouseWheelListener(l);
+								browser.getUIComponent().addMouseWheelListener(new MouseWheelListener() {
+									@Override
+									public void mouseWheelMoved(MouseWheelEvent ev) {
+										// Invert direction and multiply speed by 3
+										int newRotation = -ev.getWheelRotation() * 3;
+										double newPreciseRotation = -ev.getPreciseWheelRotation() * 3.0;
+										MouseWheelEvent newEvent = new MouseWheelEvent(
+												(Component) ev.getSource(),
+												ev.getID(),
+												ev.getWhen(),
+												ev.getModifiersEx(),
+												ev.getX(),
+												ev.getY(),
+												ev.getXOnScreen(),
+												ev.getYOnScreen(),
+												ev.getClickCount(),
+												ev.isPopupTrigger(),
+												ev.getScrollType(),
+												ev.getScrollAmount(),
+												newRotation,
+												newPreciseRotation
+										);
+										l.mouseWheelMoved(newEvent);
+									}
+								});
+								wrapped = true;
+							}
+						}
+					}
+				});
+
 				browser.getUIComponent().addMouseListener(new MouseAdapter() {
 					@Override
 					public void mousePressed(MouseEvent e) {
