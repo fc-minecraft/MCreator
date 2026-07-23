@@ -60,7 +60,7 @@ public class AnimationImportActions {
 				File file = FileDialogs.getOpenDialog(actionRegistry.getMCreator(), new String[] { ".java" });
 				if (file != null)
 					importJavaModelAnimation(actionRegistry.getMCreator(), actionRegistry.getMCreator().getWorkspace(),
-							FileIO.readFileToString(file));
+							FileIO.readFileToString(file), file.getName().replace(".java", ""));
 			});
 			setIcon(UIRES.get("16px.importjavamodelanimation"));
 		}
@@ -72,9 +72,42 @@ public class AnimationImportActions {
 	}
 
 	public static void importJavaModelAnimation(@Nullable MCreator mcreator, Workspace workspace, String origCode) {
+		importJavaModelAnimation(mcreator, workspace, origCode, null);
+	}
+
+	public static void importJavaModelAnimation(@Nullable MCreator mcreator, Workspace workspace, String origCode, @Nullable String preferredName) {
 		JavaClassSource classJavaSource;
 
 		try {
+			java.util.regex.Matcher m = java.util.regex.Pattern.compile("^[^/\\n]*class\\s+([^\\n<{]+?)\\s*(?:<|extends|implements|\\{)",
+					java.util.regex.Pattern.MULTILINE).matcher(origCode);
+			if (m.find()) {
+				String extractedClassName = m.group(1).trim();
+				String validClassName;
+				if (preferredName != null) {
+					validClassName = JavaConventions.convertToValidClassName(preferredName);
+				} else if (!JavaConventions.isValidJavaIdentifier(extractedClassName)) {
+					validClassName = JavaConventions.convertToValidClassName(extractedClassName);
+				} else {
+					validClassName = extractedClassName;
+				}
+
+				if (validClassName == null || validClassName.isEmpty()) {
+					int i = 1;
+					while (new File(workspace.getFolderManager().getModelAnimationsDir(), "AnimationsAnimation" + i + ".java").exists()) {
+						i++;
+					}
+					validClassName = "Animation" + i;
+				}
+
+				if (!extractedClassName.equals(validClassName)) {
+					LOG.debug("Sanitizing/renaming class name '{}' -> '{}'", extractedClassName, validClassName);
+					origCode = origCode.replaceFirst("class\\s+" + java.util.regex.Pattern.quote(extractedClassName),
+							"class " + java.util.regex.Matcher.quoteReplacement(validClassName));
+					origCode = origCode.replace(extractedClassName + "(", validClassName + "(");
+				}
+			}
+
 			classJavaSource = (JavaClassSource) Roaster.parse(origCode);
 			classJavaSource.toString();
 
